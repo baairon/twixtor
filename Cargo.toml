@@ -1,0 +1,35 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/fx-core",
+    "crates/fx-cli",
+    "crates/fx-parity",
+    "plugins/retime-engine",
+    "plugins/retime",
+    "plugins/create-vectors",
+    "plugins/retime-fgbg",
+    "plugins/vectors-in",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+authors = ["bairon"]
+publish = false
+
+[workspace.dependencies]
+fx-core = { path = "crates/fx-core" }
+retime-engine = { path = "plugins/retime-engine" }
+retime = { path = "plugins/retime" }
+create-vectors = { path = "plugins/create-vectors" }
+retime-fgbg = { path = "plugins/retime-fgbg" }
+vectors-in = { path = "plugins/vectors-in" }
+rayon = "1.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+codegen-units = 1
+lto = "thin"

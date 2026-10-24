@@ -1,0 +1,12 @@
+[package]
+name = "retime-engine"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+description = "The shared engine of the effects: time maps, optical flow, warps, blends and hole filling."
+
+[dependencies]
+fx-core.workspace = true
+rayon.workspace = true

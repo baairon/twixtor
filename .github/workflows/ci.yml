@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  # Every push to main runs, so main always carries a check of its own, and so
+  # does every pull request.
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# On a pull request a new push supersedes the run in flight: only the branch's
+# latest commit needs a verdict. A push to main is never cancelled and never
+# waits behind another one: each is a group of its own, so commits pushed one
+# after another all keep a result of their own.
+concurrency:
+  group: ci-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  # Tests keep opt-level 3 but skip LTO and split codegen: the same results,
+  # minutes less compiling.
+  CARGO_PROFILE_RELEASE_LTO: "false"
+  CARGO_PROFILE_RELEASE_CODEGEN_UNITS: "16"
+
+jobs:
+  test:
+    name: tests on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      # One platform failing should never hide the result on the others.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      # The Python tools shell out to ffmpeg and ffprobe, and the harness
+      # tests render their inputs with it. The 32 bpc test patterns need a geq
+      # that accepts float formats, which distribution builds may lack, so
+      # Linux uses a static 9.0 build.
+      - name: Install ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -sSfL https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-gpl-9.0.tar.xz | tar -xJ -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/ffmpeg-n9.0-latest-linux64-gpl-9.0/bin" >> "$GITHUB_PATH"
+
+      - name: Install ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg
+
+      - name: Install ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        run: choco install ffmpeg --no-progress -y
+
+      # The release profile is the one the tests run in: the optical flow
+      # and thread invariance suites are far too slow unoptimised.
+      - run: cargo build --release -p fx-cli
+
+      - run: cargo test --workspace --release
+
+      # The tools pick the vfx binary up from target/release.
+      - run: python tools/test_speed_curve.py
+
+      - run: python tools/test_apply.py
+
+      - run: python tools/test_repeat_keys.py

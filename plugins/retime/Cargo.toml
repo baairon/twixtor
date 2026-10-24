@@ -1,0 +1,16 @@
+[package]
+name = "retime"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+description = "Retime: speed or frame number time remapping with optical flow in-between frames."
+
+[dependencies]
+fx-core.workspace = true
+retime-engine.workspace = true
+
+[dev-dependencies]
+rayon.workspace = true
+serde_json.workspace = true

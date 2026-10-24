@@ -1,0 +1,16 @@
+[package]
+name = "create-vectors"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+description = "Create Vectors: writes the motion between frames as vector images."
+
+[dependencies]
+fx-core.workspace = true
+retime-engine.workspace = true
+
+[dev-dependencies]
+rayon.workspace = true
+serde_json.workspace = true
