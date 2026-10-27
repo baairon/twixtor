@@ -180,7 +180,8 @@ class StageTests(unittest.TestCase):
         for fmt in ffstage.PIX_FMT.values():
             self.assertEqual(self.caps["pix_fmts"].get(fmt), (True, True), fmt)
         self.assertTrue({"crop", "hflip", "movie", "sendcmd", "zmq"} <= self.caps["filters"])
-        self.assertEqual(self.caps["verified"], self.caps["version"].split("-")[0] == ffstage.MEASURED_VERSION)
+        self.assertEqual(self.caps["verified"],
+                         self.caps["version"].removeprefix("n").split("-")[0] == ffstage.MEASURED_VERSION)
 
     def test_list_prints_a_manifest_that_validates(self):
         code, out, err = run_stage("list", "--json")
