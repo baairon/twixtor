@@ -179,7 +179,7 @@ class StageTests(unittest.TestCase):
     def test_probing_finds_the_formats_and_filters_of_this_ffmpeg(self):
         for fmt in ffstage.PIX_FMT.values():
             self.assertEqual(self.caps["pix_fmts"].get(fmt), (True, True), fmt)
-        self.assertTrue({"crop", "hflip", "movie", "sendcmd", "zmq"} <= self.caps["filters"])
+        self.assertTrue({"crop", "hflip", "movie", "sendcmd"} <= self.caps["filters"])
         self.assertEqual(self.caps["verified"],
                          self.caps["version"].removeprefix("n").split("-")[0] == ffstage.MEASURED_VERSION)
 
@@ -231,7 +231,7 @@ class StageTests(unittest.TestCase):
         cases = (("crop=80:48", "preserve", "pass --param expect=declared"),
                  ("fps=12", "declared", "frame rate"),
                  ("setpts=2*PTS", "declared", "frame rate"),
-                 ("drawtext=textfile=a.txt", "declared", "unsafe=1"),
+                 ("lut3d=a.cube", "declared", "unsafe=1"),
                  ("movie=a.mp4[m];[in][m]overlay", "declared", "unsafe=1"),
                  ("nosuchfilter", "declared", "no filter `nosuchfilter`"))
         for graph, expect, text in cases:

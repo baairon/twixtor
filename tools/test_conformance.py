@@ -307,13 +307,21 @@ class Cli(unittest.TestCase):
                                          "L4": "not selected", "L5": "not selected"})
 
     def test_a_relative_program_path_is_resolved_from_the_working_directory(self):
-        here = os.path.relpath(sys.executable)
-        self.assertEqual(os.path.normcase(conformance.resolve_program(here)),
-                         os.path.normcase(os.path.abspath(sys.executable)))
+        # relative to the interpreter's own folder, which holds on any drive (a checkout on D: and
+        # Python on C: have no relative path between them)
+        folder = os.path.dirname(os.path.abspath(sys.executable))
+        here = os.path.join(os.curdir, os.path.basename(sys.executable))
+        old = os.getcwd()
+        os.chdir(folder)
+        try:
+            self.assertEqual(os.path.normcase(conformance.resolve_program(here)),
+                             os.path.normcase(os.path.abspath(sys.executable)))
+        finally:
+            os.chdir(old)
         self.assertEqual(conformance.resolve_program("no-such-stage-program"), "no-such-stage-program")
-        stage = f'"{os.path.relpath(sys.executable, self.tmp)}" -I "{SCRIPT}" fixture apply fixture-copy'
+        stage = f'"{here}" -I "{SCRIPT}" fixture apply fixture-copy'
         proc = subprocess.run([sys.executable, "-I", SCRIPT, "--stage", stage, "--json"], capture_output=True,
-                              timeout=300, cwd=self.tmp)
+                              timeout=300, cwd=folder)
         out = proc.stdout.decode("utf-8", "replace")
         self.assertEqual(proc.returncode, 0, out[-2000:])
         self.assertEqual(statuses(json.loads(out))["L1"], "pass")
