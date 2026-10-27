@@ -2,7 +2,7 @@
 
 An independent open source reimplementation of the four effects of the Twixtor retiming plugin. It is not affiliated with or endorsed by RE:Vision Effects, which owns the Twixtor trademark.
 
-Slow motion, speed ramps and frame interpolation from optical flow, written in Rust, on the CPU, and paired with ffmpeg. `vfx` renders raw frames in ffmpeg's own pixel formats, `tools/apply.py` runs `vfx` between an ffmpeg decode and an ffmpeg encode, `tools/speed_curve.py` and `tools/repeat_keys.py` compute keyframes without rendering, and `fx-parity` compares `vfx` with reference renders.
+Slow motion, speed ramps and frame interpolation from optical flow, written in Rust, on the CPU, and paired with ffmpeg. `vfx` renders raw frames in ffmpeg's own pixel formats, `tools/apply.py` runs `vfx` between an ffmpeg decode and an ffmpeg encode, `tools/speed_curve.py` and `tools/repeat_keys.py` compute keyframes without rendering, `fx-parity` compares `vfx` with reference renders, `tools/ffstage.py` runs an ffmpeg filter graph as a stage, and `tools/handoff.py` and `tools/conformance.py` pass frames and tasks to sapphire and test a stage against the convention.
 
 Sources of truth, for agents and scripts:
 
@@ -12,6 +12,7 @@ Sources of truth, for agents and scripts:
 | What a file render will do | `python tools/apply.py ... --dry-run`: the plan and every command, nothing written. |
 | What a file render did | `python tools/apply.py ... --json`: the plan and the probe of the verified output. |
 | Which source frame each output frame shows | `python tools/speed_curve.py`, without rendering. |
+| Every stage of twixtor and sapphire, with a ready stage command | `python -I tools/handoff.py stages --json`: each stage with the command line a wrapper takes. |
 
 ## Contents
 
@@ -27,6 +28,7 @@ Sources of truth, for agents and scripts:
   - [Wrapper](#wrapper)
   - [Helper tools](#helper-tools)
   - [Comparison harness](#comparison-harness)
+- [Handoff](#handoff)
 - [Smoke test](#smoke-test)
 - [Comparing with reference renders](#comparing-with-reference-renders)
 - [Tests](#tests)
@@ -72,7 +74,7 @@ Workspace members of `Cargo.toml`: version 0.1.0, edition 2021, MIT, unpublished
 | `plugins/retime-fgbg` | library | Effect `retime-fgbg`, single layer use. | `lib.rs`, `glue.rs`, `prerender.rs`, `timemap.rs` | `tests/`: `cli`, `retime` (goldens of `tests/common/gen_goldens.py`), `forward`, `vector`, `timemap`, `dependencies`, `consistency`, `settings`, `threads`, `unsupported` |
 | `plugins/vectors-in` | library | Effect `vectors-in`: vector layers decoded into flows. | `lib.rs`, `glue.rs`, `prerender.rs`, `timemap.rs`, `vectorin.rs` | `tests/`: `cli`, `vectorin`, `vector`, `retime`, `errors`, `timemap`, `dependencies`, `consistency`, `settings`, `threads`, `unsupported` |
 
-Outside the workspace: `tools/apply.py`, `tools/speed_curve.py` and `tools/repeat_keys.py` (Python 3 standard library only; [Wrapper](#wrapper), [Helper tools](#helper-tools)) with their `unittest` suites `tools/test_*.py`, and the technical references in `docs/` ([Documentation](#documentation)).
+Outside the workspace: `tools/apply.py`, `tools/speed_curve.py`, `tools/repeat_keys.py`, `tools/ffstage.py`, `tools/handoff.py` and `tools/conformance.py` (Python 3 standard library only; [Wrapper](#wrapper), [Helper tools](#helper-tools), [Handoff](#handoff)) with their `unittest` suites `tools/test_*.py`, the handoff contracts in `contracts/`, and the technical references in `docs/` ([Documentation](#documentation)).
 
 ## Build
 
@@ -214,7 +216,7 @@ An id given twice is a usage error (exit 2). `tools/apply.py` relays each of the
 | `--pre-stage CMD` | | A raw frame filter of another tool, run between the decode and `vfx`; repeatable, in the order given. CMD is one command line (split like a shell would, no shell involved) that reads frames of the `--depth` format on stdin and writes the same number of frames of the same format and size on stdout. `{width}`, `{height}`, `{depth}`, `{fps}` (as N/D), `{frames}` and `{pix_fmt}` in it are filled in; `{frames}` is refused when the frame count is not known. A stage that exits non zero, stops in the middle of a frame or stops reading fails the run. With a stage, `--json` adds `contract` and `stages`, and a failure prints the error object of `contracts/error.schema.json` (exit 1 under `frames/1`). |
 | `--post-stage CMD` | | Like `--pre-stage`, between `vfx` and the encode; its `{frames}` is the length of the `vfx` output (`--frames` for a temporal effect). |
 | `--stage-timeout SECONDS` | 120 | Kills a `--pre-stage` or `--post-stage` that holds the pipe up this long without a byte moving on its pipes (0 never). A stage that waits for a slow neighbour is not held up. Under `frames/2` the decode and the encode are watched too; `vfx` never is. |
-| `--contract frames/1\|frames/2` | `frames/1` | `frames/1` is the behaviour this section describes, unchanged. `frames/2` is the handoff contract ([handoff](docs/handoff.md)): every `--json` failure is the error object of `contracts/error.schema.json`, a text failure reads `error: <code>: <message>`, and the exit status follows the code: 1 `stage_failed`, 2 `usage`, 3 `unsupported`, 4 `bad_input`, `broken_pipe` and `partial_frame`, 5 `stage_timeout`, 6 `tool_missing`, 130 `interrupted`. A `--pre-stage` or `--post-stage` that exits 2, 3 or 4 is `usage`, `unsupported` or `bad_input`, as `vfx` is. `--json` adds `ok`, `contract`, `stages` (every process in pipe order, then the verify step, each with `role`, `index`, `name`, `command` as an argv list, `exit_code` and `stderr_tail`) and `geometry`. `--stage-timeout` also watches the decode and the encode; `vfx` is never judged. |
+| `--contract frames/1\|frames/2` | `frames/1` | `frames/1` is the behaviour this section describes, unchanged. `frames/2` is the handoff contract ([Handoff](#handoff)): every `--json` failure is the error object of `contracts/error.schema.json`, a text failure reads `error: <code>: <message>`, and the exit status follows the code: 1 `stage_failed`, 2 `usage`, 3 `unsupported`, 4 `bad_input`, `broken_pipe` and `partial_frame`, 5 `stage_timeout`, 6 `tool_missing`, 130 `interrupted`. A `--pre-stage` or `--post-stage` that exits 2, 3 or 4 is `usage`, `unsupported` or `bad_input`, as `vfx` is. `--json` adds `ok`, `contract`, `stages` (every process in pipe order, then the verify step, each with `role`, `index`, `name`, `command` as an argv list, `exit_code` and `stderr_tail`) and `geometry`. `--stage-timeout` also watches the decode and the encode; `vfx` is never judged. |
 | `--geometry preserve\|declared` | `preserve` | `frames/2`, after a `--pre-stage` or `--post-stage`: a `declared` stage is first asked `CMD --describe [--frames N]` (`contracts/describe.schema.json`), and its width, height and frame count go to the next process, the encode and the verify. A frame rate or depth change is refused with exit 3, and so is another value. |
 | `--describe` | off | `frames/2`: prints the output geometry of the run as a describe answer (`stage` is the effect id) and exits 0 without reading or writing frames. |
 
@@ -319,6 +321,8 @@ python tools/repeat_keys.py target/demo/rec.mp4
 
 The list is `3 9 15 21 27 33 39 45`, with `8 of 47 frames repeat the frame before them (17.0%)` on stderr; the keys start `0@0;2@2;3.5@3;4@4;8@8;9.5@9;10@10` and end `46@46;47@47`.
 
+The handoff tools, `tools/handoff.py`, `tools/conformance.py` and `tools/ffstage.py`, are in [Handoff](#handoff).
+
 ### Comparison harness
 
 `target/release/fx-parity` builds a test set of clips (temporal effects) or stills (frame effects), writes a checklist for rendering references with another program, compares `vfx` with those references, and checks `vfx` for determinism. `fx-parity --help` prints the full rules.
@@ -335,6 +339,24 @@ The list is `3 9 15 21 27 33 39 45`, with `8 of 47 frames repeat the frame befor
 - Pass rule: 8 and 16 bpc bit exact, 32 bpc within 1 ULP, clips frame by frame with the first failing frame reported. Every compared case also gets a mean error (mean absolute difference over all pixels and all 4 channels, as a percentage of full scale), a clip its worst frame, and the report a `graded error` block per effect and the 10 worst cases.
 - `selfcheck` runs each picked case twice at the default thread count and once per `--threads` value (through `RAYON_NUM_THREADS`); every output must equal the first byte for byte.
 - Exit codes: 0 fine; 1 mismatch (`run`: a `FAIL`, or under `--strict` a missing reference; `selfcheck`: a difference or a failed run); 2 usage; 3 setup or I/O (for example a references folder that does not exist). Errors print `fx-parity: error: <message>`. There is no `--version`.
+
+## Handoff
+
+twixtor runs sapphire's stages and its own around `vfx` and hands tasks to sapphire as packets, under the convention both repositories share ([handoff](docs/handoff.md)). It finds sapphire by sapphire's marker files: `--peer-dir sapphire=DIR`, else `HANDOFF_SAPPHIRE_DIR`, else the one sibling folder that holds them.
+
+| Command | Does |
+|---|---|
+| `python -I tools/handoff.py stages --json` | Lists the stages of twixtor and sapphire, each with the command line a wrapper takes. |
+| `python tools/apply.py INPUT EFFECT --pre-stage CMD` | Runs a listed stage before `vfx`, or after it with `--post-stage`, between an ffmpeg decode and encode ([Wrapper](#wrapper)); take CMD from `stages --json`. |
+| `python tools/ffstage.py list --json` | Prints the manifest of the `ffmpeg-filter` stage in Python, which `stages` does not list. |
+| `python -I tools/handoff.py new --to sapphire --task TEXT --input PATH` | Writes a task packet into sapphire's `handoff/` folder; sapphire runs `accept ID` and `done ID --output PATH --run SPEC`, and `verify ID --other` checks the result from here. |
+| `python -I tools/handoff.py doctor` | Checks sapphire, ffmpeg, ffprobe, `vfx`, the contracts and the shared files. |
+| `python -I tools/conformance.py --quick` | Runs the covering conformance subset in about a minute; `--full` runs the whole matrix and `--stage CMD` one stage. |
+| `python -I tools/handoff.py sync --check` | Compares the shared files with sapphire's by SHA-256; `sync` copies twixtor's versions over. |
+
+The `shared` list of `contracts/tool.json` is byte equal in both repositories: the schemas in `contracts/`, `contracts/conformance/cases.json`, `docs/handoff.md`, `docs/handoff-bench.tsv`, `tools/handoff.py`, `tools/conformance.py` and their tests. Change one here, then run `sync`, also after `tools/conformance.py --bench`, which rewrites the bench table.
+
+twixtor's own stages are the effects of `vfx list --json --all`; under `--contract frames/2`, `tools/apply.py` speaks the convention in full.
 
 ## Smoke test
 
@@ -444,7 +466,8 @@ This README specifies the programs. The files in `docs/` specify behaviour in de
 | [`docs/timing.md`](docs/timing.md) | How output frames map to source frames: Speed and Frame Number modes, key shapes, output length, clip edges, exact frames, the rate model. |
 | [`docs/ffmpeg.md`](docs/ffmpeg.md) | How `vfx` and `tools/apply.py` pair with ffmpeg: raw frames, the wrapper's commands, colour, rate, audio, encoding, scratch and disk, input requirements. |
 | [`docs/engine.md`](docs/engine.md) | How an output frame is computed: motion search, warps, blends, hole fill, blur compensation, vector images, determinism, cost, and the module that implements each stage. |
-| [`docs/handoff.md`](docs/handoff.md) | How twixtor, sapphire and ffmpeg pass raw frames to each other: contract versions, the frame contract, error codes and exits, reports, stage discovery, declared geometry, the ffmpeg filter stage, handoff packets and their commands. |
+| [`docs/handoff.md`](docs/handoff.md) | How twixtor, sapphire and ffmpeg pass raw frames to each other: contract versions, the frame contract, errors and exits, reports, discovery, geometry, the ffmpeg filter stage, packets, commands, platforms, known gaps. |
+| [`docs/handoff-bench.tsv`](docs/handoff-bench.tsv) | The bench table of `tools/conformance.py --bench`: the wrappers timed on chained stages. |
 
 ## Legal
 
