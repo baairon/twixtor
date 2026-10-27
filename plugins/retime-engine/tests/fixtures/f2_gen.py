@@ -1,5 +1,5 @@
 """Independent numpy float32 model of the textured forward warp.
-It produces `f2_cases.bin` for the Rust test `forward::tests::model_fixture`.
+It produces `f2_cases.hex` for the Rust test `forward::tests::model_fixture`.
 
 Run:  python -I f2_gen.py        (from this directory; needs numpy; deterministic)
 
@@ -16,6 +16,7 @@ File format, little endian:
     u32 fmt (0 u8, 1 u16, 2 f32), u32 W, u32 H, u32 FW, u32 FH, f32 amount, u32 want_cov (always 1)
     src (W*H*4 samples A R G B of the format), flow (FW*FH*2 f32), expected out (W*H*4), expected coverage (W*H bytes)
 """
+import io
 import math
 import struct
 import sys
@@ -439,6 +440,11 @@ def flow_field(kind, fw, fh, rng):
     return f
 
 
+def hex_text(blob):
+    """the bytes as hex text, 64 a line: the form the Rust tests read."""
+    return "".join(blob[i:i + 64].hex() + "\n" for i in range(0, len(blob), 64))
+
+
 def main(path):
     rng = np.random.default_rng(20261022)
     cases = []
@@ -460,7 +466,7 @@ def main(path):
         out, cov = forward_warp(src, flow, f32(amount), fmt)
         cases.append((fmt, w, h, fw, fh, f32(amount), src, flow, out, cov))
         print(kind, fmt, w, h, "cov", int((cov != 0).sum()), "of", w * h, file=sys.stderr)
-    with open(path, "wb") as fh_:
+    with io.BytesIO() as fh_:
         fh_.write(b"F2C1")
         fh_.write(struct.pack("<I", len(cases)))
         for (fmt, w, h, fw, fh, amount, src, flow, out, cov) in cases:
@@ -469,7 +475,10 @@ def main(path):
             fh_.write(flow.astype("<f4").tobytes())
             fh_.write(out.astype("<" + DT[fmt]().dtype.str[1:]).tobytes())
             fh_.write(cov.tobytes())
+        blob = fh_.getvalue()
+    with open(path, "w", encoding="ascii", newline="\n") as out:
+        out.write(hex_text(blob))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "f2_cases.bin")
+    main(sys.argv[1] if len(sys.argv) > 1 else "f2_cases.hex")

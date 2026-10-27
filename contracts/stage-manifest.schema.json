@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "stage manifest",
+  "description": "What a stage provider offers: the provider (id, version, the argv prefix that list --json and apply are appended to) and its stages. sapphire prints it natively for `stage list --json`; tools/handoff.py builds it from `vfx list --json` with the vfx-list adapter; a plugin may also ship it as a file named *.stage.json. A consumer refuses a manifest whose contract major it does not know and a stage whose geometry value it does not know. Identical in every repository that follows the convention.",
+  "type": "object",
+  "required": ["contract", "provider", "stages"],
+  "additionalProperties": true,
+  "properties": {
+    "contract": {"description": "frames/1 or frames/2; a consumer refuses another major.", "type": "string", "pattern": "^frames/[0-9]+$"},
+    "provider": {
+      "type": "object",
+      "required": ["id", "version", "command"],
+      "additionalProperties": true,
+      "properties": {
+        "id": {"description": "Lower case id; a registered tool uses its contracts/tool.json id.", "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$"},
+        "version": {"description": "The provider's version text, for example the first line of --version.", "type": "string", "minLength": 1},
+        "command": {"description": "The argv prefix: the program, then fixed words. `list --json` and `apply STAGE ...` are appended to it. In a *.stage.json file a relative program path is relative to the file's folder.", "type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "kind", "spool", "geometry", "depths", "params", "layers"],
+        "additionalProperties": true,
+        "properties": {
+          "id": {"description": "The stage id passed to apply; a leading @ marks a built in stage of a wrapper (for example @ffmpeg-filter).", "type": "string", "pattern": "^@?[a-z0-9][a-z0-9._-]*$"},
+          "kind": {"description": "frame: output frame N depends on input frame N only; temporal: output frames depend on several input frames.", "type": "string", "enum": ["frame", "temporal"]},
+          "spool": {"description": "true when the stage reads its whole input before it writes the first frame (it is silent while it spools, so a wrapper must not judge it by a stall timeout).", "type": "boolean"},
+          "geometry": {"description": "preserve: width, height, fps and pixel format of the output equal the input. declared: the stage answers apply STAGE --describe with its output geometry. Any other value is a valid manifest, but a consumer refuses that stage.", "type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+          "depths": {"description": "Bits per channel the stage accepts: 8 rgba, 16 rgba64le, 32 gbrapf32le.", "type": "array", "minItems": 1, "items": {"type": "integer", "enum": [8, 16, 32]}},
+          "params": {
+            "description": "Parameters as --param K=V. Keys beyond id, kind and default (name, choices, min, max, precision) pass through unchanged.",
+            "type": "array",
+            "items": {"type": "object", "required": ["id"], "additionalProperties": true, "properties": {"id": {"type": "string", "minLength": 1}, "kind": {"type": "string", "minLength": 1}}}
+          },
+          "layers": {
+            "description": "Extra inputs as --layer ID=PATH.",
+            "type": "array",
+            "items": {"type": "object", "required": ["id", "optional"], "additionalProperties": true, "properties": {"id": {"type": "string", "minLength": 1}, "optional": {"type": "boolean"}}}
+          }
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "contract": "frames/2",
+      "provider": {"id": "sapphire", "version": "sapphire 0.1.0", "command": ["sapphire", "stage"]},
+      "stages": [
+        {"id": "selftest-invert", "kind": "frame", "spool": false, "geometry": "preserve", "depths": [8, 16, 32], "params": [], "layers": []},
+        {"id": "ffmpeg-filter", "kind": "frame", "spool": false, "geometry": "declared", "depths": [8, 16, 32], "params": [{"id": "graph", "kind": "text"}, {"id": "expect", "kind": "popup", "choices": ["preserve", "declared"]}], "layers": []}
+      ]
+    },
+    {
+      "contract": "frames/1",
+      "provider": {"id": "twixtor", "version": "vfx 0.1.0", "command": ["vfx"], "adapter": "vfx-list"},
+      "stages": [
+        {"id": "retime", "kind": "temporal", "spool": true, "geometry": "preserve", "depths": [8, 16, 32], "params": [{"id": "speed_percent", "kind": "float", "default": 100.0}], "layers": [{"id": "alt_source_a", "optional": true}], "name": "Retime"}
+      ]
+    }
+  ]
+}

@@ -341,9 +341,9 @@ enum Case {
 }
 
 fn load_cases() -> Vec<Case> {
-    let blob = include_bytes!("../../tests/fixtures/vectors_cases.bin");
+    let blob = crate::fixture::hex(include_str!("../../tests/fixtures/vectors_cases.hex"));
     assert_eq!(&blob[..4], b"VEC1");
-    let mut r = Reader { b: blob, p: 4 };
+    let mut r = Reader { b: &blob, p: 4 };
     let n = r.u32();
     let mut out = Vec::new();
     for _ in 0..n {

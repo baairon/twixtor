@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "stage describe answer",
+  "description": "frames/2 only. A stage with geometry declared answers `apply STAGE --describe --width W --height H --depth D --fps N/D [--frames N] [--param K=V]... [--layer ID=PATH]...` with this document on standard output, reads no standard input and exits 0; a refusal is an error document (error.schema.json) with the stage exit codes 2, 3 or 4. Only width, height and frames may change: depth and fps equal the request, and a stage that would change the rate refuses with unsupported. A wrapper chains the answers stage by stage and passes the last one to encode and verify. Identical in every repository that follows the convention.",
+  "type": "object",
+  "required": ["ok", "contract", "stage", "width", "height", "depth", "fps", "frames"],
+  "additionalProperties": false,
+  "properties": {
+    "ok": {"const": true},
+    "contract": {"const": "frames/2"},
+    "stage": {"description": "The stage id that answered.", "type": "string", "minLength": 1},
+    "width": {"description": "Output width in pixels.", "type": "integer", "minimum": 1},
+    "height": {"description": "Output height in pixels.", "type": "integer", "minimum": 1},
+    "depth": {"description": "Equal to the requested --depth.", "type": "integer", "enum": [8, 16, 32]},
+    "fps": {"description": "Equal to the requested --fps, as an exact N/D.", "type": "string", "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"},
+    "frames": {"description": "Output frame count, or null when the input count was not given and the stage cannot tell.", "type": ["integer", "null"], "minimum": 0}
+  },
+  "examples": [
+    {"ok": true, "contract": "frames/2", "stage": "ffmpeg-filter", "width": 80, "height": 48, "depth": 8, "fps": "30000/1001", "frames": 12},
+    {"ok": true, "contract": "frames/2", "stage": "ffmpeg-filter", "width": 160, "height": 96, "depth": 16, "fps": "24/1", "frames": null}
+  ]
+}

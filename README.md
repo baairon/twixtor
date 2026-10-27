@@ -211,6 +211,12 @@ An id given twice is a usage error (exit 2). `tools/apply.py` relays each of the
 | `--json` | off | Prints the result as one JSON object on stdout. |
 | `--vfx PATH` | lookup below | The `vfx` executable. |
 | `--ffmpeg-path PATH`, `--ffprobe-path PATH` | lookup below | The ffmpeg and ffprobe executables. |
+| `--pre-stage CMD` | | A raw frame filter of another tool, run between the decode and `vfx`; repeatable, in the order given. CMD is one command line (split like a shell would, no shell involved) that reads frames of the `--depth` format on stdin and writes the same number of frames of the same format and size on stdout. `{width}`, `{height}`, `{depth}`, `{fps}` (as N/D), `{frames}` and `{pix_fmt}` in it are filled in; `{frames}` is refused when the frame count is not known. A stage that exits non zero, stops in the middle of a frame or stops reading fails the run. With a stage, `--json` adds `contract` and `stages`, and a failure prints the error object of `contracts/error.schema.json` (exit 1 under `frames/1`). |
+| `--post-stage CMD` | | Like `--pre-stage`, between `vfx` and the encode; its `{frames}` is the length of the `vfx` output (`--frames` for a temporal effect). |
+| `--stage-timeout SECONDS` | 120 | Kills a `--pre-stage` or `--post-stage` that holds the pipe up this long without a byte moving on its pipes (0 never). A stage that waits for a slow neighbour is not held up. Under `frames/2` the decode and the encode are watched too; `vfx` never is. |
+| `--contract frames/1\|frames/2` | `frames/1` | `frames/1` is the behaviour this section describes, unchanged. `frames/2` is the handoff contract ([handoff](docs/handoff.md)): every `--json` failure is the error object of `contracts/error.schema.json`, a text failure reads `error: <code>: <message>`, and the exit status follows the code: 1 `stage_failed`, 2 `usage`, 3 `unsupported`, 4 `bad_input`, `broken_pipe` and `partial_frame`, 5 `stage_timeout`, 6 `tool_missing`, 130 `interrupted`. A `--pre-stage` or `--post-stage` that exits 2, 3 or 4 is `usage`, `unsupported` or `bad_input`, as `vfx` is. `--json` adds `ok`, `contract`, `stages` (every process in pipe order, then the verify step, each with `role`, `index`, `name`, `command` as an argv list, `exit_code` and `stderr_tail`) and `geometry`. `--stage-timeout` also watches the decode and the encode; `vfx` is never judged. |
+| `--geometry preserve\|declared` | `preserve` | `frames/2`, after a `--pre-stage` or `--post-stage`: a `declared` stage is first asked `CMD --describe [--frames N]` (`contracts/describe.schema.json`), and its width, height and frame count go to the next process, the encode and the verify. A frame rate or depth change is refused with exit 3, and so is another value. |
+| `--describe` | off | `frames/2`: prints the output geometry of the run as a describe answer (`stage` is the effect id) and exits 0 without reading or writing frames. |
 
 **Lookup order**, first hit wins:
 
@@ -381,6 +387,11 @@ cargo test --workspace --release
 python tools/test_speed_curve.py
 python tools/test_apply.py
 python tools/test_repeat_keys.py
+python tools/test_stages.py
+python tools/test_ffstage.py
+python -I tools/test_handoff.py
+python -I tools/test_conformance.py
+python -I tools/conformance.py --quick --allow-absent-peer
 ```
 
 - **Release mode** because the optical flow and thread invariance suites are far too slow unoptimised. The end to end tests (`crates/fx-cli/tests/cli.rs`, `plugins/*/tests/cli.rs`) run the `vfx` that cargo builds in the same profile.
@@ -388,21 +399,21 @@ python tools/test_repeat_keys.py
 - **Evidence:** hand worked values, goldens and model fixtures from independent numpy float32 scripts, analytic ground truth (a texture moved by a known amount), and identical output across thread counts.
 - **Timing probes** are `#[ignore]`d: `cargo test --release -- --ignored <name> --nocapture` with `bench_1080p`, `timing_full_hd`, `timing_probe_1080p`, `timing` or `breakdown`.
 
-**Fixtures.** Each generator needs numpy and writes to the path given (most default to overwriting their fixture in place). Run it from its own folder and compare, for example `python -I -B gen_warp.py /tmp/warp_cases.bin && cmp /tmp/warp_cases.bin warp_cases.bin`. Every generated fixture below came back byte for byte (numpy 2.5.1).
+**Fixtures.** The model fixtures are hex text, 64 bytes a line, which the tests decode; the repository holds no binary files. Each generator needs numpy and writes to the path given (most default to overwriting their fixture in place). Run it from its own folder and compare, for example `python -I -B gen_warp.py /tmp/warp_cases.hex && cmp /tmp/warp_cases.hex warp_cases.hex`. Every generated fixture below came back byte for byte (numpy 2.5.1).
 
 | Fixture | Generator | Command |
 |---|---|---|
-| `plugins/retime-engine/tests/fixtures/f1_cases.bin` (Smart Blend, hole fill) | `f1_gen.py` | `python -I -B f1_gen.py [OUT]` |
-| `.../fixtures/f2_cases.bin` (forward warp) | `f2_gen.py` | `python -I -B f2_gen.py [OUT]` |
-| `.../fixtures/blur_cases.bin` (motion blur) | `gen_blur.py` | `python -I -B gen_blur.py [OUT]` |
-| `.../fixtures/vectors_cases.bin` (vector image coding) | `gen_vectors.py` | `python -I -B gen_vectors.py [OUT]` |
-| `.../fixtures/warp_cases.bin` (inverse warp) | `gen_warp.py` | `python -I -B gen_warp.py [OUT]` |
-| `.../fixtures/flow_a.bin` to `flow_f.bin` (optical flow, a differential model that is not bit exact) | `gen_flow_fixtures.py` with `flow_ref.py` | `python -I -B gen_flow_fixtures.py OUT_DIR` |
+| `plugins/retime-engine/tests/fixtures/f1_cases.hex` (Smart Blend, hole fill) | `f1_gen.py` | `python -I -B f1_gen.py [OUT]` |
+| `.../fixtures/f2_cases.hex` (forward warp) | `f2_gen.py` | `python -I -B f2_gen.py [OUT]` |
+| `.../fixtures/blur_cases.hex` (motion blur) | `gen_blur.py` | `python -I -B gen_blur.py [OUT]` |
+| `.../fixtures/vectors_cases.hex` (vector image coding) | `gen_vectors.py` | `python -I -B gen_vectors.py [OUT]` |
+| `.../fixtures/warp_cases.hex` (inverse warp) | `gen_warp.py` | `python -I -B gen_warp.py [OUT]` |
+| `.../fixtures/flow_a.hex` to `flow_f.hex` (optical flow, a differential model that is not bit exact) | `gen_flow_fixtures.py` with `flow_ref.py` | `python -I -B gen_flow_fixtures.py OUT_DIR` |
 | `plugins/retime/tests/common/goldens.rs`, `plugins/retime-fgbg/tests/common/goldens.rs` | `gen_goldens.py` beside each | `python -I -B gen_goldens.py OUT` |
 
-`gauss_r2.bin`, `gauss_r5.bin`, `gauss_r7.bin` and `binomial5_half.bin` in the same fixtures folder are kernel tables with no generator script; `flow/conv.rs` checks the code against them bit for bit.
+The Gaussian and binomial kernel tables are constants in the test of `flow/conv.rs`, checked against the code bit for bit.
 
-**Continuous integration.** `.github/workflows/ci.yml` (Linux, macOS and Windows, Python 3.12) and `.forgejo/workflows/ci.yml` (Linux in the `node:24-bookworm` container, with Rust from rustup) install ffmpeg (a static 9.0 build on Linux) and run the five commands above, with the release profile's LTO off and 16 codegen units to cut compile time, on every push to `main` and every pull request, with a 60 minute limit. Both can also be started by hand. A new push to a pull request cancels its run in flight; each push to `main` keeps a run of its own.
+**Continuous integration.** `.github/workflows/ci.yml` (Linux, macOS and Windows, Python 3.12) and `.forgejo/workflows/ci.yml` (Linux in the `node:24-bookworm` container, with Rust from rustup and Debian's `python3`) install ffmpeg (a static 9.0 build on Linux) and run the commands above, with the release profile's LTO off and 16 codegen units to cut compile time, on every push to `main` and every pull request, with a 60 minute limit. sapphire is not checked out there, so `--allow-absent-peer` lets through only the conformance parts that need sapphire; every failed check still fails the job. Both can also be started by hand. A new push to a pull request cancels its run in flight; each push to `main` keeps a run of its own.
 
 ## Limits
 
@@ -433,6 +444,7 @@ This README specifies the programs. The files in `docs/` specify behaviour in de
 | [`docs/timing.md`](docs/timing.md) | How output frames map to source frames: Speed and Frame Number modes, key shapes, output length, clip edges, exact frames, the rate model. |
 | [`docs/ffmpeg.md`](docs/ffmpeg.md) | How `vfx` and `tools/apply.py` pair with ffmpeg: raw frames, the wrapper's commands, colour, rate, audio, encoding, scratch and disk, input requirements. |
 | [`docs/engine.md`](docs/engine.md) | How an output frame is computed: motion search, warps, blends, hole fill, blur compensation, vector images, determinism, cost, and the module that implements each stage. |
+| [`docs/handoff.md`](docs/handoff.md) | How twixtor, sapphire and ffmpeg pass raw frames to each other: contract versions, the frame contract, error codes and exits, reports, stage discovery, declared geometry, the ffmpeg filter stage, handoff packets and their commands. |
 
 ## Legal
 

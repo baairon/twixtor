@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "handoff packet",
+  "description": "Packet schema_version 2: one agent to agent handoff between two registered tools (contracts/tool.json): a task, its inputs, the stage chain to run, what the result must look like, and later the result. The packet lives in handoff/<id>.json of the receiving repository; every path in it is a relative POSIX path (no leading slash, no drive, no backslash, no .. segment) from the root of that repository. revision counts every replacement of the file (compare and swap under handoff/<id>.lock). A file is at most 1 MiB. Version 1 packets (handoff-packet-v1.schema.json) stay readable and `handoff.py migrate` rewrites them as version 2. Only the keywords type, required, properties, additionalProperties, enum, items, pattern, minimum, maximum, minLength, minItems and const are used, so tools/handoff.py validates it without a library. Identical in every repository that follows the convention.",
+  "type": "object",
+  "required": ["schema_version", "id", "revision", "created", "updated", "from", "to", "task", "status", "inputs", "request", "expect", "result", "notes"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"description": "2; a reader also accepts 1 through the v1 schema and refuses anything else.", "const": 2},
+    "id": {"description": "<UTC time as YYYYMMDDTHHMMSSZ>-<from>-<to>-<6 hex digits>; also the file name stem under handoff/.", "type": "string", "pattern": "^[0-9]{8}T[0-9]{6}Z-[a-z][a-z0-9_]{0,31}-[a-z][a-z0-9_]{0,31}-[0-9a-f]{6}$"},
+    "revision": {"description": "1 when written by new; every later replacement writes the read revision plus 1, and a writer that finds another revision than it read refuses (bad_input).", "type": "integer", "minimum": 1},
+    "created": {"description": "ISO 8601 UTC, second precision, when the sender wrote the packet.", "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "updated": {"description": "ISO 8601 UTC, second precision, of the last replacement of the file.", "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+    "from": {"description": "Tool id of the sender, checked against contracts/tool.json.", "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$"},
+    "to": {"description": "Tool id of the receiver, which keeps the packet in its handoff/ folder; checked against contracts/tool.json.", "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$"},
+    "task": {"description": "What the receiver is asked to do, in plain words.", "type": "string", "minLength": 1},
+    "status": {"description": "new (written by the sender), accepted (the receiver took it), done (result recorded), failed (the receiver reports failure), verified (a verify passed on a done packet).", "type": "string", "enum": ["new", "accepted", "done", "failed", "verified"]},
+    "inputs": {
+      "description": "Files the task starts from. A raw frame input carries its geometry; any other file has null geometry. new copies an input that lies outside the receiving repository into handoff/<id>/inputs/.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "width", "height", "depth", "pix_fmt", "fps", "frames"],
+        "additionalProperties": false,
+        "properties": {
+          "path": {"description": "Relative POSIX path from the root of the repository holding the packet.", "type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"},
+          "sha256": {"description": "Lowercase hex SHA-256 of the file bytes.", "type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "width": {"type": ["integer", "null"], "minimum": 1},
+          "height": {"type": ["integer", "null"], "minimum": 1},
+          "depth": {"description": "Bits per channel of the raw frame format: 8 rgba, 16 rgba64le, 32 gbrapf32le.", "type": ["integer", "null"], "enum": [8, 16, 32, null]},
+          "pix_fmt": {"type": ["string", "null"], "enum": ["rgba", "rgba64le", "gbrapf32le", null]},
+          "fps": {"description": "Exact rate as numerator/denominator, for example 30000/1001.", "type": ["string", "null"], "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"},
+          "frames": {"description": "Whole frames in the file; null when the file is not raw frames.", "type": ["integer", "null"], "minimum": 0}
+        }
+      }
+    },
+    "request": {
+      "description": "The stage chain the receiver runs, first stage first.",
+      "type": "object",
+      "required": ["stages"],
+      "additionalProperties": false,
+      "properties": {
+        "stages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["stage", "params", "layers"],
+            "additionalProperties": false,
+            "properties": {
+              "stage": {"description": "Stage id as the provider's manifest shows it (handoff.py stages).", "type": "string", "minLength": 1},
+              "params": {"description": "Parameter id to value text, passed through unchanged as --param K=V.", "type": "object", "additionalProperties": {"type": "string"}},
+              "layers": {"description": "Layer id to a relative POSIX path, passed through as --layer ID=PATH.", "type": "object", "additionalProperties": {"type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"}}
+            }
+          }
+        }
+      }
+    },
+    "expect": {
+      "description": "What a correct result looks like; verify checks it.",
+      "type": "object",
+      "required": ["frames", "size", "determinism", "tolerance"],
+      "additionalProperties": false,
+      "properties": {
+        "frames": {"description": "Whole frames every output holds; null for no expectation.", "type": ["integer", "null"], "minimum": 0},
+        "size": {"description": "Bytes of every output file; null for no expectation.", "type": ["integer", "null"], "minimum": 0},
+        "determinism": {"description": "exact: a replay returns the recorded bytes; tolerance: a replay stays within the tolerance below; none: no claim about a replay.", "type": "string", "enum": ["exact", "tolerance", "none"]},
+        "tolerance": {
+          "type": "object",
+          "required": ["max_abs_diff", "max_diff_fraction"],
+          "additionalProperties": false,
+          "properties": {
+            "max_abs_diff": {"description": "Largest allowed difference of one sample, in code values at depth 8 and 16 and in float units at depth 32.", "type": "number", "minimum": 0},
+            "max_diff_fraction": {"description": "Largest allowed fraction of samples that differ at all.", "type": "number", "minimum": 0, "maximum": 1}
+          }
+        }
+      }
+    },
+    "result": {
+      "description": "null until the receiver records the run with done.",
+      "type": ["object", "null"],
+      "required": ["outputs", "commands", "scratch"],
+      "additionalProperties": false,
+      "properties": {
+        "outputs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256", "width", "height", "depth", "pix_fmt", "fps", "frames"],
+            "additionalProperties": false,
+            "properties": {
+              "path": {"type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"},
+              "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+              "width": {"type": ["integer", "null"], "minimum": 1},
+              "height": {"type": ["integer", "null"], "minimum": 1},
+              "depth": {"type": ["integer", "null"], "enum": [8, 16, 32, null]},
+              "pix_fmt": {"type": ["string", "null"], "enum": ["rgba", "rgba64le", "gbrapf32le", null]},
+              "fps": {"type": ["string", "null"], "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"},
+              "frames": {"type": ["integer", "null"], "minimum": 0}
+            }
+          }
+        },
+        "commands": {
+          "description": "The commands that ran, in order, without a shell. verify --replay runs them again: a program is replayed only when it is ffmpeg, ffprobe or a registered provider, unless --trust is given.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["argv", "stdin", "stdout", "cwd", "exit_code", "seconds"],
+            "additionalProperties": false,
+            "properties": {
+              "argv": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+              "stdin": {"description": "File fed to standard input (relative POSIX path from the root), or null.", "type": ["string", "null"], "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"},
+              "stdout": {"description": "File that received standard output (relative POSIX path from the root), or null when it was discarded.", "type": ["string", "null"], "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"},
+              "cwd": {"description": "Working directory (relative POSIX path from the root); null means the root.", "type": ["string", "null"], "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"},
+              "exit_code": {"type": "integer"},
+              "seconds": {"type": "number", "minimum": 0}
+            }
+          }
+        },
+        "scratch": {"description": "Folder the run kept its intermediate files in (relative POSIX path from the root), so a cut off agent can find them; null when none.", "type": ["string", "null"], "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"}
+      }
+    },
+    "notes": {
+      "description": "Status changes and free notes, oldest first.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["at", "by", "text"],
+        "additionalProperties": false,
+        "properties": {
+          "at": {"type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"},
+          "by": {"type": "string", "minLength": 1},
+          "text": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schema_version": 2, "id": "20261026T120000Z-sapphire-twixtor-abcdef", "revision": 3,
+      "created": "2026-10-26T12:00:00Z", "updated": "2026-10-26T12:05:00Z",
+      "from": "sapphire", "to": "twixtor", "task": "invert twice", "status": "done",
+      "inputs": [{"path": "handoff/20261026T120000Z-sapphire-twixtor-abcdef/inputs/clip.raw", "sha256": "0000000000000000000000000000000000000000000000000000000000000000", "width": 4, "height": 2, "depth": 8, "pix_fmt": "rgba", "fps": "24/1", "frames": 3}],
+      "request": {"stages": [{"stage": "selftest-invert", "params": {}, "layers": {}}]},
+      "expect": {"frames": 3, "size": 96, "determinism": "exact", "tolerance": {"max_abs_diff": 0, "max_diff_fraction": 0}},
+      "result": {"outputs": [{"path": "out/clip.raw", "sha256": "1111111111111111111111111111111111111111111111111111111111111111", "width": 4, "height": 2, "depth": 8, "pix_fmt": "rgba", "fps": "24/1", "frames": 3}],
+                 "commands": [{"argv": ["vfx", "apply", "selftest-invert", "--width", "4", "--height", "2", "--depth", "8", "--fps", "24/1"], "stdin": "handoff/20261026T120000Z-sapphire-twixtor-abcdef/inputs/clip.raw", "stdout": "out/clip.raw", "cwd": null, "exit_code": 0, "seconds": 0.1}],
+                 "scratch": null},
+      "notes": [{"at": "2026-10-26T12:00:00Z", "by": "sapphire", "text": "created"}, {"at": "2026-10-26T12:01:00Z", "by": "twixtor", "text": "accepted"}, {"at": "2026-10-26T12:05:00Z", "by": "twixtor", "text": "done"}]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 """Independent numpy float32 models of Smart Blend (with its binary alpha variant) and of the
 hole fill.
-They produce `f1_cases.bin` for the Rust tests `smartblend::tests::model_fixtures` and
+They produce `f1_cases.hex` for the Rust tests `smartblend::tests::model_fixtures` and
 `holefill::tests::model_fixtures`.
 
 Run:  python -I f1_gen.py        (from this directory; needs numpy)
@@ -17,6 +17,7 @@ File format, little endian:
     kind 1, 2: p1 (W*H*4 samples of the depth, A R G B), p2, expected out
     kind 3:    image (W*H*4), mask (W*H of the mask type), expected out (W*H*4)
 """
+import io
 import struct
 import sys
 
@@ -348,6 +349,11 @@ def hole_from_mask(m, mask_kind):
     return m.astype(np.float64) >= 3.1e-5
 
 
+def hex_text(blob):
+    """the bytes as hex text, 64 a line: the form the Rust tests read."""
+    return "".join(blob[i:i + 64].hex() + "\n" for i in range(0, len(blob), 64))
+
+
 def main(path):
     rng = np.random.default_rng(20261022)
     cases = []
@@ -377,15 +383,18 @@ def main(path):
                 img = random_image(rng, w, h, depth)
                 out = fill_model(img, hole, depth, w, h)
                 cases.append((3, depth, w, h, 0.0, mask_kind, [img, m.reshape(-1), out]))
-    with open(path, "wb") as f:
+    with io.BytesIO() as f:
         f.write(b"F1C1")
         f.write(struct.pack("<I", len(cases)))
         for kind, depth, w, h, wt, mk, arrays in cases:
             f.write(struct.pack("<IIIIfI", kind, depth, w, h, wt, mk))
             for a in arrays:
                 f.write(np.ascontiguousarray(a).tobytes())
+        blob = f.getvalue()
+    with open(path, "w", encoding="ascii", newline="\n") as out:
+        out.write(hex_text(blob))
     print(f"wrote {len(cases)} cases to {path}")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else "f1_cases.bin")
+    main(sys.argv[1] if len(sys.argv) > 1 else "f1_cases.hex")

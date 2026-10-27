@@ -73,7 +73,7 @@ pub(crate) fn as_f64(img: &Image) -> Vec<f64> {
     }
 }
 
-/// One case of `tests/fixtures/f1_cases.bin` (format in `f1_gen.py`).
+/// One case of `tests/fixtures/f1_cases.hex` (format in `f1_gen.py`).
 pub(crate) struct Case {
     pub kind: u32,
     pub depth: u32,
@@ -88,8 +88,9 @@ pub(crate) struct Case {
 }
 
 pub(crate) fn load_cases() -> Vec<Case> {
-    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/f1_cases.bin");
-    let b = std::fs::read(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+    let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/f1_cases.hex");
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
+    let b = crate::fixture::hex(&text);
     assert_eq!(&b[0..4], b"F1C1");
     let u32_at = |p: usize| u32::from_le_bytes(b[p..p + 4].try_into().unwrap());
     let n = u32_at(4) as usize;

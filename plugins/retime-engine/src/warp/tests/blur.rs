@@ -13,9 +13,9 @@ struct BlurCase {
 }
 
 fn load_blur_cases() -> Vec<BlurCase> {
-    let blob = include_bytes!("../../../tests/fixtures/blur_cases.bin");
+    let blob = crate::fixture::hex(include_str!("../../../tests/fixtures/blur_cases.hex"));
     assert_eq!(&blob[..4], b"BLR1");
-    let mut r = Reader { b: blob, p: 4 };
+    let mut r = Reader { b: &blob, p: 4 };
     let n = r.u32();
     let mut cases = Vec::new();
     for _ in 0..n {

@@ -2,9 +2,9 @@
 (`flow_ref.py`, float32, no block matching, not bit exact).
 
 usage: python -I gen_flow_fixtures.py OUT_DIR
-  OUT_DIR = the folder the .bin files are written to (tests/fixtures of the engine crate)
+  OUT_DIR = the folder the .hex files are written to (tests/fixtures of the engine crate)
 
-Each fixture `<name>.bin` (little endian):
+Each fixture `<name>.hex` holds these little endian bytes as hex text, 64 a line:
   magic b"FLD2", u32 width, u32 height, f32 sensitivity, u32 quality, u32 prep
   (prep: 0 none, 1 Contrast/Edge Enhance, 2 Delinearize),
   width*height*4 bytes   X as 8 bit A,R,G,B (alpha 255, colour R,G,B of the luma),
@@ -16,6 +16,7 @@ The luma of the engine for 8 bit images is (R*0.3f + G*0.59f) + B*0.11f in singl
 model receives exactly that luma computed with numpy float32 scalars, so both sides start from
 identical numbers.
 """
+import io
 import struct
 import sys
 
@@ -58,12 +59,20 @@ def luma8(img):
     return ((r * F(0.3)) + (g * F(0.59))) + (b * F(0.11))
 
 
+def hex_text(blob):
+    """the bytes as hex text, 64 a line: the form the Rust tests read."""
+    return "".join(blob[i:i + 64].hex() + "\n" for i in range(0, len(blob), 64))
+
+
 def write(name, w, h, sens, quality, prep, x, y, flow):
-    with open(f"{out_dir}/{name}.bin", "wb") as f:
+    with io.BytesIO() as f:
         f.write(struct.pack("<IIIfII", 0x32444C46, w, h, sens, quality, prep))
         f.write(np.ascontiguousarray(x, np.uint8).tobytes())
         f.write(np.ascontiguousarray(y, np.uint8).tobytes())
         f.write(np.ascontiguousarray(flow, "<f4").tobytes())
+        blob = f.getvalue()
+    with open(f"{out_dir}/{name}.hex", "w", encoding="ascii", newline="\n") as out:
+        out.write(hex_text(blob))
 
 
 def reduce1(l):

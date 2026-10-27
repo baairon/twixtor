@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "contract": "frames/2",
+  "tools": [
+    {
+      "id": "sapphire",
+      "name": "sapphire",
+      "markers": ["crates/neutral-handoff/Cargo.toml", "crates/neutral-ffmpeg/Cargo.toml"],
+      "binaries": [
+        {"name": "sapphire", "env": "SAPPHIRE_PATH", "dirs": ["target/release"], "version_args": ["--version"]}
+      ],
+      "providers": [
+        {"binary": "sapphire", "prefix": ["stage"], "list_args": ["list", "--json"], "adapter": "native"}
+      ]
+    },
+    {
+      "id": "twixtor",
+      "name": "twixtor",
+      "markers": ["crates/fx-cli/Cargo.toml", "tools/apply.py"],
+      "binaries": [
+        {"name": "vfx", "env": "VFX_PATH", "dirs": ["target/release"], "version_args": ["--version"]}
+      ],
+      "providers": [
+        {"binary": "vfx", "prefix": [], "list_args": ["list", "--json", "--all"], "adapter": "vfx-list"}
+      ]
+    }
+  ],
+  "shared": [
+    "contracts/*.json",
+    "contracts/conformance/*",
+    "docs/handoff.md",
+    "docs/handoff-bench.tsv",
+    "tools/handoff.py",
+    "tools/test_handoff.py",
+    "tools/conformance.py",
+    "tools/test_conformance.py"
+  ]
+}

@@ -2,7 +2,7 @@
 //!
 //! Two kinds of evidence: (1) goldens worked out by hand from the formulas, (2) bit exact
 //! comparison with an independent numpy float32 model (`tests/fixtures/gen_warp.py` writes
-//! `warp_cases.bin`), plus invariance and property tests.
+//! `warp_cases.hex`), plus invariance and property tests.
 
 use super::*;
 use crate::image::{Image, Samples};
@@ -587,9 +587,9 @@ struct Case {
 }
 
 fn load_cases() -> Vec<Case> {
-    let blob = include_bytes!("../../tests/fixtures/warp_cases.bin");
+    let blob = crate::fixture::hex(include_str!("../../tests/fixtures/warp_cases.hex"));
     assert_eq!(&blob[..4], b"WRP1");
-    let mut r = Reader { b: blob, p: 4 };
+    let mut r = Reader { b: &blob, p: 4 };
     let n = r.u32();
     let mut cases = Vec::new();
     for _ in 0..n {

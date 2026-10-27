@@ -153,7 +153,13 @@ fn recovers_shifts_at_half_resolution() {
 }
 
 // ---------------------------------------------------------------------------------------
-// Differential test against the numpy model (tests/fixtures/flow_*.bin)
+// Differential test against the numpy model (tests/fixtures/flow_*.hex)
+
+/// The bytes of a hex fixture, 64 bytes a line; line breaks between the digits are skipped.
+fn hex(text: &str) -> Vec<u8> {
+    let d: Vec<u8> = text.bytes().filter(|b| !b.is_ascii_whitespace()).collect();
+    d.chunks(2).map(|p| u8::from_str_radix(std::str::from_utf8(p).unwrap(), 16).unwrap()).collect()
+}
 
 struct Fixture {
     w: usize,
@@ -221,15 +227,15 @@ fn matches_the_numpy_model_without_block_matching() {
     // (a + b) * k chain in the interior, no -1.0 sentinel) and uses numpy's power for
     // Delinearize, so only agreement to a small multiple of the float epsilon times the
     // iteration gain is expected (measured about 3e-6 without prep, see the printed report).
-    for (name, bytes, tol) in [
-        ("flow_a", &include_bytes!("fixtures/flow_a.bin")[..], 1e-4),
-        ("flow_b", &include_bytes!("fixtures/flow_b.bin")[..], 1e-4),
-        ("flow_c", &include_bytes!("fixtures/flow_c.bin")[..], 1e-4),
-        ("flow_d (quality 4, odd size)", &include_bytes!("fixtures/flow_d.bin")[..], 1e-4),
-        ("flow_e (edge enhance)", &include_bytes!("fixtures/flow_e.bin")[..], 1e-3),
-        ("flow_f (delinearize)", &include_bytes!("fixtures/flow_f.bin")[..], 1e-3),
+    for (name, text, tol) in [
+        ("flow_a", include_str!("fixtures/flow_a.hex"), 1e-4),
+        ("flow_b", include_str!("fixtures/flow_b.hex"), 1e-4),
+        ("flow_c", include_str!("fixtures/flow_c.hex"), 1e-4),
+        ("flow_d (quality 4, odd size)", include_str!("fixtures/flow_d.hex"), 1e-4),
+        ("flow_e (edge enhance)", include_str!("fixtures/flow_e.hex"), 1e-3),
+        ("flow_f (delinearize)", include_str!("fixtures/flow_f.hex"), 1e-3),
     ] {
-        let (max, mean) = compare_to_model(bytes);
+        let (max, mean) = compare_to_model(&hex(text));
         writeln!(report, "{name}: max abs diff {max:.3e}, mean {mean:.3e}").unwrap();
         assert!(max < tol, "{name}: max abs diff {max}");
     }

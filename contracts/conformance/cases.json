@@ -1,0 +1,343 @@
+{
+  "version": 1,
+  "contract": "frames/2",
+  "about": "Cases of tools/conformance.py. Identical in every repository that follows docs/handoff.md. Stage ids are real provider ids or fixture-* placeholders served by tools/conformance.py itself.",
+  "levels": {
+    "L0": "manifests: native stage list --json, the vfx-list adapter and *.stage.json files, through tools/handoff.py",
+    "L1": "stage matrix: every depth, size, frame count and alpha mode through every provider of a modelled stage, alone and chained in both orders",
+    "L2": "wrappers end to end with --lossless, both orders, an ffmpeg filter between",
+    "L3": "failure injection under a deadline: the reference judge on fixture stages and the error exits of every stage under test",
+    "L4": "packets through tools/handoff.py in a scratch folder",
+    "L5": "frames/2 wrapper reports and error documents"
+  },
+  "L1": {
+    "matrix": {
+      "depths": [
+        8,
+        16,
+        32
+      ],
+      "sizes": [
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          33,
+          17
+        ],
+        [
+          160,
+          96
+        ],
+        [
+          175,
+          99
+        ]
+      ],
+      "frames": [
+        1,
+        2,
+        12
+      ],
+      "alpha": [
+        "opaque",
+        "partial",
+        "zero"
+      ],
+      "fps": "24/1"
+    },
+    "rows": {
+      "quick": "cover: every depth meets every alpha mode, every size and frame count appears",
+      "full": "product"
+    },
+    "models": {
+      "selftest-invert": "invert"
+    },
+    "involutions": [
+      "invert"
+    ],
+    "stages": [
+      {
+        "stage": "selftest-invert",
+        "model": "invert",
+        "providers": [
+          "twixtor",
+          "sapphire"
+        ],
+        "params": {}
+      }
+    ],
+    "deadline": 60
+  },
+  "L2": {
+    "size": [
+      33,
+      17
+    ],
+    "frames": 5,
+    "alpha": "partial",
+    "graph": "hflip",
+    "depths": {
+      "quick": [
+        8
+      ],
+      "full": [
+        8,
+        16
+      ]
+    },
+    "deadline": 120
+  },
+  "L3": {
+    "deadline": 30,
+    "stall": 2,
+    "clip": [
+      33,
+      17,
+      8,
+      3
+    ],
+    "big_clip": [
+      175,
+      99,
+      32,
+      12
+    ],
+    "judge": [
+      {
+        "stage": "fixture-copy",
+        "expect": "ok"
+      },
+      {
+        "stage": "fixture-exit",
+        "params": {
+          "code": 1
+        },
+        "expect": "stage_failed"
+      },
+      {
+        "stage": "fixture-exit",
+        "params": {
+          "code": 2
+        },
+        "expect": "usage"
+      },
+      {
+        "stage": "fixture-exit",
+        "params": {
+          "code": 3
+        },
+        "expect": "unsupported"
+      },
+      {
+        "stage": "fixture-exit",
+        "params": {
+          "code": 4
+        },
+        "expect": "bad_input"
+      },
+      {
+        "stage": "fixture-truncate",
+        "expect": "broken_pipe"
+      },
+      {
+        "stage": "fixture-close",
+        "expect": "broken_pipe"
+      },
+      {
+        "stage": "fixture-partial",
+        "expect": "partial_frame"
+      },
+      {
+        "stage": "fixture-hang",
+        "expect": "stage_timeout"
+      }
+    ],
+    "stage_checks": [
+      {
+        "name": "input ends inside a frame",
+        "input": "partial",
+        "exits": [
+          4
+        ]
+      },
+      {
+        "name": "unknown option",
+        "input": "clip",
+        "extra": [
+          "--conformance-unknown-option"
+        ],
+        "exits": [
+          2
+        ]
+      },
+      {
+        "name": "depth 12",
+        "input": "clip",
+        "depth": 12,
+        "exits": [
+          2,
+          3
+        ]
+      },
+      {
+        "name": "empty input",
+        "input": "empty",
+        "exits": [
+          0
+        ],
+        "out_bytes": 0
+      },
+      {
+        "name": "reader closes after one frame",
+        "input": "big",
+        "terminates": true
+      }
+    ]
+  },
+  "L4": {
+    "packet": {
+      "width": 4,
+      "height": 2,
+      "depth": 8,
+      "frames": 3,
+      "stage": "selftest-invert"
+    }
+  },
+  "L5": {
+    "clip": [
+      33,
+      17,
+      8,
+      3
+    ],
+    "deadline": 60,
+    "stage_timeout": 2,
+    "errors": [
+      {
+        "name": "a stage exits 1",
+        "stage": "fixture-exit",
+        "params": {
+          "code": 1
+        },
+        "code": "stage_failed"
+      },
+      {
+        "name": "a stage exits 2",
+        "stage": "fixture-exit",
+        "params": {
+          "code": 2
+        },
+        "code": "usage"
+      },
+      {
+        "name": "a stage exits 3",
+        "stage": "fixture-exit",
+        "params": {
+          "code": 3
+        },
+        "code": "unsupported"
+      },
+      {
+        "name": "a stage exits 4",
+        "stage": "fixture-exit",
+        "params": {
+          "code": 4
+        },
+        "code": "bad_input"
+      },
+      {
+        "name": "a stage ends inside a frame",
+        "stage": "fixture-partial",
+        "code": "partial_frame"
+      },
+      {
+        "name": "a stage holds the pipe",
+        "stage": "fixture-hang",
+        "code": "stage_timeout"
+      },
+      {
+        "name": "an unknown option",
+        "stage": "fixture-copy",
+        "flags": [
+          "--conformance-unknown-option"
+        ],
+        "code": "usage"
+      },
+      {
+        "name": "an unknown geometry value",
+        "stage": "fixture-copy",
+        "geometry": "stretch",
+        "code": "unsupported"
+      },
+      {
+        "name": "ffmpeg is absent",
+        "stage": "fixture-copy",
+        "absent": "ffmpeg",
+        "code": "tool_missing"
+      }
+    ],
+    "describe": {
+      "graph": "scale=16:8",
+      "width": 16,
+      "height": 8
+    }
+  },
+  "bench": {
+    "chain": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "sizes": [
+      [
+        320,
+        180
+      ],
+      [
+        1280,
+        720
+      ]
+    ],
+    "frames": [
+      48,
+      24
+    ],
+    "depths": [
+      8,
+      16
+    ],
+    "wrappers": [
+      "tools/apply.py",
+      "sapphire"
+    ],
+    "effect": "selftest-invert",
+    "chain_stage": "selftest-invert",
+    "spool_stage": "retime",
+    "deadline": 900,
+    "columns": [
+      "wrapper",
+      "contract",
+      "effect",
+      "stages",
+      "width",
+      "height",
+      "depth",
+      "frames",
+      "seconds",
+      "fps",
+      "peak_mb",
+      "peak_kind",
+      "disk_mb",
+      "out_mb",
+      "machine"
+    ]
+  }
+}

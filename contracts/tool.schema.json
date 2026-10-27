@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "tool registry",
+  "description": "contracts/tool.json: the tools that take part in the handoff convention, identical in every repository that follows it. tools/handoff.py tells which tool a repository root is by the markers (every marker path exists under the root), finds a peer through HANDOFF_<ID>_DIR (ID in upper case), --peer-dir ID=DIR or a sibling folder holding all of the peer's markers (never by folder name), checks packet from and to against the ids, finds built binaries (the env override, $CARGO_TARGET_DIR/release, the dirs under the tool's root, PATH) and lists stages through the providers. shared names the files that `handoff.py sync` copies byte for byte. A third tool joins by adding one entry to tools and syncing.",
+  "type": "object",
+  "required": ["schema_version", "contract", "tools", "shared"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": 1},
+    "contract": {"description": "The newest frames contract the registered tools speak.", "type": "string", "pattern": "^frames/[0-9]+$"},
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "markers", "binaries", "providers"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {"description": "Lower case, no hyphen, so packet ids can be split; also the ID of HANDOFF_<ID>_DIR.", "type": "string", "pattern": "^[a-z][a-z0-9_]{0,31}$"},
+          "name": {"type": "string", "minLength": 1},
+          "markers": {"description": "Relative POSIX paths that all exist in the tool's repository root and together exist in no other registered tool's root.", "type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^(?!/)(?![A-Za-z]:)(?!.*\\\\)(?!(.*/)?\\.\\.(/|$)).+$"}},
+          "binaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["name", "env", "dirs", "version_args"],
+              "additionalProperties": false,
+              "properties": {
+                "name": {"description": "Program name without .exe.", "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+                "env": {"description": "Environment variable holding the program path, or null.", "type": ["string", "null"], "pattern": "^[A-Z][A-Z0-9_]*$"},
+                "dirs": {"description": "Build folders relative to the tool's root, searched after $CARGO_TARGET_DIR/release.", "type": "array", "items": {"type": "string", "minLength": 1}},
+                "version_args": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          },
+          "providers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["binary", "prefix", "list_args", "adapter"],
+              "additionalProperties": false,
+              "properties": {
+                "binary": {"description": "A name from binaries.", "type": "string", "minLength": 1},
+                "prefix": {"description": "Fixed words after the program; the manifest command is the program plus prefix.", "type": "array", "items": {"type": "string", "minLength": 1}},
+                "list_args": {"description": "Appended to the command to list the stages.", "type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+                "adapter": {"description": "native: the output is a stage manifest; vfx-list: a bare array of vfx effect entries that handoff.py wraps.", "type": "string", "enum": ["native", "vfx-list"]}
+              }
+            }
+          }
+        }
+      }
+    },
+    "shared": {"description": "Relative POSIX paths or fnmatch patterns of the files `handoff.py sync` copies.", "type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "examples": [
+    {
+      "schema_version": 1,
+      "contract": "frames/2",
+      "tools": [
+        {"id": "plugin_x", "name": "plugin x", "markers": ["plugin-x.toml"], "binaries": [{"name": "px", "env": null, "dirs": ["build"], "version_args": ["--version"]}], "providers": [{"binary": "px", "prefix": [], "list_args": ["list", "--json"], "adapter": "native"}]}
+      ],
+      "shared": ["contracts/*.json", "tools/handoff.py"]
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 """Independent numpy float32 model of the inverse warp, written with scalars.
-It produces `warp_cases.bin` for the Rust test `warp::tests::model_fixtures`.
+It produces `warp_cases.hex` for the Rust test `warp::tests::model_fixtures`.
 
 Run:  python -I gen_warp.py        (from this directory; needs numpy)
 
@@ -218,6 +218,11 @@ def make_flow(rng, kind, FW, FH, W, H):
     raise ValueError(kind)
 
 
+def hex_text(blob):
+    """the bytes as hex text, 64 a line: the form the Rust tests read."""
+    return "".join(blob[i:i + 64].hex() + "\n" for i in range(0, len(blob), 64))
+
+
 def main():
     rng = np.random.default_rng(20261022)
     cases = []
@@ -263,9 +268,9 @@ def main():
         blob += out.astype(src.dtype).tobytes()
         if want_cov:
             blob += cov.tobytes()
-    path = sys.argv[1] if len(sys.argv) > 1 else "warp_cases.bin"
-    with open(path, "wb") as fh:
-        fh.write(blob)
+    path = sys.argv[1] if len(sys.argv) > 1 else "warp_cases.hex"
+    with open(path, "w", encoding="ascii", newline="\n") as fh:
+        fh.write(hex_text(blob))
     print(f"wrote {len(cases)} cases, {len(blob)} bytes to {path}")
 
 

@@ -81,3 +81,20 @@ jobs:
       - run: python tools/test_apply.py
 
       - run: python tools/test_repeat_keys.py
+
+      # The stage contract of apply.py (--pre-stage, --post-stage, frames/2)
+      # and the ffmpeg-filter stage.
+      - run: python tools/test_stages.py
+
+      - run: python tools/test_ffstage.py
+
+      # The handoff control plane and the conformance suite (docs/handoff.md).
+      - run: python -I tools/test_handoff.py
+
+      - run: python -I tools/test_conformance.py
+
+      # sapphire is not checked out here (no token, no secret), so every part
+      # that needs sapphire prints a NOT RUN line that names the absent
+      # peer. --allow-absent-peer lets only those parts through: anything else
+      # that does not run, and every failed check, still fails the job.
+      - run: python -I tools/conformance.py --quick --allow-absent-peer

@@ -41,6 +41,8 @@ jobs:
       # tests render their inputs with it. Debian's ffmpeg (5.1) cannot render
       # the 32 bpc test patterns, which need a geq that accepts float formats,
       # so the job uses a static 9.0 build.
+      # The tools run on Debian's python3 (3.11 or later), so they use no
+      # 3.12-only syntax.
       - run: |
           apt-get update && apt-get install -y --no-install-recommends python3 xz-utils
           curl -sSfL https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-gpl-9.0.tar.xz | tar -xJ -C /opt
@@ -63,3 +65,23 @@ jobs:
       - run: python3 tools/test_apply.py
 
       - run: python3 tools/test_repeat_keys.py
+
+      # The stage contract of apply.py (--pre-stage, --post-stage, frames/2)
+      # and the ffmpeg-filter stage.
+      - run: python3 tools/test_stages.py
+
+      - run: python3 tools/test_ffstage.py
+
+      # The handoff control plane and the conformance suite (docs/handoff.md).
+      - run: python3 -I tools/test_handoff.py
+
+      - run: python3 -I tools/test_conformance.py
+
+      # sapphire is not checked out here (no token, no secret). test_handoff.py
+      # above names the absent peer as the reason for each real-repository
+      # check it cannot make (HANDOFF_REQUIRE_PEERS stays unset), and every
+      # part of the conformance run that needs sapphire prints a NOT RUN
+      # line that names the absent peer. --allow-absent-peer lets only those
+      # parts through: anything else that does not run, and every failed
+      # check, still fails the job.
+      - run: python3 -I tools/conformance.py --quick --allow-absent-peer

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "error document",
+  "description": "The one failure document of the handoff convention: every --json failure of tools/apply.py (with stages, or under --contract frames/2), sapphire and tools/handoff.py. A tool may add keys next to error (verify and doctor add checks). x-codes is the one error table: the code, the exit status of a wrapper under frames/1 and frames/2, and when the code is used. Identical in every repository that follows the convention.",
+  "type": "object",
+  "required": ["ok", "contract", "error"],
+  "additionalProperties": true,
+  "properties": {
+    "ok": {"description": "Always false in an error document.", "const": false},
+    "contract": {"description": "The contract the tool spoke for this run.", "type": "string", "enum": ["frames/1", "frames/2"]},
+    "error": {
+      "type": "object",
+      "required": ["code", "stage", "exit_code", "message", "stderr_tail"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {"description": "One row of x-codes.", "type": "string", "enum": ["stage_failed", "usage", "unsupported", "bad_input", "broken_pipe", "partial_frame", "stage_timeout", "tool_missing", "interrupted"]},
+        "stage": {"description": "Label of the failing step (decode, pre1, vfx, effect, post1, encode, verify, layer-decode, args, a handoff.py subcommand, replay, lock), or null when the failure belongs to no step.", "type": ["string", "null"], "minLength": 1},
+        "exit_code": {"description": "Exit status of the failing child process (a stage, ffmpeg, ffprobe, a replayed command), or null when no child failed. The tool's own exit status follows from code through x-codes.", "type": ["integer", "null"]},
+        "message": {"description": "One line, no line breaks.", "type": "string", "minLength": 1, "pattern": "^[^\\r\\n]+$"},
+        "stderr_tail": {"description": "Last lines of the failing child's standard error, oldest first, at most 5.", "type": "array", "items": {"type": "string"}}
+      }
+    }
+  },
+  "x-codes": [
+    {"code": "stage_failed", "exit": {"frames/1": 1, "frames/2": 1}, "when": "a process exited non zero outside the exits 2, 3 and 4 of a stage, a layer decode failed, or the output did not verify or could not be moved into place"},
+    {"code": "usage", "exit": {"frames/1": 1, "frames/2": 2}, "when": "a bad flag or flag combination, an unknown placeholder value, or a stage that exited 2"},
+    {"code": "unsupported", "exit": {"frames/1": 1, "frames/2": 3}, "when": "a valid request the tool refuses: a stage that exited 3, an unknown effect, HDR input, an odd side without --lossless, an unknown geometry value, an fps change by a declared stage, a replay of an unregistered program"},
+    {"code": "bad_input", "exit": {"frames/1": 1, "frames/2": 4}, "when": "an input that is missing, unreadable or malformed, a stage that exited 4, an invalid packet, a hash or expectation mismatch, a revision conflict"},
+    {"code": "broken_pipe", "exit": {"frames/1": 1, "frames/2": 4}, "when": "a stage stopped reading its input, or exited 0 after writing fewer whole frames than it was sent"},
+    {"code": "partial_frame", "exit": {"frames/1": 1, "frames/2": 4}, "when": "a producer's output ended inside a frame, or a file is not a whole number of frames"},
+    {"code": "stage_timeout", "exit": {"frames/1": 1, "frames/2": 5}, "when": "no byte moved on a judged process's pipes for --stage-timeout seconds (decode, pre and post stages, encode; vfx is not judged), a replayed command ran past its limit, or a packet lock stayed held"},
+    {"code": "tool_missing", "exit": {"frames/1": 1, "frames/2": 6}, "when": "a program (ffmpeg, ffprobe, vfx, sapphire, a stage program) or a peer repository cannot be found or started"},
+    {"code": "interrupted", "exit": {"frames/1": 130, "frames/2": 130}, "when": "the run was interrupted (Ctrl+C); produced by tools/apply.py and tools/handoff.py, not by sapphire"}
+  ],
+  "x-frames1-exits": [
+    {"exit": 0, "when": "done, or a dry run"},
+    {"exit": 1, "when": "any refusal or failure, whatever the code"},
+    {"exit": 2, "when": "the argument parser rejected the command line"},
+    {"exit": 130, "when": "interrupted"}
+  ],
+  "x-stage-exits": [
+    {"exit": 0, "code": null, "when": "every input frame was processed and written"},
+    {"exit": 2, "code": "usage", "when": "the stage rejected its command line"},
+    {"exit": 3, "code": "unsupported", "when": "the stage refuses the request (effect, parameter, depth, geometry)"},
+    {"exit": 4, "code": "bad_input", "when": "the stage could not read its input or a layer, or the input ended inside a frame"},
+    {"exit": "other", "code": "stage_failed", "when": "any other non zero status, a crash or a kill"}
+  ],
+  "examples": [
+    {"ok": false, "contract": "frames/2", "error": {"code": "stage_timeout", "stage": "pre1", "exit_code": null, "message": "pre-stage 1 moved no byte for 120 seconds and was killed", "stderr_tail": []}},
+    {"ok": false, "contract": "frames/1", "error": {"code": "unsupported", "stage": "vfx", "exit_code": 3, "message": "vfx exited with code 3", "stderr_tail": ["vfx: unknown effect `<effect>`"]}},
+    {"ok": false, "contract": "frames/2", "error": {"code": "bad_input", "stage": "verify", "exit_code": null, "message": "1 verification problem(s)", "stderr_tail": []}, "checks": []}
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "wrapper run report",
+  "description": "The keys every successful --json result of a wrapper (tools/apply.py with stages or under frames/2, sapphire) shares. A wrapper adds its own keys next to them. stages lists every process of the pipe in pipe order; role and index identify a step, name is a label only (pre1 in tools/apply.py, renamed relative to the vfx marker in sapphire). index counts from 1 within its role. Identical in every repository that follows the convention.",
+  "type": "object",
+  "required": ["ok", "contract", "stages"],
+  "additionalProperties": true,
+  "properties": {
+    "ok": {"const": true},
+    "contract": {"type": "string", "enum": ["frames/1", "frames/2"]},
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "index", "name", "command", "exit_code", "stderr_tail"],
+        "additionalProperties": true,
+        "properties": {
+          "role": {"type": "string", "enum": ["decode", "pre", "effect", "post", "encode", "verify"]},
+          "index": {"description": "1 for the first step of its role, counting in pipe order.", "type": "integer", "minimum": 1},
+          "name": {"description": "A label for people, not an identifier.", "type": "string", "minLength": 1},
+          "command": {"description": "The argv that ran, without a shell.", "type": "array", "items": {"type": "string"}},
+          "exit_code": {"description": "null in a dry run or for a step that did not start.", "type": ["integer", "null"]},
+          "stderr_tail": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    "geometry": {
+      "description": "frames/2: the output geometry after the last declared stage.",
+      "type": "object",
+      "required": ["width", "height", "depth", "fps", "frames"],
+      "additionalProperties": false,
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1},
+        "depth": {"type": "integer", "enum": [8, 16, 32]},
+        "fps": {"type": "string", "pattern": "^[1-9][0-9]*/[1-9][0-9]*$"},
+        "frames": {"type": ["integer", "null"], "minimum": 0}
+      }
+    }
+  },
+  "examples": [
+    {"ok": true, "contract": "frames/2", "stages": [
+      {"role": "decode", "index": 1, "name": "decode", "command": ["ffmpeg", "-v", "error"], "exit_code": 0, "stderr_tail": []},
+      {"role": "pre", "index": 1, "name": "pre1", "command": ["sapphire", "stage", "apply", "selftest-invert"], "exit_code": 0, "stderr_tail": []},
+      {"role": "effect", "index": 1, "name": "vfx", "command": ["vfx", "apply", "retime"], "exit_code": 0, "stderr_tail": []},
+      {"role": "encode", "index": 1, "name": "encode", "command": ["ffmpeg", "-f", "rawvideo"], "exit_code": 0, "stderr_tail": []}
+    ], "geometry": {"width": 160, "height": 96, "depth": 8, "fps": "24/1", "frames": 12}}
+  ]
+}

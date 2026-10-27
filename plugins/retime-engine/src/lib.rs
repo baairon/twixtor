@@ -8,6 +8,8 @@ pub mod blend;
 pub mod compose;
 pub mod create_vectors;
 pub mod filters;
+#[cfg(test)]
+mod fixture;
 pub mod flow;
 pub mod forward;
 pub mod frontend;

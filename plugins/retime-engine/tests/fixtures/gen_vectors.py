@@ -1,5 +1,5 @@
 """Independent model of the vector image coding, written with numpy float32 / Python float64
-scalars. It produces `vectors_cases.bin` for the Rust tests `vectors::tests::model_fixtures_*`.
+scalars. It produces `vectors_cases.hex` for the Rust tests `vectors::tests::model_fixtures_*`.
 
 Run:  python -I gen_vectors.py        (from this directory; needs numpy)
 
@@ -109,6 +109,11 @@ def random_image(rng, W, H, depth):
     return img
 
 
+def hex_text(blob):
+    """the bytes as hex text, 64 a line: the form the Rust tests read."""
+    return "".join(blob[i:i + 64].hex() + "\n" for i in range(0, len(blob), 64))
+
+
 def main():
     rng = np.random.default_rng(20261024)
     blob = bytearray(b"VEC1")
@@ -132,9 +137,9 @@ def main():
         else:
             blob += data.tobytes()
             blob += decode(data, depth, scale).astype("<f4").tobytes()
-    path = sys.argv[1] if len(sys.argv) > 1 else "vectors_cases.bin"
-    with open(path, "wb") as fh:
-        fh.write(blob)
+    path = sys.argv[1] if len(sys.argv) > 1 else "vectors_cases.hex"
+    with open(path, "w", encoding="ascii", newline="\n") as fh:
+        fh.write(hex_text(blob))
     print(f"wrote {len(cases)} cases, {len(blob)} bytes to {path}")
 
 

@@ -1,3 +1,23 @@
 target/
 __pycache__/
 *.pyc
+handoff/
+# binaries: build output, libraries, media and archives never go into the repository
+*.bin
+*.exe
+*.dll
+*.so
+*.dylib
+*.o
+*.obj
+*.a
+*.lib
+*.pdb
+*.rlib
+*.rmeta
+*.zip
+*.7z
+*.tar
+*.gz
+*.mp4
+*.mkv

@@ -1,5 +1,5 @@
 """Independent numpy float32 model of the flow directed motion blur primitive, written with scalars.
-It produces `blur_cases.bin` for the Rust test `warp::tests::blur_model_fixtures`.
+It produces `blur_cases.hex` for the Rust test `warp::tests::blur_model_fixtures`.
 
 Run:  python -I gen_blur.py        (from this directory; needs numpy)
 
@@ -144,6 +144,11 @@ def make_flow(rng, kind, FW, FH):
     raise ValueError(kind)
 
 
+def hex_text(blob):
+    """the bytes as hex text, 64 a line: the form the Rust tests read."""
+    return "".join(blob[i:i + 64].hex() + "\n" for i in range(0, len(blob), 64))
+
+
 def main():
     rng = np.random.default_rng(20261023)
     cases = []
@@ -174,9 +179,9 @@ def main():
         blob += src.tobytes()
         blob += flow.astype("<f4").tobytes()
         blob += out.astype(src.dtype).tobytes()
-    path = sys.argv[1] if len(sys.argv) > 1 else "blur_cases.bin"
-    with open(path, "wb") as fh:
-        fh.write(blob)
+    path = sys.argv[1] if len(sys.argv) > 1 else "blur_cases.hex"
+    with open(path, "w", encoding="ascii", newline="\n") as fh:
+        fh.write(hex_text(blob))
     print(f"wrote {len(cases)} cases, {len(blob)} bytes to {path}")
 
 

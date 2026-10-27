@@ -527,8 +527,8 @@ fn model_fixture() {
     // random flows, a half resolution flow, negative and tiny amounts, a zero amount. u8, u16 and the
     // coverage must be bit exact; f32 may differ where the numpy `log` differs from the CRT `logf` in the last
     // bit of the mip level (it only moves the blend of two levels by that fraction).
-    let data = include_bytes!("../../tests/fixtures/f2_cases.bin");
-    let mut r = Rd(data, 0);
+    let data = crate::fixture::hex(include_str!("../../tests/fixtures/f2_cases.hex"));
+    let mut r = Rd(&data, 0);
     assert_eq!(r.bytes(4), b"F2C1");
     let n = r.u32();
     assert_eq!(n, 26);

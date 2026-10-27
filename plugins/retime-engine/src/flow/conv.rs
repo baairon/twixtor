@@ -249,7 +249,7 @@ mod tests {
 
     #[test]
     fn gaussian_kernels_match_the_reference_tables_bit_for_bit() {
-        // tests/fixtures/gauss_r{7,5,2}.bin: float32 little endian, numpy float32 `power`.
+        // the numpy float32 `power` values of the formula, as in `kernel_tables_match_the_numpy_values_bit_for_bit`.
         let t7: [f32; 8] = [
             0.20133439, 0.17726654, 0.12099101, 0.06401724, 0.02625780, 0.00834906, 0.00205795, 0.00039323,
         ];
@@ -269,22 +269,18 @@ mod tests {
         }
     }
 
-    fn table(bytes: &[u8]) -> Vec<u32> {
-        bytes.chunks(4).map(|c| u32::from_le_bytes([c[0], c[1], c[2], c[3]])).collect()
-    }
+    // numpy float32 values of the formula, and the three float constants of the binomial half kernel
+    const GAUSS_R7: [u32; 8] = [0x3e4e2a9a, 0x3e35855c, 0x3df7ca22, 0x3d831b79, 0x3cd71a9b, 0x3c08ca7a, 0x3b06de99, 0x39ce2a9a];
+    const GAUSS_R5: [u32; 6] = [0x3e904ee6, 0x3e60e131, 0x3dd4bfc6, 0x3cf46273, 0x3baa6d48, 0x3a104ee6];
+    const GAUSS_R2: [u32; 3] = [0x3f33bb04, 0x3e172281, 0x3ab3bb0c];
+    const BINOMIAL5_HALF: [u32; 3] = [0x3ec00000, 0x3e800000, 0x3d800000];
 
     #[test]
-    fn kernel_tables_match_the_e3_files_byte_for_byte() {
-        // tests/fixtures/gauss_r{7,5,2}.bin are numpy float32 values of the formula,
-        // binomial5_half.bin holds the three float constants of the binomial half kernel.
-        assert_eq!(bits(&gaussian_kernel(7.0)), table(include_bytes!("../../tests/fixtures/gauss_r7.bin")));
-        assert_eq!(bits(&gaussian_kernel(5.0)), table(include_bytes!("../../tests/fixtures/gauss_r5.bin")));
-        assert_eq!(bits(&gaussian_kernel(2.0)), table(include_bytes!("../../tests/fixtures/gauss_r2.bin")));
-        assert_eq!(bits(&BINOMIAL5), table(include_bytes!("../../tests/fixtures/binomial5_half.bin")));
-        assert_eq!(
-            table(include_bytes!("../../tests/fixtures/binomial5_half.bin")),
-            vec![0x3ec00000, 0x3e800000, 0x3d800000]
-        );
+    fn kernel_tables_match_the_numpy_values_bit_for_bit() {
+        assert_eq!(bits(&gaussian_kernel(7.0)), GAUSS_R7);
+        assert_eq!(bits(&gaussian_kernel(5.0)), GAUSS_R5);
+        assert_eq!(bits(&gaussian_kernel(2.0)), GAUSS_R2);
+        assert_eq!(bits(&BINOMIAL5), BINOMIAL5_HALF);
     }
 
     #[test]
