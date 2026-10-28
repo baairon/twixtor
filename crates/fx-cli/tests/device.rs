@@ -77,12 +77,13 @@ fn devices_lists_the_cpu_and_every_opencl_device() {
     let note = String::from_utf8(text_out.stderr).unwrap();
     assert_eq!(note, json_note, "the same notes for both forms");
     if list.len() == 1 {
-        // no OpenCL device here (CI): the CPU and one note
+        // no OpenCL device here (CI): the CPU and its note, then one note for each platform that could
+        // not list its devices (Apple's answers CL_INVALID_VALUE on a runner without a GPU)
         println!("no OpenCL device: {note}");
         assert_eq!(text, "id   name  kind  default
 cpu  CPU   cpu   yes
 ");
-        assert_eq!(note.lines().count(), 1, "{note:?}");
+        assert!(note.lines().skip(1).all(|l| l.starts_with("vfx: note: OpenCL platform skipped")), "{note:?}");
         assert!(note.starts_with("vfx: note: ") && note.contains("listing the CPU only"), "{note:?}");
     } else {
         println!("{text}");

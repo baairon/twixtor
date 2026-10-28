@@ -439,7 +439,7 @@ fn a_fg_matte_layer_file_renders_end_to_end_as_the_engine_does_and_notes_its_rul
 
 /// The `vfx: note:` line of gap `g` for retime-fgbg.
 fn note_line(g: &fx_core::OpenGap) -> String {
-    format!("vfx: note: retime-fgbg: {} {}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)", g.id, g.title)
+    format!("vfx: note: retime-fgbg: {} {}: a stated rule that no Twixtor reference render has graded yet (README: limits)", g.id, g.title)
 }
 
 #[test]

@@ -284,7 +284,7 @@ mod tests {
 
     #[test]
     fn failure_skips_notes() {
-        let note = "vfx: note: retime-fgbg: G1 matte shrink tail: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)";
+        let note = "vfx: note: retime-fgbg: G1 matte shrink tail: a stated rule that no Twixtor reference render has graded yet (README: limits)";
         let both = format!("{note}\nvfx: error: frame 3: unsupported: boom\n");
         assert_eq!(failure(&Some(3), both.as_bytes()), "exited with code 3: vfx: error: frame 3: unsupported: boom");
         // the error line wins wherever it is, and a stray line before it does not
@@ -297,7 +297,7 @@ mod tests {
 
     #[test]
     fn note_lines_are_kept_and_read_for_their_gap() {
-        let note = "vfx: note: retime-fgbg: G1b mask-aware block matching cost: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)";
+        let note = "vfx: note: retime-fgbg: G1b mask-aware block matching cost: a stated rule that no Twixtor reference render has graded yet (README: limits)";
         let err = format!("progress\n  {note}\nvfx: note: create-vectors: G4 four Debug view compositions: a stated rule\nother\n");
         let lines = note_lines(err.as_bytes());
         assert_eq!(lines.len(), 2);

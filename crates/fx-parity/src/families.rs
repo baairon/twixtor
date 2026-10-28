@@ -14,7 +14,7 @@
 //!
 //! Retiring a note: when `fx-parity run` reports a family `settled` (every case compared and bit
 //! exact), its register entry in `plugins/retime-engine/src/gaps.rs` and its `record` calls are
-//! deleted, and its README row moves from the parity gaps table into the parity status table.
+//! deleted, and its Stated rules row in `docs/parity.md` goes.
 
 use crate::cases::{self, Case, CaseKind, InputFile};
 use crate::effects::{EffectInfo, Kind};

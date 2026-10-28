@@ -1,5 +1,5 @@
 //! The parity gaps register: every open point of the effects, each pinned to one stated rule
-//! until a reference render of the original grades it (README: parity gaps).
+//! until a reference render of the original grades it (README: limits).
 //!
 //! Precision contract: no arithmetic. The entries are static data; the formulas in the doc
 //! comments are the rules the engine modules implement, with their own precision contracts.
@@ -12,7 +12,7 @@
 //! ([`CREATE_VECTORS`], [`RETIME_FGBG`], [`VECTORS_IN`]); `retime` has none.
 //!
 //! Retiring a gap: once its family is graded bit exact, its entry, its list memberships and its
-//! `record` calls go, and its README row moves to the parity status table.
+//! `record` calls go, and its Stated rules row in `docs/parity.md` goes.
 //!
 //! G7 (tiny frames) and the key handle points K1 have no entry: there is nothing inside the
 //! plugin to grade them against, so they print no note.

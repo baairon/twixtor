@@ -1705,7 +1705,7 @@ def tail(path, count=3):
         return []
 
 
-# how vfx starts the stderr line of an open parity gap that a render used (README: parity gaps)
+# how vfx starts the stderr line of an open parity gap that a render used (README: limits)
 VFX_NOTE = "vfx: note: "
 
 

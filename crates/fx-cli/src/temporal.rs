@@ -247,7 +247,7 @@ pub fn render_all_on(
 /// The stderr line for an open parity gap that a render of `effect` used.
 pub fn note_line(effect: &str, gap: &fx_core::OpenGap) -> String {
     format!(
-        "vfx: note: {effect}: {} {}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)\n",
+        "vfx: note: {effect}: {} {}: a stated rule that no Twixtor reference render has graded yet (README: limits)\n",
         gap.id, gap.title
     )
 }
@@ -811,7 +811,7 @@ mod tests {
     fn a_note_line_names_the_effect_the_gap_and_the_readme_section() {
         assert_eq!(
             note_line("retime-fgbg", &X1),
-            "vfx: note: retime-fgbg: X1 first open point: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)\n"
+            "vfx: note: retime-fgbg: X1 first open point: a stated rule that no Twixtor reference render has graded yet (README: limits)\n"
         );
     }
 

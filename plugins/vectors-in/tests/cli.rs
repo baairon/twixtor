@@ -338,7 +338,7 @@ fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_
     let layers = [("vectors_prev", prev.as_path()), ("vectors_next", next.as_path()), ("fg1_matte", clip.as_path())];
     let out = dir.path("out.raw");
     let line = |g: &fx_core::OpenGap| {
-        format!("vfx: note: vectors-in: {} {}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)", g.id, g.title)
+        format!("vfx: note: vectors-in: {} {}: a stated rule that no Twixtor reference render has graded yet (README: limits)", g.id, g.title)
     };
     let (g1, g1e) = (line(&retime_engine::gaps::G1), line(&retime_engine::gaps::G1E));
     for (params, want_g1, want_g1e) in [

@@ -289,7 +289,7 @@ fn note(id: &str) -> String {
         "G5" => "second tracker arithmetic",
         other => panic!("no gap {other}"),
     };
-    format!("vfx: note: create-vectors: {id} {title}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)")
+    format!("vfx: note: create-vectors: {id} {title}: a stated rule that no Twixtor reference render has graded yet (README: limits)")
 }
 
 #[test]

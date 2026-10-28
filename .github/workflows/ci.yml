@@ -73,7 +73,9 @@ jobs:
       # and thread invariance suites are far too slow unoptimised.
       - run: cargo build --release -p fx-cli
 
-      - run: cargo test --workspace --release
+      # Without --no-fail-fast cargo stops at the first failing test binary,
+      # which hid every later suite on macOS.
+      - run: cargo test --workspace --release --no-fail-fast
 
       # The tools pick the vfx binary up from target/release.
       - run: python tools/test_speed_curve.py

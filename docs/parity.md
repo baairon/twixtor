@@ -1,6 +1,8 @@
 # Parity
 
-How close the output of twixtor is to the original plugin's, how every figure of the README's [Parity](../README.md#parity) table is counted, and what is not shown yet. Each figure on this page and in that table sits in a marker that `tools/gen_docs.py` fills from the snapshots in `docs/data/` and from scans of the tree; `python -I tools/gen_docs.py --check` fails when a figure drifts, and `docs/data/facts.json` lists every key with its value and source.
+What has and has not been compared with the original plugin, how every figure of the README's [Parity](../README.md#parity) table is counted, and what is not shown yet. Every figure on this page and in that table sits in a marker that `tools/gen_docs.py` fills from the snapshots in `docs/data/` and from scans of the tree, except the Interface check, which is written by hand; `python -I tools/gen_docs.py --check` fails when a generated figure drifts, and `docs/data/facts.json` lists every key with its value and source.
+
+The port has never been verified frame by frame against the original plugin. Parity with the original could only be checked from the supplied plugin builds alone, by comparing the controls they register; no rendered frames were compared, so output parity has never been verified frame by frame. That comparison is the [Interface check](#interface-check). The fixtures show that modelled steps follow their written rules, and the lock that locked settings still give the baseline's bytes; neither compares with the original.
 
 ## The unit counted
 
@@ -21,28 +23,28 @@ A model fixture is no comparison with the original. It shows that the code compu
 
 ## Standards
 
-The rows of the README's Parity table, each with its unit:
+Every figure of this page, with its unit:
 
 | Row | Unit | Count | Share |
 |---|---|---|---|
-| Graded against the original plugin (bit exact) | a checklist case of the reference families, one row of `docs/data/references.tsv` | <!--f:graded_cases-->0<!--/f--> of <!--f:family_cases-->117<!--/f--> cases | <!--f:graded_pct-->0.0<!--/f-->% of the cases |
+| Graded against the original plugin (bit exact): never verified frame by frame | a checklist case of the reference families, one row of `docs/data/references.tsv` | <!--f:graded_cases-->0<!--/f--> of <!--f:family_cases-->117<!--/f--> cases | <!--f:graded_pct-->0.0<!--/f-->% of the cases |
 | Rule pending a reference (a note is printed) | a gap, one row of `docs/data/gaps.tsv`, and the controls it names | <!--f:gaps_open-->13<!--/f--> gaps over <!--f:gap_controls-->57<!--/f--> controls | <!--f:gap_controls_pct-->32.4<!--/f-->% of the controls |
 | Model exact (independent model fixtures) | a fixture file, and the cases its header counts | <!--f:model_fixtures-->11<!--/f--> fixtures, <!--f:model_cases-->794<!--/f--> cases | none: a fixture is no share of the controls |
 | Regression lock | an invocation: one case of a lock corpus, run by `vfx` | <!--f:lock_identical-->13,073<!--/f--> of <!--f:lock_total-->13,073<!--/f--> | <!--f:lock_pct-->100.0<!--/f-->% |
 | Unproven | a control | <!--f:unproven-->176<!--/f--> of <!--f:controls_total-->176<!--/f--> | <!--f:unproven_pct-->100.0<!--/f-->% of the controls |
 
-- **Graded.** A case counts when its result is `pass`; `fail` and `missing` (no reference render yet) do not. Of the <!--f:family_cases-->117<!--/f--> cases, <!--f:graded_failed-->0<!--/f--> failed and <!--f:graded_missing-->117<!--/f--> have no reference yet.
+- **Graded.** A case counts when its result is `pass`; `fail` and `missing` (no reference render) do not. Of the <!--f:family_cases-->117<!--/f--> cases, <!--f:graded_failed-->0<!--/f--> failed and <!--f:graded_missing-->117<!--/f--> have no reference render.
 - **Rule.** A control counts once per effect, also when several gaps name it.
 - **Model.** A fixture is a model fixture when a generator beside it documents its header as `b"MAGIC", u32 ncases`; its cases are the count in that header. The model fixtures hold <!--f:model_bytes-->4,322,375<!--/f--> decoded bytes, each listed in [Model fixtures](#model-fixtures). The <!--f:differential_fixtures-->6<!--/f--> flow fixtures `flow_a.hex` to `flow_f.hex` come from a differential model that is not bit exact, so they are listed and not counted.
 - **Regression lock** and **Unproven**: their own sections below.
 
 ## Unproven
 
-A control is graded when at least one checklist case that sets it (as a param or as a layer) passed and no checklist case that sets it failed. Every other control is unproven: today <!--f:unproven-->176<!--/f--> of <!--f:controls_total-->176<!--/f-->, because no reference render of the original has been graded yet. The model fixtures and the lock do not lower the figure: they show that the code does what its contracts say and that it has not changed, not that it matches the original. A control that a failing case sets is unproven again.
+A control is graded when at least one checklist case that sets it (as a param or as a layer) passed and no checklist case that sets it failed. Every other control is unproven: today <!--f:unproven-->176<!--/f--> of <!--f:controls_total-->176<!--/f-->, because nothing has been compared frame by frame with the original: no checklist case has a graded reference render. The model fixtures and the lock do not lower the figure. The fixtures show that modelled steps follow their written rules, and the lock that locked settings still give the baseline's bytes; neither compares with the original. A control that a failing case sets is unproven again.
 
 ## Gaps register
 
-Where the original's behaviour is not established, each open point has one stated rule, one id and one family of reference cases that settles it. A frame that uses the rule prints, once per gap and run, `vfx: note: <effect>: <id> <open point>: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)` on stderr; `--check` prints none, and the exit code does not change. `vfx list --json` lists the open gaps of each effect as `gaps`, and `docs/data/gaps.tsv` keeps them. The rule of each gap, its reference family and when its note prints are in [README: parity gaps](../README.md#parity-gaps).
+Where the original's behaviour is not established, each open point has one stated rule, one id and one family of reference cases that settles it. A frame that uses the rule prints, once per gap and run, `vfx: note: <effect>: <id> <open point>: a stated rule that no Twixtor reference render has graded yet (README: limits)` on stderr; `--check` prints none, and the exit code does not change. `vfx list --json` lists the open gaps of each effect as `gaps`, and `docs/data/gaps.tsv` keeps them. The rule of each gap, its reference family and when its note prints are in [Stated rules](#stated-rules); the README's summary is [README: limits](../README.md#limits).
 
 <!--gen:gaps-->
 | Gap | Open point | Effects | Controls | Graded reference cases |
@@ -62,9 +64,9 @@ Where the original's behaviour is not established, each open point has one state
 | G6 | solver, hole fill and blur wrap variants | `retime-fgbg` | `track_rgb_a` | 0 of 8 |
 <!--/gen:gaps-->
 
-When a family is graded bit exact, its gap leaves the register: the note and the `gaps` entry go, `--refresh-data` rewrites `docs/data/gaps.tsv`, its row of the README's rules table goes, and its controls leave the Rule row.
+When a family is graded bit exact, its gap leaves the register: the note and the `gaps` entry go, `--refresh-data` rewrites `docs/data/gaps.tsv`, its row of [Stated rules](#stated-rules) goes, and its controls leave the Rule row.
 
-The reference families, from `docs/data/references.tsv` (written by `--refresh-data --testset` from a set of `fx-parity gen --families all`; with no reference renders yet every case is `missing`):
+The reference families, from `docs/data/references.tsv` (written by `--refresh-data --testset` from a set of `fx-parity gen --families all`; with no reference renders recorded, every case is `missing`):
 
 <!--gen:families-->
 | Family | Gap | Cases | Pass | Fail | Missing |
@@ -85,6 +87,26 @@ The reference families, from `docs/data/references.tsv` (written by `--refresh-d
 | `gap-wrap` | G6 | 8 | 0 | 0 | 8 |
 <!--/gen:families-->
 
+## Stated rules
+
+The rule each gap stands on, the frames whose render prints its note, and the reference family that settles it:
+
+| Gap | Stated rule | The note prints for | Family |
+|---|---|---|---|
+| G1 | A shrink of 0 changes nothing. A shrink of n pixels blurs the layer's inverse matte with a Gaussian of radius n + 1.99 and rescales it so that a straight edge erodes by exactly n pixels; a fraction mixes the two nearest whole shrinks, a negative value grows. Only the inverse matte, the part a layer leaves to the layers below, is shrunk. | every frame rendered with an FG matte layer, on any display but Source | `gap-shrink` |
+| G1b | The block matching step of a layer's search runs only where the layer's mask of the first frame is set; its cost reads the unmasked images. | a frame with an FG matte layer that searches motion | `gap-maskbm` |
+| G1c | FG1 is on top. The tracking matte of FG k is its matte times the inverse mattes of the layers above it; the background's is the product of all inverses. | two or more FG matte layers | `gap-order` |
+| G1d | Each pixel stores the sum of every layer's vector times its OVER weight (its matte times what the layers above leave free; the background's weight is 1 times that), over the layers `layers_output` selects, then the single layer clip and store; blue 0, alpha opaque. | a `create-vectors` frame with an FG matte layer | `gap-merge` |
+| G1e | Each layer's read of the vector images sets alpha to 0 where the layer's tracking matte is below 0.95, then decodes and fills as without layers. | a `vectors-in` frame with an FG matte layer | `gap-vecmatte` |
+| G1f | The blur compensation tail of a layered render uses the motion of the last layer of the displayed group. | a layered frame whose `blur_compensation` tail changes pixels | `gap-blurflow` |
+| G1g | The hole fill runs whatever the displayed group, so a single layer display is filled like the full output. | `display` 3 to 6 with an FG matte layer, on a warping code that fills holes | `gap-groups` |
+| G1h | The fast path (an exact position, `vectors=1`, a segment marker that turns the search off) composes the displayed group, with no warp and no fill. | `display` 3 to 6 with an FG matte layer, on a fast path frame | `gap-groups` |
+| G2 | At every pyramid level each point in use moves the nearest pixel of its layer's starting motion by the point's own motion, in point order, and points on one pixel average; a point outside the frame is skipped. | a point in use on a frame that searches motion | `gap-points` |
+| G3 | Each point in use is drawn as an opaque disc of radius 1.5 pixels in its `ptN_color`, later points on top. | Draw Geom drawing a point | `gap-drawgeom` |
+| G4 | Blend mixes the pushed frame and the other frame half and half; Diff is their absolute difference; Detail Compare and Edge Compare overlay a band pass and an edge measure of the two lumas in red and green. Warp (`1`) is no gap. | `display=3` with `debug_view_method` 2 to 5 | `gap-debug` |
+| G5 | A layer whose Track is off takes the motion of its tracking points, spread over the frame by the pull-push hole fill with no further blur; no point gives no motion. | a layer's Track off on the Vectors or Debug display | `gap-tracker2` |
+| G6 | The motion search, the inverse warps, the hole fill and the blur tail wrap horizontally (columns taken modulo the width; rows never wrap); the forward warp itself does not wrap, and Track RGB+A adds no alpha to the search. | `track_rgb_a=1` on a frame that searches motion | `gap-wrap` |
+
 ## Rules without a note
 
 Some points have a stated rule but print no note. Tiny frames and key handles have nothing inside the plugin to grade them against (no result of the original is established at those sizes, and the host computes keyframe interpolation), and the rest belong to the wrapper or to how a host hands footage to the plugin. Each names the render that would test it.
@@ -104,6 +126,20 @@ Some points have a stated rule but print no note. Tiny frames and key handles ha
 | HDR input | the signal as stored, no tone mapping ([ffmpeg: HDR](ffmpeg.md#hdr)) | a 16 bpc render of PQ code values in an unmanaged project |
 
 The `--device` choice has no rule: a device is used only where the gate shows it gives the CPU's bytes ([engine: device](engine.md#device)).
+
+## Interface check
+
+The record of 2026-10-28. The controls of the four effects were compared with the controls that four supplied plugin builds register when set up, recorded through a filter that normalizes names, so each match is after normalization, not exact.
+
+| Controls of the four effects | Count |
+|---|---|
+| with a counterpart in the builds | 175 of 176 |
+| of those, matching after normalization | 122 |
+| of those, paired by a similar name (unverified) | 46 |
+| of those, differing in popup text | 7 |
+| with no counterpart in the builds | 1: `vectors-in` "Output: Frame Rate" (`output_frame_rate`) |
+
+The builds also register mask path parameters, which this project lists as not offered ([README: not offered](../README.md#not-offered)), and group markers, which hold no setting. This compares control tables only: no rendered frames were compared, and it does not move any figure above.
 
 ## Model fixtures
 

@@ -8,18 +8,18 @@ Sources of truth, for agents and scripts:
 
 | Question | Ask |
 |---|---|
-| Effect ids, parameter ids, kinds, ranges, defaults, layer ids, open parity gaps | `target/release/vfx list --json`. Any document that disagrees with it is wrong. |
+| Effect ids, parameter ids, kinds, ranges, defaults, layer ids, limits (`gaps`) | `target/release/vfx list --json`. Any document that disagrees with it is wrong. |
 | What a file render will do | `python tools/apply.py ... --dry-run`: the plan and every command, nothing written. |
 | What a file render did | `python tools/apply.py ... --json`: the plan and the probe of the verified output. |
 | Which source frame each output frame shows | `python tools/speed_curve.py`, without rendering. |
 | Every stage of twixtor and sapphire, with a ready stage command | `python -I tools/handoff.py stages --json`: each stage with the command line a wrapper takes. |
 | The render devices and what each reports | `target/release/vfx devices --json`. |
-| How close the output is to the original, and on what evidence | [parity](docs/parity.md), its figures generated from `docs/data/` (`python -I tools/gen_docs.py --check`). |
+| What has and has not been verified against the original | [parity](docs/parity.md), its figures generated from `docs/data/` (`python -I tools/gen_docs.py --check`). |
 
 ## Contents
 
 - [Parity](#parity)
-  - [Parity gaps](#parity-gaps)
+  - [Limits](#limits)
   - [Not offered](#not-offered)
 - [The effects](#the-effects)
 - [Crate map](#crate-map)
@@ -42,73 +42,44 @@ Sources of truth, for agents and scripts:
 
 ## Parity
 
-1:1 parity with Twixtor is the first priority of this project, ahead of speed, convenience and a cleaner design. When they conflict, parity wins.
+1:1 parity with Twixtor is the goal and the first priority of this project, ahead of speed, convenience and a cleaner design. When they conflict, parity wins.
 
-- **Output.** The same settings on the same frames give the same frames: bit for bit at 8 and 16 bits per channel, within one unit in the last place at 32-bit float. The engine's precision contracts (evaluation order, single or double precision, rounding, no fused multiply add) are written in the `//!` headers of `plugins/retime-engine/src` and are part of that target.
-- **Interface.** Parameter ids map one to one onto the plugin's controls, with the same display names, choices, ranges and defaults, so settings carry over in both directions.
-- **No near misses.** Every control renders. Where the original's behaviour is not established, one stated rule of this project stands in, and a render that uses it prints one `vfx: note:` line per open point on stderr until a reference render grades it ([Parity gaps](#parity-gaps)). The refusals left are inputs no setting can serve, such as a Speed mode position beyond 2^23 frames ([parameters: refusals](docs/parameters.md#refusals)). Nothing falls back to an approximation.
-- **Measured, not assumed.** `fx-parity` builds test clips and settings, writes the checklist for rendering the same cases in the original, compares every frame and grades every miss ([Comparing with reference renders](#comparing-with-reference-renders)). 1:1 is claimed for a control only when `fx-parity run` grades the checklist cases that set it bit exact against renders of the original plugin. Every figure below is generated from `docs/data/` and the tree, and CI fails when one drifts ([parity](docs/parity.md)).
+**The port has never been verified frame by frame against the original plugin.** The only comparison made so far is of the controls in the supplied plugin builds ([interface check](docs/parity.md#interface-check)); no output of the original has been compared.
 
-| Standard | Count | Share |
+- **Output (goal).** The same settings on the same frames should give exactly the same frames, down to the last bit at 8 and 16 bits per channel and to the smallest possible step at 32-bit float. The arithmetic rules the engine follows for that are written at the top of each file in `plugins/retime-engine/src`.
+- **Interface (goal).** Every control of the original should have one matching setting here, with the same name, choices, range and default, so that settings carry over in both directions. The controls the supplied plugin builds register are the source of truth for this ([interface check](docs/parity.md#interface-check)); left out are the drawn mask controls ([Not offered](#not-offered)), the graphics card settings (`--device` does that job here) and a few that only concern the host application.
+- **No silent guesses.** Every control renders. Where the original's behaviour is not known, this project's own stated rule is used and `vfx` says so with a note ([Limits](#limits)). The only inputs refused are ones no setting could handle, such as a Speed mode position beyond 2^23 frames ([parameters: refusals](docs/parameters.md#refusals)). Nothing quietly falls back to a rough approximation.
+- **Claimed only when measured.** `fx-parity` makes test clips and a checklist of the same cases to render in the original, then compares the two frame by frame and reports every difference ([Comparing with reference renders](#comparing-with-reference-renders)). 1:1 is claimed for a control only when the checklist cases that set it match the original's frames in `fx-parity run`; no control carries that claim yet. The figures below are generated automatically, and the automated checks fail when one goes out of date ([parity](docs/parity.md)).
+
+These two checks only show that the code agrees with itself (with separately written models of its steps and with an earlier version of itself), not that it matches the original.
+
+| Check | Count | Share |
 |---|---|---|
-| Graded against the original plugin (bit exact) | <!--f:graded_cases-->0<!--/f--> of <!--f:family_cases-->117<!--/f--> checklist cases | <!--f:graded_pct-->0.0<!--/f-->% of the cases |
-| Rule pending a reference (a note is printed) | <!--f:gaps_open-->13<!--/f--> gaps over <!--f:gap_controls-->57<!--/f--> controls | <!--f:gap_controls_pct-->32.4<!--/f-->% of the <!--f:controls_total-->176<!--/f--> controls |
-| Model exact (independent model fixtures, bit for bit) | <!--f:model_fixtures-->11<!--/f--> fixtures, <!--f:model_cases-->794<!--/f--> cases | - |
-| Regression lock (settings that rendered at <!--f:lock_ref-->d74f402<!--/f-->, byte identical now) | <!--f:lock_identical-->13,073<!--/f--> of <!--f:lock_total-->13,073<!--/f--> | <!--f:lock_pct-->100.0<!--/f-->% |
-| Unproven (no graded case yet) | <!--f:unproven-->176<!--/f--> of <!--f:controls_total-->176<!--/f--> controls | <!--f:unproven_pct-->100.0<!--/f-->% of the controls |
+| Matches separately written models exactly | <!--f:model_fixtures-->11<!--/f--> fixtures, <!--f:model_cases-->794<!--/f--> cases | - |
+| Same output as an earlier version | <!--f:lock_identical-->13,073<!--/f--> of <!--f:lock_total-->13,073<!--/f--> | <!--f:lock_pct-->100.0<!--/f-->% |
 
-A control is one parameter or layer of the four effects. The checklist cases are the reference families of `fx-parity gen --families`, none of them rendered in the original yet. Each row's unit, the tiers (Graded, Model, Rule, Defined), the lock's corpora and the caveats (a few steps use the platform's math library, so bytes are fixed per platform; 32-bit float within one ULP; the 16 bit range round trip; threads; GPU) are in [parity](docs/parity.md).
+The earlier version is the build of commit <!--f:lock_ref-->d74f402<!--/f-->: every setting that rendered there gives the same bytes now.
 
-Defined here, with nothing in the original to grade it against, and printing no note:
+A control is one setting or input layer of the four effects. What each row counts, the test sets behind the lock and the fine print (for example, a few steps use the operating system's math library, so the output bytes are fixed per platform rather than across all of them) are in [parity](docs/parity.md).
 
-- the wrapper's own features in `tools/apply.py`: retimed audio, a new size or frame rate, HDR input and odd frame sizes;
-- Bezier key handles (keyframe interpolation, which the host does for the original);
-- the motion search on tiny frames: it never halves below 2x2, and a frame with a side of 1 has none;
-- the `--device` choice: `--device gpu` / `gpu=N` renders on an OpenCL 1.2 device with the CPU's bytes: the motion solver, the forward warp and the whole composition of a vector frame run on the device, the layered `retime-fgbg` compositions with mattes and the wrap-around (360) composition on the CPU; `fx-parity devcheck` compares a corpus byte for byte on both GPUs of the development machine (results and timings in [engine: device](docs/engine.md#device)).
+Some features are this project's own, with nothing in the original to compare them with, so they print no note:
 
-Their stated rules, and the reference renders that would test the host's part in them, are in [parity: rules without a note](docs/parity.md#rules-without-a-note).
+- the wrapper's extras in `tools/apply.py`: retimed audio, a new size or frame rate, HDR input and odd frame sizes;
+- Bezier key handles (the values between keyframes are worked out here; in the original the editing application does it);
+- motion on tiny frames: the search never shrinks a frame below 2x2 pixels, and a frame 1 pixel wide or tall gets no motion;
+- rendering on a graphics card with `--device gpu`, which gives the same bytes as the CPU; some steps still run on the CPU, and `fx-parity devcheck` checks that the two match byte for byte ([engine: device](docs/engine.md#device)).
 
-### Parity gaps
+Their rules, and the comparisons with the original that could still test parts of them, are in [parity: rules without a note](docs/parity.md#rules-without-a-note).
 
-Each open point of the original's behaviour has one stated rule, an id that its note prints and one family of reference cases that settles it (`fx-parity gen --families`, [Comparing with reference renders](#comparing-with-reference-renders)). `vfx list --json` lists the gaps of each effect under `gaps`; `retime` has none. When a family grades bit exact, its rows and its note go.
+### Limits
 
-<!--gen:gaps-->
-| Gap | Open point | Effects | Controls | Graded reference cases |
-|---|---|---|---|---|
-| G1 | matte shrink tail | `create-vectors`, `retime-fgbg`, `vectors-in` | `fg1_inv_matte_shrink` to `fg3_inv_matte_shrink` | 0 of 10 |
-| G1b | mask-aware block matching cost | `create-vectors`, `retime-fgbg` | `fg1_matte` to `fg3_matte` | 0 of 2 |
-| G1c | layer visibility direction | `create-vectors`, `retime-fgbg`, `vectors-in` | `fg2_matte`, `fg3_matte` | 0 of 10 |
-| G1d | create-vectors merge | `create-vectors` | `fg1_matte` to `fg3_matte`, `layers_output` | 0 of 5 |
-| G1e | vectors-in per-layer matte step | `vectors-in` | `fg1_matte` to `fg3_matte` | 0 of 3 |
-| G1f | blur tail flow of a layered render | `retime-fgbg`, `vectors-in` | `blur_compensation` | 0 of 2 |
-| G1g | hole fill of a single group display | `retime-fgbg`, `vectors-in` | `display`, `warping` | 0 of 10 |
-| G1h | fast path group display | `retime-fgbg`, `vectors-in` | `display` | 0 of 10 |
-| G2 | tracking point displacement | `create-vectors`, `retime-fgbg` | `pt1_use` to `pt12_use` | 0 of 6 |
-| G3 | Draw Geom drawing | `create-vectors`, `retime-fgbg` | `draw_geom` | 0 of 18 |
-| G4 | four Debug view compositions | `create-vectors` | `debug_view_method` | 0 of 10 |
-| G5 | second tracker arithmetic | `create-vectors` | `main_bg_track`, `fg1_track` to `fg3_track` | 0 of 6 |
-| G6 | solver, hole fill and blur wrap variants | `retime-fgbg` | `track_rgb_a` | 0 of 8 |
-<!--/gen:gaps-->
-
-| Gap | Stated rule | The note prints for | Family |
-|---|---|---|---|
-| G1 | A shrink of 0 changes nothing. A shrink of n pixels blurs the layer's inverse matte with a Gaussian of radius n + 1.99 and rescales it so that a straight edge erodes by exactly n pixels; a fraction mixes the two nearest whole shrinks, a negative value grows. Only the inverse matte, the part a layer leaves to the layers below, is shrunk. | every frame rendered with an FG matte layer, on any display but Source | `gap-shrink` |
-| G1b | The block matching step of a layer's search runs only where the layer's mask of the first frame is set; its cost reads the unmasked images. | a frame with an FG matte layer that searches motion | `gap-maskbm` |
-| G1c | FG1 is on top. The tracking matte of FG k is its matte times the inverse mattes of the layers above it; the background's is the product of all inverses. | two or more FG matte layers | `gap-order` |
-| G1d | Each pixel stores the sum of every layer's vector times its OVER weight (its matte times what the layers above leave free; the background's weight is 1 times that), over the layers `layers_output` selects, then the single layer clip and store; blue 0, alpha opaque. | a `create-vectors` frame with an FG matte layer | `gap-merge` |
-| G1e | Each layer's read of the vector images sets alpha to 0 where the layer's tracking matte is below 0.95, then decodes and fills as without layers. | a `vectors-in` frame with an FG matte layer | `gap-vecmatte` |
-| G1f | The blur compensation tail of a layered render uses the motion of the last layer of the displayed group. | a layered frame whose `blur_compensation` tail changes pixels | `gap-blurflow` |
-| G1g | The hole fill runs whatever the displayed group, so a single layer display is filled like the full output. | `display` 3 to 6 with an FG matte layer, on a warping code that fills holes | `gap-groups` |
-| G1h | The fast path (an exact position, `vectors=1`, a segment marker that turns the search off) composes the displayed group, with no warp and no fill. | `display` 3 to 6 with an FG matte layer, on a fast path frame | `gap-groups` |
-| G2 | At every pyramid level each point in use moves the nearest pixel of its layer's starting motion by the point's own motion, in point order, and points on one pixel average; a point outside the frame is skipped. | a point in use on a frame that searches motion | `gap-points` |
-| G3 | Each point in use is drawn as an opaque disc of radius 1.5 pixels in its `ptN_color`, later points on top. | Draw Geom drawing a point | `gap-drawgeom` |
-| G4 | Blend mixes the pushed frame and the other frame half and half; Diff is their absolute difference; Detail Compare and Edge Compare overlay a band pass and an edge measure of the two lumas in red and green. Warp (`1`) is no gap. | `display=3` with `debug_view_method` 2 to 5 | `gap-debug` |
-| G5 | A layer whose Track is off takes the motion of its tracking points, spread over the frame by the pull-push hole fill with no further blur; no point gives no motion. | a layer's Track off on the Vectors or Debug display | `gap-tracker2` |
-| G6 | The motion search, the inverse warps, the hole fill and the blur tail wrap horizontally (columns taken modulo the width; rows never wrap); the forward warp itself does not wrap, and Track RGB+A adds no alpha to the search. | `track_rgb_a=1` on a frame that searches motion | `gap-wrap` |
+The only comparison made so far is of the controls in the supplied plugin builds ([interface check](docs/parity.md#interface-check)); no output of the original has been compared. Where the original's behaviour is not known, this project uses its own stated rule, and `vfx` prints a short `vfx: note:` line when a render uses one. Those places are mattes and matte layers, tracking points, Draw Geom, the Debug views and wrap-around; the full list and each rule are in [parity](docs/parity.md#gaps-register).
 
 ### Not offered
 
-Never part of this project, and not counted above: licensing; hosts other than After Effects; Hide Mask paths; layer masks and the First/Last Mask paths, which are parameter kinds `fx-core` cannot express.
+Not part of this project: licensing, and running inside another application (this is a command-line renderer).
+
+Drawn masks (the Hide Mask, First Mask and Last Mask controls) belong to an editor, so they are not offered here. Regions are agent driven instead: you describe in plain words which part of the picture should be tracked on its own, and your agent makes the matte and passes it as `fg1_matte`, `fg2_matte` or `fg3_matte`. That part then gets its own motion, while the whole frame is still retimed at the same speed. `vfx` only takes the finished matte; making it is the agent's job and is not part of this repository. How a matte is read (which channel, size and timing) is in [parameters](docs/parameters.md#retime-fgbg).
 
 ## The effects
 
@@ -129,10 +100,10 @@ Workspace members of `Cargo.toml`: version 0.1.0, edition 2021, MIT, unpublished
 
 | Member | Builds | Owns | Key modules (`src/`) | Tests |
 |---|---|---|---|---|
-| `crates/fx-core` | library | The interface every crate shares: the `Effect` trait (frame or temporal kind), frames and the raw wire format, parameter specs and command line value parsing, keyframe curves, time bases, layers. | `lib.rs` (`Effect`, `FxError`), `frame.rs`, `params.rs`, `curves.rs` (with the Bezier handles), `time.rs`, `layer.rs`, `fixed.rs` (16.16 fixed point), `gaps.rs` (`OpenGap`, `record`, `take_recorded`: the open parity gaps a render used), `device.rs` (`DeviceRequest`, the `--device` request a temporal context carries) | in-module (`#[cfg(test)]`); the Bezier model fixture `tests/fixtures/bezier_cases.hex` with its generator |
+| `crates/fx-core` | library | The interface every crate shares: the `Effect` trait (frame or temporal kind), frames and the raw wire format, parameter specs and command line value parsing, keyframe curves, time bases, layers. | `lib.rs` (`Effect`, `FxError`), `frame.rs`, `params.rs`, `curves.rs` (with the Bezier handles), `time.rs`, `layer.rs`, `fixed.rs` (16.16 fixed point), `gaps.rs` (`OpenGap`, `record`, `take_recorded`: the stated rules of the [limits](#limits) a render used), `device.rs` (`DeviceRequest`, the `--device` request a temporal context carries) | in-module (`#[cfg(test)]`); the Bezier model fixture `tests/fixtures/bezier_cases.hex` with its generator |
 | `crates/fx-cli` | binary `vfx` | The renderer: arguments, effect registry, listing, frame and temporal runs over files or pipes. | `main.rs`, `cli.rs` (flags, usage text), `registry.rs` (`FAMILIES`: `retime` and the hidden `selftest`), `list.rs`, `apply.rs` (frame effects, `--check`, panic guard), `temporal.rs` (time base, curves, layers, clip rates, notes), `clip.rs` (random access to raw clips at their own rate, stdin spool), `devices.rs` (`vfx devices`, the device check of `--device`), `selftest.rs`, `error.rs` (exit codes) | in-module; `tests/cli.rs` and `tests/device.rs` (black box tests of the built binary) |
-| `crates/fx-parity` | library `fx_parity`, binary `fx-parity` | The comparison harness: test patterns, case plans, the reference case families of the parity gaps, reference checklists, comparison and grading, determinism checks. | `args.rs`, `sources.rs` (lavfi patterns, the family clips), `cases.rs` (`cases.json`), `families.rs` (the reference case families), `testgen.rs` (`gen`), `checklist.rs`, `run.rs`, `compare.rs`, `selfcheck.rs`, `devcheck.rs` (the byte gate of the GPU backend), `sweep.rs`, `effects.rs`, `vfx.rs` (finds and drives `vfx`) | in-module; `tests/selftest.rs` (needs ffmpeg, skips without) |
-| `plugins/retime-engine` | library | The engine of the four effects: time model, frame selection, optical flow, warps, blends, hole filling, vector image coding, FG matte layers, tracking points, the parity gaps register, and the OpenCL device code ([engine](docs/engine.md)). | `timeline.rs`, `planner.rs`, `frontend.rs` (parameters to settings), `host.rs`, `compose.rs` and `compose/vector.rs`, `flow.rs` (with `flow/conv.rs`, `flow/sample.rs`, and `flow/extras.rs`: layer masks, tracking points, wrap-around), `prep.rs`, `warp.rs` (with `warp/blurcomp.rs`), `forward.rs` (with `forward/mesh.rs`, `forward/pyramid.rs`, `forward/raster.rs`), `smartblend.rs`, `holefill.rs`, `blend.rs`, `filters.rs`, `vectors.rs`, `create_vectors.rs`, `image.rs`, `matte.rs` (FG mattes), `points.rs` and `geom.rs` (tracking points, the second tracker, Draw Geom), `layers.rs` (the n-layer render), `debug.rs` (the Debug views), `gaps.rs` (the parity gaps register), `device.rs` and `device/` (OpenCL: `device/cl.rs` loads the runtime and holds the only FFI of the workspace, `device/probe.rs`, the kernels, the simulator, the self-check, the device stages, the executor `device/exec/` and the program binary cache `device/progcache.rs`) | in-module, the larger suites in their own files (`compose/tests.rs`, `forward/tests.rs`, `warp/tests.rs`, `holefill/tests.rs`, `smartblend/tests.rs`, `vectors/tests.rs`, `matte/tests.rs`, `layers/tests.rs`, `debug/tests.rs` and others; the device stages against their simulator, and on a device when there is one); `tests/flow_d.rs`, `tests/flow_masks.rs`, `tests/device_cl.rs` (on the machine's OpenCL devices, skipped without one), `tests/no_unsafe.rs`; model fixtures and their generators in `tests/fixtures/` |
+| `crates/fx-parity` | library `fx_parity`, binary `fx-parity` | The comparison harness: test patterns, case plans, the reference case families of the limits, reference checklists, comparison and grading, determinism checks. | `args.rs`, `sources.rs` (lavfi patterns, the family clips), `cases.rs` (`cases.json`), `families.rs` (the reference case families), `testgen.rs` (`gen`), `checklist.rs`, `run.rs`, `compare.rs`, `selfcheck.rs`, `devcheck.rs` (the byte gate of the GPU backend), `sweep.rs`, `effects.rs`, `vfx.rs` (finds and drives `vfx`) | in-module; `tests/selftest.rs` (needs ffmpeg, skips without) |
+| `plugins/retime-engine` | library | The engine of the four effects: time model, frame selection, optical flow, warps, blends, hole filling, vector image coding, FG matte layers, tracking points, the register of limits, and the OpenCL device code ([engine](docs/engine.md)). | `timeline.rs`, `planner.rs`, `frontend.rs` (parameters to settings), `host.rs`, `compose.rs` and `compose/vector.rs`, `flow.rs` (with `flow/conv.rs`, `flow/sample.rs`, and `flow/extras.rs`: layer masks, tracking points, wrap-around), `prep.rs`, `warp.rs` (with `warp/blurcomp.rs`), `forward.rs` (with `forward/mesh.rs`, `forward/pyramid.rs`, `forward/raster.rs`), `smartblend.rs`, `holefill.rs`, `blend.rs`, `filters.rs`, `vectors.rs`, `create_vectors.rs`, `image.rs`, `matte.rs` (FG mattes), `points.rs` and `geom.rs` (tracking points, the second tracker, Draw Geom), `layers.rs` (the n-layer render), `debug.rs` (the Debug views), `gaps.rs` (the register of limits), `device.rs` and `device/` (OpenCL: `device/cl.rs` loads the runtime and holds the only FFI of the workspace, `device/probe.rs`, the kernels, the simulator, the self-check, the device stages, the executor `device/exec/` and the program binary cache `device/progcache.rs`) | in-module, the larger suites in their own files (`compose/tests.rs`, `forward/tests.rs`, `warp/tests.rs`, `holefill/tests.rs`, `smartblend/tests.rs`, `vectors/tests.rs`, `matte/tests.rs`, `layers/tests.rs`, `debug/tests.rs` and others; the device stages against their simulator, and on a device when there is one); `tests/flow_d.rs`, `tests/flow_masks.rs`, `tests/device_cl.rs` (on the machine's OpenCL devices, skipped without one), `tests/no_unsafe.rs`; model fixtures and their generators in `tests/fixtures/` |
 | `plugins/retime` | library | Effect `retime`: params, layers, wiring to the engine. | `lib.rs`, `glue.rs` | `tests/`: `cli` (end to end through `vfx`), `retime` (goldens of `tests/common/gen_goldens.py`), `vector`, `dependencies`, `consistency`, `settings`, `threads`, `tiny` |
 | `plugins/create-vectors` | library | Effect `create-vectors`: params, layers, wiring to the engine. | `lib.rs`, `glue.rs`, `prerender.rs` | `tests/`: `cli`, `encoder`, `roundtrip`, `vector`, `display`, `point_layer`, `dependencies`, `consistency`, `settings`, `threads`, `tiny`, `unsupported` (the renders once refused) |
 | `plugins/retime-fgbg` | library | Effect `retime-fgbg`: params, layers, wiring to the engine. | `lib.rs`, `glue.rs`, `prerender.rs`, `timemap.rs` | `tests/`: `cli`, `retime` (goldens of `tests/common/gen_goldens.py`), `forward`, `vector`, `timemap`, `dependencies`, `consistency`, `settings`, `threads`, `tiny`, `unsupported` (the renders once refused) |
@@ -168,7 +139,7 @@ Every contract an agent relies on: what goes in, what comes out, how failure sho
 | `vfx --help` (also `-h`, `help`) | Prints the usage text, exit 0. `--help` after `list` or anywhere in an `apply` line does the same. |
 | `vfx --version` (also `-V`) | Prints `vfx 0.1.0`. |
 | `vfx list` | A table with columns `id name family kind params layers`, then per effect a `<id> params` table (`param name kind range default`) and a `<id> layers` table (`layer name optional`). |
-| `vfx list --json` | The same as a JSON array. Each effect: `id`, `name`, `family`, `kind` (`frame` or `temporal`), `hidden`, `params`, `layers`. Each param: `id`, `name`, `kind` and that kind's fields: `float` `valid_min`, `valid_max` (the accepted range), `slider_min`, `slider_max` (an interface range only), `default`, `precision`; `int` `min`, `max`, `default`; `popup` `choices` (names in order) and `default` (1-based); `checkbox` `default` (`true` or `false`); `color` `default` `[r, g, b]`; `point` `default` `[x, y]`; `angle` `default`. Each layer: `id`, `name`, `optional`. Last, `gaps` when the effect has open parity gaps ([Parity gaps](#parity-gaps)): each `id`, `title` and `controls` (the param and layer ids whose use reaches the rule); an effect without gaps has no `gaps` key. |
+| `vfx list --json` | The same as a JSON array. Each effect: `id`, `name`, `family`, `kind` (`frame` or `temporal`), `hidden`, `params`, `layers`. Each param: `id`, `name`, `kind` and that kind's fields: `float` `valid_min`, `valid_max` (the accepted range), `slider_min`, `slider_max` (an interface range only), `default`, `precision`; `int` `min`, `max`, `default`; `popup` `choices` (names in order) and `default` (1-based); `checkbox` `default` (`true` or `false`); `color` `default` `[r, g, b]`; `point` `default` `[x, y]`; `angle` `default`. Each layer: `id`, `name`, `optional`. Last, `gaps` when the effect has limits ([Limits](#limits)): each `id`, `title` and `controls` (the param and layer ids whose use reaches the rule); an effect without gaps has no `gaps` key. |
 | `vfx list --all` | Adds the hidden `selftest` family (`"hidden": true`). |
 | `vfx devices` | A table `id name kind default verdict` of the render devices `--device` can name: `cpu`, then every OpenCL device the system runtime reports, numbered `gpu=0`, `gpu=1`, ... platform by platform; then a block per OpenCL device with its platform, vendor, versions (OpenCL, OpenCL C, driver), device type, profile, endianness, compute units, memory (global, largest buffer, dedicated or shared with the host), fp32 and fp64 config bits, and the verdict `ok` or `refused` with one `reason` line per unmet requirement ([engine: device](docs/engine.md#device)). It runs info queries only, no kernel. Without an OpenCL runtime or device it lists `cpu` alone, without the `verdict` column, and prints one `vfx: note:` line on stderr. |
 | `vfx devices --json` | The same as a JSON array. Each device: `id` (the `--device` value), `name`, `kind` (`cpu` or `gpu`), `default` (`true` for the device a run without `--device` uses); an OpenCL device adds `device_name`, `platform`, `vendor`, `version`, `driver`, `opencl_c`, `profile`, `type`, `little_endian`, `global_memory` and `max_allocation` (bytes), `unified_memory`, `compute_units`, `fp64`, `single_fp` and `double_fp` (flag names) with `single_fp_bits` and `double_fp_bits`, `extensions`, `verdict` and `reasons`. |
@@ -262,7 +233,7 @@ An id given twice is a usage error (exit 2). `tools/apply.py` relays each of the
 
 `vfx` writes every error as one line on stderr, `vfx: error: <message>`. Frames finished before an error stay in the output.
 
-A render that runs the rule of an open parity gap ([Parity gaps](#parity-gaps)) also prints, once per gap per run and right after the first frame that rendered with it, `vfx: note: <effect>: <id> <title>: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)`. A note never changes the frames or the exit code; a frame that fails prints none, and `--check` prints none.
+A render that runs the stated rule of a limit ([Limits](#limits)) also prints, once per rule per run and right after the first frame that rendered with it, `vfx: note: <effect>: <id> <title>: a stated rule that no Twixtor reference render has graded yet (README: limits)`. A note never changes the frames or the exit code; a frame that fails prints none, and `--check` prints none.
 
 | Code | Meaning | Messages |
 |---|---|---|
@@ -440,7 +411,7 @@ The handoff tools, `tools/handoff.py`, `tools/conformance.py` and `tools/ffstage
 | `devcheck --testset DIR [--testset DIR...]` | `cases.json`, the inputs | nothing: a table on stdout | `--effect ID`, `--max-cases` (0: every temporal case; per test set), `--devices gpu=N,...` (every device `vfx devices` lists as ok), `--json`, `--vfx` |
 
 - Cases: a temporal effect gets `all-default`, `all-min`, `all-max` and, when it has an optional layer, `no-layers` on every clip source, size and depth; without `--no-sweep` also one param at a time and a two key ramp per `float`, `angle` and `point` param on the sweep sources. When `--max-cases-per-effect` trims an effect, those four settings and one case for each param's min and max always stay (so a cap below their count removes none of them), then one case per other setting, then a fixed pseudo random fill. Every case except `no-layers` gets a clip of another source for every layer the effect lists. A case id reads `<effect>.<label>.<source>-<W>x<H>.d<depth>.<hash>`.
-- Families (`gen --families`): every open point of the [parity gaps](#parity-gaps) gets the cases that settle its rule once they are rendered in the original: `gap-shrink` (G1), `gap-maskbm` (G1b), `gap-order` (G1c), `gap-merge` (G1d), `gap-vecmatte` (G1e), `gap-blurflow` (G1f), `gap-groups` (G1g, G1h), `gap-points` (G2), `gap-drawgeom` (G3), `gap-debug` (G4), `gap-tracker2` (G5), `gap-wrap` (G6), plus two that only observe and print no note, `gap-tiny` (frames of 1x1 to 5x5) and `gap-keys` (ease handles on Frame Num, Speed %, Sensitivity and a point). Their cases have 12 frames at 24 fps, mostly 64x48 at 8 bpc, on clips of their own made with exact arithmetic (a textured disc moving over a still background with its hard and soft mattes, two crossing discs, the disc's vector images, a texture periodic across the width, and others), kept out of the matrix's clip rotation, so a set made without `--families` is byte for byte what it was. A family case's id reads `<effect>.<family>-<label>.<source>-<W>x<H>.d<depth>.<hash>`.
+- Families (`gen --families`): every stated rule of the [limits](#limits) gets the cases that would settle it once they are rendered in the original: `gap-shrink` (G1), `gap-maskbm` (G1b), `gap-order` (G1c), `gap-merge` (G1d), `gap-vecmatte` (G1e), `gap-blurflow` (G1f), `gap-groups` (G1g, G1h), `gap-points` (G2), `gap-drawgeom` (G3), `gap-debug` (G4), `gap-tracker2` (G5), `gap-wrap` (G6), plus two that only observe and print no note, `gap-tiny` (frames of 1x1 to 5x5) and `gap-keys` (ease handles on Frame Num, Speed %, Sensitivity and a point). Their cases have 12 frames at 24 fps, mostly 64x48 at 8 bpc, on clips of their own made with exact arithmetic (a textured disc moving over a still background with its hard and soft mattes, two crossing discs, the disc's vector images, a texture periodic across the width, and others), kept out of the matrix's clip rotation, so a set made without `--families` is byte for byte what it was. A family case's id reads `<effect>.<family>-<label>.<source>-<W>x<H>.d<depth>.<hash>`.
 - With family cases in the set, `checklist` adds a gaps table (family, gap, open point, rule, cases), the family clips, a `- settles:` line per case and notes on mattes (a hidden layer picked in the FG Matte popup), points (layer pixels, Linear spatial interpolation) and ease handles (the Keyframe Velocity dialog); `run` adds `families.<id>` with `cases`, `compared`, `exact`, `failed`, `missing` and `settled` to the JSON report and a `families` block to the text report, keeps each family case's `vfx: note:` lines (`notes` in the JSON), and warns when a family case printed no note for the gap it is there to settle.
 - `vfx` lookup: `--vfx`, `VFX_PATH`, next to `fx-parity` (or one folder up), then `PATH`. `--jobs` defaults to the number of cores, at most 8.
 - Pass rule: 8 and 16 bpc bit exact, 32 bpc within 1 ULP, clips frame by frame with the first failing frame reported. Every compared case also gets a mean error (mean absolute difference over all pixels and all 4 channels, as a percentage of full scale), a clip its worst frame, and the report a `graded error` block per effect and the 10 worst cases.
@@ -490,6 +461,8 @@ ffmpeg -v error -i target/demo/clip.mp4 -f rawvideo -pix_fmt rgba - | target/rel
 
 ## Comparing with reference renders
 
+Optional end to end check. Nothing else in this repository needs it: building, `vfx`, `tools/apply.py`, the tests and CI all run with no host application. Only a 1:1 claim ([Parity](#parity)) waits on it, because a reference render has to come from the original plugin.
+
 `fx-parity` measures how far `vfx` is from another program's renders of the same cases, and whether `vfx` gives the same bytes on every run and thread count. A small set for one effect at 8 bpc:
 
 ```sh
@@ -507,7 +480,7 @@ target/release/fx-parity run --testset target/demo/pack --refs target/demo/pack/
 
 On a set of all four effects, every case but `no-layers` hands `create-vectors`, `retime-fgbg` and `vectors-in` their `fg1_matte` to `fg3_matte` layers, which they render on the layered path, with the notes of the gaps they reach. A `--no-sweep` 160x96 set of all four effects (`gen --out DIR --depths 8 --no-sweep --sizes 160x96 --frames 12`: 64 cases) ends `selfcheck` with `24 cases checked, 24 identical, 0 DIFFER` (exit 0). Pass `--effect ID` to `run` or `selfcheck` to check one effect.
 
-The reference case families settle the open parity gaps:
+The reference case families are built to settle the [limits](#limits):
 
 ```sh
 target/release/fx-parity gen --out target/demo/families --families all
@@ -515,7 +488,7 @@ target/release/fx-parity checklist --testset target/demo/families
 target/release/fx-parity selfcheck --testset target/demo/families --max-cases 0
 ```
 
-`gen` ends `families: 14 with 117 cases (gap-shrink 10, gap-maskbm 2, gap-order 10, gap-merge 5, gap-vecmatte 3, gap-blurflow 2, gap-groups 10, gap-points 6, gap-drawgeom 18, gap-debug 10, gap-tracker2 6, gap-wrap 8, gap-tiny 20, gap-keys 7)`, and `selfcheck` `117 cases checked, 117 identical, 0 DIFFER`. Render the checklist once in the original, convert the exports into `refs/` with its commands and run `fx-parity run --testset target/demo/families --refs target/demo/families/refs --json`: a family is settled when its `families.<id>.settled` is true, every case compared and bit exact. Its gap then retires: its entry in `plugins/retime-engine/src/gaps.rs` and its `record` calls go, so does its row of the rules table under [Parity gaps](#parity-gaps), and `python -I tools/gen_docs.py --refresh-data` with `--testset` and `--refs` moves the figures ([parity: moving the numbers](docs/parity.md#moving-the-numbers)). `gap-tiny` and `gap-keys` print no note; their references decide whether the stated rule stays.
+`gen` ends `families: 14 with 117 cases (gap-shrink 10, gap-maskbm 2, gap-order 10, gap-merge 5, gap-vecmatte 3, gap-blurflow 2, gap-groups 10, gap-points 6, gap-drawgeom 18, gap-debug 10, gap-tracker2 6, gap-wrap 8, gap-tiny 20, gap-keys 7)`, and `selfcheck` `117 cases checked, 117 identical, 0 DIFFER`. Render the checklist once in the original, convert the exports into `refs/` with its commands and run `fx-parity run --testset target/demo/families --refs target/demo/families/refs --json`: a family is settled when its `families.<id>.settled` is true, every case compared and bit exact. Its gap then retires: its entry in `plugins/retime-engine/src/gaps.rs` and its `record` calls go, so does its entry in [parity: gaps register](docs/parity.md#gaps-register), and `python -I tools/gen_docs.py --refresh-data` with `--testset` and `--refs` moves the figures ([parity: moving the numbers](docs/parity.md#moving-the-numbers)). `gap-tiny` and `gap-keys` print no note; their references decide whether the stated rule stays.
 
 ## Tests
 
@@ -581,7 +554,7 @@ This README specifies the programs. The files in `docs/` specify behaviour in de
 | [`docs/timing.md`](docs/timing.md) | How output frames map to source frames: Speed and Frame Number modes, key shapes and handles, output length, clip edges, exact frames, the rate model, the audio map. |
 | [`docs/ffmpeg.md`](docs/ffmpeg.md) | How `vfx` and `tools/apply.py` pair with ffmpeg: raw frames, the wrapper's commands, rate, size, colour and HDR, audio, encoding, scratch and disk, input requirements. |
 | [`docs/engine.md`](docs/engine.md) | How an output frame is computed: motion search, warps, blends, FG matte layers, hole fill, blur compensation, vector images, the OpenCL device, determinism, cost, and the module that implements each stage. |
-| [`docs/parity.md`](docs/parity.md) | How the output is measured against the original: the unit counted, the tiers Graded, Model, Rule and Defined, unproven controls, the gaps register and the rules without a note, the model fixtures, the regression lock and how to reproduce it, caveats, terms, and how a reference render moves the numbers. |
+| [`docs/parity.md`](docs/parity.md) | What has and has not been verified against the original, and how a future comparison would be graded: the unit counted, the tiers of evidence, the gaps register and the rules without a note, the model fixtures, the regression lock and how to reproduce it, caveats, terms, and how a reference render moves the numbers. |
 | [`docs/handoff.md`](docs/handoff.md) | How twixtor, sapphire and ffmpeg pass raw frames to each other: contract versions, the frame contract, errors and exits, reports, discovery, geometry, the ffmpeg filter stage, packets, commands, platforms, known gaps. |
 | [`docs/handoff-bench.tsv`](docs/handoff-bench.tsv) | The bench table of `tools/conformance.py --bench`: the wrappers timed on chained stages. |
 
@@ -590,7 +563,7 @@ This README specifies the programs. The files in `docs/` specify behaviour in de
 - **Independent work.** This project is written independently and contains none of Twixtor's code, binaries, assets or documentation.
 - **No affiliation.** It is not affiliated with, endorsed by or sponsored by RE:Vision Effects.
 - **Trademarks.** Twixtor is a trademark of RE:Vision Effects. It appears here only to name the plugin this project reimplements.
-- **Interoperability.** Parameter ids, display names and values follow the plugin's interface so that settings carry over between the two.
+- **Interoperability.** Parameter ids, display names and values are meant to follow the plugin's interface, so settings can carry over.
 - **No warranty.** Everything here is provided as is under the MIT License, without warranty of any kind and without liability.
 - **Your responsibility.** You need the rights to the media you process, and you stay bound by the licences of any software you use alongside this project, ffmpeg included.
 - **Rights holders.** If you believe something here infringes your rights, email [hi@bairon.dev](mailto:hi@bairon.dev) or [open an issue](https://github.com/baairon/twixtor/issues). Every concern gets a prompt answer in good faith.

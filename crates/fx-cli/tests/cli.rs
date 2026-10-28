@@ -168,7 +168,7 @@ fn list_table_names_every_effect_and_its_kind() {
 /// The hidden effect that records the test gap T1 on every frame with `gap` on.
 const GAP: &str = "selftest-gap";
 const T1_NOTE: &str =
-    "vfx: note: selftest-gap: T1 notes plumbing test: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)\n";
+    "vfx: note: selftest-gap: T1 notes plumbing test: a stated rule that no Twixtor reference render has graded yet (README: limits)\n";
 
 fn gap_run(depth: &str, w: &str, h: &str, extra: &[&str], stdin: &[u8], env: &[(&str, &str)]) -> Output {
     let mut args = vec!["apply", GAP, "--width", w, "--height", h, "--depth", depth, "--fps", "24"];

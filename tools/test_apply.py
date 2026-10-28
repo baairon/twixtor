@@ -992,7 +992,7 @@ class NoteTests(Workspace):
 
     GAP = "selftest-gap"
     NOTE = ("vfx: selftest-gap: T1 notes plumbing test: a stated rule that no Twixtor reference render "
-            "has graded yet (README: parity gaps)")
+            "has graded yet (README: limits)")
 
     def setUp(self):
         super().setUp()
@@ -1040,13 +1040,13 @@ class NoteTests(Workspace):
         with open(log, "w", encoding="utf-8") as f:
             f.write("something else\n"
                     "vfx: note: retime-fgbg: G1 matte shrink tail: a stated rule that no Twixtor reference render "
-                    "has graded yet (README: parity gaps)\n"
+                    "has graded yet (README: limits)\n"
                     "  vfx: note: indented, so not one\n"
                     "vfx: note: retime-fgbg: G6 solver, hole fill and blur wrap variants: x\r\n"
                     "vfx: error: not a note\n")
         self.assertEqual(tool.vfx_notes(log), [
             "vfx: retime-fgbg: G1 matte shrink tail: a stated rule that no Twixtor reference render has graded yet "
-            "(README: parity gaps)",
+            "(README: limits)",
             "vfx: retime-fgbg: G6 solver, hole fill and blur wrap variants: x"])
         self.assertEqual(tool.vfx_notes(self.path("missing.log")), [])
         result = {"outputs": []}

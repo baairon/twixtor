@@ -15,7 +15,7 @@ How `plugins/retime-engine` computes one output frame, which module does each st
 | 7. vector path | flow solves on the tracking layer's frames `a` and `b`, warps and composition of the retimed layer's frames, then the blur compensation tail; with FG matte layers one solve and one warp per layer ([FG matte layers](#fg-matte-layers)) | `compose/vector.rs`, `layers.rs` |
 | 8. output | the engine image converted back to the wire format | `frontend.rs`, `image.rs` |
 
-What the engine cannot serve is an `unsupported` error, never a silent fallback ([parameters: refusals](parameters.md#refusals)). Where a stage runs a stated rule because the original's behaviour there is not established, it records that gap (`fx_core::gaps::record` with an entry of `gaps.rs`) and `vfx` prints its note once per run ([README: parity gaps](../README.md#parity-gaps)); recording changes no pixel.
+What the engine cannot serve is an `unsupported` error, never a silent fallback ([parameters: refusals](parameters.md#refusals)). Where a stage runs a stated rule because the original's behaviour there is not established, it records that gap (`fx_core::gaps::record` with an entry of `gaps.rs`) and `vfx` prints its note once per run ([README: limits](../README.md#limits)); recording changes no pixel.
 
 ## Working format
 

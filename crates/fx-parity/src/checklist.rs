@@ -409,7 +409,7 @@ fn family_notes(out: &mut String) {
     put(out, "- A matte goes on a layer of its own, hidden (video switch off), and is picked in the effect's FG Matte popup of that layer (FG1 Matte, FG2 Matte, ...); the Matte Chan setting says which channel of it is read. Two FG layers may read different channels of one matte file: put it in the project once and pick it in both popups.");
     put(out, "- Point positions are in layer pixels, with (0, 0) at the centre of the top left pixel. A keyed point needs Linear spatial interpolation (Keyframe Interpolation, Spatial Interpolation: Linear), so that it moves on the straight line between its keys.");
     put(out, "- Ease handle values go into the Keyframe Velocity dialog of the key: the incoming or outgoing velocity in units per second (frames per second for Frame Num, pixels per second along the path for a point) and the influence in percent. A key written as eased is Easy Ease.");
-    put(out, "- A family is settled when `fx-parity run --json` reports it with `settled: true`: every case compared and bit exact. Then its note retires: delete the gap's entry in `plugins/retime-engine/src/gaps.rs` (the register, its effect lists and its tests) and every `record` call of it, and move its README row from the parity gaps table into the parity status table with the date and the case count. The observing families (G7 and K1) print no note; their references decide whether the stated rule stays as it is.");
+    put(out, "- A family is settled when `fx-parity run --json` reports it with `settled: true`: every case compared and bit exact. Then its note retires: delete the gap's entry in `plugins/retime-engine/src/gaps.rs` (the register, its effect lists and its tests) and every `record` call of it, and its Stated rules row in `docs/parity.md` goes. The observing families (G7 and K1) print no note; their references decide whether the stated rule stays as it is.");
 }
 
 /// The gaps the family cases settle, one row per family that has cases here, then the clips.
@@ -945,7 +945,7 @@ mod tests {
             "`settled: true`",
             "`plugins/retime-engine/src/gaps.rs`",
             "every `record` call of it",
-            "parity status table",
+            "its Stated rules row in `docs/parity.md` goes",
             "## Parity gaps these cases settle",
             "| `gap-shrink` | G1 matte shrink tail | how FG Inv Matte Shrink chokes",
             "| `gap-keys` | K1a a Linear end next to a Bezier end; K1b Easy Ease influence;",

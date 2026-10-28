@@ -21,7 +21,7 @@ use std::sync::Mutex;
 /// One open point of the parity register. Build it with [`OpenGap::new`] as a `static`, and pass
 /// that static to [`record`]: the record keeps a reference to it.
 pub struct OpenGap {
-    /// The register id, `G1`, `G1b`, ... as the README parity gaps table names it.
+    /// The register id, `G1`, `G1b`, ... as its Stated rules row in `docs/parity.md` names it.
     pub id: &'static str,
     /// One line naming the open point; it holds no `": "`, so a note line splits cleanly.
     pub title: &'static str,

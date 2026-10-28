@@ -222,7 +222,7 @@ python tools/apply.py target/demo/clip.mp4 vectors-in --layer vectors_next=targe
 
 ## Refusals
 
-A refusal stops the run with exit 3 and `vfx: error: frame N: unsupported: <message>`; `tools/apply.py` reports it under `[error] the pipeline failed:` and exits 1. `--check` does not catch these. Every control renders; what is left are inputs that no setting can serve. A control whose rule is still open prints a note instead ([README: parity gaps](../README.md#parity-gaps)).
+A refusal stops the run with exit 3 and `vfx: error: frame N: unsupported: <message>`; `tools/apply.py` reports it under `[error] the pipeline failed:` and exits 1. `--check` does not catch these. Every control renders; what is left are inputs that no setting can serve. A control whose rule is still open prints a note instead ([README: limits](../README.md#limits)).
 
 | Effect | Trigger | From frame | Message starts |
 |---|---|---|---|
