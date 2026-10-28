@@ -6,6 +6,7 @@
 
 use crate::cases::{Case, TestSet};
 use crate::effects::{EffectInfo, EffectKind, Kind};
+use crate::families;
 use crate::run::{self, quote};
 use crate::sources;
 use crate::testgen;
@@ -248,24 +249,47 @@ fn show(kind: &Kind, value: &str) -> String {
 }
 
 /// `V@F;V@F` as `V at frame F, V at frame F`; a trailing `h` on a frame is a hold key and
-/// a trailing `e` an eased one.
+/// a trailing `e` an eased one. Ease handles `iS/I` and `oS/I` ([`fx_core::split_key`]) are the
+/// incoming and outgoing velocity of the Keyframe Velocity dialog, `S` per second with an
+/// influence of `I` percent. A key `split_key` refuses is shown as written.
 fn show_keys(kind: &Kind, value: &str) -> String {
     let keys: Vec<String> = value
         .split(';')
         .map(str::trim)
         .filter(|k| !k.is_empty())
-        .map(|key| {
-            let (v, frame) = key.rsplit_once('@').unwrap_or((key, "0"));
-            let frame = frame.trim();
-            let (frame, how) = match frame.chars().last() {
-                Some('h') => (&frame[..frame.len() - 1], " (hold key)"),
-                Some('e') => (&frame[..frame.len() - 1], " (eased)"),
-                _ => (frame, ""),
-            };
-            format!("{} at frame {}{how}", show(kind, v), frame.trim())
+        .map(|key| match fx_core::split_key(key) {
+            Ok(k) => {
+                let velocity = |side: &str, h: &fx_core::HandleText<'_>| {
+                    format!("{side} velocity {} per second, influence {}%", h.speed_text, h.influence_text)
+                };
+                let mut how: Vec<String> = Vec::new();
+                how.extend(k.ease_in.as_ref().map(|h| velocity("incoming", h)));
+                how.extend(k.ease_out.as_ref().map(|h| velocity("outgoing", h)));
+                if k.hold {
+                    how.push("hold key".into());
+                } else if k.ease {
+                    how.push("eased".into());
+                }
+                let how = if how.is_empty() { String::new() } else { format!(" ({})", how.join("; ")) };
+                format!("{} at frame {}{how}", show(kind, k.value), k.frame_text)
+            }
+            Err(_) => key_as_written(kind, key),
         })
         .collect();
     keys.join(", ")
+}
+
+/// A key `split_key` refuses, read as before handles existed: the last character of the frame
+/// alone decides between a hold and an eased key.
+fn key_as_written(kind: &Kind, key: &str) -> String {
+    let (v, frame) = key.rsplit_once('@').unwrap_or((key, "0"));
+    let frame = frame.trim();
+    let (frame, how) = match frame.chars().last() {
+        Some('h') => (&frame[..frame.len() - 1], " (hold key)"),
+        Some('e') => (&frame[..frame.len() - 1], " (eased)"),
+        _ => (frame, ""),
+    };
+    format!("{} at frame {}{how}", show(kind, v), frame.trim())
 }
 
 /// One `id=value` setting of a case in words, or None when it is the param's default.
@@ -357,9 +381,12 @@ fn preface(out: &mut String, set: &TestSet, groups: &[Group<'_>], dir: &str, exr
     put(out, "4. Run the export command. It converts the export into the raw reference file the case names.\n");
     put(out, format!("When the references are in `{REFS_DIR}`, check them with `fx-parity run --testset {dir} --refs {dir}/{REFS_DIR}`.\n"));
     put(out, "Notes:\n");
-    put(out, "- Keyframes are written as `value at frame N`; frames count from 0 at the first frame of the clip. A hold key keeps its value until the next key, an eased key has no slope at its frame.");
+    put(out, "- Keyframes are written as `value at frame N`; frames count from 0 at the first frame of the clip. A hold key keeps its value until the next key, an eased key has no slope at its frame. A key with an incoming or outgoing velocity is a Bezier key: type that velocity (units per second) and its influence into the key's Keyframe Velocity dialog; a side without one is linear, or hold for a hold key.");
     put(out, "- A menu choice is given by the name the menu shows, a checkbox as on or off, a point as (x, y) in pixels, an angle in degrees, and a colour in hex and as red, green and blue from 0 to 255.");
     put(out, "- If your program names or numbers its files differently, or writes a movie, change the `-i` argument (and `-start_number`) of the export command and leave the rest.");
+    if has_families(set) {
+        family_notes(out);
+    }
     if set.cases.iter().any(|c| c.depth == 32) {
         put(out, format!("- 32 bpc goes through EXR, which holds colour multiplied by alpha. Import the EXR files as premultiplied alpha and export EXR as premultiplied alpha; the 32 bpc export command divides by alpha again (`-vf {UNPREMULTIPLY}`) to get straight alpha. If your program writes straight alpha EXR, delete that option. Colour under zero alpha cannot be kept this way, so pixels with zero alpha can differ for that reason alone."));
         match exr {
@@ -369,6 +396,74 @@ fn preface(out: &mut String, set: &TestSet, groups: &[Group<'_>], dir: &str, exr
         }
     }
     put(out, "");
+}
+
+/// Whether the set holds cases of the reference case families; only then does the file speak of them.
+fn has_families(set: &TestSet) -> bool {
+    set.cases.iter().any(|c| c.family.is_some())
+}
+
+/// The preface notes a family case needs on top of the general ones.
+fn family_notes(out: &mut String) {
+    put(out, "- A case with a `settles:` line belongs to a reference case family: it settles an open point of the parity gaps register (table below), a rule `vfx` runs because the original's behaviour there is not known yet. Render it like any other case.");
+    put(out, "- A matte goes on a layer of its own, hidden (video switch off), and is picked in the effect's FG Matte popup of that layer (FG1 Matte, FG2 Matte, ...); the Matte Chan setting says which channel of it is read. Two FG layers may read different channels of one matte file: put it in the project once and pick it in both popups.");
+    put(out, "- Point positions are in layer pixels, with (0, 0) at the centre of the top left pixel. A keyed point needs Linear spatial interpolation (Keyframe Interpolation, Spatial Interpolation: Linear), so that it moves on the straight line between its keys.");
+    put(out, "- Ease handle values go into the Keyframe Velocity dialog of the key: the incoming or outgoing velocity in units per second (frames per second for Frame Num, pixels per second along the path for a point) and the influence in percent. A key written as eased is Easy Ease.");
+    put(out, "- A family is settled when `fx-parity run --json` reports it with `settled: true`: every case compared and bit exact. Then its note retires: delete the gap's entry in `plugins/retime-engine/src/gaps.rs` (the register, its effect lists and its tests) and every `record` call of it, and move its README row from the parity gaps table into the parity status table with the date and the case count. The observing families (G7 and K1) print no note; their references decide whether the stated rule stays as it is.");
+}
+
+/// The gaps the family cases settle, one row per family that has cases here, then the clips.
+fn gaps_table(out: &mut String, set: &TestSet) {
+    let mut seen: Vec<(&str, usize)> = Vec::new();
+    for c in &set.cases {
+        let Some(f) = c.family.as_deref() else { continue };
+        match seen.iter_mut().find(|(id, _)| *id == f) {
+            Some((_, n)) => *n += 1,
+            None => seen.push((f, 1)),
+        }
+    }
+    put(out, "## Parity gaps these cases settle\n");
+    put(out, "| family | gap | open point | rule until a reference grades it | cases |");
+    put(out, "| --- | --- | --- | --- | --- |");
+    for (id, n) in &seen {
+        match families::find(id) {
+            Some(f) => {
+                let gaps: Vec<String> = f.gaps.iter().map(|g| format!("{g} {}", md(families::title(g)))).collect();
+                let open = if f.observe_only { format!("{} (observe only, no note)", md(f.settles)) } else { md(f.settles) };
+                put(out, format!("| `{id}` | {} | {open} | {} | {n} |", gaps.join("; "), md(f.rule)));
+            }
+            None => put(out, format!("| `{}` | | not known to this build of fx-parity | | {n} |", md(id))),
+        }
+    }
+    put(out, "");
+    let mut clips: Vec<&str> = Vec::new();
+    for c in set.cases.iter().filter(|c| c.family.is_some()) {
+        let layer_sources = c.layers.values().filter_map(|f| set.inputs.iter().find(|i| &i.file == f).map(|i| i.source.as_str()));
+        for src in std::iter::once(c.source.as_str()).chain(layer_sources) {
+            if sources::find_family(src).is_some() && !clips.contains(&src) {
+                clips.push(src);
+            }
+        }
+    }
+    if !clips.is_empty() {
+        put(out, "The family clips:\n");
+        for f in sources::FAMILY_SOURCES.iter().filter(|f| clips.contains(&f.name)) {
+            put(out, format!("- `{}`: {}", f.name, md(f.about)));
+        }
+        put(out, "");
+    }
+}
+
+/// The `settles:` line of a family case: the gaps it settles, by id and title, and its family.
+fn settles_line(case: &Case, family: &str) -> String {
+    let gaps: Vec<String> = families::settles(case).iter().map(|g| format!("{g} ({})", md(families::title(g)))).collect();
+    match families::find(family) {
+        Some(f) => {
+            let observe = if f.observe_only { ", observe only" } else { "" };
+            format!("- settles: {} in family `{family}`{observe}", list_names(&gaps))
+        }
+        None => format!("- settles: family `{}`, not known to this build of fx-parity", md(family)),
+    }
 }
 
 fn summary_table(out: &mut String, groups: &[Group<'_>], effects: &[EffectInfo]) {
@@ -391,6 +486,9 @@ fn summary_table(out: &mut String, groups: &[Group<'_>], effects: &[EffectInfo])
 fn case_section(out: &mut String, n: usize, case: &Case, info: Option<&EffectInfo>, exr: Exr) {
     put(out, format!("### {n}. `{}`\n", case.label));
     put(out, format!("- case: `{}`", case.id));
+    if let Some(family) = &case.family {
+        put(out, settles_line(case, family));
+    }
     let length = if case.is_temporal() {
         format!("{} frames at {} fps", case.frames, rate_text(case.fps.as_deref().unwrap_or("24")))
     } else {
@@ -455,6 +553,9 @@ pub fn render(set: &TestSet, effects: &[EffectInfo], dir: &str, exr: Exr) -> Str
     let mut out = String::new();
     preface(&mut out, set, &groups, dir, exr);
     summary_table(&mut out, &groups, effects);
+    if has_families(set) {
+        gaps_table(&mut out, set);
+    }
     for g in &groups {
         let info = effects.iter().find(|e| e.id == g.id);
         put(&mut out, format!("## {} (`{}`)\n", info.map_or_else(|| md(g.id), |e| md(&e.name)), g.id));
@@ -735,6 +836,22 @@ mod tests {
             Some("Center: (80, 45) at frame 0, (240, 135) at frame 11")
         );
         assert_eq!(setting_text(blur, "angle=-180@0;180@11").as_deref(), Some("Direction: -180 degrees at frame 0, 180 degrees at frame 11"));
+        // ease handles are velocities per second with their influence, as typed, then a hold
+        assert_eq!(
+            setting_text(retime, "speed=100@0o0/33.3;50@24i-12.50/50h").as_deref(),
+            Some("Speed %: 100 at frame 0 (outgoing velocity 0 per second, influence 33.3%), 50 at frame 24 (incoming velocity -12.50 per second, influence 50%; hold key)")
+        );
+        assert_eq!(
+            setting_text(retime, "speed=100@12.5i5/10o-6/0.1;70@30").as_deref(),
+            Some("Speed %: 100 at frame 12.5 (incoming velocity 5 per second, influence 10%; outgoing velocity -6 per second, influence 0.1%), 70 at frame 30")
+        );
+        assert_eq!(
+            setting_text(blur, "center=80,45@0o10/50;240,135@11").as_deref(),
+            Some("Center: (80, 45) at frame 0 (outgoing velocity 10 per second, influence 50%), (240, 135) at frame 11")
+        );
+        // a key the grammar refuses is shown as it was before handles existed
+        assert_eq!(setting_text(retime, "speed=100@0i5/0;50@24i5/50e").as_deref(), Some("Speed %: 100 at frame 0i5/0, 50 at frame 24i5/50 (eased)"));
+        assert_eq!(setting_text(retime, "speed=100@0;50").as_deref(), Some("Speed %: 100 at frame 0, 50 at frame 0"));
     }
 
     #[test]
@@ -802,6 +919,63 @@ mod tests {
             assert!(head.contains(want), "{want}: {head}");
         }
         assert!(head.contains("(6 cases, 3 effects)"), "{head}");
+    }
+
+    /// The hand made set with two of its clips turned into family cases.
+    fn family_set() -> TestSet {
+        let mut s = set();
+        s.cases[3].family = Some("gap-shrink".into());
+        s.cases[3].label = "gap-shrink-cv-lo5-shrink-2".into();
+        s.cases[4].family = Some("gap-keys".into());
+        s.cases[4].label = "gap-keys-frame-num-easy-ease".into();
+        s.cases[4].source = "fgdisc".into();
+        s
+    }
+
+    #[test]
+    fn family_cases_get_the_gaps_table_their_settles_line_and_the_preface_notes() {
+        let md = render(&family_set(), &effects(), "C:/work/set", Exr::Yes);
+        let head = md.split("## Soft Blur").next().unwrap();
+        for want in [
+            "picked in the effect's FG Matte popup",
+            "hidden (video switch off)",
+            "Point positions are in layer pixels",
+            "Linear spatial interpolation",
+            "Keyframe Velocity dialog of the key",
+            "`settled: true`",
+            "`plugins/retime-engine/src/gaps.rs`",
+            "every `record` call of it",
+            "parity status table",
+            "## Parity gaps these cases settle",
+            "| `gap-shrink` | G1 matte shrink tail | how FG Inv Matte Shrink chokes",
+            "| `gap-keys` | K1a a Linear end next to a Bezier end; K1b Easy Ease influence;",
+            "(observe only, no note)",
+            "The family clips:",
+            "- `fgdisc`: a textured disc moving 2 px right",
+        ] {
+            assert!(head.contains(want), "{want}: {head}");
+        }
+        assert!(head.contains("| 1 |\n| `gap-keys`") && !head.contains("gap-tiny"), "one row per family present: {head}");
+        assert!(md.contains("- case: `retime-01.speed-ramp.testsrc2-4x3.d8.00000004`\n- settles: G1 (matte shrink tail) in family `gap-shrink`\n"), "{md}");
+        assert!(md.contains("- settles: K1b (Easy Ease influence) in family `gap-keys`, observe only\n"), "{md}");
+        assert_eq!(md.matches("- settles:").count(), 2, "only the family cases");
+        assert!(md.is_ascii());
+        // a family this build does not know is named, not dropped
+        let mut odd = family_set();
+        odd.cases[3].family = Some("gap-future".into());
+        let md = render(&odd, &effects(), "C:/work/set", Exr::Yes);
+        assert!(md.contains("| `gap-future` | | not known to this build of fx-parity | | 1 |"), "{md}");
+        assert!(md.contains("- settles: family `gap-future`, not known to this build of fx-parity"), "{md}");
+    }
+
+    #[test]
+    fn a_set_without_family_cases_says_nothing_of_them() {
+        for exr in [Exr::Yes, Exr::No, Exr::Unknown] {
+            let md = doc(exr);
+            for word in ["settles", "family", "families", "Parity gaps", "FG Matte popup", "spatial interpolation", "gaps.rs"] {
+                assert!(!md.contains(word), "{word}");
+            }
+        }
     }
 
     #[test]

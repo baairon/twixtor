@@ -1,0 +1,14 @@
+id	title	effects	controls
+G1	matte shrink tail	create-vectors,retime-fgbg,vectors-in	fg1_inv_matte_shrink,fg2_inv_matte_shrink,fg3_inv_matte_shrink
+G1b	mask-aware block matching cost	create-vectors,retime-fgbg	fg1_matte,fg2_matte,fg3_matte
+G1c	layer visibility direction	create-vectors,retime-fgbg,vectors-in	fg2_matte,fg3_matte
+G1d	create-vectors merge	create-vectors	fg1_matte,fg2_matte,fg3_matte,layers_output
+G1e	vectors-in per-layer matte step	vectors-in	fg1_matte,fg2_matte,fg3_matte
+G1f	blur tail flow of a layered render	retime-fgbg,vectors-in	blur_compensation
+G1g	hole fill of a single group display	retime-fgbg,vectors-in	display,warping
+G1h	fast path group display	retime-fgbg,vectors-in	display
+G2	tracking point displacement	create-vectors,retime-fgbg	pt1_use,pt2_use,pt3_use,pt4_use,pt5_use,pt6_use,pt7_use,pt8_use,pt9_use,pt10_use,pt11_use,pt12_use
+G3	Draw Geom drawing	create-vectors,retime-fgbg	draw_geom
+G4	four Debug view compositions	create-vectors	debug_view_method
+G5	second tracker arithmetic	create-vectors	main_bg_track,fg1_track,fg2_track,fg3_track
+G6	solver, hole fill and blur wrap variants	retime-fgbg	track_rgb_a

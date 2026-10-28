@@ -1,14 +1,14 @@
-//! What plugin 04 or the engine cannot do is an `FxError::Unsupported` with a precise message,
-//! never a silent fallback: a FG Matte layer (the multi layer path). The Warping popup "Forward"
-//! (its default, warp code 2) is served by the engine's forward warp and a single vector layer by
-//! its flow inversion; the tests below pin that those renders succeed and are close to the analytic
-//! frame of the moving clip.
+//! What plugin 04 once refused now renders: a FG Matte layer takes the n-layer path of the engine,
+//! the Warping popup "Forward" (its default, warp code 2) is served by the engine's forward warp
+//! and a single vector layer by its flow inversion; the tests below pin that those renders succeed
+//! and are close to the analytic frame of the moving clip, and that what is still an error is one
+//! with a precise message, never a silent fallback.
 
 mod common;
 
 use common::moving::*;
 use common::*;
-use fx_core::{Depth, FxError};
+use fx_core::Depth;
 use vectors_in::glue;
 
 const W: usize = 48;
@@ -23,13 +23,6 @@ fn base<'a>(extra: &[(&'a str, &'a str)]) -> Vec<(&'a str, &'a str)> {
 
 fn rig(extra: &[(&str, &str)]) -> Rig {
     Rig::new(DEFAULT.clip(Depth::U8, W, H, 8), &base(extra)).with_frames(10).with_vectors(3.4, 1.7, MD)
-}
-
-fn unsupported(r: &Rig, n: u64) -> String {
-    match r.render(n) {
-        Err(FxError::Unsupported(m)) => m,
-        other => panic!("expected an Unsupported error, got {other:?}"),
-    }
 }
 
 /// Mean absolute error of output frame `n` of a half speed run against the exact scene at position `n / 2`.
@@ -72,29 +65,56 @@ fn exact_positions_and_markers_that_switch_the_vectors_off_never_reach_the_warp(
 }
 
 #[test]
-fn a_fg_matte_layer_is_the_multi_layer_path() {
+fn a_fg_matte_layer_renders_the_n_layer_path() {
     let matte = DEFAULT.clip(Depth::U8, W, H, 8);
-    let r = rig(&[("warping", "1")]).with_layer("fg1_matte", matte.clone());
-    // every frame, exact or not, and every Display but the Source one
-    for n in [0u64, 1, 2, 3] {
-        assert_eq!(unsupported(&r, n), glue::FG_UNSUPPORTED, "frame {n}");
+    let plain = rig(&[("warping", "1")]);
+    // every frame, exact or not, every Display and both warpings render
+    for warping in ["1", "2"] {
+        let r = rig(&[("warping", warping)]).with_layer("fg1_matte", matte.clone());
+        for n in [0u64, 1, 2, 3] {
+            r.render(n).unwrap_or_else(|e| panic!("warping {warping} frame {n}: {e}"));
+        }
+        for display in ["1", "3", "4", "5", "6"] {
+            let r = rig(&[("warping", warping), ("display", display)]).with_layer("fg1_matte", matte.clone());
+            r.render(1).unwrap_or_else(|e| panic!("warping {warping} display {display}: {e}"));
+        }
     }
-    for display in ["1", "3", "4", "5", "6"] {
-        let r = rig(&[("warping", "1"), ("display", display)]).with_layer("fg1_matte", matte.clone());
-        assert_eq!(unsupported(&r, 1), glue::FG_UNSUPPORTED, "display {display}");
-    }
-    // the Source display copies the source: no multi layer path
-    let r = rig(&[("warping", "1"), ("display", "2")]).with_layer("fg1_matte", matte.clone());
-    assert!(r.render(1).is_ok());
+    // a textured matte splits the frame into two layers: the output is not the single layer one
+    let layered = rig(&[("warping", "1")]).with_layer("fg1_matte", matte.clone());
+    assert_ne!(layered.render(1).unwrap(), plain.render(1).unwrap());
+    // the Source display copies the source: the matte changes nothing there
+    let source = |r: Rig| r.render(1).unwrap();
+    assert_eq!(source(rig(&[("warping", "1"), ("display", "2")]).with_layer("fg1_matte", matte.clone())), source(rig(&[("warping", "1"), ("display", "2")])));
     // FG2 without FG1 is ignored (the probe loop stops at the first empty layer)
     let r = rig(&[("warping", "1")]).with_layer("fg2_matte", matte.clone());
-    assert!(r.render(1).is_ok());
-    assert_eq!(
-        glue::FG_UNSUPPORTED,
-        "a FG Matte layer is set: the multi layer path (one flow per layer, the Vectors layers \
-         loaded once per layer, mattes, Main_BG compositing) is not implemented; remove the FG Matte layers (this \
-         render handles the single layer case only)"
-    );
+    assert_eq!(r.render(1).unwrap(), plain.render(1).unwrap());
+}
+
+#[test]
+fn an_all_black_fg_matte_gives_the_single_layer_render_with_the_inverse_warp() {
+    // FG1's matte is 0 everywhere: its layer image is transparent and its tracking matte 0 (every vector a hole),
+    // while Main_BG's tracking matte is 1 (the matte step changes nothing), so with the inverse warp (no fill) the
+    // layered render is the single layer one bit for bit, between frames and on them, for every Frame Interp
+    let black: Vec<fx_core::Frame> = (0..8).map(|_| fx_core::Frame::new(W, H, Depth::U8)).collect();
+    let black = black
+        .into_iter()
+        .map(|mut f| {
+            if let fx_core::Pixels::U8(px) = &mut f.pixels {
+                px.fill([0, 0, 0, 255]);
+            }
+            f
+        })
+        .collect::<Vec<_>>();
+    for interp in ["1", "2", "3"] {
+        for blur in ["0", "1"] {
+            let params = [("warping", "1"), ("frame_interp", interp), ("blur_compensation", blur)];
+            let plain = rig(&params);
+            let layered = rig(&params).with_layer("fg1_matte", black.clone());
+            for n in [1u64, 2, 3] {
+                assert_eq!(layered.render(n).unwrap(), plain.render(n).unwrap(), "interp {interp} blur {blur} frame {n}");
+            }
+        }
+    }
 }
 
 #[test]

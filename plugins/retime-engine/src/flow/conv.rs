@@ -19,6 +19,15 @@
 //!
 //! The border sums of the multi channel case use the same sequential chain as the 1 channel case:
 //! `num = (num + xr*wr) + xl*wl`.
+//!
+//! The `_wrapx` variants ([`convolve_wrapx`], [`blur_gaussian_wrapx`], [`blur5_wrapx`]) are the
+//! horizontal wrap-around (360) mode of the hole fill (parity gap G6; its
+//! arithmetic is U): the horizontal pass is circular, every element takes the interior chain
+//! above with its tap indices taken modulo the line length (`x[(i+j) mod len]`, Euclidean, so a
+//! kernel longer than the line wraps more than once), with no border renormalisation and no
+//! `-1.0` padding test because no tap is outside the line. The vertical pass is the one above,
+//! unchanged. An element whose taps all lie inside the line is computed by the same interior
+//! code as the plain pass, so it equals the plain pass bit for bit.
 
 use rayon::prelude::*;
 
@@ -127,22 +136,63 @@ fn hrow<const C: usize>(x: &[f32], out: &mut [f32], len: usize, k: &[f32]) {
         border(i, out);
     }
     if interior > 0 {
-        let a = head * C;
-        let b = (head + interior) * C;
-        let k0 = k[0];
-        for t in a..b {
-            out[t] = x[t] * k0;
-        }
-        for j in (1..n).rev() {
-            let off = j * C;
-            let kj = k[j];
-            for t in a..b {
-                out[t] = out[t] + (x[t + off] + x[t - off]) * kj;
-            }
-        }
+        interior_run::<C>(x, out, head, head + interior, k);
     }
     for i in (head + interior)..len {
         border(i, out);
+    }
+}
+
+/// The interior chain of the pixels `a..b` of a row (pixels whose taps all lie inside the line):
+/// `s = x[i] * k[0]`, then for `j = n-1` down to 1 `s = s + (x[i+j] + x[i-j]) * k[j]`, every
+/// channel of a pixel on its own.
+#[inline(always)]
+fn interior_run<const C: usize>(x: &[f32], out: &mut [f32], a: usize, b: usize, k: &[f32]) {
+    let n = k.len();
+    let (a, b) = (a * C, b * C);
+    let k0 = k[0];
+    for t in a..b {
+        out[t] = x[t] * k0;
+    }
+    for j in (1..n).rev() {
+        let off = j * C;
+        let kj = k[j];
+        for t in a..b {
+            out[t] = out[t] + (x[t + off] + x[t - off]) * kj;
+        }
+    }
+}
+
+/// One row of the circular horizontal pass (the `_wrapx` variants, see the module header): the
+/// pixels of [`hrow`]'s interior run the same interior code, every other pixel the same chain with
+/// its tap indices taken modulo `len`: `s = x[i] * k[0]`, then for `j = n-1` down to 1
+/// `s = s + (x[(i+j) mod len] + x[(i-j) mod len]) * k[j]` (right tap first). Single precision,
+/// every operation rounded on its own.
+fn hrow_wrapx<const C: usize>(x: &[f32], out: &mut [f32], len: usize, k: &[f32]) {
+    let n = k.len();
+    let head = n.min(len);
+    let interior = len.saturating_sub(2 * n);
+    let wrapped = |i: usize, out: &mut [f32]| {
+        for c in 0..C {
+            let mut s = x[i * C + c] * k[0];
+            let mut j = n;
+            while j > 1 {
+                j -= 1;
+                let r = (i + j) % len;
+                let l = (i as isize - j as isize).rem_euclid(len as isize) as usize;
+                s = s + (x[r * C + c] + x[l * C + c]) * k[j];
+            }
+            out[i * C + c] = s;
+        }
+    };
+    for i in 0..head {
+        wrapped(i, out);
+    }
+    if interior > 0 {
+        interior_run::<C>(x, out, head, head + interior, k);
+    }
+    for i in (head + interior)..len {
+        wrapped(i, out);
     }
 }
 
@@ -155,6 +205,17 @@ fn hpass<const C: usize>(src: &[f32], dst: &mut [f32], w: usize, k: &[f32]) {
     dst.par_chunks_mut(row)
         .zip(src.par_chunks(row))
         .for_each(|(d, s)| hrow::<C>(s, d, w, k));
+}
+
+/// The circular horizontal pass of the whole image ([`hrow_wrapx`]), rows in parallel.
+fn hpass_wrapx<const C: usize>(src: &[f32], dst: &mut [f32], w: usize, k: &[f32]) {
+    let row = w * C;
+    if row == 0 {
+        return;
+    }
+    dst.par_chunks_mut(row)
+        .zip(src.par_chunks(row))
+        .for_each(|(d, s)| hrow_wrapx::<C>(s, d, w, k));
 }
 
 /// Vertical pass: output row `y` of an image of `h` rows and `w` pixels.
@@ -237,6 +298,47 @@ pub(crate) fn blur_gaussian(data: &mut [f32], w: usize, h: usize, c: usize, r: f
 /// The 5 tap pyramid filter (`[1 4 6 4 1] / 16`) on a 1 channel image.
 pub(crate) fn blur5(data: &mut [f32], w: usize, h: usize) {
     convolve(data, w, h, 1, &BINOMIAL5);
+}
+
+fn convolve_wrapx_c<const C: usize>(data: &mut [f32], w: usize, h: usize, k: &[f32]) {
+    if data.is_empty() || k.is_empty() {
+        return;
+    }
+    let mut tmp = vec![0.0f32; data.len()];
+    hpass_wrapx::<C>(data, &mut tmp, w, k);
+    vpass::<C>(&tmp, data, w, h, k);
+}
+
+/// [`convolve`] in the horizontal wrap-around mode (G6, U): the circular horizontal pass over all
+/// rows (tap indices modulo the width, no renormalisation; see the module header), then the
+/// unchanged vertical pass. Precision: the interior chain of [`convolve`] per element, single
+/// precision, no fused multiply add; rows run through rayon row chunks, so the result does not
+/// depend on the thread count. Columns whose horizontal taps all lie inside the row
+/// (`n <= x < w - n` for a half kernel of `n` taps) equal [`convolve`] bit for bit.
+pub(crate) fn convolve_wrapx(data: &mut [f32], w: usize, h: usize, c: usize, k: &[f32]) {
+    assert_eq!(data.len(), w * h * c);
+    match c {
+        1 => convolve_wrapx_c::<1>(data, w, h, k),
+        2 => convolve_wrapx_c::<2>(data, w, h, k),
+        3 => convolve_wrapx_c::<3>(data, w, h, k),
+        _ => panic!("convolve: {c} channels are not used by the solver"),
+    }
+}
+
+/// [`blur_gaussian`] in the horizontal wrap-around mode: the same kernel through
+/// [`convolve_wrapx`]; radii below `BLUR_RADIUS_EPS` do nothing.
+pub(crate) fn blur_gaussian_wrapx(data: &mut [f32], w: usize, h: usize, c: usize, r: f32) {
+    if (r as f64) < BLUR_RADIUS_EPS {
+        return;
+    }
+    let k = gaussian_kernel(r);
+    convolve_wrapx(data, w, h, c, &k);
+}
+
+/// [`blur5`] in the horizontal wrap-around mode: the 5 tap pyramid filter through
+/// [`convolve_wrapx`] on a 1 channel image.
+pub(crate) fn blur5_wrapx(data: &mut [f32], w: usize, h: usize) {
+    convolve_wrapx(data, w, h, 1, &BINOMIAL5);
 }
 
 #[cfg(test)]
@@ -397,5 +499,204 @@ mod tests {
         // 1D kernel [1 4 6 4 1]/16 squared, times 16 -> 6*6/16 = 2.25 at the centre
         assert_eq!(d[4 * w + 4], 16.0 * 0.375 * 0.375);
         assert_eq!(d[4 * w + 5], 16.0 * 0.25 * 0.375);
+    }
+
+    // --------------------------------------------------------------------------------------------
+    // the circular horizontal pass (`_wrapx`)
+    // --------------------------------------------------------------------------------------------
+
+    fn noise(n: usize, seed: u32) -> Vec<f32> {
+        let mut s = seed;
+        (0..n)
+            .map(|_| {
+                s = s.wrapping_mul(1664525).wrapping_add(1013904223);
+                (s >> 8) as f32 / 65536.0 - 128.0
+            })
+            .collect()
+    }
+
+    fn kernels() -> Vec<Vec<f32>> {
+        vec![BINOMIAL5.to_vec(), gaussian_kernel(2.0), gaussian_kernel(5.0), gaussian_kernel(7.0)]
+    }
+
+    #[test]
+    fn wrapx_rows_equal_the_plain_rows_where_no_tap_wraps() {
+        for k in kernels() {
+            let n = k.len();
+            for len in [2 * n + 1, 2 * n + 7, 61] {
+                for c in 1..=3usize {
+                    let x = noise(len * c, (len * 7 + c) as u32);
+                    let mut a = vec![0.0f32; len * c];
+                    let mut b = vec![0.0f32; len * c];
+                    match c {
+                        1 => {
+                            hrow::<1>(&x, &mut a, len, &k);
+                            hrow_wrapx::<1>(&x, &mut b, len, &k);
+                        }
+                        2 => {
+                            hrow::<2>(&x, &mut a, len, &k);
+                            hrow_wrapx::<2>(&x, &mut b, len, &k);
+                        }
+                        _ => {
+                            hrow::<3>(&x, &mut a, len, &k);
+                            hrow_wrapx::<3>(&x, &mut b, len, &k);
+                        }
+                    }
+                    assert_eq!(bits(&a[n * c..(len - n) * c]), bits(&b[n * c..(len - n) * c]), "n {n} len {len} c {c}");
+                    // the borders do differ: the plain pass renormalises, the circular one continues
+                    assert_ne!(bits(&a[..c]), bits(&b[..c]), "n {n} len {len} c {c}");
+                }
+            }
+        }
+        // and so do the whole convolutions on the columns whose taps stay inside
+        let (w, h) = (40usize, 23usize);
+        for k in kernels() {
+            let n = k.len();
+            for c in 1..=3usize {
+                let src = noise(w * h * c, 99 + c as u32);
+                let (mut a, mut b) = (src.clone(), src.clone());
+                convolve(&mut a, w, h, c, &k);
+                convolve_wrapx(&mut b, w, h, c, &k);
+                for y in 0..h {
+                    let r = y * w * c;
+                    assert_eq!(bits(&a[r + n * c..r + (w - n) * c]), bits(&b[r + n * c..r + (w - n) * c]), "row {y} n {n} c {c}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn the_circular_pass_commutes_with_a_rotation_of_the_row() {
+        // every pixel is the same chain over its circular neighbourhood, so rotating the input by s
+        // rotates the output by s, bit for bit, for every length (kernels longer than the row too)
+        for k in kernels() {
+            for len in 1..=20usize {
+                let x = noise(len, len as u32);
+                let mut out = vec![0.0f32; len];
+                hrow_wrapx::<1>(&x, &mut out, len, &k);
+                for s in 0..len {
+                    let xr: Vec<f32> = (0..len).map(|i| x[(i + s) % len]).collect();
+                    let mut or = vec![0.0f32; len];
+                    hrow_wrapx::<1>(&xr, &mut or, len, &k);
+                    let want: Vec<f32> = (0..len).map(|i| out[(i + s) % len]).collect();
+                    assert_eq!(bits(&or), bits(&want), "len {len} shift {s} n {}", k.len());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn circular_border_pixels_by_hand() {
+        let k = [0.5f32, 0.25, 0.125];
+        let x = [1.0f32, 2.0, 4.0, 8.0, 16.0];
+        let mut out = [0.0f32; 5];
+        hrow_wrapx::<1>(&x, &mut out, 5, &k);
+        // pixel 0: right taps 2.0 (j=1), 4.0 (j=2); left taps 16.0 (j=1), 8.0 (j=2); j from 2 down
+        let p0 = (1.0f32 * 0.5 + (4.0 + 8.0) * 0.125) + (2.0 + 16.0) * 0.25;
+        assert_eq!(out[0].to_bits(), p0.to_bits());
+        // pixel 4: right taps 1.0 (j=1), 2.0 (j=2); left taps 8.0, 4.0
+        let p4 = (16.0f32 * 0.5 + (2.0 + 4.0) * 0.125) + (1.0 + 8.0) * 0.25;
+        assert_eq!(out[4].to_bits(), p4.to_bits());
+        // a line of 2: the taps wrap more than once, j = 2 lands on the pixel itself
+        let mut o2 = [0.0f32; 2];
+        hrow_wrapx::<1>(&[3.0, 5.0], &mut o2, 2, &k);
+        assert_eq!(o2[0].to_bits(), ((3.0f32 * 0.5 + (3.0 + 3.0) * 0.125) + (5.0 + 5.0) * 0.25).to_bits());
+        // a line of 1: every tap is the pixel itself
+        let mut o1 = [0.0f32; 1];
+        hrow_wrapx::<1>(&[7.0], &mut o1, 1, &k);
+        assert_eq!(o1[0].to_bits(), ((7.0f32 * 0.5 + (7.0 + 7.0) * 0.125) + (7.0 + 7.0) * 0.25).to_bits());
+        // no -1.0 test in the circular pass: a -1.0 sample of a two channel row is kept
+        let x2: Vec<f32> = vec![1.0, 9.0, -1.0, 9.0, 3.0, 9.0, 4.0, 9.0, 5.0, 9.0];
+        let mut o = vec![0.0f32; 10];
+        hrow_wrapx::<2>(&x2, &mut o, 5, &k);
+        let want = (1.0f32 * 0.5 + (3.0 + 4.0) * 0.125) + (-1.0 + 5.0) * 0.25;
+        assert_eq!(o[0].to_bits(), want.to_bits());
+    }
+
+    #[test]
+    fn a_constant_row_stays_one_value_without_renormalisation() {
+        // every pixel of a constant row takes the same chain over equal taps, borders included
+        let k = gaussian_kernel(5.0);
+        for len in [1usize, 3, 12, 40] {
+            let x = vec![0.7f32; len];
+            let mut out = vec![0.0f32; len];
+            hrow_wrapx::<1>(&x, &mut out, len, &k);
+            assert!(out.iter().all(|v| v.to_bits() == out[0].to_bits()), "len {len}");
+            assert!((out[0] - 0.7).abs() < 1e-6);
+        }
+    }
+
+    #[test]
+    fn the_vertical_pass_stays_renormalised_and_the_horizontal_one_wraps() {
+        let (w, h) = (24usize, 30usize);
+        let k = gaussian_kernel(5.0);
+        let n = k.len();
+        let base = noise(w * h, 5);
+        let mut a = base.clone();
+        convolve_wrapx(&mut a, w, h, 1, &k);
+        // changing the bottom rows leaves the top rows alone (no vertical wrap) ...
+        let mut low = base.clone();
+        for v in low[(h - 3) * w..].iter_mut() {
+            *v += 50.0;
+        }
+        convolve_wrapx(&mut low, w, h, 1, &k);
+        assert_eq!(bits(&a[..(h - 3 - n) * w]), bits(&low[..(h - 3 - n) * w]));
+        // ... while changing the last column reaches the first one (horizontal wrap)
+        let mut right = base.clone();
+        for y in 0..h {
+            right[y * w + w - 1] += 50.0;
+        }
+        convolve_wrapx(&mut right, w, h, 1, &k);
+        assert!((0..h).all(|y| right[y * w] != a[y * w]));
+        // the vertical pass is the plain one: a single column image (w = 1 wraps onto itself)
+        // through convolve_wrapx equals the plain vertical pass of its horizontal result
+        let col = noise(h, 6);
+        let mut c1 = col.clone();
+        convolve_wrapx(&mut c1, 1, h, 1, &k);
+        let mut t = vec![0.0f32; h];
+        hpass_wrapx::<1>(&col, &mut t, 1, &k);
+        let mut c2 = vec![0.0f32; h];
+        vpass::<1>(&t, &mut c2, 1, h, &k);
+        assert_eq!(bits(&c1), bits(&c2));
+    }
+
+    #[test]
+    fn wrapx_convolution_model_fixtures_are_reproduced_bit_for_bit() {
+        let mut n = 0;
+        for c in crate::holefill::tests::load_wrap_cases() {
+            let crate::holefill::tests::WrapCase::Conv { c, w, h, radius, data, out } = c else { continue };
+            let mut got = data.clone();
+            if radius == 0.0 {
+                convolve_wrapx(&mut got, w, h, c, &BINOMIAL5);
+                if c == 1 {
+                    let mut g2 = data.clone();
+                    blur5_wrapx(&mut g2, w, h);
+                    assert_eq!(bits(&g2), bits(&got));
+                }
+            } else {
+                let k = gaussian_kernel(radius);
+                convolve_wrapx(&mut got, w, h, c, &k);
+                if c == 1 {
+                    let mut g2 = data.clone();
+                    blur_gaussian_wrapx(&mut g2, w, h, 1, radius);
+                    assert_eq!(bits(&g2), bits(&got));
+                }
+            }
+            assert_eq!(bits(&got), bits(&out), "{c} channels {w}x{h} radius {radius}");
+            n += 1;
+        }
+        assert!(n >= 9, "{n} convolution cases");
+    }
+
+    #[test]
+    fn wrapx_convolution_is_identical_for_one_and_four_threads() {
+        let (w, h) = (77usize, 41usize);
+        let src = noise(w * h * 2, 8);
+        let run = |threads: usize| {
+            let mut d = src.clone();
+            rayon::ThreadPoolBuilder::new().num_threads(threads).build().unwrap().install(|| blur_gaussian_wrapx(&mut d, w, h, 2, 7.0));
+            d
+        };
+        assert_eq!(bits(&run(1)), bits(&run(4)));
     }
 }

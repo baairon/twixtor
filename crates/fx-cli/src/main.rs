@@ -3,6 +3,7 @@
 mod apply;
 mod cli;
 mod clip;
+mod devices;
 mod error;
 mod list;
 mod registry;
@@ -25,6 +26,7 @@ fn run() -> Result<(), CliError> {
         Command::Help => print(cli::USAGE),
         Command::Version => print(&format!("vfx {}", env!("CARGO_PKG_VERSION"))),
         Command::List { json, all } => list::run(json, all, &mut io::stdout().lock()),
+        Command::Devices { json } => devices::run(json, &mut io::stdout().lock()),
         Command::Apply(args) => apply::run(args),
     }
 }

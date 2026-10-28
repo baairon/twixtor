@@ -258,3 +258,58 @@ fn max_displace_is_the_16_16_value_at_the_given_time() {
     assert_eq!(vectorin::vec_scale(&curves(&[]), 0), (1.0, 1.0));
     assert_eq!(vectorin::vec_scale(&curves(&[("vec_scale_x", "-2.5"), ("vec_scale_y", "0.3")]), 0), (-2.5, fixed_reader(float_to_fixed(0.3), 1.0)));
 }
+
+#[test]
+fn each_layered_load_is_stepped_by_the_matte_of_its_own_frame() {
+    // rule G1e: F_AB is loaded from Vectors: Next at T(A) and stepped by the layer's matte AT A, F_BA from
+    // Vectors: Prev at T(B) by its matte AT B. The vector layers hold one flow on the left half and another on the
+    // right half; the layer's matte covers the left half at A and the right half at B. F_AB keeps the left half's
+    // vectors exactly and its holes (the right half) take them from the fill; F_BA the other way round
+    let (w, h) = (8usize, 4usize);
+    let split = |left: [f32; 2], right: [f32; 2]| {
+        let mut flow = FlowField::new(w, h);
+        for y in 0..h {
+            for x in 0..w {
+                flow.set(x, y, if x < w / 2 { left } else { right });
+            }
+        }
+        retime_engine::vectors::encode_vectors_image(w, h, retime_engine::image::Fmt::U8, &flow, 127.0).unwrap().to_frame()
+    };
+    let next: Vec<Frame> = (0..12).map(|_| split([3.0, 1.0], [-2.0, 0.0])).collect();
+    let prev: Vec<Frame> = (0..12).map(|_| split([-3.0, -1.0], [2.0, -1.0])).collect();
+    let r = Rig::new(vec![Frame::new(w, h, Depth::U8)], &[("vectors_max_displace", "127")]).with_layer("vectors_next", next).with_layer("vectors_prev", prev);
+    let half = |left: bool| retime_engine::matte::Matte { width: w, height: h, data: (0..w * h).map(|i| if (i % w < w / 2) == left { 1.0 } else { 0.0 }).collect() };
+    let (at_a, at_b) = (half(true), half(false));
+    let cx = r.cx(0);
+    let env = r.env();
+    let s = glue::read_settings(&cx, &env).unwrap().engine;
+    let map = VectorsInTimeMap::new(CurveParams04::new(env.params).unwrap(), s.rates, s.current_time);
+    let mattes = retime_engine::layers::LayerMattes { at_a: &at_a, at_b: &at_b };
+    let load = |threads: usize| {
+        rayon::ThreadPoolBuilder::new().num_threads(threads).build().unwrap().install(|| {
+            let map = VectorsInTimeMap::new(CurveParams04::new(env.params).unwrap(), s.rates, s.current_time);
+            vectorin::load_layer_flows(&env, &s, &map, &selection(3), true, true, &mattes).unwrap()
+        })
+    };
+    let f = load(1);
+    assert_eq!(load(4), f, "1 and 4 threads");
+    let (ab, ba) = (f.f_ab.unwrap(), f.f_ba.unwrap());
+    let near = |v: [f32; 2], want: [f32; 2]| (v[0] - want[0]).abs() < 1e-3 && (v[1] - want[1]).abs() < 1e-3;
+    for y in 0..h {
+        for x in 0..w {
+            let left = x < w / 2;
+            let (vab, vba) = (ab.at(x, y), ba.at(x, y));
+            if left {
+                assert_eq!(vab, [3.0, 1.0], "F_AB ({x}, {y}): inside the matte at A, as loaded");
+                assert!(near(vba, [2.0, -1.0]), "F_BA ({x}, {y}): a hole of the matte at B, filled: {vba:?}");
+            } else {
+                assert!(near(vab, [3.0, 1.0]), "F_AB ({x}, {y}): a hole of the matte at A, filled: {vab:?}");
+                assert_eq!(vba, [2.0, -1.0], "F_BA ({x}, {y}): inside the matte at B, as loaded");
+            }
+        }
+    }
+    // the same mattes the other way round give the other halves
+    let swapped = retime_engine::layers::LayerMattes { at_a: &at_b, at_b: &at_a };
+    let g = vectorin::load_layer_flows(&env, &s, &map, &selection(3), true, true, &swapped).unwrap();
+    assert!(near(g.f_ab.unwrap().at(0, 0), [-2.0, 0.0]) && near(g.f_ba.unwrap().at(w - 1, 0), [-3.0, -1.0]));
+}

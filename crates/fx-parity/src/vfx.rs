@@ -162,6 +162,12 @@ impl Vfx {
 
     /// Runs one temporal case from the clip files of `testset` and returns the output clip.
     pub fn apply_clip(&self, case: &Case, testset: &Path, threads: Threads) -> Result<Vec<u8>, String> {
+        self.apply_clip_noted(case, testset, threads).map(|(clip, _)| clip)
+    }
+
+    /// [`Vfx::apply_clip`], and the `vfx: note:` lines the run printed on stderr (the open parity
+    /// gaps its settings reached), in the order printed.
+    pub fn apply_clip_noted(&self, case: &Case, testset: &Path, threads: Threads) -> Result<(Vec<u8>, Vec<String>), String> {
         let mut cmd = Command::new(&self.path);
         cmd.args(clip_args(case, testset));
         match threads {
@@ -181,7 +187,7 @@ impl Vfx {
         .wait_with_output()
         .map_err(|e| format!("waiting for vfx failed: {e}"))?;
         if out.status.success() {
-            Ok(out.stdout)
+            Ok((out.stdout, note_lines(&out.stderr)))
         } else {
             Err(format!("vfx {}", failure(&out.status.code(), &out.stderr)))
         }
@@ -205,9 +211,29 @@ impl Vfx {
     }
 }
 
-/// "exited with code 3: <first stderr line>"
+/// The `vfx: note:` lines of a run's stderr, trimmed, in order.
+pub fn note_lines(stderr: &[u8]) -> Vec<String> {
+    String::from_utf8_lossy(stderr).lines().map(str::trim).filter(|l| l.starts_with("vfx: note:")).map(str::to_string).collect()
+}
+
+/// The gap id of a note line, `vfx: note: <effect>: <id> <title>: ...`; None for any other line.
+pub fn note_gap(line: &str) -> Option<&str> {
+    let rest = line.trim().strip_prefix("vfx: note:")?.trim_start();
+    let (_effect, rest) = rest.split_once(": ")?;
+    rest.split_whitespace().next()
+}
+
+/// "exited with code 3: <the `vfx: error:` line>". Without one, the first stderr line that is not
+/// a `vfx: note:` line (the notes of open parity gaps print before an error that ends a run).
 fn failure(code: &Option<i32>, stderr: &[u8]) -> String {
-    let line = String::from_utf8_lossy(stderr).lines().next().unwrap_or("").trim().to_string();
+    let text = String::from_utf8_lossy(stderr);
+    let line = text
+        .lines()
+        .find(|l| l.trim_start().starts_with("vfx: error:"))
+        .or_else(|| text.lines().find(|l| !l.trim_start().starts_with("vfx: note:")))
+        .unwrap_or("")
+        .trim()
+        .to_string();
     let how = match code {
         Some(c) => format!("exited with code {c}"),
         None => "was killed".to_string(),
@@ -241,6 +267,7 @@ mod tests {
             frames: 12,
             fps: Some("30000/1001".into()),
             layers: BTreeMap::from([("overlay".to_string(), "inputs/noisefx-16x12.d8.f12.rgba".to_string())]),
+            family: None,
         }
     }
 
@@ -253,6 +280,33 @@ mod tests {
         assert_eq!(failure(&Some(3), b"vfx: error: nope\nmore\n"), "exited with code 3: vfx: error: nope");
         assert_eq!(failure(&Some(4), b""), "exited with code 4");
         assert_eq!(failure(&None, b"x"), "was killed: x");
+    }
+
+    #[test]
+    fn failure_skips_notes() {
+        let note = "vfx: note: retime-fgbg: G1 matte shrink tail: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)";
+        let both = format!("{note}\nvfx: error: frame 3: unsupported: boom\n");
+        assert_eq!(failure(&Some(3), both.as_bytes()), "exited with code 3: vfx: error: frame 3: unsupported: boom");
+        // the error line wins wherever it is, and a stray line before it does not
+        let stray = format!("thread note\n{note}\nvfx: error: frame 1: boom\n");
+        assert_eq!(failure(&Some(3), stray.as_bytes()), "exited with code 3: vfx: error: frame 1: boom");
+        // no error line: the first line that is not a note, or nothing at all
+        assert_eq!(failure(&None, format!("{note}\n").as_bytes()), "was killed");
+        assert_eq!(failure(&Some(101), format!("{note}\nsomething else\n").as_bytes()), "exited with code 101: something else");
+    }
+
+    #[test]
+    fn note_lines_are_kept_and_read_for_their_gap() {
+        let note = "vfx: note: retime-fgbg: G1b mask-aware block matching cost: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)";
+        let err = format!("progress\n  {note}\nvfx: note: create-vectors: G4 four Debug view compositions: a stated rule\nother\n");
+        let lines = note_lines(err.as_bytes());
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0], note);
+        assert_eq!(note_gap(&lines[0]), Some("G1b"));
+        assert_eq!(note_gap(&lines[1]), Some("G4"));
+        assert_eq!(note_gap("vfx: error: frame 1: boom"), None);
+        assert_eq!(note_gap("vfx: note: no effect part"), None);
+        assert!(note_lines(b"").is_empty());
     }
 
     #[test]

@@ -1,22 +1,30 @@
 //! Hand rolled argument parsing for `vfx`.
 
 use crate::error::CliError;
-use fx_core::{Depth, FieldOrder, Quality, Rational};
+use fx_core::{Depth, DeviceRequest, FieldOrder, Quality, Rational};
 use std::path::PathBuf;
 
 pub const USAGE: &str = "\
 usage:
   vfx list [--json] [--all]
+  vfx devices [--json]
   vfx apply <effect> --width W --height H --depth 8|16|32 [--fps N[/D]]
             [--param ID=VALUE ...] [--in FILE] [--out FILE]
             [--frames N] [--time-scale TICKS] [--layer ID=FILE ...]
+            [--clip-fps N[/D]] [--layer-fps ID=N[/D] ...]
             [--quality draft|high] [--field none|upper|lower]
-            [--tmp-dir DIR] [--check]
+            [--device cpu|gpu|gpu=N] [--tmp-dir DIR] [--check]
   vfx --help | --version
 
 list prints the registered effects with their kind (frame or temporal), params
 and, for temporal effects, their extra layers. The hidden test family selftest
 is listed only with --all; its effects always run.
+
+devices prints the render devices --device can name: the CPU and every OpenCL
+device, probed without running a kernel, with whether it meets the device
+requirements. A GPU render gives the CPU's bytes: a device is used only after
+it passes a self-check, the first frame that uses it is checked against the
+CPU, and every stage it cannot serve runs on the CPU.
 
 apply reads raw frames and writes the same byte format: rgba for 8 bpc,
 rgba64le for 16, gbrapf32le for 32 (planar G B R A), straight alpha. `-` means
@@ -32,23 +40,40 @@ other frames. The input is a seekable clip, whole frames back to back:
 --in FILE, or stdin spooled to a temporary file in --tmp-dir (default: the OS
 temp dir) that is removed on every exit path. Frames are rendered in order and
 written as they finish.
-  --frames N         frames to render (default: the frames in the input clip;
-                     frames past the clip see an empty input)
+  --frames N         frames to render (default: the frames in the input clip,
+                     or at another --clip-fps the output frames that start
+                     inside the clip's duration; frames past the clip see an
+                     empty input)
   --time-scale T     ticks per second (default: 100 ticks per frame at integer
                      rates, num/den at NTSC style rates); a frame must last a
                      whole number of ticks
   --layer ID=FILE    an extra layer the effect lists, a raw clip of the same
                      size and depth; repeatable
+  --clip-fps N[/D]   the input clip's own frame rate, written like --fps
+                     (default: --fps): clip frame i covers i/R to (i+1)/R
+                     seconds, so footage at another rate is read by time and
+                     none of its frames is dropped or repeated beforehand
+  --layer-fps ID=N[/D]
+                     the same for the layer ID given with --layer (default:
+                     --fps); repeatable
+  --device D         cpu (the default), gpu (the best OpenCL device that passes
+                     the gate, else the CPU after one note) or gpu=N (device N
+                     as devices lists it, exit 3 when it cannot be used)
   --quality, --field render quality (default high) and field order (default none)
 
 --param ID=VALUE sets a parameter. A temporal effect also takes keyframes,
 VALUE = V@F;V@F with F the frame number (fractions allowed) and a trailing h
 on F for a hold key, for example --param 'speed_percent=100@0;50@24h'. A
 trailing e on F eases the key (zero slope there, S-shaped between two eased
-keys), for example --param 'speed_percent=100@0e;50@24e'. The ; ends a
-command in a shell, so quote the argument.
+keys), for example --param 'speed_percent=100@0e;50@24e'. Bezier handles
+follow F: iS/I shapes the segment into the key and oS/I the one out of it, S
+the speed in units per second and I the influence in percent (0.1 to 100),
+for example --param 'speed_percent=100@0o0/50;50@24i-30/50'. A key with
+handles takes no e, a hold key only an i handle, and only floats, angles and
+points take handles. The ; ends a command in a shell, so quote the argument.
 
---check validates the effect, parameters, layer ids and rates, then exits 0
+--check validates the effect, parameters, layer ids and rates (--clip-fps and
+--layer-fps included), then exits 0
 without reading or writing any file.
 
 exit codes: 0 ok, 2 usage, 3 unknown effect or bad param or effect failure,
@@ -59,6 +84,7 @@ pub enum Command {
     Help,
     Version,
     List { json: bool, all: bool },
+    Devices { json: bool },
     Apply(ApplyArgs),
 }
 
@@ -82,8 +108,14 @@ pub struct ApplyArgs {
     pub frames: Option<u64>,
     pub params: Vec<(String, String)>,
     pub layers: Vec<(String, PathBuf)>,
+    /// `--clip-fps`: the input clip's own rate; `None` reads it at the output rate (`--fps`).
+    pub clip_fps: Option<Rational>,
+    /// `--layer-fps ID=N[/D]`, in the order given; a layer not named here is read at `--fps`.
+    pub layer_fps: Vec<(String, Rational)>,
     pub quality: Option<Quality>,
     pub field: Option<FieldOrder>,
+    /// `--device`; `None` renders on the CPU, like `Some(DeviceRequest::Cpu)`.
+    pub device: Option<DeviceRequest>,
     pub tmp_dir: Option<PathBuf>,
     pub check: bool,
     pub input: Option<PathBuf>,
@@ -103,8 +135,11 @@ impl ApplyArgs {
             frames: None,
             params: Vec::new(),
             layers: Vec::new(),
+            clip_fps: None,
+            layer_fps: Vec::new(),
             quality: None,
             field: None,
+            device: None,
             tmp_dir: None,
             check: false,
             input: None,
@@ -127,6 +162,9 @@ impl ApplyArgs {
             (self.quality.is_some(), "--quality"),
             (self.field.is_some(), "--field"),
             (self.tmp_dir.is_some(), "--tmp-dir"),
+            (self.device.is_some(), "--device"),
+            (self.clip_fps.is_some(), "--clip-fps"),
+            (!self.layer_fps.is_empty(), "--layer-fps"),
         ] {
             if given {
                 flags.push(name);
@@ -145,6 +183,7 @@ pub fn parse<I: IntoIterator<Item = String>>(args: I) -> Result<Command, CliErro
         "-h" | "--help" | "help" => Ok(Command::Help),
         "-V" | "--version" => Ok(Command::Version),
         "list" => parse_list(it),
+        "devices" => parse_devices(it),
         "apply" => parse_apply(it),
         other => Err(CliError::usage(format!("unknown command `{other}`, try `vfx --help`"))),
     }
@@ -181,6 +220,23 @@ fn parse_list(it: impl Iterator<Item = String>) -> Result<Command, CliError> {
     Ok(Command::List { json, all })
 }
 
+fn parse_devices(it: impl Iterator<Item = String>) -> Result<Command, CliError> {
+    let mut json = false;
+    for arg in it {
+        match arg.as_str() {
+            "--json" => json = true,
+            "-h" | "--help" => return Ok(Command::Help),
+            other => return Err(CliError::usage(format!("unexpected argument `{other}` for devices"))),
+        }
+    }
+    Ok(Command::Devices { json })
+}
+
+fn parse_device(text: &str) -> Result<DeviceRequest, CliError> {
+    DeviceRequest::parse(text)
+        .ok_or_else(|| CliError::usage(format!("`--device` expects cpu, gpu or gpu=N, got `{text}`")))
+}
+
 fn parse_size(flag: &str, text: &str) -> Result<usize, CliError> {
     match text.trim().parse::<usize>() {
         Ok(n) if n > 0 => Ok(n),
@@ -198,6 +254,16 @@ fn parse_fps(text: &str) -> Result<FpsArg, CliError> {
             "`--fps` expects a positive rate such as 24, 29.97 or 30000/1001, got `{text}`"
         ))),
     }
+}
+
+/// An exact rate for `--clip-fps` and `--layer-fps`: the temporal grammar of `--fps` (an
+/// integer, a decimal of at most 6 places or `N/D`, above 0).
+fn parse_exact_rate(flag: &str, text: &str) -> Result<Rational, CliError> {
+    Rational::parse(text).map_err(|_| {
+        CliError::usage(format!(
+            "`{flag}` expects an exact positive rate such as 24, 29.97 or 30000/1001, got `{text}`"
+        ))
+    })
 }
 
 /// `ID=VALUE` pairs for `--param` and `--layer`; `flag` names the option in errors.
@@ -257,6 +323,18 @@ fn parse_apply(mut it: impl Iterator<Item = String>) -> Result<Command, CliError
                 }
                 a.layers.push((id.to_string(), PathBuf::from(file)));
             }
+            "--clip-fps" => a.clip_fps = Some(parse_exact_rate("--clip-fps", &value(&flag, inline, &mut it)?)?),
+            "--layer-fps" => {
+                let text = value(&flag, inline, &mut it)?;
+                let Some((id, rate)) = text.split_once('=').filter(|(id, _)| !id.is_empty()) else {
+                    return Err(CliError::usage(format!("`--layer-fps` expects ID=N[/D], got `{text}`")));
+                };
+                let rate = parse_exact_rate("--layer-fps", rate)?;
+                if a.layer_fps.iter().any(|(k, _)| k == id) {
+                    return Err(CliError::usage(format!("layer `{id}` given more than once to --layer-fps")));
+                }
+                a.layer_fps.push((id.to_string(), rate));
+            }
             "--quality" => {
                 let text = value(&flag, inline, &mut it)?;
                 a.quality = Some(match text.trim() {
@@ -278,6 +356,7 @@ fn parse_apply(mut it: impl Iterator<Item = String>) -> Result<Command, CliError
                     }
                 });
             }
+            "--device" => a.device = Some(parse_device(&value(&flag, inline, &mut it)?)?),
             "--tmp-dir" => a.tmp_dir = Some(PathBuf::from(value(&flag, inline, &mut it)?)),
             "--check" => a.check = true,
             "--in" => a.input = Some(PathBuf::from(value(&flag, inline, &mut it)?)),
@@ -368,6 +447,44 @@ mod tests {
     }
 
     #[test]
+    fn device_is_absent_by_default_and_parses_its_three_forms() {
+        let a = apply(&[]).unwrap();
+        assert_eq!(a.device, None);
+        assert!(a.temporal_only_flags().is_empty());
+        let device = |extra: &[&str]| apply(extra).unwrap().device;
+        assert_eq!(device(&["--device", "cpu"]), Some(DeviceRequest::Cpu));
+        assert_eq!(device(&["--device", "gpu"]), Some(DeviceRequest::Gpu));
+        assert_eq!(device(&["--device", "gpu=3"]), Some(DeviceRequest::GpuIndex(3)));
+        assert_eq!(device(&["--device=gpu=0"]), Some(DeviceRequest::GpuIndex(0)));
+        assert_eq!(device(&["--device", "cpu", "--device", "gpu"]), Some(DeviceRequest::Gpu), "the last one wins");
+        assert_eq!(apply(&["--device", "cpu"]).unwrap().temporal_only_flags(), ["--device"]);
+        for bad in [&["--device", "opencl"][..], &["--device", "gpu="], &["--device", "gpu=-1"], &["--device", "GPU"], &["--device", ""], &["--device"]] {
+            let err = apply(bad).unwrap_err();
+            assert_eq!(err.code(), 2, "{bad:?}");
+        }
+        assert_eq!(
+            apply(&["--device", "gpu=x"]).unwrap_err().to_string(),
+            "`--device` expects cpu, gpu or gpu=N, got `gpu=x`"
+        );
+    }
+
+    #[test]
+    fn devices_takes_json_only() {
+        assert_eq!(p(&["devices"]).unwrap(), Command::Devices { json: false });
+        assert_eq!(p(&["devices", "--json"]).unwrap(), Command::Devices { json: true });
+        assert_eq!(p(&["devices", "--help"]).unwrap(), Command::Help);
+        assert_eq!(code(&["devices", "--all"]), 2);
+        assert_eq!(code(&["devices", "cpu"]), 2);
+    }
+
+    #[test]
+    fn the_usage_text_names_the_device_flag_and_the_devices_command() {
+        for word in ["vfx devices [--json]", "[--device cpu|gpu|gpu=N]", "--device D", "passes"] {
+            assert!(USAGE.contains(word), "{word}");
+        }
+    }
+
+    #[test]
     fn temporal_options_parse() {
         let a = apply(&[
             "--frames", "12", "--time-scale=2400", "--layer", "overlay=o.raw", "--layer=alt=b.raw",
@@ -447,6 +564,46 @@ mod tests {
             &["apply", "e", "--width", "4", "--height", "4"],
         ] {
             assert_eq!(code(missing), 2, "{missing:?}");
+        }
+    }
+
+    #[test]
+    fn clip_and_layer_rates_parse_like_exact_fps_values() {
+        let a = apply(&[]).unwrap();
+        assert_eq!((a.clip_fps, a.layer_fps.is_empty()), (None, true), "absent by default");
+        let a = apply(&["--clip-fps", "60", "--layer-fps", "overlay=30000/1001", "--layer-fps=matte=25", "--clip-fps=29.97"]).unwrap();
+        assert_eq!(a.clip_fps, Some(Rational { num: 2997, den: 100 }), "the last --clip-fps wins");
+        assert_eq!(
+            a.layer_fps,
+            vec![("overlay".to_string(), Rational { num: 30000, den: 1001 }), ("matte".to_string(), Rational { num: 25, den: 1 })]
+        );
+        assert_eq!(a.temporal_only_flags(), ["--clip-fps", "--layer-fps"]);
+        assert_eq!(apply(&["--clip-fps", "120000/2002"]).unwrap().clip_fps, Some(Rational { num: 60000, den: 1001 }));
+        for bad in [
+            &["--clip-fps", "0"][..],
+            &["--clip-fps", "-24"],
+            &["--clip-fps", "24/0"],
+            &["--clip-fps", "29.97002997002997"],
+            &["--clip-fps", "x"],
+            &["--clip-fps", ""],
+            &["--clip-fps"],
+            &["--layer-fps", "overlay"],
+            &["--layer-fps", "=24"],
+            &["--layer-fps", "overlay=0"],
+            &["--layer-fps", "overlay=nan"],
+            &["--layer-fps", "overlay="],
+            &["--layer-fps", "a=24", "--layer-fps", "a=25"],
+        ] {
+            assert_eq!(apply(bad).unwrap_err().code(), 2, "{bad:?}");
+        }
+        assert_eq!(
+            apply(&["--clip-fps", "fast"]).unwrap_err().to_string(),
+            "`--clip-fps` expects an exact positive rate such as 24, 29.97 or 30000/1001, got `fast`"
+        );
+        assert_eq!(apply(&["--layer-fps", "a=24", "--layer-fps", "a=24"]).unwrap_err().to_string(), "layer `a` given more than once to --layer-fps");
+        assert_eq!(apply(&["--layer-fps", "a"]).unwrap_err().to_string(), "`--layer-fps` expects ID=N[/D], got `a`");
+        for word in ["[--clip-fps N[/D]] [--layer-fps ID=N[/D] ...]", "--clip-fps N[/D]   the input clip's own frame rate", "start\n                     inside the clip's duration"] {
+            assert!(USAGE.contains(word), "{word}");
         }
     }
 

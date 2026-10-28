@@ -4,23 +4,27 @@
 //! frames `A` and `B = A + 1` of the tracking layer when one is set; the output is always built
 //! from the retimed layer's frames. The steps are the solves ([`solve_flows`]), the warps and
 //! composition ([`compose_vectors`]) and the blur compensation tail. The "360 Video" checkbox is
-//! not the `is360` argument of the warps (they never wrap): it feeds the video range luma of the
-//! solver and selects the binary alpha Smart Blend variant.
+//! not the `is360` argument of the warps: it feeds the video range luma of the solver and selects
+//! the binary alpha Smart Blend variant. The engine's wrap-around (360) flag
+//! `EngineSettings::wrap_360` (retime-fgbg's `Track RGB+A`) is: it
+//! reaches `FlowSettings::wrap`, the inverse warps of code 0, the `is360` of the Smart Blend
+//! options (codes 1 and 2) and the blur tail ([`blur_compensation_wrap`]); the weighted Smart Blend
+//! and forward compositions and the Vectors In flow steps keep it off. With the flag off every
+//! call is the one this path made before the flag existed, bit for bit.
 
 use super::{issue_fill, Rendered};
 use crate::blend::blend;
 use crate::filters::sharpen_step;
-use crate::flow::{solve, solve_pair, FlowField, FlowPair, FlowSettings};
-use crate::forward::{
-    forward_warp_coverage, blend_forward, blend_forward_fill, nearest_forward, nearest_forward_fill, weighted_forward, weighted_forward_fill,
-};
+use crate::flow::{FlowField, FlowPair, FlowSettings};
+use crate::forward::{blend_forward_fill_on, blend_forward_on, nearest_forward_fill_on, nearest_forward_on, weighted_forward_fill_on, weighted_forward_on};
+use crate::stages::{Cpu, Stages};
 use crate::holefill::{fill_flow_holes, HoleMaskRef};
 use crate::host::{EngineHost, EngineSettings};
 use crate::image::{Fmt, Image, Samples, CHANNELS};
 use crate::smartblend::{blend_smart, nearest_smart, weighted_blend_smart, SmartOpts};
 use crate::timeline::Selection;
 use crate::vectors::{apply_vec_scale, decode_vectors_with_holes, HoleMask};
-use crate::warp::{blur_amount, blur_compensation, inv_warp, WarpOpts};
+use crate::warp::{blur_amount, blur_compensation_wrap, inv_warp, WarpOpts};
 use fx_core::{FxError, Result};
 
 #[cfg(test)]
@@ -60,14 +64,17 @@ pub fn nearest_uses_f_ab(wa: f32, code: i32) -> bool {
 }
 
 /// The settings that reach the solver for this render: the quality after the segment override,
-/// the render quality flag, the sensitivity, the two Prep flags and the "360 Video" checkbox as
-/// the video range luma. `Track RGB+A` is false in the retime.
+/// the render quality flag, the sensitivity, the two Prep flags, the "360 Video" checkbox as
+/// the video range luma and the engine's wrap-around flag `wrap_360` as `FlowSettings::wrap`
+/// (off it is the plain solve). `Track RGB+A` is never alpha in the luma in the retime
+/// (`track_alpha` false).
 pub fn flow_settings(settings: &EngineSettings, sel: &Selection) -> FlowSettings {
     let quality = u8::try_from(sel.vectors_quality).unwrap_or(u8::MAX);
     FlowSettings {
         prep_contrast_edge: settings.prep_contrast_edge,
         prep_delinearize: settings.prep_delinearize,
         video_range_luma: settings.video_360,
+        wrap: settings.wrap_360,
         ..FlowSettings::new(quality, settings.quality_high, settings.sensitivity)
     }
 }
@@ -82,7 +89,8 @@ pub fn flow_settings(settings: &EngineSettings, sel: &Selection) -> FlowSettings
 /// the Smart Blend composite, not the `is360` argument of the warps (see the module
 /// documentation). What the compositions themselves cannot do (a frame below 2 x 2, the forward
 /// warp geometry that writes outside the image) comes back from them as `FxError::Unsupported`
-/// with their own text.
+/// with their own text. The engine's wrap-around (360) flag `settings.wrap_360` is served (the
+/// module documentation says where it reaches).
 pub fn check_supported(settings: &EngineSettings, sel: &Selection) -> Result<()> {
     match settings.warp_mode {
         0..=3 => {}
@@ -101,12 +109,15 @@ pub fn check_supported(settings: &EngineSettings, sel: &Selection) -> Result<()>
 /// The pushed frame uses its OWN flow: `A` with `F_AB`, `B` with `F_BA`, Nearest the one flow
 /// [`nearest_uses_f_ab`] names (with code 2 or 3 it is `F_AB` for `wA >= 0.5`, the opposite of
 /// the inverse warps). Code 2 passes
-/// `SmartOpts { binary_alpha: "360 Video" checkbox (Blend only), is360: false }`; code 3 has no
-/// options. The blur compensation tail of [`compose_vectors`] follows as for the inverse warps.
+/// `SmartOpts { binary_alpha: "360 Video" checkbox (Blend only), is360: wrap_360 }` (the forward
+/// warp itself never wraps, its hole fill does; the weighted variant keeps the fill off); code 3
+/// has no options. The blur compensation tail of [`compose_vectors`] follows as for the inverse
+/// warps.
 fn compose_forward(settings: &EngineSettings, sel: &Selection, a: &Image, b: &Image, flows: &Flows, out: &mut Image) -> Result<()> {
     let wa = sel.wa;
     let fill = settings.warp_mode == 2;
-    let opts = SmartOpts { binary_alpha: settings.video_360, is360: false };
+    let opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360 };
+    let stages = settings.stages.get();
     match sel.interp {
         0 => {
             let flow = if nearest_uses_f_ab(wa, settings.warp_mode) {
@@ -115,19 +126,19 @@ fn compose_forward(settings: &EngineSettings, sel: &Selection, a: &Image, b: &Im
                 flows.f_ba.as_ref().ok_or_else(|| missing_flow("F_BA"))?
             };
             if fill {
-                nearest_forward_fill(out, a, b, flow, wa, opts)
+                nearest_forward_fill_on(stages, out, a, b, flow, wa, opts)
             } else {
-                nearest_forward(out, a, b, flow, wa)
+                nearest_forward_on(stages, out, a, b, flow, wa)
             }
         }
         1 | 2 => {
             let f_ab = flows.f_ab.as_ref().ok_or_else(|| missing_flow("F_AB"))?;
             let f_ba = flows.f_ba.as_ref().ok_or_else(|| missing_flow("F_BA"))?;
             match (sel.interp, fill) {
-                (1, true) => blend_forward_fill(out, a, f_ab, b, f_ba, wa, opts),
-                (1, false) => blend_forward(out, a, f_ab, b, f_ba, wa),
-                (_, true) => weighted_forward_fill(out, a, f_ab, b, f_ba, wa, opts),
-                (_, false) => weighted_forward(out, a, f_ab, b, f_ba, wa),
+                (1, true) => blend_forward_fill_on(stages, out, a, f_ab, b, f_ba, wa, opts),
+                (1, false) => blend_forward_on(stages, out, a, f_ab, b, f_ba, wa),
+                (_, true) => weighted_forward_fill_on(stages, out, a, f_ab, b, f_ba, wa, opts),
+                (_, false) => weighted_forward_on(stages, out, a, f_ab, b, f_ba, wa),
             }
         }
         other => Err(bad_interp(other)),
@@ -151,15 +162,16 @@ fn bad_interp(other: i32) -> FxError {
 pub fn solve_flows(settings: &EngineSettings, sel: &Selection, xa: &Image, xb: &Image) -> Result<Flows> {
     check_supported(settings, sel)?;
     let fs = flow_settings(settings, sel);
+    let stages = settings.stages.get();
     match sel.interp {
         0 => {
             if nearest_uses_f_ab(sel.wa, settings.warp_mode) {
-                Ok(Flows { f_ab: Some(solve(xa, xb, &fs)?), f_ba: None })
+                Ok(Flows { f_ab: Some(stages.solve(xa, xb, &fs)?), f_ba: None })
             } else {
-                Ok(Flows { f_ab: None, f_ba: Some(solve(xb, xa, &fs)?) })
+                Ok(Flows { f_ab: None, f_ba: Some(stages.solve(xb, xa, &fs)?) })
             }
         }
-        1 | 2 => Ok(Flows::pair(solve_pair(xa, xb, &fs)?)),
+        1 | 2 => Ok(Flows::pair(stages.solve_pair(xa, xb, &fs)?)),
         other => Err(bad_interp(other)),
     }
 }
@@ -176,8 +188,8 @@ fn missing_flow(which: &str) -> FxError {
 /// both.
 ///
 /// Code 0 is the inverse warp without coverage, with `frac = 1.0f - wA` in single precision and
-/// `W` the inverse warp with hold edges, mode 1 and `is360 = 0` ([`crate::warp::inv_warp`] with
-/// the default options):
+/// `W` the inverse warp with hold edges, mode 1 and `is360 = wrap_360` ([`crate::warp::inv_warp`]
+/// with the default options when the flag is off):
 /// * Nearest: `wA >= 0.5` gives `W(A, F_BA, 1 - wA)`, else `W(B, F_AB, wA)`; the warp writes the
 ///   output;
 /// * Blend: `tA = W(A, F_BA, frac)`, `tB = W(B, F_AB, wA)`, `out = blend(tA, tB, frac)`;
@@ -190,19 +202,21 @@ fn missing_flow(which: &str) -> FxError {
 /// `weighted_blend_smart`: the Smart Blend composite, or the binary alpha composite for Blend
 /// when the "360 Video" checkbox is set, the combined and inverted coverage, the pull-push hole
 /// fill). Codes 2 and 3 push the frames with the forward warp ([`compose_forward`]). The blur
-/// compensation tail ([`crate::warp::blur_compensation`]) runs last on the composed image, with
+/// compensation tail ([`blur_compensation_wrap`] with `wrap_360`, which is
+/// [`crate::warp::blur_compensation`] with the flag off) runs last on the composed image, with
 /// the flow `F_AB` (Blend, Weighted Blend) or the single flow (Nearest).
 pub fn compose_vectors(settings: &EngineSettings, sel: &Selection, a: &Image, b: &Image, flows: &Flows) -> Result<Image> {
     check_supported(settings, sel)?;
     let wa = sel.wa;
     // frac = 1.0f - wA, the position after frame A; the amount of A and the weight of B
     let frac = 1.0f32 - wa;
-    let opts = WarpOpts::default();
+    let opts = WarpOpts { is360: settings.wrap_360, ..WarpOpts::default() };
     let mut out = Image::new(a.width, a.height, a.fmt());
     let smart = settings.warp_mode == 1;
     // The Smart Blend compositions take the "360 Video" checkbox as `binary_alpha` (the binary
-    // alpha composite, Blend only); `is360` is false.
-    let smart_opts = SmartOpts { binary_alpha: settings.video_360, is360: false };
+    // alpha composite, Blend only) and the engine's wrap flag as `is360` (the weighted variant
+    // ignores it).
+    let smart_opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360 };
     if settings.warp_mode >= 2 {
         compose_forward(settings, sel, a, b, flows, &mut out)?;
     } else if smart {
@@ -263,7 +277,7 @@ pub fn compose_vectors(settings: &EngineSettings, sel: &Selection, a: &Image, b:
     }
     // 14.4: after the composition, with the flow F_AB (Nearest: the single flow)
     if let Some(flow) = flows.blur_flow() {
-        blur_compensation(&mut out, flow, sel.s0, sel.s1, settings.blur, settings.quality_high)?;
+        blur_compensation_wrap(&mut out, flow, sel.s0, sel.s1, settings.blur, settings.quality_high, settings.wrap_360)?;
     }
     Ok(out)
 }
@@ -290,7 +304,7 @@ pub(super) fn vector_path(settings: &EngineSettings, host: &dyn EngineHost, sel:
         None => (&a, &b),
     };
     let flows = solve_flows(settings, sel, xa, xb)?;
-    Ok(Rendered::Image(compose_vectors(settings, sel, &a, &b, &flows)?))
+    Ok(Rendered::Image(settings.stages.get().compose_vectors(settings, sel, &a, &b, &flows)?))
 }
 
 /// The flow field of one vector layer image: the encoded image is converted with `max_displace`
@@ -329,6 +343,11 @@ pub fn flow_from_vector_image(vec: &Image, max_displace: f32, scale: (f32, f32))
 /// the forward warp refuses (a flow below 2 x 2, the geometry that writes outside the image)
 /// comes back as its `FxError::Unsupported`.
 pub fn invert_flow(flow: &FlowField) -> Result<FlowField> {
+    invert_flow_on(&Cpu, flow)
+}
+
+/// [`invert_flow`] with the forward warp on `stages`.
+pub fn invert_flow_on(stages: &dyn Stages, flow: &FlowField) -> Result<FlowField> {
     let (w, h) = (flow.width, flow.height);
     if flow.data.len() != w * h * 2 {
         return Err(FxError::Mismatch("flow inversion: flow data length does not match its size".into()));
@@ -344,7 +363,7 @@ pub fn invert_flow(flow: &FlowField) -> Result<FlowField> {
         }
     }
     let mut pushed = Image::new(w, h, Fmt::F32);
-    let mut cov = forward_warp_coverage(&mut pushed, &t, flow, 1.0)?;
+    let mut cov = stages.forward_warp_coverage(&mut pushed, &t, flow, 1.0)?;
     cov.invert();
     let mut out = FlowField::new(w, h);
     if let Samples::F32(v) = &pushed.samples {
@@ -372,7 +391,7 @@ where
     if let Some(fill) = issue_fill(settings, host) {
         return Ok(fill);
     }
-    Ok(Rendered::Image(compose_vectors(settings, sel, &a, &b, &flows)?))
+    Ok(Rendered::Image(settings.stages.get().compose_vectors(settings, sel, &a, &b, &flows)?))
 }
 
 /// With exactly one flow loaded the other one is its inversion ([`invert_flow`]). Done lazily:
@@ -393,13 +412,13 @@ fn complete_flows(settings: &EngineSettings, sel: &Selection, flows: &mut Flows)
         (None, None) => Err(FxError::Mismatch("Vectors In: neither vector layer supplied a flow".into())),
         (None, Some(ba)) => {
             if need_ab {
-                flows.f_ab = Some(invert_flow(ba)?);
+                flows.f_ab = Some(invert_flow_on(settings.stages.get(), ba)?);
             }
             Ok(())
         }
         (Some(ab), None) => {
             if need_ba {
-                flows.f_ba = Some(invert_flow(ab)?);
+                flows.f_ba = Some(invert_flow_on(settings.stages.get(), ab)?);
             }
             Ok(())
         }

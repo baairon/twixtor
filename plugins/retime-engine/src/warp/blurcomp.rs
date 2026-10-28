@@ -4,8 +4,22 @@
 //! clamps it and either blurs along the flow (positive) or builds a flow directed unsharp mask
 //! (negative), using the motion blur primitive [`motion_blur`]; the post step is
 //! [`clear_rgb_where_transparent`].
+//!
+//! The wrap-around (360) variant ([`blur_compensation_wrap`] with `is360`, parity gap G6) has no
+//! established description (U). It is defined here by
+//! the most constrained reading: the same taps, weights, counts and stores as the plain leaves,
+//! with the tap x coordinate wrapped into `[0, W)` by the loops of the 360 inverse warp; the
+//! bilinear taps sample with the 360 sampler of the warp (`bilerp360`), the nearest taps read
+//! column `trunc(x)` of the wrapped coordinate (the tap's column modulo `W`). The y test, the
+//! flow lookup and the forward and backward tap order are those of the plain leaves. A pixel
+//! whose taps all stay inside the image (`0 <= x < W - 1`, `0 <= y < H - 1` for the bilinear
+//! taps, `0 <= x < W` for the nearest taps) comes out bit identical to the plain blur.
+//!
+//! Numerics: single precision in the written order, no fused multiply add, truncating stores as
+//! documented per function; rows run through rayon row chunks, so the result does not depend on
+//! the thread count.
 
-use super::{bilerp4, cvtt32, Flow, Pix};
+use super::{bilerp360, bilerp4, cvtt32, Flow, Pix, WRAP_LIMIT};
 use crate::flow::FlowField;
 use crate::image::{Image, Samples, CHANNELS};
 use fx_core::{par_rows, FxError, Result};
@@ -40,7 +54,7 @@ pub fn blur_amount(s0: f32, s1: f32, blur: f32) -> Option<f32> {
 ///
 /// Does nothing when the condition fails ([`blur_amount`] is `None`). Otherwise [`compensate`]
 /// runs on the amount and the result replaces `img` (it blurs into a temporary and copies it
-/// back). The 360 variant is not supported: see [`motion_blur`].
+/// back). The 360 variant is [`blur_compensation_wrap`]; this is its call with the flag off.
 pub fn blur_compensation(
     img: &mut Image,
     flow: &FlowField,
@@ -49,8 +63,26 @@ pub fn blur_compensation(
     blur: f32,
     hiq: bool,
 ) -> Result<()> {
+    blur_compensation_wrap(img, flow, s0, s1, blur, hiq, false)
+}
+
+/// [`blur_compensation`] with the engine's wrap-around (360) flag for the taps of the motion
+/// blur. `is360 == false` is the compensation above, bit for bit. With the flag the
+/// same chain runs (condition, clamp, positive blur and clear, or negative blur and lerp) with the
+/// wrapped taps of [`motion_blur`] (G6, U; see the module header); one whose condition fails, or
+/// whose clamped amount is below 1e-6, does nothing as without the flag.
+pub fn blur_compensation_wrap(
+    img: &mut Image,
+    flow: &FlowField,
+    s0: f32,
+    s1: f32,
+    blur: f32,
+    hiq: bool,
+    is360: bool,
+) -> Result<()> {
     match blur_amount(s0, s1, blur) {
-        Some(amount) => compensate(img, flow, amount, hiq),
+        Some(amount) if !is360 => compensate(img, flow, amount, hiq),
+        Some(amount) => compensate_wrap(img, flow, amount, hiq, true),
         None => Ok(()),
     }
 }
@@ -63,6 +95,11 @@ pub fn blur_compensation(
 /// so `img + (blur - img) * amount`: a flow directed unsharp mask of strength `|amount|`). The
 /// temporary then replaces `img`.
 pub fn compensate(img: &mut Image, flow: &FlowField, amount: f32, hiq: bool) -> Result<()> {
+    compensate_wrap(img, flow, amount, hiq, false)
+}
+
+/// [`compensate`] with the 360 flag of the motion blur taps.
+fn compensate_wrap(img: &mut Image, flow: &FlowField, amount: f32, hiq: bool, is360: bool) -> Result<()> {
     let mut amount = amount;
     if 20.0f32 < amount {
         amount = 20.0;
@@ -74,10 +111,10 @@ pub fn compensate(img: &mut Image, flow: &FlowField, amount: f32, hiq: bool) -> 
     }
     let mut tmp = Image::new(img.width, img.height, img.fmt());
     if 0.0f32 < amount {
-        motion_blur(&mut tmp, img, flow, amount, hiq, 0.5, false)?;
+        motion_blur(&mut tmp, img, flow, amount, hiq, 0.5, is360)?;
         clear_rgb_where_transparent(&mut tmp);
     } else {
-        motion_blur(&mut tmp, img, flow, 0.5, hiq, 0.5, false)?;
+        motion_blur(&mut tmp, img, flow, 0.5, hiq, 0.5, is360)?;
         crate::blend::lerp(&mut tmp, img, amount);
     }
     crate::blend::copy(img, &tmp);
@@ -115,8 +152,8 @@ pub fn clear_rgb_where_transparent(img: &mut Image) {
 
 /// The flow directed motion blur primitive, over the whole image.
 ///
-/// Variant selection: `hiq` picks the bilinear tap variant, otherwise the nearest tap variant.
-/// The 360 wrap variants are not supported: `is360` returns [`FxError::Unsupported`].
+/// Variant selection: `hiq` picks the bilinear tap variant, otherwise the nearest tap variant;
+/// `is360` picks the wrap-around taps of either (described after the plain ones).
 ///
 /// With `rx = flow.w1 / src.w1`, `ry = flow.h1 / src.h1`, `kx = (0.5 / rx) * amount`,
 /// `ky = (0.5 / ry) * amount`, `k = shutter * 2.0 - 1.0` (all f32), per pixel `(x, y)`:
@@ -136,9 +173,22 @@ pub fn clear_rgb_where_transparent(img: &mut Image) {
 ///   count only when inside, the backward taps ALWAYS count (the increment sits after the range
 ///   test in the backward loop). The centre of the nearest taps is `centre + 0.5`.
 ///
+/// * Wrap-around taps (`is360`, G6, U: the most constrained reading of a 360 variant of
+///   the leaves): the tap positions are accumulated exactly as above; per tap a copy of its x is
+///   wrapped into `[0, W)` by the loops of the 360 inverse warp (`while x < 0 { x += W }`, then
+///   `while W <= x { x -= W }`, single precision). Bilinear: a tap counts when `0 <= py < H` and
+///   adds `bilerp360(src, x, py)`, the 360 sampler of the inverse warp (right neighbour of the
+///   last column is column 0, the row below the last row is the last row shifted by half the
+///   width). Nearest (`q = p + 0.5` the accumulated position): a tap is inside when
+///   `0 <= trunc32(q.y) < H`, and an inside tap reads column `trunc32` of its wrapped `q.x`, which
+///   is its column modulo `W`; the forward and backward counting rules stay. The x of a tap whose
+///   y is outside is not wrapped.
+///
 /// A NaN tap coordinate in the bilinear variant would index outside the image, and a vector of
 /// more than 65 536 taps would run for minutes per pixel; both are reported as
-/// [`FxError::Unsupported`].
+/// [`FxError::Unsupported`]. With `is360` the same holds for a tap x that the wrap loops cannot
+/// bring into `[0, W)` within their bound (NaN, infinite or astronomically far, as the 360 inverse
+/// warp refuses it).
 pub fn motion_blur(
     dest: &mut Image,
     src: &Image,
@@ -166,18 +216,20 @@ pub fn motion_blur(
         )));
     }
     if is360 {
-        return Err(FxError::Unsupported(
-            "motion blur with the 360 flag (wrapping sample lookups) is not implemented".into(),
-        ));
+        fx_core::gaps::record(&crate::gaps::G6);
     }
     let ok = match (&mut dest.samples, &src.samples) {
-        (Samples::U8(d), Samples::U8(s)) => run::<u8>(d, s, src.width, src.height, flow, amount, hiq, shutter),
-        (Samples::U16(d), Samples::U16(s)) => run::<u16>(d, s, src.width, src.height, flow, amount, hiq, shutter),
-        (Samples::F32(d), Samples::F32(s)) => run::<f32>(d, s, src.width, src.height, flow, amount, hiq, shutter),
+        (Samples::U8(d), Samples::U8(s)) => run::<u8>(d, s, src.width, src.height, flow, amount, hiq, shutter, is360),
+        (Samples::U16(d), Samples::U16(s)) => run::<u16>(d, s, src.width, src.height, flow, amount, hiq, shutter, is360),
+        (Samples::F32(d), Samples::F32(s)) => run::<f32>(d, s, src.width, src.height, flow, amount, hiq, shutter, is360),
         _ => unreachable!("shapes were checked"),
     };
     if ok {
         Ok(())
+    } else if is360 {
+        Err(FxError::Unsupported(
+            "motion blur: a tap coordinate is NaN or never wraps, or a vector needs more than 65536 taps, which is not supported".into(),
+        ))
     } else {
         Err(FxError::Unsupported(
             "motion blur: a tap coordinate is NaN or a vector needs more than 65536 taps, which is not supported".into(),
@@ -213,6 +265,7 @@ fn run<P: Pix>(
     amount: f32,
     hiq: bool,
     shutter: f32,
+    is360: bool,
 ) -> bool {
     let w1i = width as i32 - 1;
     let h1i = height as i32 - 1;
@@ -238,12 +291,46 @@ fn run<P: Pix>(
         bilinear: hiq,
         bad: AtomicBool::new(false),
     };
-    par_rows(dest, width * CHANNELS, |y, row| b.row(y, row));
+    if is360 {
+        par_rows(dest, width * CHANNELS, |y, row| b.row::<true>(y, row));
+    } else {
+        par_rows(dest, width * CHANNELS, |y, row| b.row::<false>(y, row));
+    }
     !b.bad.load(Ordering::Relaxed)
 }
 
 impl<'a, P: Pix> Blur<'a, P> {
-    fn row(&self, y: usize, row: &mut [P]) {
+    /// The x of a wrap-around tap brought into `[0, W)` by the loops of the 360 inverse warp
+    /// (`x += W` while `x < 0`, then `x -= W` while `W <= x`, single precision), or `None` when
+    /// the loops exceed their bound or the result is outside (NaN, infinite or astronomically far).
+    #[inline(always)]
+    fn wrap_x(&self, qx: f32) -> Option<f32> {
+        let wf = self.wf;
+        let mut x = qx;
+        let mut guard = 0u32;
+        while x < 0.0 {
+            x += wf;
+            guard += 1;
+            if guard > WRAP_LIMIT {
+                return None;
+            }
+        }
+        while wf <= x {
+            x -= wf;
+            guard += 1;
+            if guard > WRAP_LIMIT {
+                return None;
+            }
+        }
+        if x >= 0.0 && x < wf {
+            Some(x)
+        } else {
+            None
+        }
+    }
+
+    /// One output row; `WRAP` selects the wrap-around taps.
+    fn row<const WRAP: bool>(&self, y: usize, row: &mut [P]) {
         let yf = y as f32;
         let fy = yf * self.ry;
         for x in 0..self.w {
@@ -258,16 +345,18 @@ impl<'a, P: Pix> Blur<'a, P> {
                     let i = (y * self.w + x) * CHANNELS;
                     px.copy_from_slice(&self.src[i..i + CHANNELS]);
                 } else {
-                    self.blur_bilinear(xf, yf, vx, vy, d2, px);
+                    self.blur_bilinear::<WRAP>(xf, yf, vx, vy, d2, px);
                 }
             } else {
-                self.blur_nearest(xf, yf, vx, vy, d2, px);
+                self.blur_nearest::<WRAP>(xf, yf, vx, vy, d2, px);
             }
         }
     }
 
+    /// Bilinear taps; `WRAP` wraps the x of a tap whose y is inside and samples it with
+    /// `bilerp360` (the module header).
     #[inline(always)]
-    fn blur_bilinear(&self, xf: f32, yf: f32, vx: f32, vy: f32, d2: f32, px: &mut [P]) {
+    fn blur_bilinear<const WRAP: bool>(&self, xf: f32, yf: f32, vx: f32, vy: f32, d2: f32, px: &mut [P]) {
         let dist = d2.sqrt();
         let (cx, cy) = if self.shifted { (vx * self.k + xf, vy * self.k + yf) } else { (xf, yf) };
         let mut n = cvtt32(dist + 1.0f32);
@@ -293,7 +382,19 @@ impl<'a, P: Pix> Blur<'a, P> {
                 self.bad.store(true, Ordering::Relaxed);
                 return;
             }
-            if 0.0 <= qx && qx < self.wf && 0.0 <= qy && qy < self.hf {
+            if WRAP {
+                if 0.0 <= qy && qy < self.hf {
+                    let Some(wx) = self.wrap_x(qx) else {
+                        self.bad.store(true, Ordering::Relaxed);
+                        return;
+                    };
+                    *cnt += 1;
+                    let t = bilerp360(self.src, self.w, self.w1i, self.h1i, wx, qy);
+                    for c in 0..CHANNELS {
+                        sum[c] += t[c];
+                    }
+                }
+            } else if 0.0 <= qx && qx < self.wf && 0.0 <= qy && qy < self.hf {
                 *cnt += 1;
                 let t = bilerp4(self.src, self.w, self.w1i, self.h1i, qx, qy);
                 for c in 0..CHANNELS {
@@ -321,9 +422,9 @@ impl<'a, P: Pix> Blur<'a, P> {
     }
 
     /// Nearest taps, no small vector shortcut, and the backward taps are counted whether or not
-    /// they are inside.
+    /// they are inside. `WRAP` replaces the x test by the wrap of the tap x (the module header).
     #[inline(always)]
-    fn blur_nearest(&self, xf: f32, yf: f32, vx: f32, vy: f32, d2: f32, px: &mut [P]) {
+    fn blur_nearest<const WRAP: bool>(&self, xf: f32, yf: f32, vx: f32, vy: f32, d2: f32, px: &mut [P]) {
         let dist = d2.sqrt();
         let (cx, cy) = if self.shifted { (vx * self.k + xf, vy * self.k + yf) } else { (xf, yf) };
         let cx = cx + 0.5f32;
@@ -348,14 +449,38 @@ impl<'a, P: Pix> Blur<'a, P> {
         let mut cnt = 0i32;
         let w = self.w as i32;
         let h = self.hf as i32;
+        // the column of an inside wrap-around tap: `trunc32` of its x wrapped into [0, W), so
+        // `0 <= ix < W`; an x that cannot be wrapped fails the call
+        let wrapped_column = |qx: f32| -> Option<usize> {
+            match self.wrap_x(qx) {
+                Some(x) => Some(cvtt32(x) as usize),
+                None => {
+                    self.bad.store(true, Ordering::Relaxed);
+                    None
+                }
+            }
+        };
         let (mut qx, mut qy) = (cx, cy);
         for _ in 0..n {
-            let (ix, iy) = (cvtt32(qx), cvtt32(qy));
-            if ix >= 0 && ix < w && iy >= 0 && iy < h {
-                cnt += 1;
-                let i = (iy as usize * self.w + ix as usize) * CHANNELS;
-                for c in 0..CHANNELS {
-                    sum[c] += self.src[i + c].to_f32();
+            if WRAP {
+                let iy = cvtt32(qy);
+                if iy >= 0 && iy < h {
+                    if let Some(ix) = wrapped_column(qx) {
+                        cnt += 1;
+                        let i = (iy as usize * self.w + ix) * CHANNELS;
+                        for c in 0..CHANNELS {
+                            sum[c] += self.src[i + c].to_f32();
+                        }
+                    }
+                }
+            } else {
+                let (ix, iy) = (cvtt32(qx), cvtt32(qy));
+                if ix >= 0 && ix < w && iy >= 0 && iy < h {
+                    cnt += 1;
+                    let i = (iy as usize * self.w + ix as usize) * CHANNELS;
+                    for c in 0..CHANNELS {
+                        sum[c] += self.src[i + c].to_f32();
+                    }
                 }
             }
             qx += sx;
@@ -364,11 +489,23 @@ impl<'a, P: Pix> Blur<'a, P> {
         let (nsx, nsy) = (-sx, -sy);
         let (mut qx, mut qy) = (cx - sx, cy - sy);
         for _ in 1..n {
-            let (ix, iy) = (cvtt32(qx), cvtt32(qy));
-            if ix >= 0 && ix < w && iy >= 0 && iy < h {
-                let i = (iy as usize * self.w + ix as usize) * CHANNELS;
-                for c in 0..CHANNELS {
-                    sum[c] += self.src[i + c].to_f32();
+            if WRAP {
+                let iy = cvtt32(qy);
+                if iy >= 0 && iy < h {
+                    if let Some(ix) = wrapped_column(qx) {
+                        let i = (iy as usize * self.w + ix) * CHANNELS;
+                        for c in 0..CHANNELS {
+                            sum[c] += self.src[i + c].to_f32();
+                        }
+                    }
+                }
+            } else {
+                let (ix, iy) = (cvtt32(qx), cvtt32(qy));
+                if ix >= 0 && ix < w && iy >= 0 && iy < h {
+                    let i = (iy as usize * self.w + ix as usize) * CHANNELS;
+                    for c in 0..CHANNELS {
+                        sum[c] += self.src[i + c].to_f32();
+                    }
                 }
             }
             cnt += 1;

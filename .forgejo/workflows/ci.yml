@@ -85,3 +85,24 @@ jobs:
       # parts through: anything else that does not run, and every failed
       # check, still fails the job.
       - run: python3 -I tools/conformance.py --quick --allow-absent-peer
+
+      # The parity record (docs/parity.md): every generated figure equals a
+      # fresh generation from docs/data/ and the tree, the documentation
+      # checks pass (the flag tables need VFX_PATH and are skipped here), and
+      # the generator and the regression lock tool pass their tests.
+      - run: python3 -I tools/gen_docs.py --check
+
+      - run: python3 -I tools/check_docs.py
+
+      - run: python3 -I tools/test_docgen.py
+
+      - run: python3 tools/test_parity_lock.py
+
+      # The retimed audio map (no tools needed), then the HDR and odd size
+      # encodes and the --size and --fps runs of apply.py (ffmpeg, ffprobe
+      # and vfx; the HDR cases skip without a 10 bit libx265).
+      - run: python3 tools/test_audio_map.py
+
+      - run: python3 tools/test_apply_hdr.py
+
+      - run: python3 tools/test_apply_geometry.py

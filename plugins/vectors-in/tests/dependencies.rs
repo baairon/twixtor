@@ -169,11 +169,57 @@ fn the_fg_probe_stops_at_the_first_empty_matte() {
     assert_eq!(deps.len(), 8);
 }
 
+/// One main plan entry at layer time `off` with `nfg` FG mattes: the dummies, Source, then the two
+/// vector layers once per layer (`nfg + 1` times, a pair per layer).
+fn layered_main(x: i64, off: i64, nfg: usize) -> Vec<Checkout> {
+    let mut v = entry(x, off, SRC);
+    v.truncate(v.len() - 2);
+    for _ in 0..=nfg {
+        v.extend([co(PREV, off), co(NEXT, off)]);
+    }
+    v
+}
+
+/// One kind 2 entry (FG matte `k`) at layer time `off`: the dummies, then the matte.
+fn matte_entry(x: i64, off: i64, k: usize) -> Vec<Checkout> {
+    let mut v = entry(x, off, SRC);
+    v.truncate(v.len() - 3);
+    v.push(co(FG[k], off));
+    v
+}
+
 #[test]
-fn a_fg_matte_layer_with_the_plan_is_the_multi_layer_refusal() {
-    let r = rig(&[]).with_layer("fg1_matte", random_clip(Depth::U8, 5, 4, 12, 9));
-    let e = r.deps(3).unwrap_err();
-    assert_eq!(e.to_string(), format!("unsupported: {}", vectors_in::glue::FG_UNSUPPORTED));
+fn fg_matte_layers_add_their_kind_2_entries_and_the_vector_layers_once_per_layer() {
+    let m = || random_clip(Depth::U8, 5, 4, 12, 9);
+    // FG1: the probes end with FG1 and the empty FG2; the main entries load Prev and Next twice (nfg + 1), then
+    // the two matte entries of FG1 at the same two layer times (half speed: frame 3 is position 1.5, frames 1 and 2)
+    let r = rig(&[("speed_percent", "50")]).with_layer("fg1_matte", m());
+    let mut want = vec![co(None, 300), co(Some("source"), 300), co(PREV, 300), co(NEXT, 300), co(FG[0], 300), co(FG[1], 300)];
+    for off in [100, 200] {
+        want.extend(layered_main(300, off, 1));
+    }
+    for off in [100, 200] {
+        want.extend(matte_entry(300, off, 0));
+    }
+    assert_eq!(r.deps(3).unwrap(), want);
+    // all three: four loads of each vector layer per main entry and six matte entries, FG1 first; an exact frame
+    // takes the same plan (the fast path composes the displayed group from the mattes too)
+    let r = rig(&[]).with_layer("fg1_matte", m()).with_layer("fg2_matte", m()).with_layer("fg3_matte", m());
+    let mut want = vec![co(None, 300), co(Some("source"), 300), co(PREV, 300), co(NEXT, 300), co(FG[0], 300), co(FG[1], 300), co(FG[2], 300)];
+    for off in [300, 400] {
+        want.extend(layered_main(300, off, 3));
+    }
+    for k in 0..3 {
+        for off in [300, 400] {
+            want.extend(matte_entry(300, off, k));
+        }
+    }
+    assert_eq!(r.deps(3).unwrap(), want);
+    // every Display but the Source one has the same list
+    for display in ["1", "3", "4", "5", "6"] {
+        let d = rig(&[("display", display)]).with_layer("fg1_matte", m()).with_layer("fg2_matte", m()).with_layer("fg3_matte", m());
+        assert_eq!(d.deps(3).unwrap(), want, "display {display}");
+    }
 }
 
 #[test]

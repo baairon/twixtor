@@ -260,6 +260,26 @@ class ArgumentTests(unittest.TestCase):
             for flags in (["--desc"], ["--cont", "frames/2"], ["--pre-st", "x"], ["--stage-t", "5"], ["--geo", "x"]):
                 self.assertEqual(parse(*flags), (2, "apply.py: error: unrecognized arguments: " + " ".join(flags)))
 
+    def test_the_size_rate_and_audio_flags_are_never_abbreviated(self):
+        # --size, --fps and --audio came after the stage flags: their prefixes are refused as they were before
+        # them, and the prefixes they share with older flags mean what they meant
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = os.path.join(tmp, "missing.mp4")
+
+            def parse(*flags):
+                proc = subprocess.run([sys.executable, APPLY, missing, "retime", *flags], shell=False,
+                                      capture_output=True, text=True, encoding="utf-8", errors="replace",
+                                      env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+                return proc.returncode, (proc.stderr.strip().splitlines() or [""])[-1]
+
+            for flags in (["--si", "8x8"], ["--s", "8x8"], ["--fp", "24"], ["--au", "copy"], ["--a", "copy"]):
+                self.assertEqual(parse(*flags), (2, "apply.py: error: unrecognized arguments: " + " ".join(flags)))
+            self.assertEqual(parse("--f", "24"), (2, "apply.py: error: ambiguous option: --f could match --frames, "
+                                                     "--force, --ffmpeg-path, --ffprobe-path"))
+            for flags in (["--fr", "5"], ["--fo"], ["--size", "8x8"], ["--fps", "24"], ["--audio", "copy"]):
+                code, last = parse(*flags)
+                self.assertEqual((code, last), (1, f"[error] no such file: {missing}"), flags)
+
 
 class StageBuildTests(unittest.TestCase):
     """the placeholders and the order of the stages, on facts alone."""
@@ -310,6 +330,24 @@ class StageBuildTests(unittest.TestCase):
         self.assertEqual(known[0]["argv"][1], "7")
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             tool.build_stages(self.args(pre=[text], frames=7), facts(nb_frames=None))
+
+    def test_the_chain_starts_at_the_work_geometry(self):
+        # the decode writes frames of the work geometry (work_geometry), so the first stage reads those; vfx
+        # writes the same size, and --frames sets the count after it
+        text = cmdline(sys.executable, "{width}", "{height}", "{fps}", "{frames}")
+        work = {"width": 64, "height": 36, "rate": Fraction(60), "frames": 25, "source": None, "auto_params": [],
+                "rounding": None}
+        chain = {}
+        stages = tool.build_stages(self.args(pre=[text], post=[text], frames=50), facts(), chain, work)
+        self.assertEqual([s["argv"][1:] for s in stages], [["64", "36", "60/1", "25"], ["64", "36", "60/1", "50"]])
+        self.assertEqual(chain["vfx"], {"width": 64, "height": 36, "depth": 16, "fps": Fraction(60), "frames": 25})
+        self.assertEqual([s["frame_bytes"] for s in stages], [64 * 36 * 8] * 2)
+        # without one the chain starts at the input's, as before, and so do the relays of a run
+        self.assertEqual(tool.build_stages(self.args(pre=[text]), facts())[0]["argv"][1:], ["160", "96", "24/1", "12"])
+        self.assertEqual(tool.build_stages(self.args(pre=[text]), facts(), None, tool.work_geometry(self.args(), facts())),
+                         tool.build_stages(self.args(pre=[text]), facts()))
+        self.assertEqual(tool.frame_size(self.args(depth=8), facts(), work), 64 * 36 * 4)
+        self.assertEqual(tool.frame_size(self.args(depth=8), facts()), WIDTH * HEIGHT * 4)
 
     def test_a_program_that_cannot_be_found_is_refused(self):
         err = io.StringIO()
@@ -1258,9 +1296,19 @@ class FramedPipelineTests(unittest.TestCase):
         self.assertEqual(validate(answer, "describe.schema.json"), [])
         self.assertEqual((answer["stage"], answer["width"], answer["height"], answer["frames"]),
                          ("selftest-invert", 80, 48, FRAMES))
+        # a declared size with an odd side encodes yuv444p at that exact size on the lossy path
+        odd_out = self.path("odd.mp4")
         odd = apply(self.src, "selftest-invert", "--contract", "frames/2", "--json", "--post-stage",
-                    self.ffstage("crop=81:48"), "--geometry", "declared", tmp=self.dir)
-        self.assertFramed(odd, "unsupported", None, "odd side")
+                    self.ffstage("crop=81:48"), "--geometry", "declared", "-o", odd_out, tmp=self.dir)
+        self.assertEqual(odd.returncode, 0, odd.stderr)
+        data = json.loads(odd.stdout)
+        self.assertEqual(validate(data, "run-report.schema.json"), [])
+        self.assertEqual(data["geometry"], {"width": 81, "height": 48, "depth": 16, "fps": "24/1", "frames": FRAMES})
+        self.assertEqual(data["encode"], {"codec": "libx264", "pix_fmt": "yuv444p"})
+        self.assertIn("encoded yuv444p (the size has an odd side)", data["summary"])
+        facts_out = tool.probe(odd_out)
+        self.assertEqual((facts_out["width"], facts_out["height"], facts_out["pix_fmt"]), (81, 48, "yuv444p"))
+        self.assertClean()
 
     def test_an_interrupt_is_reported_as_interrupted_with_exit_130(self):
         # no console signal: apply.py's main runs in this process and a KeyboardInterrupt is raised where

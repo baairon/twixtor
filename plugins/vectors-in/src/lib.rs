@@ -2,12 +2,11 @@
 //! layers.
 //!
 //! It does not estimate motion itself: the vectors come from two layers ("Vectors: Prev", "Vectors:
-//! Next") and are applied to a source layer. This crate is the temporal front-end for the SINGLE
-//! LAYER use (no FG Matte layers): `dependencies()` is the pre-render ([`prerender`]),
-//! `render_temporal()` the render on the shared engine with the vectors taken from the two layers
-//! ([`glue`], [`vectorin`]), and everything the engine or this front-end cannot do is an
-//! `FxError::Unsupported` with a precise message. `params()` lists the visible user parameters that
-//! can affect the CPU render output; the layers are the `layers()` of the effect.
+//! Next") and are applied to a source layer, once per layer when FG Matte layers are set (the
+//! n-layer path of the engine). This crate is its temporal front-end: `dependencies()` is the
+//! pre-render ([`prerender`]), `render_temporal()` the render on the shared engine with the vectors
+//! taken from the two layers ([`glue`], [`vectorin`]). `params()` lists the visible user
+//! parameters that can affect the CPU render output; the layers are the `layers()` of the effect.
 
 use fx_core::{
     Checkout, Effect, EffectKind, Env, Frame, LayerSpec, ParamKind, ParamSpec, Params, RenderContext, Result, TemporalContext,
@@ -151,8 +150,8 @@ impl Effect for VectorsIn {
     /// back to `A`, `Vectors: Next` is fetched at frame `A` and holds the displacement from `A`
     /// forward to `B`; at least one of them is needed (with none the render shows the red error
     /// fill), with one the other flow is derived by inversion. The three FG Matte layers feed the
-    /// multi layer path, which this front-end does not run (a set matte layer gives
-    /// `FxError::Unsupported`; the matte sizes are still probed for the error fills).
+    /// n-layer path (the consecutive layers with pixels from FG1 on; their sizes are probed for the
+    /// error fills).
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
             LayerSpec { id: LAYER_SOURCE, name: "Source", optional: true },
@@ -164,15 +163,19 @@ impl Effect for VectorsIn {
         ]
     }
 
+    /// The open parity gaps of the layered retime path over loaded vectors (`retime_engine::gaps`).
+    fn gaps(&self) -> &'static [&'static fx_core::OpenGap] {
+        retime_engine::gaps::VECTORS_IN
+    }
+
     /// The pre-render checkouts of output frame `cx.frame_index`, in issue order.
     fn dependencies(&self, cx: &TemporalContext, env: &Env<'_>) -> Result<Vec<Checkout>> {
         glue::dependencies(cx, env)
     }
 
-    /// Single layer use: Time Remap Mode Speed and Frame Number, Nearest, Blend and Weighted Blend, Warping
-    /// "Inverse" (and "Forward" once the engine has it), Blur Compensation, Max Displace and Vec Scale, the
-    /// Source display. FG Matte layers, the forward warp (today) and a single vector layer (today) return
-    /// `FxError::Unsupported`.
+    /// Time Remap Mode Speed and Frame Number, Nearest, Blend and Weighted Blend, Warping "Inverse" and
+    /// "Forward", Blur Compensation, Max Displace and Vec Scale, one or two vector layers, the FG Matte
+    /// layers with the Display groups, and the Source display.
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
         glue::render_temporal(cx, env, output)
     }

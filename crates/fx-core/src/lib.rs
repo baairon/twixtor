@@ -4,15 +4,19 @@
 //! bpc instead of round tripping through float.
 
 mod curves;
+mod device;
 mod fixed;
 mod frame;
+pub mod gaps;
 mod layer;
 mod params;
 mod time;
 
-pub use curves::{Keyframe, ParamCurves};
+pub use curves::{split_key, Ease, HandleText, KeyText, Keyframe, ParamCurves};
+pub use device::DeviceRequest;
 pub use fixed::{fixed_to_float, float_to_fixed};
 pub use frame::{Depth, Frame, Pixels};
+pub use gaps::OpenGap;
 pub use layer::{Checkout, Env, Layer, LayerSet, LayerSpec, MemLayer};
 pub use params::{ParamKind, ParamSpec, ParamValue, Params};
 pub use time::{FieldOrder, Quality, Rational, TemporalContext, TimeBase};
@@ -96,6 +100,12 @@ pub trait Effect: Send + Sync {
         Vec::new()
     }
 
+    /// The open parity gaps a render of this effect can run into, in id order, as `vfx list
+    /// --json` lists them. The code that runs one of their rules notes it with [`gaps::record`].
+    fn gaps(&self) -> &'static [&'static OpenGap] {
+        &[]
+    }
+
     /// The layer fetches the render of `cx.frame_index` will make, in issue order. A caller may use
     /// it to prefetch; tests use it to pin the times a render reads. Temporal effects only.
     fn dependencies(&self, _cx: &TemporalContext, _env: &Env<'_>) -> Result<Vec<Checkout>> {
@@ -160,6 +170,11 @@ mod tests {
         let r = Temporal.render(&RenderContext::default(), &Params::default(), &Frame::new(1, 1, Depth::U8), &mut out);
         assert!(matches!(r, Err(FxError::Unsupported(m)) if m.contains("temporal")));
         assert_eq!(Temporal.kind(), EffectKind::Frame);
+    }
+
+    #[test]
+    fn an_effect_has_no_open_gaps_by_default() {
+        assert!(Temporal.gaps().is_empty());
     }
 
     #[test]

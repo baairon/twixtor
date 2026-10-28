@@ -145,3 +145,24 @@ fn the_wiring_names_real_parameters_of_the_expected_kinds() {
     assert_eq!(layers, vec![(w.layers.alt_a, true), (w.layers.alt_b, true)]);
     assert_eq!(retime::Retime.kind(), fx_core::EffectKind::Temporal);
 }
+
+#[test]
+fn the_wrap_flag_is_off_and_the_device_request_is_carried_without_changing_a_pixel() {
+    // half speed: output frame 1 lies between two source frames, so the vector path runs
+    let rig = Rig::new(random_clip(Depth::U8, 16, 12, 4, 7), &[("speed_percent", "50")]);
+    let plain = settings_of(&rig, 1);
+    assert!(!plain.wrap_360);
+    assert_eq!(plain.device, fx_core::DeviceRequest::Cpu);
+    let want = rig.render(1).unwrap();
+    for device in [fx_core::DeviceRequest::Gpu, fx_core::DeviceRequest::GpuIndex(2)] {
+        let mut cx = rig.cx(1);
+        cx.device = device;
+        let s = read_settings(&WIRING, &cx, &rig.env()).unwrap();
+        assert_eq!(s, EngineSettings { device, ..plain.clone() });
+        // the engine only carries the request: the pixels are the CPU's
+        assert_eq!(rig.render_cx(&cx).unwrap(), want, "{device}");
+    }
+    // the 360 Video checkbox is not the wrap flag
+    let s = settings_of(&Rig::new(clip(), &[("video_360", "1")]), 0);
+    assert!(s.video_360 && !s.wrap_360);
+}

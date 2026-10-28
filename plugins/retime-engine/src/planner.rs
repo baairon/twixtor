@@ -12,23 +12,32 @@ use fx_core::{Checkout, Result};
 pub const LAYER_ALT_A: &str = "alt_source_a";
 /// Layer id of "Alt Source B", the separate tracking source.
 pub const LAYER_ALT_B: &str = "alt_source_b";
+/// Layer ids of the FG matte layers FG1 to FG3 of the FG capable effects (retime-fgbg,
+/// vectors-in and create-vectors declare these ids); [`EntryKind::Matte`] `k` names entry `k`.
+pub const LAYER_FG_MATTE: [&str; 3] = ["fg1_matte", "fg2_matte", "fg3_matte"];
 
-/// The `type` of a plan entry. The engine also knows type 2 ("reuse the previous layer"); plugin
-/// 01 never emits it.
+/// The largest number of FG matte layers (FG1 to FG3).
+pub const MAX_FG_LAYERS: usize = 3;
+
+/// The `type` of a plan entry. Plugin 01 emits only the first two; the FG capable effects add the
+/// kind 2 entries of their matte layers ([`plan_layers`]).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EntryKind {
     /// 0: the tracking layer (Alt Source B).
     LayerB,
     /// 1: the retimed layer (Alt Source A, or the input layer when A is not set).
     Main,
+    /// 2: FG matte layer `k` (0 is FG1), fetched at the layer times of the main frames.
+    Matte(usize),
 }
 
 impl EntryKind {
-    /// The integer of the kind: 0 for `LayerB`, 1 for `Main`.
+    /// The integer of the kind: 0 for `LayerB`, 1 for `Main`, 2 for every `Matte`.
     pub fn code(self) -> i32 {
         match self {
             EntryKind::LayerB => 0,
             EntryKind::Main => 1,
+            EntryKind::Matte(_) => 2,
         }
     }
 }
@@ -62,7 +71,8 @@ pub struct Plan {
 /// form of the second frame (see [`marker_override`]); `simple` as in [`exact_position`].
 /// Entries: `(Main, f), (Main, f+1)` when the overridden vectors quality is 0 or `simple` or
 /// there is no layer B (`no_b`); otherwise `(LayerB, f), (LayerB, f+1), (Main, f), (Main, f+1)`.
-/// `vectors_quality` and `interp` are the raw values minus one.
+/// `vectors_quality` and `interp` are the raw values minus one. This is [`plan_layers`] without
+/// FG matte layers.
 pub fn plan(
     map: &dyn TimeMap,
     t0: f32,
@@ -72,13 +82,39 @@ pub fn plan(
     blur: f32,
     no_b: bool,
 ) -> Result<Plan> {
+    plan_layers(map, t0, t1, vectors_quality, interp, blur, no_b, 0)
+}
+
+/// [`plan`] with `nfg` FG matte layers (V: the matte layers are fetched at the layer
+/// times of the main frames of the pair, the kind 2 entries): after the entries of [`plan`], for
+/// every matte `k` in `0..nfg` (FG1 first) the two entries `(Matte(k), f), (Matte(k), f+1)`,
+/// whatever the vectors quality and `simple` are (the fast path composes the displayed group
+/// too). So at most 10 entries. `nfg = 0` is [`plan`] itself; an `nfg` above
+/// [`MAX_FG_LAYERS`] is a bad parameter.
+#[allow(clippy::too_many_arguments)]
+pub fn plan_layers(
+    map: &dyn TimeMap,
+    t0: f32,
+    t1: f32,
+    vectors_quality: i32,
+    interp: i32,
+    blur: f32,
+    no_b: bool,
+    nfg: usize,
+) -> Result<Plan> {
+    if nfg > MAX_FG_LAYERS {
+        return Err(fx_core::FxError::BadParam {
+            id: "fg_matte".into(),
+            reason: format!("{nfg} FG matte layers, at most {MAX_FG_LAYERS} exist"),
+        });
+    }
     let s0 = map.src_pos(t0)?;
     let s1 = map.src_pos(t1)?;
     let (vq, ip) = marker_override(map, s0, vectors_quality, interp, true)?;
     let simple = exact_position(s0, s1, blur);
     let f = cvtt_i32_f32(s0);
     let g = f.wrapping_add(1);
-    let entries = if vq == 0 || simple || no_b {
+    let mut entries = if vq == 0 || simple || no_b {
         vec![PlanEntry { kind: EntryKind::Main, position: f }, PlanEntry { kind: EntryKind::Main, position: g }]
     } else {
         vec![
@@ -88,6 +124,10 @@ pub fn plan(
             PlanEntry { kind: EntryKind::Main, position: g },
         ]
     };
+    for k in 0..nfg {
+        entries.push(PlanEntry { kind: EntryKind::Matte(k), position: f });
+        entries.push(PlanEntry { kind: EntryKind::Matte(k), position: g });
+    }
     Ok(Plan { entries, simple, vectors_quality: vq, interp: ip, s0, s1 })
 }
 
@@ -138,7 +178,9 @@ fn checkout(layer: Option<&'static str>, time: i32) -> Checkout {
 
 /// The checkouts that follow the plan: one per entry at `frame_time(position)`, and for input
 /// fields a second one at `frame_time(position + 0.5)` where the half frame position is
-/// `(position as f64 + 0.5) as f32`. Layer: `Main` is the source layer, `LayerB` is Alt Source B.
+/// `(position as f64 + 0.5) as f32`. Layer: `Main` is the source layer, `LayerB` is Alt Source B,
+/// `Matte(k)` the matte layer `LAYER_FG_MATTE[k]` (plugin 01's own plan has none; an entry past
+/// the three ids is skipped).
 pub fn plan_checkouts(req: &PreRender, map: &dyn TimeMap, plan: &Plan) -> Vec<Checkout> {
     let src = req.src_layer();
     let mut out = Vec::with_capacity(plan.entries.len() * 2);
@@ -146,6 +188,10 @@ pub fn plan_checkouts(req: &PreRender, map: &dyn TimeMap, plan: &Plan) -> Vec<Ch
         let layer = match entry.kind {
             EntryKind::Main => src,
             EntryKind::LayerB => Some(LAYER_ALT_B),
+            EntryKind::Matte(k) => match LAYER_FG_MATTE.get(k) {
+                Some(&id) => Some(id),
+                None => continue,
+            },
         };
         out.push(checkout(layer, map.frame_time(entry.position as f32)));
         if req.input_fields {
@@ -240,7 +286,72 @@ mod tests {
     fn layer_ids_are_the_ones_the_front_end_declares() {
         assert_eq!(LAYER_ALT_A, "alt_source_a");
         assert_eq!(LAYER_ALT_B, "alt_source_b");
+        assert_eq!(LAYER_FG_MATTE, ["fg1_matte", "fg2_matte", "fg3_matte"]);
         assert_eq!((EntryKind::LayerB.code(), EntryKind::Main.code()), (0, 1));
+        for k in 0..3 {
+            assert_eq!(EntryKind::Matte(k).code(), 2, "every matte entry is of kind 2");
+        }
+    }
+
+    #[test]
+    fn the_matte_entries_of_kind_2_follow_the_entries_of_plan() {
+        let entry = |kind, position| PlanEntry { kind, position };
+        let m = Mock::speed(50.0);
+        let map = RemapTimeMap::new(&m, plain_rates(), 0);
+        // fractional position, vectors on, layer B present: four entries, then (k, f), (k, f + 1) per matte
+        let p = plan_layers(&map, 7.0, 8.0, 4, 1, 0.0, false, 3).unwrap();
+        assert_eq!(
+            p.entries,
+            vec![
+                entry(EntryKind::LayerB, 3),
+                entry(EntryKind::LayerB, 4),
+                entry(EntryKind::Main, 3),
+                entry(EntryKind::Main, 4),
+                entry(EntryKind::Matte(0), 3),
+                entry(EntryKind::Matte(0), 4),
+                entry(EntryKind::Matte(1), 3),
+                entry(EntryKind::Matte(1), 4),
+                entry(EntryKind::Matte(2), 3),
+                entry(EntryKind::Matte(2), 4),
+            ]
+        );
+        assert_eq!(p.entries.len(), 10, "at most 10 entries");
+        // the matte entries come whatever the vectors and the position: vectors off, an exact frame, no layer B
+        for (vq, t0, no_b) in [(0, 7.0f32, false), (4, 6.0, false), (4, 7.0, true)] {
+            let p = plan_layers(&map, t0, t0 + 1.0, vq, 1, 0.0, no_b, 1).unwrap();
+            let base = plan(&map, t0, t0 + 1.0, vq, 1, 0.0, no_b).unwrap();
+            let f = base.entries[0].position;
+            let mut want = base.entries.clone();
+            want.extend([entry(EntryKind::Matte(0), f), entry(EntryKind::Matte(0), f + 1)]);
+            assert_eq!(p.entries, want, "vq {vq} t0 {t0} no_b {no_b}");
+            let same = (p.simple, p.vectors_quality, p.interp, p.s0, p.s1) == (base.simple, base.vectors_quality, base.interp, base.s0, base.s1);
+            assert!(same, "vq {vq} t0 {t0}: the other fields are those of plan");
+        }
+        assert!(plan_layers(&map, 7.0, 8.0, 4, 1, 0.0, false, 4).is_err(), "there are three FG matte layers");
+    }
+
+    #[test]
+    fn plan_is_plan_layers_without_mattes() {
+        // the same plan for every case of the tests above
+        let marks = Mock::speed(50.0).with_marks(|t| if t >= 400 { 2 } else { 1 });
+        for m in [Mock::speed(50.0), Mock::speed(100.0), Mock::speed(75.0), Mock::frame_number(-2.5), marks] {
+            let map = RemapTimeMap::new(&m, plain_rates(), 0);
+            for (t0, vq, ip, blur, no_b) in [(7.0f32, 4, 1, 0.0f32, false), (7.0, 4, 1, 0.0, true), (6.0, 4, 2, 1.0, false), (7.0, 0, 0, 0.0, false), (1.0, 3, 2, 0.5, false)] {
+                let a = plan(&map, t0, t0 + 1.0, vq, ip, blur, no_b).unwrap();
+                let b = plan_layers(&map, t0, t0 + 1.0, vq, ip, blur, no_b, 0).unwrap();
+                assert_eq!(a, b, "t0 {t0} vq {vq}");
+            }
+        }
+    }
+
+    #[test]
+    fn plugin_01s_checkouts_name_the_matte_layers_of_a_layered_plan() {
+        let m = Mock::speed(50.0);
+        let map = RemapTimeMap::new(&m, plain_rates(), 0);
+        let p = plan_layers(&map, 7.0, 8.0, 4, 1, 0.0, true, 2).unwrap();
+        let got = plan_checkouts(&req(), &map, &p);
+        let fg = |k: usize| Some(LAYER_FG_MATTE[k]);
+        assert_eq!(got, vec![cp(None, 300), cp(None, 400), cp(fg(0), 300), cp(fg(0), 400), cp(fg(1), 300), cp(fg(1), 400)]);
     }
 
     #[test]

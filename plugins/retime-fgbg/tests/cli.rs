@@ -355,3 +355,129 @@ fn the_forward_warp_renders_between_frames_through_the_binary_and_exact_frames_p
     assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
     assert_eq!(read_frames(&out, Depth::U8), read_frames(&clip, Depth::U8));
 }
+
+/// Writes `frames` as one raw clip file.
+fn write_raw(path: PathBuf, frames: &[Frame]) -> PathBuf {
+    let bytes: Vec<u8> = frames.iter().flat_map(|f| f.to_bytes()).collect();
+    std::fs::write(&path, bytes).unwrap();
+    path
+}
+
+/// The disc matte of the layered tests: opaque white inside a disc of radius 12 that moves 2 px right per frame.
+fn disc_matte(depth: Depth, count: usize) -> Vec<Frame> {
+    (0..count)
+        .map(|k| {
+            let mut f = Frame::new(W, H, depth);
+            if let Pixels::U8(px) = &mut f.pixels {
+                for y in 0..H {
+                    for x in 0..W {
+                        let (dx, dy) = (x as f64 - 24.0 - 2.0 * k as f64, y as f64 - 24.0);
+                        let v = if dx * dx + dy * dy <= 144.0 { 255 } else { 0 };
+                        px[y * W + x] = [v, v, v, 255];
+                    }
+                }
+            }
+            f
+        })
+        .collect()
+}
+
+#[test]
+fn a_fg_matte_layer_file_renders_end_to_end_as_the_engine_does_and_notes_its_rules_once() {
+    let bin = vfx().expect("fx-cli builds");
+    let dir = Scratch::new("layered");
+    let clip_frames = common::moving::DEFAULT.clip(Depth::U8, W, H, SOURCE_FRAMES);
+    let matte_frames = disc_matte(Depth::U8, SOURCE_FRAMES);
+    let clip = write_raw(dir.path("clip.raw"), &clip_frames);
+    let matte = write_raw(dir.path("matte.raw"), &matte_frames);
+    let out = dir.path("out.raw");
+    for (params, notes) in [
+        (vec!["speed_percent=50"], vec!["G1", "G1b"]),
+        // frame 0 is exact: the fast path of the FG1 group notes G1h first; the notes of a frame come in id order
+        (vec!["speed_percent=50", "track_rgb_a=1", "warping=2", "display=3"], vec!["G1", "G1h", "G1b", "G1g", "G6"]),
+        (vec!["speed_percent=50", "pt1_use=2", "pt1_pos=24,24@0;30,24@6", "blur_compensation=1"], vec!["G1", "G1b", "G1f", "G2"]),
+        (vec!["vectors=1", "display=6"], vec!["G1", "G1h"]),
+    ] {
+        let frames = 6;
+        let mut cmd = Command::new(bin);
+        cmd.args(["apply", "retime-fgbg", "--width", &W.to_string(), "--height", &H.to_string(), "--depth", "8", "--fps", "24", "--in"])
+            .arg(&clip)
+            .arg("--out")
+            .arg(&out)
+            .args(["--frames", &frames.to_string(), "--layer"])
+            .arg(format!("fg1_matte={}", matte.display()));
+        for p in &params {
+            cmd.args(["--param", p]);
+        }
+        let r = cmd.output().expect("run vfx");
+        let stderr = String::from_utf8_lossy(&r.stderr).to_string();
+        assert!(r.status.success(), "{params:?}: {stderr}");
+        // the bytes of the engine called in process with the same clips and parameters
+        let pairs: Vec<(&str, &str)> = params.iter().map(|p| p.split_once('=').unwrap()).collect();
+        let fps24 = fx_core::TimeBase::default_for_rate(fx_core::Rational::new(24, 1).unwrap());
+        let mut curves = fx_core::ParamCurves::new(fx_core::Effect::params(&retime_fgbg::RetimeFgBg));
+        for (id, text) in &pairs {
+            curves.parse_cli(id, text, fps24).unwrap();
+        }
+        let input = fx_core::MemLayer::new(fps24, clip_frames.clone()).unwrap();
+        let mut layers = fx_core::LayerSet::new();
+        layers.insert("fg1_matte", std::sync::Arc::new(fx_core::MemLayer::new(fps24, matte_frames.clone()).unwrap()));
+        let env = fx_core::Env { params: &curves, input: &input, layers: &layers };
+        let got = read_frames(&out, Depth::U8);
+        assert_eq!(got.len(), frames);
+        for (n, g) in got.iter().enumerate() {
+            let cx = fx_core::TemporalContext::new(W, H, Depth::U8, fps24, n as u64, frames as u64);
+            let mut want = Frame::new(W, H, Depth::U8);
+            fx_core::Effect::render_temporal(&retime_fgbg::RetimeFgBg, &cx, &env, &mut want).unwrap();
+            assert_eq!(g, &want, "{params:?} frame {n}");
+        }
+        // each open rule the run reached is noted exactly once, and no other
+        let noted: Vec<&str> = stderr.lines().filter_map(|l| l.strip_prefix("vfx: note: retime-fgbg: ")).map(|l| l.split(' ').next().unwrap()).collect();
+        assert_eq!(noted, notes, "{params:?}: {stderr}");
+    }
+}
+
+/// The `vfx: note:` line of gap `g` for retime-fgbg.
+fn note_line(g: &fx_core::OpenGap) -> String {
+    format!("vfx: note: retime-fgbg: {} {}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)", g.id, g.title)
+}
+
+#[test]
+fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_display() {
+    // gaps.rs: G1 is noted on every frame rendered with an FG matte layer present, on any display but Source. vfx
+    // prints a gap once per run, so each run here renders ONE frame (Frame Number mode): an in-between frame (the
+    // layered vector path, which also notes G1b), an exact frame and a No Vectors frame (the layered fast path), and
+    // the Source display, which composes no layer and notes nothing
+    let bin = vfx().expect("fx-cli builds");
+    let dir = Scratch::new("g1-note");
+    let clip = write_raw(dir.path("clip.raw"), &common::moving::DEFAULT.clip(Depth::U8, W, H, SOURCE_FRAMES));
+    let matte = write_raw(dir.path("matte.raw"), &disc_matte(Depth::U8, SOURCE_FRAMES));
+    let out = dir.path("out.raw");
+    let (g1, g1b) = (note_line(&retime_engine::gaps::G1), note_line(&retime_engine::gaps::G1B));
+    for (params, want_g1, want_g1b) in [
+        (vec!["time_remap_mode=2", "frame_num=2.5"], true, true),
+        (vec!["time_remap_mode=2", "frame_num=3"], true, false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "vectors=1"], true, false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false, false),
+    ] {
+        let mut cmd = Command::new(bin);
+        cmd.args(["apply", "retime-fgbg", "--width", &W.to_string(), "--height", &H.to_string(), "--depth", "8", "--fps", "24", "--in"])
+            .arg(&clip)
+            .arg("--out")
+            .arg(&out)
+            .args(["--frames", "1", "--layer"])
+            .arg(format!("fg1_matte={}", matte.display()));
+        for p in &params {
+            cmd.args(["--param", p]);
+        }
+        let r = cmd.output().expect("run vfx");
+        let stderr = String::from_utf8_lossy(&r.stderr).to_string();
+        assert!(r.status.success(), "{params:?}: {stderr}");
+        let count = |line: &str| stderr.lines().filter(|l| l.trim_end() == line).count();
+        assert_eq!(count(&g1), usize::from(want_g1), "{params:?}: {stderr}");
+        assert_eq!(count(&g1b), usize::from(want_g1b), "{params:?}: {stderr}");
+        if !want_g1 {
+            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display notes nothing: {stderr}");
+        }
+    }
+}

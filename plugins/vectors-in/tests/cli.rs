@@ -252,11 +252,11 @@ fn no_vector_layer_gives_the_red_fill_through_the_binary() {
     }
 }
 
-/// What the front-end cannot do is a clean error of the binary (exit code 3, the message on stderr), not a wrong
-/// picture: a FG Matte layer is the multi layer path. The default Warping is Forward, which renders between frames
-/// (the engine has the forward warp), and so does a single vector layer; the exact frames pass through.
+/// What the front-end once refused renders through the binary: a FG Matte layer takes the n-layer path. The default
+/// Warping is Forward, which renders between frames (the engine has the forward warp), and so does a single vector
+/// layer; the exact frames pass through.
 #[test]
-fn unsupported_settings_are_a_clean_error_and_the_defaults_render_between_frames() {
+fn the_defaults_and_a_fg_matte_layer_render_between_frames() {
     let bin = vfx().expect("fx-cli builds");
     let dir = Scratch::new("unsupported");
     let (clip, prev, next) = moving_files(&dir, Depth::U8);
@@ -272,11 +272,13 @@ fn unsupported_settings_are_a_clean_error_and_the_defaults_render_between_frames
     let r = apply(bin, Depth::U8, &clip, &out, SOURCE_FRAMES, &[], &layers);
     assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
     assert_eq!(read_frames(&out, Depth::U8), read_frames(&clip, Depth::U8));
-    // a FG Matte layer: the multi layer path
+    // a FG Matte layer: the n-layer path renders, and it notes its open rules once each
     let with_matte = [("vectors_prev", prev.as_path()), ("vectors_next", next.as_path()), ("fg1_matte", clip.as_path())];
-    let r = apply(bin, Depth::U8, &clip, &out, 4, &["warping=1"], &with_matte);
-    assert_eq!(r.status.code(), Some(3), "{}", String::from_utf8_lossy(&r.stderr));
-    assert!(String::from_utf8_lossy(&r.stderr).contains("a FG Matte layer is set"));
+    let r = apply(bin, Depth::U8, &clip, &out, 4, &["warping=1", "speed_percent=50"], &with_matte);
+    assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
+    assert_eq!(read_frames(&out, Depth::U8).len(), 4);
+    let stderr = String::from_utf8_lossy(&r.stderr);
+    assert_eq!(stderr.matches("vfx: note: vectors-in: G1e ").count(), 1, "{stderr}");
 }
 
 /// A real `testsrc2` clip (needs ffmpeg) with vector layers of zero motion: exact frames pass the engine, the odd
@@ -320,6 +322,38 @@ fn testsrc2_clip_with_zero_vectors_at_8_bpc() {
             for i in 0..4 {
                 assert!((p[i] as i32 - m[i] as i32).abs() <= 1, "frame {n}: {p:?} against {m:?}");
             }
+        }
+    }
+}
+
+#[test]
+fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_display() {
+    // gaps.rs: G1 is noted on every frame rendered with an FG matte layer present, on any display but Source. vfx
+    // prints a gap once per run, so each run here renders ONE frame (Frame Number mode): an in-between frame (the
+    // layered Vectors In path, which also notes G1e) and an exact frame (the layered fast path); the Source display
+    // composes no layer and notes nothing
+    let bin = vfx().expect("fx-cli builds");
+    let dir = Scratch::new("g1-note");
+    let (clip, prev, next) = moving_files(&dir, Depth::U8);
+    let layers = [("vectors_prev", prev.as_path()), ("vectors_next", next.as_path()), ("fg1_matte", clip.as_path())];
+    let out = dir.path("out.raw");
+    let line = |g: &fx_core::OpenGap| {
+        format!("vfx: note: vectors-in: {} {}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)", g.id, g.title)
+    };
+    let (g1, g1e) = (line(&retime_engine::gaps::G1), line(&retime_engine::gaps::G1E));
+    for (params, want_g1, want_g1e) in [
+        (vec!["time_remap_mode=2", "frame_num=2.5"], true, true),
+        (vec!["time_remap_mode=2", "frame_num=3"], true, false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false, false),
+    ] {
+        let r = apply(bin, Depth::U8, &clip, &out, 1, &params, &layers);
+        let stderr = String::from_utf8_lossy(&r.stderr).to_string();
+        assert!(r.status.success(), "{params:?}: {stderr}");
+        let count = |l: &str| stderr.lines().filter(|x| x.trim_end() == l).count();
+        assert_eq!(count(&g1), usize::from(want_g1), "{params:?}: {stderr}");
+        assert_eq!(count(&g1e), usize::from(want_g1e), "{params:?}: {stderr}");
+        if !want_g1 {
+            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display notes nothing: {stderr}");
         }
     }
 }

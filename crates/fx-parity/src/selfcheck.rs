@@ -217,6 +217,7 @@ mod tests {
             frames: 4,
             fps: Some("24".into()),
             layers: BTreeMap::new(),
+            family: None,
         }
     }
 

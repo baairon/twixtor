@@ -1,53 +1,147 @@
-//! Each unsupported feature gives an `FxError::Unsupported` with its own message, pinned literally
-//! here, and only when the parameters really select that path (`glue.rs` has the list): a FG matte
-//! layer with pixels, Display Debug (five views), `Main_BG: Track` unchecked, user tracking points
-//! reaching the solver, and the Draw Geom overlay over the Source display. An error fill (size
-//! mismatch, missing layer) wins over every refusal, as the flags are tested first. Nothing is
-//! approximated.
+//! What the plugin once refused now renders, through the `Effect` trait exactly as a host runs it:
+//! FG matte layers (one flow per layer, the matte weighted merge), `Layers Output`, tracking
+//! points (user displacement), `Main_BG: Track` and `FGk: Track` unchecked (the second tracker),
+//! Display Debug (five views) and the Draw Geom overlay on the Source and Debug displays. Each
+//! render equals the engine call it stands for. An error fill (size mismatch, missing layer) still
+//! wins over everything, as the flags are tested first.
 
 mod common;
 
 use common::*;
-use fx_core::{Depth, Frame, FxError, Pixels};
+use fx_core::{Depth, Frame, Pixels};
+use retime_engine::create_vectors::{create_vectors, create_vectors_job, frame_time, job_flow, CreateVectorsJob, LayerParams};
+use retime_engine::debug::debug_view;
+use retime_engine::image::{Fmt, Image};
+use retime_engine::matte::extract;
+use retime_engine::points::UserPoint;
+use retime_engine::vectors::zero_vectors_image;
 
 const FG1: &str = "fg1_matte";
 const FG2: &str = "fg2_matte";
+const W: usize = 48;
+const H: usize = 36;
 
 fn clip() -> Vec<Frame> {
-    random_clip(Depth::U8, 24, 16, 6, 5)
+    moving::DEFAULT.clip(Depth::U8, W, H, 6)
+}
+
+/// A matte clip: an opaque white disc of radius `r` (in every channel) on transparent black, the
+/// disc moving by `(2, 1)` px a frame.
+fn disc_clip(cx: f64, cy: f64, r: f64) -> Vec<Frame> {
+    (0..6)
+        .map(|k| {
+            let mut f = Frame::new(W, H, Depth::U8);
+            if let Pixels::U8(p) = &mut f.pixels {
+                for (i, px) in p.iter_mut().enumerate() {
+                    let (x, y) = ((i % W) as f64, (i / W) as f64);
+                    let d = ((x - cx - 2.0 * k as f64).powi(2) + (y - cy - k as f64).powi(2)).sqrt();
+                    *px = if d <= r { [255, 255, 255, 255] } else { [0, 0, 0, 0] };
+                }
+            }
+            f
+        })
+        .collect()
 }
 
 fn rig(params: &[(&str, &str)]) -> Rig {
     Rig::new(clip(), params).with_frames(6)
 }
 
-fn unsupported(r: &Rig, n: u64) -> String {
-    match r.render(n) {
-        Err(FxError::Unsupported(m)) => m,
-        Err(e) => panic!("another error: {e}"),
-        Ok(_) => panic!("rendered, expected Unsupported"),
+fn engine(f: &Frame) -> Image {
+    Image::from_frame(f)
+}
+
+/// The settings of the default parameters with `max_displace` 16 (the rigs below set it).
+fn base() -> retime_engine::create_vectors::CreateVectorsSettings {
+    retime_engine::create_vectors::CreateVectorsSettings {
+        quality: 4,
+        hiq: true,
+        sensitivity: 0.7,
+        prep_contrast_edge: false,
+        prep_delinearize: false,
+        track_rgb_a: false,
+        max_displace: 16.0,
     }
 }
 
-const FG_MESSAGE: &str = "a FG Matte layer is set: the multi layer path (one flow per layer, matte weighted \
-merge of the vector images) is not implemented; remove the FG matte layers (Create Vectors \
-handles the single layer case only)";
+fn layer(track: bool) -> LayerParams {
+    LayerParams { matte_chan: 1, sensitivity: 0.7, shrink: 0.0, track }
+}
 
-const TRACK_MESSAGE: &str = "Main_BG: Track is unchecked: the second tracker (a displacement \
-interpolator driven by user geometry, used instead of the optical flow) is not implemented; check Main_BG: Track";
-
-const DRAW_GEOM_MESSAGE: &str = "Draw Geom would draw the geometry of the tracking points over the source view, which is \
-not implemented; set Draw Geom to None or Pt n: Use to Don't Use";
+/// Output frame 2 with Previous: X is frame 2, Y frame 1.
+fn pair() -> (Image, Image) {
+    let c = clip();
+    (engine(&c[2]), engine(&c[1]))
+}
 
 #[test]
-fn a_fg_matte_layer_is_refused_for_the_vector_display() {
-    let r = rig(&[]).with_layer(FG1, clip());
-    assert_eq!(unsupported(&r, 2), FG_MESSAGE);
-    // FG2 alone is not active (the scan stops at the first empty matte), so nothing is refused
-    assert!(rig(&[]).with_layer(FG2, clip()).render(2).is_ok());
-    // every Track Frame, and Debug too (the FG check comes first)
-    assert_eq!(unsupported(&rig(&[("track_frame", "2")]).with_layer(FG1, clip()), 2), FG_MESSAGE);
-    assert_eq!(unsupported(&rig(&[("display", "3")]).with_layer(FG1, clip()), 2), FG_MESSAGE);
+fn fg_matte_layers_render_the_merged_vectors() {
+    let m1 = disc_clip(18.0, 16.0, 11.0);
+    let m2 = disc_clip(30.0, 18.0, 9.0);
+    let (x, y) = pair();
+    let mat = |c: &[Frame], k: usize| extract(&engine(&c[k]), 1);
+    for (lo, first, last) in [("1", 0usize, 2usize), ("2", 0, 0), ("3", 1, 1), ("4", 2, 2), ("5", 2, 2)] {
+        let r = rig(&[("max_displace", "16"), ("layers_output", lo)]).with_layer(FG1, m1.clone()).with_layer(FG2, m2.clone());
+        let got = r.render(2).unwrap();
+        let job = CreateVectorsJob {
+            settings: base(),
+            layers: vec![layer(true), layer(true), layer(true)],
+            mattes_x: vec![mat(&m1, 2), mat(&m2, 2)],
+            mattes_y: vec![mat(&m1, 1), mat(&m2, 1)],
+            points: Vec::new(),
+            first,
+            last,
+        };
+        assert_eq!(got, create_vectors_job(&x, &y, &job).unwrap().to_frame(), "layers output {lo}");
+    }
+    // FG2 alone is not active (the scan stops at the first empty matte): the single layer output
+    let plain = rig(&[("max_displace", "16")]).render(2).unwrap();
+    assert_eq!(rig(&[("max_displace", "16")]).with_layer(FG2, m2).render(2).unwrap(), plain);
+    assert_eq!(plain, create_vectors(&x, &y, &base()).unwrap().to_frame());
+    // a black FG1 matte with Layers Output All: Main_BG takes the whole frame, the single layer output
+    let black: Vec<Frame> = (0..6).map(|_| Frame::new(W, H, Depth::U8)).collect();
+    assert_eq!(rig(&[("max_displace", "16")]).with_layer(FG1, black).render(2).unwrap(), plain);
+}
+
+#[test]
+fn the_fg_controls_reach_their_layers() {
+    let m1 = disc_clip(18.0, 16.0, 11.0);
+    let (x, y) = pair();
+    let mat = |k: usize, chan: i32| extract(&engine(&m1[k]), chan);
+    let params = [
+        ("max_displace", "16"),
+        ("fg1_sensitivity", "50"),
+        ("fg1_matte_chan", "4"),
+        ("fg1_inv_matte_shrink", "2.5"),
+        ("fg1_track", "0"),
+        ("main_bg_sensitivity", "90"),
+    ];
+    let got = rig(&params).with_layer(FG1, m1.clone()).render(2).unwrap();
+    let job = CreateVectorsJob {
+        settings: CreateVectorsSettingsExt::with_sensitivity(base(), 0.9),
+        layers: vec![
+            LayerParams { matte_chan: 4, sensitivity: 0.5, shrink: 2.5, track: false },
+            LayerParams { matte_chan: 0, sensitivity: 0.9, shrink: 0.0, track: true },
+        ],
+        mattes_x: vec![mat(2, 4)],
+        mattes_y: vec![mat(1, 4)],
+        points: Vec::new(),
+        first: 0,
+        last: 1,
+    };
+    assert_eq!(got, create_vectors_job(&x, &y, &job).unwrap().to_frame());
+}
+
+/// `CreateVectorsSettings` with another Main_BG sensitivity.
+trait CreateVectorsSettingsExt {
+    fn with_sensitivity(self, s: f32) -> Self;
+}
+
+impl CreateVectorsSettingsExt for retime_engine::create_vectors::CreateVectorsSettings {
+    fn with_sensitivity(mut self, s: f32) -> Self {
+        self.sensitivity = s;
+        self
+    }
 }
 
 #[test]
@@ -59,80 +153,141 @@ fn the_source_display_ignores_fg_mattes_without_draw_geom() {
 }
 
 #[test]
-fn every_debug_view_is_refused_with_its_own_message() {
-    let want = [
-        ("1", "Display Debug with Debug View Method \"Warp\" draws the forward warp of the first frame with the flow, which is not implemented; set Display to Vectors or Source"),
-        ("2", "Display Debug with Debug View Method \"Blend\" draws the blend view of the two frames, which is not implemented; set Display to Vectors or Source"),
-        ("3", "Display Debug with Debug View Method \"Diff\" draws the difference view of the two frames, which is not implemented; set Display to Vectors or Source"),
-        ("4", "Display Debug with Debug View Method \"Detail Compare\" draws the detail comparison view, which is not implemented; set Display to Vectors or Source"),
-        ("5", "Display Debug with Debug View Method \"Edge Compare\" draws the edge comparison view, which is not implemented; set Display to Vectors or Source"),
-    ];
-    for (view, message) in want {
-        for track in ["1", "2"] {
-            assert_eq!(unsupported(&rig(&[("display", "3"), ("debug_view_method", view), ("track_frame", track)]), 2), message, "view {view}");
-        }
+fn every_debug_view_renders_the_engine_view() {
+    let (x, y) = pair();
+    for (view, code) in [("1", 4), ("2", 0), ("3", 1), ("4", 2), ("5", 3)] {
+        // Debug swaps the roles: Previous reads X = frame 3, Y = frame 2 for output frame 2
+        let c = clip();
+        let (dx, dy) = (engine(&c[3]), engine(&c[2]));
+        let job = CreateVectorsJob::single(base());
+        let want = debug_view(&dx, &dy, &job_flow(&dx, &dy, &job).unwrap(), code).unwrap().to_frame();
+        let got = rig(&[("display", "3"), ("debug_view_method", view), ("max_displace", "16"), ("draw_geom", "1")]).render(2).unwrap();
+        assert_eq!(got, want, "view {view}");
     }
     // the view popup does nothing when Display is not Debug
-    assert!(rig(&[("debug_view_method", "1")]).render(2).is_ok());
+    assert_eq!(rig(&[("debug_view_method", "1"), ("max_displace", "16")]).render(2).unwrap(), create_vectors(&x, &y, &base()).unwrap().to_frame());
+    // with an FG matte the Debug view uses the merged flow
+    let m1 = disc_clip(18.0, 16.0, 11.0);
+    let c = clip();
+    let (dx, dy) = (engine(&c[3]), engine(&c[2]));
+    let job = CreateVectorsJob {
+        settings: base(),
+        layers: vec![layer(true), layer(true)],
+        mattes_x: vec![extract(&engine(&m1[3]), 1)],
+        mattes_y: vec![extract(&engine(&m1[2]), 1)],
+        points: Vec::new(),
+        first: 0,
+        last: 1,
+    };
+    let want = debug_view(&dx, &dy, &job_flow(&dx, &dy, &job).unwrap(), 4).unwrap().to_frame();
+    let got = rig(&[("display", "3"), ("debug_view_method", "1"), ("max_displace", "16")]).with_layer(FG1, m1).render(2).unwrap();
+    assert_eq!(got, want);
 }
 
 #[test]
 fn main_bg_track_unchecked_is_the_second_tracker() {
-    assert_eq!(unsupported(&rig(&[("main_bg_track", "0")]), 2), TRACK_MESSAGE);
+    // no point: the zero vector everywhere (127 in R and G, B 0, opaque)
+    let got = rig(&[("main_bg_track", "0")]).render(2).unwrap();
+    assert_eq!(got, zero_vectors_image(W, H, Fmt::U8).to_frame());
+    let Pixels::U8(p) = &got.pixels else { panic!() };
+    assert!(p.iter().all(|px| *px == [127, 127, 0, 255]));
+    // a point on Main_BG: the field follows it
+    let got = rig(&[("main_bg_track", "0"), ("max_displace", "16"), ("pt1_use", "5"), ("pt1_pos", "10,10@1;13,11@2")]).render(2).unwrap();
+    let flow = decode(&got, 16.0);
+    let [u, v] = flow.at(10, 10);
+    assert!((u + 3.0).abs() < 0.2 && (v + 1.0).abs() < 0.2, "{u} {v}");
     // the Source display never reaches a tracker
     assert!(rig(&[("main_bg_track", "0"), ("display", "1")]).render(2).is_ok());
     // the FG Track checkboxes only matter for FG layers
-    assert!(rig(&[("fg1_track", "0"), ("fg2_track", "0"), ("fg3_track", "0")]).render(2).is_ok());
+    let plain = rig(&[]).render(2).unwrap();
+    assert_eq!(rig(&[("fg1_track", "0"), ("fg2_track", "0"), ("fg3_track", "0")]).render(2).unwrap(), plain);
 }
 
 #[test]
-fn tracking_points_in_use_at_both_frames_are_refused() {
-    let m = |list: &str| {
-        format!(
-            "user tracking points feed the flow solver as user displacement, which is not implemented; set {list} to Don't Use"
-        )
-    };
-    // Pt 1 is FG1 and Pt 4 is Main_BG: with one layer (no FG matte) both belong to the only layer
-    assert_eq!(unsupported(&rig(&[("pt1_use", "2")]), 2), m("Pt 1: Use"));
-    assert_eq!(unsupported(&rig(&[("pt1_use", "2"), ("pt4_use", "5")]), 2), m("Pt 1: Use, Pt 4: Use"));
-    assert_eq!(unsupported(&rig(&[("pt12_use", "4"), ("track_frame", "2")]), 2), m("Pt 12: Use"));
-    // Don't Use (the default) is fine, and so is a point whose value differs at the two frame times:
-    // frame 3 with Previous reads frames 3 and 2 (ticks 300 and 200), the key switches at frame 3 (tick 300)
-    assert!(rig(&[("pt1_use", "1")]).render(2).is_ok());
-    assert!(rig(&[("pt1_use", "1@0;2@3")]).render(3).is_ok(), "Don't Use at the first time (tick 300 is the key: value 2) differs from tick 200");
-    assert!(rig(&[("pt1_use", "2@0;3@3")]).render(3).is_ok(), "FG1 at tick 200, FG2 at tick 300: the values differ");
-    assert!(rig(&[("pt1_use", "2@0;3@3")]).render(2).is_err(), "frames 2 and 1 are both before the key: FG1 at both");
-    // the Source display does not run the solver
-    assert!(rig(&[("pt1_use", "2"), ("display", "1"), ("draw_geom", "1")]).render(2).is_ok());
+fn tracking_points_in_use_at_both_frames_reach_the_solver() {
+    let (x, y) = pair();
+    let plain = create_vectors(&x, &y, &base()).unwrap().to_frame();
+    let at = |t: i32| frame_time(t, 100);
+    // Pt 1 on FG1: with one layer it belongs to the only layer; at frame 2 (Previous: ticks 200 and 100)
+    let params = [("max_displace", "16"), ("pt1_use", "2"), ("pt1_pos", "20,15@1;24,17@2")];
+    let got = rig(&params).render(2).unwrap();
+    let mut job = CreateVectorsJob::single(base());
+    job.points = vec![vec![UserPoint { at_a: [24.0, 17.0], at_b: [20.0, 15.0] }]];
+    assert_eq!((at(2), at(1)), (200, 100));
+    assert_eq!(got, create_vectors_job(&x, &y, &job).unwrap().to_frame());
+    assert_ne!(got, plain);
+    // Don't Use (the default) and a value that differs at the two frame times change nothing
+    assert_eq!(rig(&[("max_displace", "16"), ("pt1_use", "1")]).render(2).unwrap(), plain);
+    assert_eq!(rig(&[("max_displace", "16"), ("pt1_use", "2@0;3@2"), ("pt1_pos", "20,15")]).render(2).unwrap(), plain);
+    // a point that never moves holds its pixel still (Full res: the point's pixel is an output pixel)
+    let still = rig(&[("max_displace", "16"), ("vector_resolution", "2"), ("pt1_use", "5"), ("pt1_pos", "20,15")]).render(2).unwrap();
+    assert_eq!(decode(&still, 16.0).at(20, 15), [0.0, 0.0]);
 }
 
 #[test]
-fn draw_geom_over_the_source_view_needs_geometry_to_be_refused() {
+fn draw_geom_draws_over_the_source_and_the_debug_display() {
     // default Draw Geom is All: with no point in use the overlay draws nothing and the Source display is a plain copy
-    assert!(rig(&[("display", "1")]).render(2).is_ok());
-    // a point in use at the frame time: refused; Draw Geom None switches the overlay off
-    assert_eq!(unsupported(&rig(&[("display", "1"), ("pt3_use", "2")]), 2), DRAW_GEOM_MESSAGE);
-    assert!(rig(&[("display", "1"), ("pt3_use", "2"), ("draw_geom", "1")]).render(2).is_ok());
-    // one layer only: FG1, FG2, FG3 and Main_BG all name the only layer
+    let source = rig(&[("display", "1")]).render(2).unwrap();
+    assert_eq!(source, clip()[2]);
+    // a point in use at the frame time: an opaque disc in its colour (Pt 3 is white)
+    let got = rig(&[("display", "1"), ("pt3_use", "2"), ("pt3_pos", "10,12")]).render(2).unwrap();
+    let Pixels::U8(p) = &got.pixels else { panic!() };
+    assert_eq!(p[12 * W + 10], [255, 255, 255, 255]);
+    assert_eq!(p[12 * W + 11], [255, 255, 255, 255]);
+    assert_eq!(p[12 * W + 13], {
+        let Pixels::U8(s) = &source.pixels else { panic!() };
+        s[12 * W + 13]
+    });
+    // Draw Geom None switches the overlay off; one layer: FG1 to Main_BG all name the only layer
+    assert_eq!(rig(&[("display", "1"), ("pt3_use", "2"), ("pt3_pos", "10,12"), ("draw_geom", "1")]).render(2).unwrap(), source);
     for g in ["3", "4", "5", "6"] {
-        assert_eq!(unsupported(&rig(&[("display", "1"), ("pt3_use", "2"), ("draw_geom", g)]), 2), DRAW_GEOM_MESSAGE, "draw geom {g}");
+        assert_eq!(rig(&[("display", "1"), ("pt3_use", "2"), ("pt3_pos", "10,12"), ("draw_geom", g)]).render(2).unwrap(), got, "draw geom {g}");
     }
-    // Display Vectors never draws the overlay: with the point it is the solver that refuses
-    let m = unsupported(&rig(&[("pt3_use", "2"), ("draw_geom", "1")]), 2);
-    assert!(m.starts_with("user tracking points feed the flow solver"), "{m}");
+    // with FG1 present, Draw Geom Main_BG does not draw a point of FG1
+    let m1 = disc_clip(18.0, 16.0, 11.0);
+    assert_eq!(rig(&[("display", "1"), ("pt3_use", "2"), ("pt3_pos", "10,12"), ("draw_geom", "6")]).with_layer(FG1, m1).render(2).unwrap(), source);
+    // the Debug display draws it over the view
+    let debug = rig(&[("display", "3"), ("pt3_use", "2"), ("pt3_pos", "10,12"), ("draw_geom", "1")]).render(2).unwrap();
+    let drawn = rig(&[("display", "3"), ("pt3_use", "2"), ("pt3_pos", "10,12")]).render(2).unwrap();
+    assert_ne!(debug, drawn);
+    let Pixels::U8(p) = &drawn.pixels else { panic!() };
+    assert_eq!(p[12 * W + 10], [255, 255, 255, 255]);
+    // Display Vectors never draws the overlay
+    let vectors = rig(&[("pt3_use", "2"), ("pt3_pos", "10,12"), ("max_displace", "16")]).render(2).unwrap();
+    let Pixels::U8(p) = &vectors.pixels else { panic!() };
+    assert_ne!(p[12 * W + 10], [255, 255, 255, 255]);
 }
 
 #[test]
-fn the_order_of_the_refusals_is_fg_then_debug_then_track_then_points() {
-    let all = [("display", "3"), ("main_bg_track", "0"), ("pt1_use", "2")];
-    assert_eq!(unsupported(&rig(&all).with_layer(FG1, clip()), 2), FG_MESSAGE);
-    assert!(unsupported(&rig(&all), 2).starts_with("Display Debug"));
-    assert_eq!(unsupported(&rig(&[("main_bg_track", "0"), ("pt1_use", "2")]), 2), TRACK_MESSAGE);
+fn a_side_of_one_is_the_zero_vector_whatever_the_settings() {
+    for depth in [Depth::U8, Depth::U16, Depth::F32] {
+        for (w, h) in [(1usize, 1usize), (1, 17), (17, 1)] {
+            let c = random_clip(depth, w, h, 6, 4);
+            let zero = zero_vectors_image(w, h, Fmt::from_depth(depth)).to_frame();
+            let cases: [&[(&str, &str)]; 6] = [
+                &[("main_bg_track", "0")],
+                &[("pt1_use", "5"), ("pt1_pos", "0,0@1;0,1@2")],
+                &[("display", "3"), ("debug_view_method", "1")],
+                &[("display", "3"), ("debug_view_method", "4"), ("pt2_use", "2")],
+                &[("layers_output", "2"), ("fg1_track", "0")],
+                &[("layers_output", "5"), ("fg1_inv_matte_shrink", "3")],
+            ];
+            for params in cases {
+                for fg in [false, true] {
+                    let mut r = Rig::new(c.clone(), params).with_frames(6);
+                    if fg {
+                        r = r.with_layer(FG1, random_clip(depth, w, h, 6, 5));
+                    }
+                    assert_eq!(r.render(2).unwrap(), zero, "{depth:?} {w}x{h} fg {fg} {params:?}");
+                }
+            }
+        }
+    }
 }
 
 #[test]
-fn an_error_fill_wins_over_every_refusal() {
-    // a FG matte of another size is a size mismatch (red), even though a FG matte would be refused
+fn an_error_fill_wins_over_everything() {
+    // a FG matte of another size is a size mismatch (red), whatever the other settings
     let small = random_clip(Depth::U8, 8, 8, 6, 9);
     let r = rig(&[("display", "3"), ("main_bg_track", "0"), ("pt1_use", "2")]).with_layer(FG1, small);
     let out = r.render(2).unwrap();

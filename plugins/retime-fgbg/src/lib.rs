@@ -1,12 +1,12 @@
 //! retime-fgbg: a time remap and frame interpolation effect with foreground and background handling.
 //!
 //! It retimes a layer by a speed curve or by an absolute frame number and synthesizes the
-//! in-between frames from motion vectors. This crate is its temporal front-end for the SINGLE LAYER
-//! use (no FG Matte layer, no user tracking points): `dependencies()` is the pre-render,
-//! `render_temporal()` the render on the shared engine, and everything the engine or this front-end
-//! cannot do is an `FxError::Unsupported` with a precise message (see `glue.rs`). `params()` lists
-//! the visible user parameters that can affect the CPU render output, restricted to the kinds
-//! `fx-core` can express; the layers are the `layers()` of the effect.
+//! in-between frames from motion vectors, one flow per layer when FG Matte layers are set (the
+//! n-layer path of the engine, with tracking points, the Draw Geom overlay and the wrap-around
+//! flag of `Track RGB+A`). This crate is its temporal front-end: `dependencies()` is the
+//! pre-render, `render_temporal()` the render on the shared engine (see `glue.rs`). `params()`
+//! lists the visible user parameters that can affect the CPU render output, restricted to the
+//! kinds `fx-core` can express; the layers are the `layers()` of the effect.
 
 use fx_core::{
     Checkout, Effect, EffectKind, Env, Frame, LayerSpec, ParamKind, ParamSpec, Params, RenderContext, Result, TemporalContext,
@@ -28,11 +28,11 @@ pub const FG_COUNT: usize = 3;
 /// Number of user placed tracking points.
 pub const POINT_COUNT: usize = 12;
 
-const FG_CHAN_IDS: [&str; FG_COUNT] = ["fg1_matte_chan", "fg2_matte_chan", "fg3_matte_chan"];
+pub(crate) const FG_CHAN_IDS: [&str; FG_COUNT] = ["fg1_matte_chan", "fg2_matte_chan", "fg3_matte_chan"];
 const FG_CHAN_NAMES: [&str; FG_COUNT] = ["FG1 Matte Chan", "FG2 Matte Chan", "FG3 Matte Chan"];
-const FG_SENS_IDS: [&str; FG_COUNT] = ["fg1_sensitivity", "fg2_sensitivity", "fg3_sensitivity"];
+pub(crate) const FG_SENS_IDS: [&str; FG_COUNT] = ["fg1_sensitivity", "fg2_sensitivity", "fg3_sensitivity"];
 const FG_SENS_NAMES: [&str; FG_COUNT] = ["FG1 Sensitivity", "FG2 Sensitivity", "FG3 Sensitivity"];
-const FG_SHRINK_IDS: [&str; FG_COUNT] =
+pub(crate) const FG_SHRINK_IDS: [&str; FG_COUNT] =
     ["fg1_inv_matte_shrink", "fg2_inv_matte_shrink", "fg3_inv_matte_shrink"];
 const FG_SHRINK_NAMES: [&str; FG_COUNT] =
     ["FG1 Inv Matte Shrink", "FG2 Inv Matte Shrink", "FG3 Inv Matte Shrink"];
@@ -45,7 +45,7 @@ const PT_USE_NAMES: [&str; POINT_COUNT] = [
     "Pt 1: Use", "Pt 2: Use", "Pt 3: Use", "Pt 4: Use", "Pt 5: Use", "Pt 6: Use", "Pt 7: Use",
     "Pt 8: Use", "Pt 9: Use", "Pt 10: Use", "Pt 11: Use", "Pt 12: Use",
 ];
-const PT_POS_IDS: [&str; POINT_COUNT] = [
+pub(crate) const PT_POS_IDS: [&str; POINT_COUNT] = [
     "pt1_pos", "pt2_pos", "pt3_pos", "pt4_pos", "pt5_pos", "pt6_pos", "pt7_pos", "pt8_pos",
     "pt9_pos", "pt10_pos", "pt11_pos", "pt12_pos",
 ];
@@ -53,7 +53,7 @@ const PT_POS_NAMES: [&str; POINT_COUNT] = [
     "Pt 1: Pos", "Pt 2: Pos", "Pt 3: Pos", "Pt 4: Pos", "Pt 5: Pos", "Pt 6: Pos", "Pt 7: Pos",
     "Pt 8: Pos", "Pt 9: Pos", "Pt 10: Pos", "Pt 11: Pos", "Pt 12: Pos",
 ];
-const PT_COLOR_IDS: [&str; POINT_COUNT] = [
+pub(crate) const PT_COLOR_IDS: [&str; POINT_COUNT] = [
     "pt1_color", "pt2_color", "pt3_color", "pt4_color", "pt5_color", "pt6_color", "pt7_color",
     "pt8_color", "pt9_color", "pt10_color", "pt11_color", "pt12_color",
 ];
@@ -231,9 +231,8 @@ impl Effect for RetimeFgBg {
 
     /// The five optional layer parameters: Alt Source A replaces the input as the retimed footage,
     /// Alt Source B is the separate source for the vector estimation (the same ids as plugin 01),
-    /// and the three FG Matte layers feed the multi layer path, which this front-end does not run
-    /// (a set matte layer gives `FxError::Unsupported`, the matte sizes are still probed for the
-    /// error fills).
+    /// and the three FG Matte layers feed the n-layer path (the consecutive layers with pixels from
+    /// FG1 on; their sizes are probed for the error fills).
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
             LayerSpec { id: LAYER_ALT_A, name: "Alt Source A", optional: true },
@@ -244,15 +243,21 @@ impl Effect for RetimeFgBg {
         ]
     }
 
+    /// The open parity gaps of the layered retime path, the points, the overlay and the wrap
+    /// (`retime_engine::gaps`).
+    fn gaps(&self) -> &'static [&'static fx_core::OpenGap] {
+        retime_engine::gaps::RETIME_FGBG
+    }
+
     /// The pre-render checkouts of output frame `cx.frame_index`, in issue order.
     fn dependencies(&self, cx: &TemporalContext, env: &Env<'_>) -> Result<Vec<Checkout>> {
         glue::dependencies(cx, env)
     }
 
-    /// Single layer use: Time Remap Mode Speed and Frame Number, Nearest, Blend and Weighted Blend, the
-    /// inverse warp (Warping "Inverse") with every Vectors quality, Blur Compensation, Prep and the
-    /// Source display. Warping codes 1 to 3, FG Matte layers, user tracking points and Track RGB+A (when
-    /// vectors are computed) return `FxError::Unsupported`.
+    /// Time Remap Mode Speed and Frame Number, Nearest, Blend and Weighted Blend, the four Warping
+    /// codes with every Vectors quality, Blur Compensation, Prep, the FG Matte layers with the
+    /// Display groups, the tracking points, Track RGB+A (the wrap-around flag) and the Source
+    /// display with the Draw Geom overlay.
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
         glue::render_temporal(cx, env, output)
     }

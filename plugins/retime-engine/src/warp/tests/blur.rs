@@ -330,15 +330,21 @@ fn blur_compensation_entry_applies_the_call_site_condition() {
     blur_compensation(&mut img, &flow, 7.0, 5.0, 0.8, true).unwrap();
     assert_eq!(img, want);
     assert_ne!(img, src);
-    // 360 leaves are not reproduced
-    let mut out = zeros_like(&src);
-    assert!(matches!(motion_blur(&mut out, &src, &flow, 1.0, true, 0.5, true), Err(FxError::Unsupported(_))));
+    // the 360 leaves run too (G6): this flow moves 6 pixels on a 10 pixel row, so the taps cross the
+    // seam and the wrapped blur differs from the plain one
+    for hiq in [true, false] {
+        let mut plain = zeros_like(&src);
+        motion_blur(&mut plain, &src, &flow, 1.0, hiq, 0.5, false).unwrap();
+        let mut wrap = zeros_like(&src);
+        motion_blur(&mut wrap, &src, &flow, 1.0, hiq, 0.5, true).unwrap();
+        assert!(same_samples(&plain, &wrap).is_some(), "hiq {hiq}");
+    }
 }
 
 #[test]
 fn blur_leaf_stores_follow_the_clamp_rule_not_the_pack_rule() {
-    // maxps / minps based: a NaN or an out of int32 range value ends at 0 (indefinite integer clamped by
-    // maxps), large values that fit an int32 end at the white
+    // clamp based: a NaN or an out of int32 range value ends at 0 (the indefinite integer, clamped), large
+    // values that fit an int32 end at the white
     assert_eq!(<u8 as Pix>::store_blur(f32::NAN), 0);
     assert_eq!(<u8 as Pix>::store_blur(1e6), 255);
     assert_eq!(<u8 as Pix>::store_blur(1e12), 0);
@@ -349,4 +355,254 @@ fn blur_leaf_stores_follow_the_clamp_rule_not_the_pack_rule() {
     assert_eq!(<u16 as Pix>::store_blur(1e6), 65535);
     assert_eq!(<u16 as Pix>::store_blur(f32::NAN), 0);
     assert_eq!(<f32 as Pix>::store_blur(-3.5), -3.5);
+}
+
+#[test]
+fn the_wrap_entry_is_the_plain_compensation_with_the_flag_off() {
+    let src = img_f32(10, 8, |x, y, c| 0.05 * (x + y + c) as f32 + 0.1);
+    let src8 = img_u8(10, 8, |x, y, c| (20 + x * 11 + y * 7 + c * 3) as u8);
+    let flow = const_flow(10, 8, 6.0, -2.0);
+    // running (fast and slow motion, both tap variants) and not running (no motion, slider off)
+    for (s0, s1, blur, hiq) in [(7.0, 5.0, 0.8, true), (7.0, 5.0, 0.8, false), (5.0, 5.5, 1.0, true), (5.0, 5.0, 1.0, true), (7.0, 5.0, 0.0, true)] {
+        for img in [&src, &src8] {
+            let mut want = img.clone();
+            blur_compensation(&mut want, &flow, s0, s1, blur, hiq).unwrap();
+            let mut got = img.clone();
+            blur_compensation_wrap(&mut got, &flow, s0, s1, blur, hiq, false).unwrap();
+            assert_eq!(same_samples(&got, &want), None, "{s0} {s1} {blur} {hiq} {:?}", img.fmt());
+        }
+    }
+    // with the flag a compensation that runs is the same chain on the wrapped taps: positive amounts
+    // blur and clear, negative ones blur at 0.5 and lerp; one whose condition fails does nothing,
+    // as without the flag
+    for (s0, s1, blur, hiq) in [(7.0, 5.0, 0.8, true), (7.0, 5.0, 0.8, false), (5.0, 5.5, 1.0, true), (5.0, 5.5, 1.0, false)] {
+        for img in [&src, &src8] {
+            let amount = blur_amount(s0, s1, blur).unwrap();
+            let mut want = zeros_like(img);
+            if amount > 0.0 {
+                motion_blur(&mut want, img, &flow, amount, hiq, 0.5, true).unwrap();
+                clear_rgb_where_transparent(&mut want);
+            } else {
+                motion_blur(&mut want, img, &flow, 0.5, hiq, 0.5, true).unwrap();
+                crate::blend::lerp(&mut want, img, amount);
+            }
+            let mut got = img.clone();
+            blur_compensation_wrap(&mut got, &flow, s0, s1, blur, hiq, true).unwrap();
+            assert_eq!(same_samples(&got, &want), None, "{s0} {s1} {blur} {hiq} {:?}", img.fmt());
+            let mut plain = img.clone();
+            blur_compensation(&mut plain, &flow, s0, s1, blur, hiq).unwrap();
+            assert!(same_samples(&got, &plain).is_some(), "the taps cross the seam: {s0} {s1} {hiq} {:?}", img.fmt());
+        }
+    }
+    for (s0, s1, blur) in [(5.0, 5.0, 1.0), (7.0, 5.0, 0.0)] {
+        let mut img = src.clone();
+        blur_compensation_wrap(&mut img, &flow, s0, s1, blur, true, true).unwrap();
+        assert_eq!(same_samples(&img, &src), None);
+    }
+}
+
+// ---------------------------------------------------------------------------------------
+// the wrap-around (360) taps
+// ---------------------------------------------------------------------------------------
+
+/// An image of the depth from a closure in native units of 0..1 (scaled to the integer white).
+fn img_depth(depth: usize, w: usize, h: usize, f: impl Fn(usize, usize, usize) -> f32) -> Image {
+    match depth {
+        0 => img_u8(w, h, |x, y, c| (f(x, y, c) * 255.0) as u8),
+        1 => img_u16(w, h, |x, y, c| (f(x, y, c) * 65535.0) as u16),
+        _ => img_f32(w, h, f),
+    }
+}
+
+/// `img` rotated left by `s` columns: `out(x, y) = img((x + s) mod w, y)`.
+fn rotated(img: &Image, s: usize) -> Image {
+    let w = img.width;
+    let mut out = img.clone();
+    fn rot<T: Copy>(o: &mut [T], i: &[T], w: usize, s: usize) {
+        for (r, (orow, irow)) in o.chunks_mut(w * 4).zip(i.chunks(w * 4)).enumerate() {
+            let _ = r;
+            for x in 0..w {
+                orow[x * 4..x * 4 + 4].copy_from_slice(&irow[((x + s) % w) * 4..((x + s) % w) * 4 + 4]);
+            }
+        }
+    }
+    match (&mut out.samples, &img.samples) {
+        (Samples::U8(o), Samples::U8(i)) => rot(o, i, w, s),
+        (Samples::U16(o), Samples::U16(i)) => rot(o, i, w, s),
+        (Samples::F32(o), Samples::F32(i)) => rot(o, i, w, s),
+        _ => unreachable!(),
+    }
+    out
+}
+
+/// The four samples of pixel `(x, y)` as f64 bit patterns (any depth), for exact comparisons.
+fn pixel_bits(img: &Image, x: usize, y: usize) -> [u64; 4] {
+    let i = (y * img.width + x) * 4;
+    let mut out = [0u64; 4];
+    for c in 0..4 {
+        out[c] = match &img.samples {
+            Samples::U8(v) => f64::from(v[i + c]).to_bits(),
+            Samples::U16(v) => f64::from(v[i + c]).to_bits(),
+            Samples::F32(v) => f64::from(v[i + c]).to_bits(),
+        };
+    }
+    out
+}
+
+#[test]
+fn wrap_blur_model_fixtures_are_reproduced_bit_for_bit() {
+    let mut n = 0;
+    let mut hiq_cases = 0;
+    for (i, c) in crate::holefill::tests::load_wrap_cases().iter().enumerate() {
+        let crate::holefill::tests::WrapCase::Blur { src, flow, amount, shutter, hiq, out } = c else { continue };
+        let mut got = zeros_like(src);
+        motion_blur(&mut got, src, flow, *amount, *hiq, *shutter, true).unwrap();
+        if let Some(pos) = same_samples_nan_ok(&got, out) {
+            panic!(
+                "wrap case {i} ({:?}, {}x{}, flow {}x{}, amount {amount}, shutter {shutter}, hiq {hiq}): first difference at sample {pos}",
+                src.fmt(),
+                src.width,
+                src.height,
+                flow.width,
+                flow.height
+            );
+        }
+        n += 1;
+        hiq_cases += usize::from(*hiq);
+    }
+    assert_eq!((n, hiq_cases), (42, 21));
+}
+
+#[test]
+fn wrap_blur_thread_count_does_not_change_the_output() {
+    for (i, c) in crate::holefill::tests::load_wrap_cases().iter().enumerate() {
+        let crate::holefill::tests::WrapCase::Blur { src, flow, amount, shutter, hiq, .. } = c else { continue };
+        let run = |threads: usize| {
+            in_pool(threads, || {
+                let mut out = zeros_like(src);
+                motion_blur(&mut out, src, flow, *amount, *hiq, *shutter, true).unwrap();
+                out
+            })
+        };
+        assert!(same_samples_nan_ok(&run(1), &run(4)).is_none(), "wrap case {i}");
+    }
+}
+
+#[test]
+fn wrap_blur_equals_the_plain_blur_where_the_taps_stay_inside() {
+    // a smooth flow of at most 2.5 pixels per axis after the amount: a pixel at least `m` pixels
+    // from the left, right and bottom borders has every tap inside [0, W - 1) x [0, H - 1), where
+    // the 360 sampler and the plain one compute the same lerps, and the wrap of x changes nothing
+    let (w, h) = (30usize, 22usize);
+    let mut flow = FlowField::new(w, h);
+    for y in 0..h {
+        for x in 0..w {
+            let fx = ((x * 7 + y * 3) % 11) as f32 / 11.0 * 10.0 - 5.0;
+            let fy = ((x * 5 + y * 9) % 13) as f32 / 13.0 * 10.0 - 5.0;
+            flow.set(x, y, [fx, fy]);
+        }
+    }
+    for depth in 0..3 {
+        let src = img_depth(depth, w, h, |x, y, c| ((x * 13 + y * 7 + c * 5) % 17) as f32 / 17.0);
+        for hiq in [true, false] {
+            for (shutter, m) in [(0.5f32, 4usize), (0.25, 6)] {
+                let mut plain = zeros_like(&src);
+                motion_blur(&mut plain, &src, &flow, 1.0, hiq, shutter, false).unwrap();
+                let mut wrap = zeros_like(&src);
+                motion_blur(&mut wrap, &src, &flow, 1.0, hiq, shutter, true).unwrap();
+                let mut differs = 0;
+                for y in 0..h {
+                    for x in 0..w {
+                        let inside = x >= m && x + m < w && y + m < h;
+                        if inside {
+                            assert_eq!(pixel_bits(&wrap, x, y), pixel_bits(&plain, x, y), "depth {depth} hiq {hiq} shutter {shutter} ({x}, {y})");
+                        } else if pixel_bits(&wrap, x, y) != pixel_bits(&plain, x, y) {
+                            differs += 1;
+                        }
+                    }
+                }
+                // near the seam the wrapped taps read the other side
+                assert!(differs > 0, "depth {depth} hiq {hiq} shutter {shutter}");
+            }
+        }
+    }
+}
+
+#[test]
+fn wrap_blur_across_the_seam_equals_the_plain_blur_of_the_rotated_image() {
+    // Exact tap positions (integer or quarter pixel steps), a 32 pixel row rotated by 16: the taps
+    // of a pixel near the seam land on the same pixels, with the same fractions, as the plain taps
+    // of its rotated twin in the middle of the rotated image.
+    let (w, h) = (32usize, 12usize);
+    for (dx, dy) in [(6.0f32, 2.0f32), (-6.0, 0.0), (3.0, 4.0), (-3.0, -4.0)] {
+        let flow = const_flow(w, h, dx, dy);
+        for depth in 0..3 {
+            let src = img_depth(depth, w, h, |x, y, c| ((x * 11 + y * 5 + c * 3) % 19) as f32 / 19.0);
+            let rot = rotated(&src, w / 2);
+            for hiq in [true, false] {
+                let mut wrap = zeros_like(&src);
+                motion_blur(&mut wrap, &src, &flow, 1.0, hiq, 0.5, true).unwrap();
+                let mut plain = zeros_like(&rot);
+                motion_blur(&mut plain, &rot, &flow, 1.0, hiq, 0.5, false).unwrap();
+                // the rotated twin sits at x' = (x + 16) mod 32; its taps (at most 3 pixels away)
+                // stay inside [0, W - 1) for x' in 4..=27, which covers the seam pixels of `src`;
+                // rows whose taps reach the last row use the pole row of the 360 sampler, so they
+                // are left out
+                let mut seam = 0;
+                for y in 0..h - 3 {
+                    for x in 0..w {
+                        let xr = (x + w / 2) % w;
+                        if !(4..=27).contains(&xr) {
+                            continue;
+                        }
+                        assert_eq!(pixel_bits(&wrap, x, y), pixel_bits(&plain, xr, y), "flow ({dx}, {dy}) depth {depth} hiq {hiq} ({x}, {y})");
+                        if x < 4 || x >= w - 4 {
+                            seam += 1;
+                        }
+                    }
+                }
+                assert!(seam >= 8 * (h - 3));
+            }
+        }
+    }
+}
+
+#[test]
+fn wrap_blur_wraps_the_taps_but_not_the_rows() {
+    // a vertical vector: the plain and the wrapped blur agree on every pixel whose taps stay above
+    // the last row (no x ever leaves the image), and the taps above the first row are dropped by
+    // both, as the y test is the plain one
+    let (w, h) = (9usize, 14usize);
+    let flow = const_flow(w, h, 0.0, 6.0);
+    let src = img_f32(w, h, |x, y, c| (x * 3 + y * 17 + c) as f32 * 0.01);
+    for hiq in [true, false] {
+        let mut plain = zeros_like(&src);
+        motion_blur(&mut plain, &src, &flow, 1.0, hiq, 0.5, false).unwrap();
+        let mut wrap = zeros_like(&src);
+        motion_blur(&mut wrap, &src, &flow, 1.0, hiq, 0.5, true).unwrap();
+        for y in 0..h - 4 {
+            for x in 0..w - 1 {
+                assert_eq!(pixel_bits(&wrap, x, y), pixel_bits(&plain, x, y), "hiq {hiq} ({x}, {y})");
+            }
+        }
+    }
+}
+
+#[test]
+fn wrap_blur_refuses_a_tap_that_never_wraps() {
+    // a shutter far outside 0..1 moves the centre 3e7 pixels away: the plain leaves drop such taps,
+    // the wrap loops would run for millions of steps, so the call is refused like the 360 warp's
+    let src = img_f32(16, 8, |x, y, c| (x + y + c) as f32 * 0.1);
+    let flow = const_flow(16, 8, 3.0, 0.0);
+    for hiq in [true, false] {
+        let mut out = zeros_like(&src);
+        motion_blur(&mut out, &src, &flow, 1.0, hiq, 1.0e7, false).unwrap();
+        assert!(matches!(motion_blur(&mut out, &src, &flow, 1.0, hiq, 1.0e7, true), Err(FxError::Unsupported(_))), "hiq {hiq}");
+    }
+    // a NaN flow is refused by the bilinear taps with or without the flag
+    let mut nan = const_flow(16, 8, 3.0, 0.0);
+    nan.set(5, 5, [f32::NAN, 1.0]);
+    let mut out = zeros_like(&src);
+    assert!(matches!(motion_blur(&mut out, &src, &nan, 1.0, true, 0.5, false), Err(FxError::Unsupported(_))));
+    assert!(matches!(motion_blur(&mut out, &src, &nan, 1.0, true, 0.5, true), Err(FxError::Unsupported(_))));
 }

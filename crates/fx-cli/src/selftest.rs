@@ -3,13 +3,15 @@
 //! parameter curves, thread count invariance), not to do anything useful.
 //! `vfx list` hides them unless `--all` is passed; `vfx apply` runs them.
 
+use fx_core::gaps::{record, OpenGap};
 use fx_core::{
     par_rows, Checkout, Effect, EffectKind, Env, Frame, FxError, LayerSpec, ParamKind, ParamSpec, Params, Pixels,
     RenderContext, Result, TemporalContext,
 };
+use rayon::prelude::*;
 
 pub fn effects() -> Vec<Box<dyn Effect>> {
-    vec![Box::new(Invert), Box::new(Shift), Box::new(Integrate), Box::new(Threads)]
+    vec![Box::new(Invert), Box::new(Shift), Box::new(Integrate), Box::new(Threads), Box::new(Gap)]
 }
 
 /// The temporal effects have no single frame form.
@@ -282,6 +284,59 @@ impl Effect for Threads {
     }
 }
 
+// ---- selftest-gap: the note of an open parity gap ------------------------------------------------
+
+/// The test gap of `selftest-gap`. It stands for no rule of the original: it exists so that the
+/// path from `fx_core::gaps::record` to the `vfx: note:` line can be run on a real process.
+pub static T1: OpenGap = OpenGap::new("T1", "notes plumbing test", &["gap"]);
+static GAP_GAPS: &[&OpenGap] = &[&T1];
+
+/// Output frame `n` is input frame `n`, transparent black past the clip. With the checkbox `gap`
+/// on at the frame's time, the frame records the test gap T1 once from the main thread and once
+/// per row from the rayon thread that visits it, so `vfx` has to fold many records from many
+/// threads into its one note per run. The pixels are the same with `gap` on or off.
+pub struct Gap;
+
+impl Effect for Gap {
+    fn id(&self) -> &'static str {
+        "selftest-gap"
+    }
+
+    fn name(&self) -> &'static str {
+        "Selftest Gap"
+    }
+
+    fn params(&self) -> Vec<ParamSpec> {
+        vec![ParamSpec { id: "gap", name: "Gap", kind: ParamKind::Checkbox { default: false } }]
+    }
+
+    fn kind(&self) -> EffectKind {
+        EffectKind::Temporal
+    }
+
+    fn gaps(&self) -> &'static [&'static OpenGap] {
+        GAP_GAPS
+    }
+
+    fn render(&self, _ctx: &RenderContext, _params: &Params, _input: &Frame, _output: &mut Frame) -> Result<()> {
+        not_a_frame_effect(self.id())
+    }
+
+    fn dependencies(&self, cx: &TemporalContext, _env: &Env<'_>) -> Result<Vec<Checkout>> {
+        Ok(vec![Checkout { layer: None, time: cx.current_time }])
+    }
+
+    fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
+        let src = env.input.frame_at(cx.current_time)?;
+        load(output, src.as_deref())?;
+        if env.params.bool_at("gap", cx.current_time) {
+            record(&T1);
+            (0..output.height).into_par_iter().for_each(|_| record(&T1));
+        }
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -322,7 +377,7 @@ mod tests {
     }
 
     #[test]
-    fn the_registry_sees_one_frame_and_three_temporal_effects() {
+    fn the_registry_sees_one_frame_and_four_temporal_effects() {
         let kinds: Vec<(&str, EffectKind)> = effects().iter().map(|e| (e.id(), e.kind())).collect();
         assert_eq!(
             kinds,
@@ -330,7 +385,8 @@ mod tests {
                 ("selftest-invert", EffectKind::Frame),
                 ("selftest-shift", EffectKind::Temporal),
                 ("selftest-integrate", EffectKind::Temporal),
-                ("selftest-threads", EffectKind::Temporal)
+                ("selftest-threads", EffectKind::Temporal),
+                ("selftest-gap", EffectKind::Temporal)
             ]
         );
         assert_eq!(Shift.layers(), vec![LayerSpec { id: "overlay", name: "Overlay", optional: true }]);
@@ -485,6 +541,27 @@ mod tests {
         assert_eq!(first8(&out), [n, 21, 22, 255]);
         let Pixels::U8(px) = &out.pixels else { unreachable!() };
         assert_eq!(px[1], [20, 20, 20, 20]);
+    }
+
+    #[test]
+    fn the_gap_effect_copies_its_input_with_the_gap_on_or_off() {
+        let clip = clip8(&[10, 20, 30]);
+        let mut curves = ParamCurves::new(Gap.params());
+        let frames = |curves: &ParamCurves| (0..4).map(|n| render(&Gap, curves, &clip, &LayerSet::new(), n, 4)).collect::<Vec<_>>();
+        let off = frames(&curves);
+        assert_eq!(off[..3], [frame8(10), frame8(20), frame8(30)]);
+        assert_eq!(off[3], Frame::new(2, 2, Depth::U8), "past the clip it is transparent black");
+        // the record itself is process wide and only fx-core's tests read it; the note is pinned
+        // through the binary (tests/cli.rs)
+        curves.set_constant("gap", ParamValue::Bool(true)).unwrap();
+        assert_eq!(frames(&curves), off);
+        assert_eq!(Gap.gaps(), [&T1]);
+        let none = LayerSet::new();
+        let env = Env { params: &curves, input: &clip, layers: &none };
+        let cx = TemporalContext::new(2, 2, Depth::U8, base(), 2, 4);
+        assert_eq!(Gap.dependencies(&cx, &env).unwrap(), vec![Checkout { layer: None, time: 200 }]);
+        let mut out = Frame::new(2, 2, Depth::U8);
+        assert!(matches!(Gap.render(&RenderContext::default(), &Params::default(), &frame8(1), &mut out), Err(FxError::Unsupported(_))));
     }
 
     #[test]

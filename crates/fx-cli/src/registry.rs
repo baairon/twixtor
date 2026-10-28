@@ -113,7 +113,7 @@ mod tests {
     #[test]
     fn hidden_effects_run_but_are_not_listed() {
         let hidden: Vec<_> = all().into_iter().filter(|e| e.hidden).map(|e| e.effect.id()).collect();
-        for want in ["selftest-invert", "selftest-shift", "selftest-integrate", "selftest-threads"] {
+        for want in ["selftest-invert", "selftest-shift", "selftest-integrate", "selftest-threads", "selftest-gap"] {
             assert!(hidden.contains(&want), "{want} should be hidden");
             assert!(find(want).is_some());
             assert!(listed().iter().all(|e| e.effect.id() != want));

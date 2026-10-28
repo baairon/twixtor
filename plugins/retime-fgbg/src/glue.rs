@@ -1,35 +1,40 @@
-//! Plugin 03's wiring of the shared engine front-end, single layer use.
+//! Plugin 03's wiring of the shared engine front-end: the single layer path and the n-layer path
+//! of the FG matte layers.
 //!
 //! What the shared `retime_engine::frontend` entry points cannot express for plugin 03 is done
 //! here from the public pieces of the engine: the Warping popup (a warp code, not plugin 01's Smart
-//! Blend checkbox), the missing `Src Time Offset`, the FG matte probes of the pre-render and the
-//! checks that turn every feature of the multi layer path into an explicit `FxError::Unsupported`
-//! instead of a silent fallback.
+//! Blend checkbox), the missing `Src Time Offset`, the FG matte probes of the pre-render, the layer
+//! job of the FG matte layers, the tracking points and the Draw Geom overlay.
 //!
-//! Two things leave the single layer path and are refused with `FxError::Unsupported`:
-//! * a FG Matte layer with pixels (the count `n` of the probe loop, which stops at the first empty
-//!   one) selects the multi layer path (one flow per layer, mattes, Main_BG compositing);
-//! * user geometry of the one group: a `Pt k: Use` point that is in use at the two source frame
-//!   times (every value 2 to 5 belongs to the only group when `n = 0`) reaches the flow solver as
-//!   user displacement. Mask paths (First/Last Mask) feed the same solver input but are parameter
-//!   kinds `fx-core` cannot express, so they cannot be detected and are not part of this crate's
-//!   input.
+//! The render of a frame, after the error fills of the probes:
+//! * the Source display (`Display == 2`) shows Alt Source A at the current time `X`, or the input
+//!   layer when there is no Alt Source A, then draws the tracking points of the Draw Geom group
+//!   over it ([`draw_geom_points`]; rule G3);
+//! * every other display runs `compose::retime_layers` with the layer job of the FG matte layers
+//!   ([`layer_job`]: the count `n` of the probe loop, which stops at the first empty one, the per
+//!   layer controls and the group of the Display popup) and the tracking points in use at the
+//!   two source frame times ([`user_points`]). With `n = 0` and no point in use that is the
+//!   single layer core of today, byte for byte, and the Display values 3 to 6 all
+//!   select the one group `0..=0`, so they render exactly like the processed output.
 //!
-//! The Source display (`Display == 2`) shows Alt Source A at the current time `X`, or the input
-//! layer when there is no Alt Source A; the error flags are tested before it. With `n = 0` the
-//! Display popup values 3 to 6 (FG1 to FG3 and Background processed) all select the single group
-//! `min(Display - 3, 0) = 0`, which is the range `0..=0` of Display 1 as well, so they render
-//! exactly like the processed output.
+//! `Track RGB+A` is the engine's wrap-around (360) flag (`EngineSettings::wrap_360`, rule G6): the solver, the inverse warps, the hole fill and the blur tail wrap horizontally;
+//! it does not add alpha to the luma. Mask paths (First/Last Mask, layer masks) feed the same
+//! solver input as the points but are parameter kinds `fx-core` cannot express, so they are not
+//! part of this crate's input.
 
 use crate::prerender::{self, PreRender03, LAYER_FG_MATTE};
 use crate::timemap::{CurveParams03, RetimeFgBgTimeMap};
+use crate::{FG_CHAN_IDS, FG_SENS_IDS, FG_SHRINK_IDS, PT_COLOR_IDS, PT_POS_IDS, PT_USE_IDS};
 use fx_core::{Checkout, Env, FieldOrder, Frame, FxError, ParamCurves, Result, TemporalContext};
 use retime_engine::compose::{self, Rendered};
-use retime_engine::frontend::{self, SettingIds, TimeParamIds, Wiring};
+use retime_engine::frontend::{self, fixed_reader, SettingIds, TimeParamIds, Wiring};
+use retime_engine::geom::draw_points;
 use retime_engine::host::{layer_is_set, EngineHost, EngineSettings, EnvHost, LayerIds};
 use retime_engine::image::{error_frame, MissingLayerStyle};
+use retime_engine::layers::{LayerJob, LayerParams};
 use retime_engine::planner::{LAYER_ALT_A, LAYER_ALT_B};
-use retime_engine::timeline::{frame_positions, TimeMap};
+use retime_engine::points::{point_layer, read_pos, UserPoint};
+use retime_engine::timeline::{frame_positions, Selection, TimeMap};
 
 /// Plugin 03's parameter and layer ids for the shared settings reader (`frontend::read_settings`,
 /// the only function of `frontend` this crate calls). Differences from plugin 01's table:
@@ -76,30 +81,6 @@ pub fn warp_code(popup_value: i32) -> i32 {
     }
 }
 
-/// The message of a FG Matte layer being set.
-pub const FG_UNSUPPORTED: &str = "a FG Matte layer is set: the multi layer path (one flow per \
-     layer, mattes, Main_BG compositing) is not implemented; remove the FG Matte layers (this render \
-     handles the single layer case only)";
-
-/// The message of user tracking points reaching the solver.
-pub fn points_unsupported(points: &[usize]) -> String {
-    let list: Vec<String> = points.iter().map(|n| format!("Pt {n}: Use")).collect();
-    format!(
-        "user tracking points feed the flow solver as user displacement, which is not \
-         implemented; set {} to Don't Use",
-        list.join(", ")
-    )
-}
-
-/// The message of the Draw Geom overlay.
-pub const DRAW_GEOM_UNSUPPORTED: &str = "Draw Geom would draw the geometry of the tracking points over the source view, \
-     which is not implemented; set Draw Geom to None or Pt n: Use to Don't Use";
-
-/// The message of Track RGB+A.
-pub const TRACK_RGB_A_UNSUPPORTED: &str = "Track RGB+A drives the \
-     engine's 360 degree flag (wrap around warps, solver and hole fill), which is not implemented; \
-     uncheck Track RGB+A (it only matters when motion vectors are computed)";
-
 /// The FG matte probes of the pre-render: the count of consecutive present layers starting at FG1
 /// (the loop stops at the first empty one) and whether one of them has another size than the
 /// output.
@@ -120,10 +101,11 @@ pub fn fg_probe(env: &Env<'_>, width: usize, height: usize) -> (usize, bool) {
 }
 
 /// `Pt n: Use` points (1 based) in use at the two times: the value is not "Don't Use" at the first
-/// time and the same at the second. With no FG layer every value 2 to 5 maps to the only group.
+/// time and the same at the second. With no FG layer every value 2 to 5 maps to the only
+/// group.
 pub fn points_in_use(curves: &ParamCurves, time1: i32, time2: i32) -> Vec<usize> {
     let mut out = Vec::new();
-    for (i, id) in crate::PT_USE_IDS.iter().enumerate() {
+    for (i, id) in PT_USE_IDS.iter().enumerate() {
         let v1 = curves.int_at(id, i64::from(time1));
         if v1 != 1 && curves.int_at(id, i64::from(time2)) == v1 {
             out.push(i + 1);
@@ -133,11 +115,94 @@ pub fn points_in_use(curves: &ParamCurves, time1: i32, time2: i32) -> Vec<usize>
 }
 
 /// The settings of the engine for plugin 03: the shared reader plus the warp code of the Warping
-/// popup read at `current_time` (all popups are sampled there).
+/// popup and `Track RGB+A` as the engine's wrap-around flag, both read at `current_time`
+/// (all popups and checkboxes are sampled there).
 pub fn read_settings(cx: &TemporalContext, env: &Env<'_>) -> Result<EngineSettings> {
     let mut settings = frontend::read_settings(&WIRING, cx, env)?;
     settings.warp_mode = warp_code(env.params.int_at("warping", cx.current_time) as i32);
+    settings.wrap_360 = env.params.bool_at("track_rgb_a", cx.current_time);
     Ok(settings)
+}
+
+/// The controls of FG layer `k` (0 is FG1) at `time`: `fgk_matte_chan`, `fgk_sensitivity`
+/// through the 16.16 reader divided by 100 (as `main_bg_sensitivity` is read), and
+/// `fgk_inv_matte_shrink` through the 16.16 reader, in pixels (`downsample_ratio_y * value`,
+/// the ratio is 1 here; I: the slider is read as the engine's other sliders are). Plugin 03 has no
+/// Track control: every layer tracks.
+pub fn fg_layer(curves: &ParamCurves, time: i64, k: usize) -> LayerParams {
+    LayerParams {
+        matte_chan: curves.int_at(FG_CHAN_IDS[k], time) as i32,
+        sensitivity: fixed_reader(curves.fixed_at(FG_SENS_IDS[k], time), 1.0f32) / 100.0f32,
+        shrink: fixed_reader(curves.fixed_at(FG_SHRINK_IDS[k], time), 1.0f32),
+        track: true,
+    }
+}
+
+/// The layer job of a render with `fg_count` FG matte layers: FG1 to FG`n` from [`fg_layer`]
+/// at `current_time`, Main_BG with the settings' sensitivity (`main_bg_sensitivity`, the one the
+/// single layer path reads) and no matte, and the group of the Display popup
+/// (`LayerJob::display_group`).
+pub fn layer_job(settings: &EngineSettings, curves: &ParamCurves, fg_count: usize) -> LayerJob {
+    let t = i64::from(settings.current_time);
+    let fg: Vec<LayerParams> = (0..fg_count).map(|k| fg_layer(curves, t, k)).collect();
+    let main_bg = LayerParams { matte_chan: 0, sensitivity: settings.sensitivity, shrink: 0.0, track: true };
+    LayerJob::for_display(&fg, main_bg, curves.int_at("display", t) as i32)
+}
+
+/// The tracking points of the pair of `sel`: every point in use at the layer times
+/// `T(a)` and `T(b)` ([`points_in_use`]) goes to the layer `points::point_layer` names (values 2 to
+/// 5 to FG1, FG2, FG3 and Main_BG, a missing layer to Main_BG), in point order, with its position
+/// read by the 16.16 reader at both times (`points::read_pos`). `nfg + 1` lists, Main_BG last.
+pub fn user_points(curves: &ParamCurves, map: &dyn TimeMap, sel: &Selection, nfg: usize) -> Vec<Vec<UserPoint>> {
+    let ta = map.frame_time(sel.a as f32);
+    let tb = map.frame_time(sel.b as f32);
+    let mut out = vec![Vec::new(); nfg + 1];
+    for n in points_in_use(curves, ta, tb) {
+        let v = curves.int_at(PT_USE_IDS[n - 1], i64::from(ta));
+        if let Some(k) = point_layer(v, nfg) {
+            let id = PT_POS_IDS[n - 1];
+            out[k].push(UserPoint { at_a: read_pos(curves, id, ta), at_b: read_pos(curves, id, tb) });
+        }
+    }
+    out
+}
+
+/// The layers whose points the `draw_geom` popup value `mode` draws: 2 All, every layer
+/// `0..=nfg`; 3 to 6 the single group `min(mode - 3, nfg)` (FG1, FG2, FG3, Main_BG); 1 None and
+/// any value outside the popup draw nothing (U, ours).
+pub fn draw_geom_group(mode: i64, nfg: usize) -> Option<(usize, usize)> {
+    match mode {
+        2 => Some((0, nfg)),
+        3..=6 => {
+            let g = ((mode - 3) as usize).min(nfg);
+            Some((g, g))
+        }
+        _ => None,
+    }
+}
+
+/// The Draw Geom overlay of the Source display (rule G3): with
+/// `draw_geom` other than None (read at `current_time`), the points in use at the rounded frame
+/// time `T(t0)` (`t0` the output position of the frame) whose layer is in the Draw Geom group, in
+/// point order, each at its position and in its `ptN_color` at that time, as
+/// `geom::draw_points` draws them (an opaque disc of radius 1.5 times the downsample ratio, 1
+/// here). Only an engine image is drawn on; an error fill stays as it is.
+pub fn draw_geom_points(curves: &ParamCurves, map: &dyn TimeMap, settings: &EngineSettings, nfg: usize) -> Vec<([f32; 2], [u8; 3])> {
+    let Some((first, last)) = draw_geom_group(curves.int_at("draw_geom", i64::from(settings.current_time)), nfg) else {
+        return Vec::new();
+    };
+    let (t0, _) = frame_positions(settings.current_time, settings.time_step, settings.local_time_step);
+    let at = map.frame_time(t0);
+    let mut pts = Vec::new();
+    for n in points_in_use(curves, at, at) {
+        let v = curves.int_at(PT_USE_IDS[n - 1], i64::from(at));
+        if let Some(k) = point_layer(v, nfg) {
+            if first <= k && k <= last {
+                pts.push((read_pos(curves, PT_POS_IDS[n - 1], at), curves.color_at(PT_COLOR_IDS[n - 1], i64::from(at))));
+            }
+        }
+    }
+    pts
 }
 
 fn time_map<'e>(settings: &EngineSettings, env: &Env<'e>) -> Result<RetimeFgBgTimeMap<CurveParams03<'e>>> {
@@ -163,10 +228,10 @@ pub(crate) fn dependencies(cx: &TemporalContext, env: &Env<'_>) -> Result<Vec<Ch
         blur: settings.blur,
         register_layers: WIRING.register_layers,
     };
-    prerender::checkouts(&req, &map, FG_UNSUPPORTED)
+    prerender::checkouts(&req, &map)
 }
 
-/// `Effect::render_temporal`: settings, time map, host, the checks of this module, the core, the finish.
+/// `Effect::render_temporal`: settings, time map, host, [`render`], the finish.
 pub(crate) fn render_temporal(cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
     if (output.width, output.height, output.depth()) != (cx.width, cx.height, cx.depth) {
         return Err(FxError::Mismatch(format!(
@@ -182,14 +247,19 @@ pub(crate) fn render_temporal(cx: &TemporalContext, env: &Env<'_>, output: &mut 
     let settings = read_settings(cx, env)?;
     let map = time_map(&settings, env)?;
     let host = EnvHost::new(env, &settings, &map, WIRING.layers)?;
-    let rendered = render(&settings, env, &host, &map)?;
+    let rendered = render(&settings, env, host, &map)?;
     frontend::finish(rendered, output);
     Ok(())
 }
 
-/// The render of one frame: error flags, then the Source display, then the core, with the
-/// `Unsupported` checks of the single layer front-end where a setting leaves that path.
-fn render(settings: &EngineSettings, env: &Env<'_>, host: &EnvHost<'_>, map: &RetimeFgBgTimeMap<CurveParams03<'_>>) -> Result<Rendered> {
+/// The render of one frame: error flags, then the Source display with the Draw Geom overlay, then
+/// the layered core (`compose::retime_layers`, which is today's core for no FG layer and no point).
+fn render<'e>(
+    settings: &EngineSettings,
+    env: &'e Env<'_>,
+    host: EnvHost<'e>,
+    map: &RetimeFgBgTimeMap<CurveParams03<'_>>,
+) -> Result<Rendered> {
     // Error flags first: the size probes of the FG mattes set the same size mismatch flag as the
     // other layers; red wins over the missing layer fill.
     let (fg_count, fg_mismatch) = fg_probe(env, settings.width, settings.height);
@@ -199,31 +269,16 @@ fn render(settings: &EngineSettings, env: &Env<'_>, host: &EnvHost<'_>, map: &Re
         return Ok(Rendered::Error(error_frame(kind, settings.width, settings.height, settings.fmt.depth())));
     }
     let curves = env.params;
-    let (t0, _) = frame_positions(settings.current_time, settings.time_step, settings.local_time_step);
     if settings.display_source {
-        // 6.4: the Draw Geom overlay runs after the copy of the source; with no geometry it draws nothing.
-        let draw_geom = curves.int_at("draw_geom", i64::from(settings.current_time));
-        if draw_geom != 1 {
-            let at = map.frame_time(t0);
-            if !points_in_use(curves, at, at).is_empty() {
-                return Err(FxError::Unsupported(DRAW_GEOM_UNSUPPORTED.into()));
-            }
+        // 6.4: the Draw Geom overlay runs after the copy of the source; with no geometry it draws nothing
+        let mut rendered = compose::render(settings, &host)?;
+        let pts = draw_geom_points(curves, map, settings, fg_count);
+        if let Rendered::Image(img) = &mut rendered {
+            draw_points(img, &pts, 1.0f32);
         }
-        return compose::render(settings, host);
+        return Ok(rendered);
     }
-    if fg_count > 0 {
-        return Err(FxError::Unsupported(FG_UNSUPPORTED.into()));
-    }
-    let sel = compose::select_frames(settings, host)?;
-    if sel.vectors_quality != 0 && !sel.exact {
-        // The vector path: everything that reaches the solver or the warps must be one the engine has.
-        let points = points_in_use(curves, map.frame_time(sel.a as f32), map.frame_time(sel.b as f32));
-        if !points.is_empty() {
-            return Err(FxError::Unsupported(points_unsupported(&points)));
-        }
-        if curves.bool_at("track_rgb_a", i64::from(settings.current_time)) {
-            return Err(FxError::Unsupported(TRACK_RGB_A_UNSUPPORTED.into()));
-        }
-    }
-    compose::retime(settings, host)
+    let host = host.with_mattes(env, &LAYER_FG_MATTE[..fg_count])?;
+    let job = layer_job(settings, curves, fg_count);
+    compose::retime_layers(settings, &host, &job, |sel| Ok(user_points(curves, map, sel, fg_count)))
 }

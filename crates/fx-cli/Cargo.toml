@@ -13,6 +13,7 @@ path = "src/main.rs"
 
 [dependencies]
 fx-core.workspace = true
+retime-engine.workspace = true
 retime.workspace = true
 create-vectors.workspace = true
 retime-fgbg.workspace = true

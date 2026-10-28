@@ -10,6 +10,7 @@
 
 use super::*;
 use crate::compose::{render, select_frames, Rendered};
+use crate::flow::solve_pair;
 use crate::host::test_support::settings;
 use crate::host::{EnvHost, LayerIds};
 use crate::image::{Fmt, Samples};
@@ -348,7 +349,7 @@ fn blur_compensation_runs_last_with_f_ab_and_only_when_the_source_moves_and_the_
         }
     }
     // the same render without the slider, or with a static source position, is the plain composition
-    let mut off = s;
+    let mut off = s.clone();
     off.blur = 0.0;
     assert_eq!(compose_vectors(&off, &sl, &a, &b, &flows).unwrap(), a);
     let mut still = sl;
@@ -434,7 +435,7 @@ fn the_forward_codes_compose_with_the_compositions_of_forward_rs() {
                 let mut s = cfg(fmt);
                 s.video_360 = binary;
                 let run = |code: i32, interp: i32| {
-                    let mut s = s;
+                    let mut s = s.clone();
                     s.warp_mode = code;
                     compose_vectors(&s, &sel(interp, wa), &a, &b, &flows).unwrap()
                 };
@@ -588,7 +589,7 @@ fn forward_codes_with_solved_flows_are_closer_to_the_truth_than_the_frame_blend(
             let e_plain = err(&plain);
             for code in [2, 3] {
                 for interp in 0..=1 {
-                    let mut s = s;
+                    let mut s = s.clone();
                     s.warp_mode = code;
                     let mut sl = selection;
                     sl.interp = interp;
@@ -861,18 +862,35 @@ fn a_tracking_layer_of_another_size_is_the_red_fill_and_a_missing_frame_is_trans
 }
 
 #[test]
-fn frames_too_small_for_the_solver_report_the_solver_limit_instead_of_falling_back() {
-    // 3 x 2 at Best is a 1 x 1 working size: the solver refuses, the render fails with its message
+fn frames_too_small_for_their_halvings_are_searched_at_the_last_size_of_at_least_2x2() {
+    // 3 x 2 at Best was a 1 x 1 working size; the reduction never halves below 2 x 2 (the tiny frames
+    // rule, parity gap G7), so it is searched at 3 x 2 and the composition runs on those flows
     let a = make(Fmt::U8, 3, 2, |x, y| noise(x as i64, y as i64, 1));
     let b = make(Fmt::U8, 3, 2, |x, y| noise(x as i64, y as i64, 2));
-    let s = settings(3, 2, Fmt::U8);
-    let mut s = s;
+    let mut s = settings(3, 2, Fmt::U8);
+    s.vectors_quality = 4;
+    for interp in 0..=2 {
+        let selection = sel(interp, 0.5);
+        for code in 0..=3 {
+            // Nearest solves the one flow its warp code reads
+            s.warp_mode = code;
+            let flows = solve_flows(&s, &selection, &a, &b).unwrap();
+            let f = flows.blur_flow().expect("a flow");
+            assert_eq!((f.width, f.height), (3, 2), "interp {interp} code {code}");
+            let img = compose_vectors(&s, &selection, &a, &b, &flows).unwrap();
+            assert_eq!((img.width, img.height), (3, 2), "interp {interp} code {code}");
+        }
+    }
+    // a side of 1 is never searched: the front-ends pass No Vectors for it (`prep::searchable`), and the
+    // solver itself still refuses it with its own message
+    let a = make(Fmt::U8, 3, 1, |x, y| noise(x as i64, y as i64, 1));
+    let b = make(Fmt::U8, 3, 1, |x, y| noise(x as i64, y as i64, 2));
+    let mut s = settings(3, 1, Fmt::U8);
     s.vectors_quality = 4;
     match solve_flows(&s, &sel(1, 0.5), &a, &b) {
-        Err(FxError::Unsupported(m)) => assert_eq!(
-            m,
-            "optical flow: working size 1x1 (output 3x2, reduction 1) is below 2x2, which is not supported"
-        ),
+        Err(FxError::Unsupported(m)) => {
+            assert_eq!(m, "optical flow: working size 3x1 (output 3x1, reduction 0) is below 2x2, which is not supported")
+        }
         other => panic!("expected Unsupported, got {other:?}"),
     }
 }
@@ -1266,4 +1284,54 @@ fn a_vector_layer_image_becomes_a_flow_decoded_hole_filled_and_scaled() {
             assert_eq!((q[0], q[1]), (2.0f32 * p[0], 0.5f32 * p[1]), "{fmt:?}");
         }
     }
+}
+
+#[test]
+fn the_wrap_flag_reaches_the_solves_and_tracks_a_shift_across_the_seam() {
+    // `EngineSettings::wrap_360` is `FlowSettings::wrap` of the render's solves. A texture periodic in x moved
+    // 2.5 px to the right: with the flag both flows of `solve_flows` are the shift in every column, the two seam
+    // columns included; the plain solve loses it on the side whose targets leave the frame
+    let (w, h) = (128usize, 48usize);
+    let wf = w as f64;
+    let tex = |x: f64, y: f64| {
+        let t = std::f64::consts::TAU;
+        0.5 + 0.16 * (t * (3.0 * x / wf + 0.03 * y)).sin() + 0.12 * (t * (7.0 * x / wf - 0.05 * y) + 1.0).sin()
+    };
+    let a = make(Fmt::F32, w, h, |x, y| [tex(x as f64, y as f64); 3]);
+    let b = make(Fmt::F32, w, h, |x, y| [tex(x as f64 - 2.5, y as f64); 3]);
+    let mut s = settings(w, h, Fmt::F32);
+    s.vectors_quality = 5;
+    s.sensitivity = 1.0;
+    let sl = Selection { vectors_quality: 5, ..sel(1, 0.5) };
+    s.wrap_360 = true;
+    let fs = flow_settings(&s, &sl);
+    assert!(fs.wrap, "the flag reaches the solver settings");
+    assert!(!flow_settings(&EngineSettings { wrap_360: false, ..s.clone() }, &sl).wrap);
+    let run = |threads: usize| rayon::ThreadPoolBuilder::new().num_threads(threads).build().unwrap().install(|| solve_flows(&s, &sl, &a, &b).unwrap());
+    let flows = run(1);
+    assert_eq!(run(4), flows, "1 and 4 threads");
+    let pair = solve_pair(&a, &b, &fs).unwrap();
+    assert_eq!(flows, Flows::pair(pair), "the wrap solves of the pair");
+    // the worst column of each flow against the true motion (+2.5 for F_AB, -2.5 for F_BA), rows 8 to h - 8
+    let worst = |f: &FlowField, want: f64, cols: std::ops::Range<usize>| {
+        cols.map(|c| {
+            let e: f64 = (8..h - 8).map(|y| {
+                let v = f.at(c, y);
+                ((f64::from(v[0]) - want).powi(2) + f64::from(v[1]).powi(2)).sqrt()
+            })
+            .sum();
+            e / (h - 16) as f64
+        })
+        .fold(0.0f64, f64::max)
+    };
+    let (f_ab, f_ba) = (flows.f_ab.as_ref().unwrap(), flows.f_ba.as_ref().unwrap());
+    let (ab, ba) = (worst(f_ab, 2.5, 0..w), worst(f_ba, -2.5, 0..w));
+    assert!(ab < 0.05 && ba < 0.05, "wrap: worst column F_AB {ab}, F_BA {ba}");
+    let (ab_seam, ba_seam) = (worst(f_ab, 2.5, w - 2..w), worst(f_ba, -2.5, 0..2));
+    assert!(ab_seam < 0.05 && ba_seam < 0.05, "wrap: seam F_AB {ab_seam}, F_BA {ba_seam}");
+    // the same render without the flag: F_AB's targets leave the frame on the right, F_BA's on the left
+    let plain = solve_flows(&EngineSettings { wrap_360: false, ..s.clone() }, &sl, &a, &b).unwrap();
+    let (pab, pba) = (worst(plain.f_ab.as_ref().unwrap(), 2.5, w - 2..w), worst(plain.f_ba.as_ref().unwrap(), -2.5, 0..2));
+    eprintln!("seam columns: wrap {ab_seam:.4} {ba_seam:.4}, plain {pab:.4} {pba:.4}");
+    assert!(pab > 4.0 * ab_seam.max(0.01) && pba > 4.0 * ba_seam.max(0.01), "plain seam F_AB {pab}, F_BA {pba}");
 }

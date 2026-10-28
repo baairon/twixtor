@@ -5,9 +5,11 @@
 
 pub mod args;
 pub mod cases;
+pub mod devcheck;
 pub mod checklist;
 pub mod compare;
 pub mod effects;
+pub mod families;
 pub mod run;
 pub mod selfcheck;
 pub mod sources;

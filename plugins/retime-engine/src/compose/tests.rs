@@ -256,6 +256,97 @@ fn out_interp(case: &Case, mock: Mock, n: i32, interp: i32) -> Frame {
     out_with(case, mock, n, |s| s.interp = interp).unwrap()
 }
 
+/// The texture of the vector path checks: strong gradients in x and y that are not parallel, a
+/// different phase per colour channel, so a 3 x 2 or 2 x 2 frame solves to a non zero flow at
+/// Sensitivity 100 and the vector path gives other bytes than the frame blend.
+fn texture(c: usize, x: f64, y: f64) -> f64 {
+    let p = 2.3 * c as f64;
+    0.5 + 0.45 * (2.1 * x + 0.4 + p).sin() * (1.7 * y - 0.2 + 0.5 * p).cos()
+}
+
+/// Clips of four opaque frames of [`texture`] moving by (0.6, 0.35) pixels per frame (a sub-pixel
+/// shift between consecutive frames), at 3 x 2 and 2 x 2 for every depth. The golden cases above
+/// solve to a zero flow (one pyramid level at Sensitivity 70), whose warps give the bytes of the
+/// frame blend, so they cannot tell the vector path from a fall back to the fast path.
+fn moving_cases() -> Vec<Case> {
+    let mut out = Vec::new();
+    for depth in [Depth::U8, Depth::U16, Depth::F32] {
+        for (w, h) in [(3usize, 2usize), (2, 2)] {
+            let frames = (0..4)
+                .map(|k| {
+                    let mut f = Frame::new(w, h, depth);
+                    for y in 0..h {
+                        for x in 0..w {
+                            let (px, py) = (x as f64 - 0.6 * k as f64, y as f64 - 0.35 * k as f64);
+                            let [r, g, b] = [texture(0, px, py), texture(1, px, py), texture(2, px, py)];
+                            let q8 = |v: f64| (v * 255.0 + 0.5) as u8;
+                            let q16 = |v: f64| (v * 65535.0 + 0.5) as u16;
+                            match &mut f.pixels {
+                                Pixels::U8(p) => p[y * w + x] = [q8(r), q8(g), q8(b), 255],
+                                Pixels::U16(p) => p[y * w + x] = [q16(r), q16(g), q16(b), 65535],
+                                Pixels::F32(p) => p[y * w + x] = [r as f32, g as f32, b as f32, 1.0],
+                            }
+                        }
+                    }
+                    f
+                })
+                .collect();
+            out.push(Case { depth, frames });
+        }
+    }
+    out
+}
+
+/// Sensitivity 100: a one level pyramid keeps its flow (at the default 70 it solves to zero).
+fn sensitive(s: &mut EngineSettings) {
+    s.sensitivity = 1.0;
+}
+
+/// The selection of output frame 1 at half speed: between frames 0 and 1, `wA = 0.5`.
+fn half(vectors_quality: i32, interp: i32) -> Selection {
+    Selection { s0: 0.5, s1: 1.0, a: 0, b: 1, wa: 0.5, exact: false, vectors_quality, interp }
+}
+
+/// The selection the core makes for `s` (only to check the literal selections of the tests).
+fn core_selection(case: &Case, mock: Mock, s: &EngineSettings) -> Selection {
+    let layer = case.layer();
+    let params = ParamCurves::new(Vec::new());
+    let layers = LayerSet::new();
+    let env = Env { params: &params, input: &layer, layers: &layers };
+    let map = RemapTimeMap::new(&mock, s.rates, s.current_time);
+    let host = EnvHost::new(&env, s, &map, LayerIds::default()).unwrap();
+    select_frames(s, &host).unwrap()
+}
+
+/// The vector path computed from explicit inputs: frames `sel.a` and `sel.b` of the case
+/// (`Image::from_frame`), the selection `sel`, [`solve_flows`] and [`compose_vectors`], then the
+/// finish. It shares no routing with [`retime`].
+fn direct(case: &Case, s: &EngineSettings, sel: Selection) -> Frame {
+    let a = Image::from_frame(&case.at(i64::from(sel.a)));
+    let b = Image::from_frame(&case.at(i64::from(sel.b)));
+    let flows = solve_flows(s, &sel, &a, &b).unwrap();
+    Rendered::Image(compose_vectors(s, &sel, &a, &b, &flows).unwrap()).into_frame()
+}
+
+/// Output frame `n` with `tweak` is the vector path: the selection of the core is `sel`, the frame is
+/// [`direct`] for `sel`, and it is not the No Vectors render of the same input (the moving cases make
+/// the two differ), so a silent fall back to the fast path fails here.
+fn assert_vector_path(case: &Case, mock: impl Fn() -> Mock, n: i32, tweak: impl Fn(&mut EngineSettings), sel: Selection) {
+    let what = format!("{:?} {:?} frame {n}", case.depth, case.size());
+    let mut s = case.settings();
+    s.current_time = 100 * n;
+    tweak(&mut s);
+    assert_eq!(core_selection(case, mock(), &s), sel, "{what}: the selection");
+    let got = out_with(case, mock(), n, &tweak).unwrap_or_else(|e| panic!("{what}: {e}"));
+    assert_eq!(got, direct(case, &s, sel), "{what}: the vector path");
+    let plain = out_with(case, mock(), n, |t| {
+        tweak(t);
+        t.vectors_quality = 0;
+    })
+    .unwrap();
+    assert_ne!(got, plain, "{what}: the No Vectors render");
+}
+
 #[test]
 fn speed_100_percent_on_exact_frames_is_the_documented_round_trip() {
     for case in cases() {
@@ -545,43 +636,42 @@ fn a_fetched_frame_of_the_wrong_size_shows_the_fill_too() {
     }
 }
 
-/// The frames of these cases are 3 x 2 and 2 x 2: below the 2 x 2 working size the solver needs at every
-/// quality. A position between frames with Vectors on takes the vector path (`retime` calls
-/// `vector::vector_path`), whose solver refuses such frames with its own message; it never blends
-/// the frames instead. The vector path itself is tested in `vector/tests.rs` and, with real
-/// motion, in `retime/tests/vector.rs`.
+/// The frames of these cases are 3 x 2 and 2 x 2. The motion search never halves below 2 x 2 (the tiny
+/// frames rule, parity gap G7), so every quality searches them at their own size. A position between
+/// frames with Vectors on takes the vector path (`retime` calls `vector::vector_path`): its output is
+/// the solve and the composition computed directly ([`direct`]), never the frame blend. The vector
+/// path itself is tested in `vector/tests.rs` and, with real motion, in `retime/tests/vector.rs`.
 #[test]
 fn the_vector_path_runs_for_positions_between_frames_and_a_failure_is_never_a_silent_fallback() {
-    for case in cases() {
+    for case in moving_cases() {
         // half speed, odd frame, Vectors = Best (vq 4): the position is between frames
-        let r = out_with(&case, Mock::speed(50.0), 1, |s| s.vectors_quality = 4);
-        match r {
-            Err(FxError::Unsupported(msg)) => assert!(msg.contains("below 2x2"), "{msg}"),
-            other => panic!("expected the solver's Unsupported, got {other:?}"),
-        }
+        let best = |s: &mut EngineSettings| {
+            sensitive(s);
+            s.vectors_quality = 4;
+        };
+        assert_vector_path(&case, || Mock::speed(50.0), 1, best, half(4, 1));
         // every quality above No Vectors and every interpolation mode asks for it
         for vq in 1..=4 {
             for interp in 0..=2 {
-                let r = out_with(&case, Mock::speed(50.0), 1, |s| {
+                let tweak = |s: &mut EngineSettings| {
+                    sensitive(s);
                     s.vectors_quality = vq;
                     s.interp = interp;
-                });
-                assert!(matches!(r, Err(FxError::Unsupported(_))), "vq {vq} interp {interp}");
+                };
+                assert_vector_path(&case, || Mock::speed(50.0), 1, tweak, half(vq, interp));
             }
         }
-        // every warping code runs the same solver, so tiny frames meet the same size limit; a bad code is refused by name
+        // every warping code runs the same solver and its own composition; a bad code is refused by name
         for interp in 0..=2 {
             for code in 0..=3 {
-                let r = out_with(&case, Mock::speed(50.0), 1, |s| {
+                let tweak = |s: &mut EngineSettings| {
+                    sensitive(s);
                     s.vectors_quality = 4;
                     s.interp = interp;
                     s.smart_blend = code == 1;
                     s.warp_mode = code;
-                });
-                match r {
-                    Err(FxError::Unsupported(msg)) => assert!(msg.contains("below 2x2"), "code {code}: {msg}"),
-                    other => panic!("code {code}: expected the solver's Unsupported, got {other:?}"),
-                }
+                };
+                assert_vector_path(&case, || Mock::speed(50.0), 1, tweak, half(4, interp));
             }
             let r = out_with(&case, Mock::speed(50.0), 1, |s| {
                 s.vectors_quality = 4;
@@ -592,6 +682,7 @@ fn the_vector_path_runs_for_positions_between_frames_and_a_failure_is_never_a_si
         }
         // ... and an exact position with Smart Blend on is the fast path (the vector path does not run)
         let ok = out_with(&case, Mock::speed(100.0), 1, |s| {
+            sensitive(s);
             s.vectors_quality = 4;
             s.smart_blend = true;
             s.warp_mode = 1;
@@ -629,22 +720,40 @@ fn the_exactness_tolerance_is_five_thousandths_of_a_frame() {
         // (0.004 in f32) is below the 0.005 snap of `blend`, so the output is frame 2 itself.
         let near = out_with(&case, Mock::frame_number(2.004), 0, |s| s.vectors_quality = 4).unwrap();
         assert_eq!(near, case.rt(2));
-        let far = out_with(&case, Mock::frame_number(2.006), 0, |s| s.vectors_quality = 4);
-        assert!(matches!(far, Err(FxError::Unsupported(_))));
         let below = out_with(&case, Mock::frame_number(1.996), 0, |s| s.vectors_quality = 4).unwrap();
         assert_eq!(below, case.rt(2), "1.996: a = 1, wa = 0.004 + 0 -> weight 0.996 snaps to B");
+    }
+    // Frame Num 2.006 is not: the vector path, between frames 2 and 3
+    let far = Selection { s0: 2.006, s1: 2.006, a: 2, b: 3, wa: 1.0f32 - (2.006f32 - 2.0f32), exact: false, vectors_quality: 4, interp: 1 };
+    for case in moving_cases() {
+        let tweak = |s: &mut EngineSettings| {
+            sensitive(s);
+            s.vectors_quality = 4;
+        };
+        assert_vector_path(&case, || Mock::frame_number(2.006), 0, tweak, far);
     }
 }
 
 #[test]
 fn blur_compensation_makes_a_moving_position_inexact() {
+    // speed 100 percent: s0 and s1 differ by 1, blur above 0.005 turns the exact position into a vector path frame.
+    // Its bytes are frame 1 (wA = 1, and the blur amount (|s0 - s1| - 1) * blur is 0), so the selection shows it;
+    // at speed 200 the same holds and the blur tail runs along the flow with amount 1, which changes the bytes
+    let tweak = |s: &mut EngineSettings| {
+        sensitive(s);
+        s.vectors_quality = 4;
+        s.blur = 1.0;
+    };
+    let at_100 = Selection { s0: 1.0, s1: 2.0, a: 1, b: 2, wa: 1.0, exact: false, vectors_quality: 4, interp: 1 };
+    let at_200 = Selection { s0: 2.0, s1: 4.0, a: 2, b: 3, wa: 1.0, exact: false, vectors_quality: 4, interp: 1 };
+    for case in moving_cases() {
+        let mut s = case.settings();
+        s.current_time = 100;
+        tweak(&mut s);
+        assert_eq!(core_selection(&case, Mock::speed(100.0), &s), at_100, "{:?}", case.depth);
+        assert_vector_path(&case, || Mock::speed(200.0), 1, tweak, at_200);
+    }
     for case in cases() {
-        // speed 100 percent: s0 and s1 differ by 1, blur above 0.005 turns the exact position into a vector path frame
-        let r = out_with(&case, Mock::speed(100.0), 1, |s| {
-            s.vectors_quality = 4;
-            s.blur = 1.0;
-        });
-        assert!(matches!(r, Err(FxError::Unsupported(_))));
         // blur at or below 0.005 does not
         let ok = out_with(&case, Mock::speed(100.0), 1, |s| {
             s.vectors_quality = 4;
@@ -694,9 +803,14 @@ fn segment_markers_override_the_vector_path_and_the_interpolation_mode() {
         })
         .unwrap();
         assert_eq!(cut, case.rt(0));
-        // the same marker on both sides keeps the user's choice (and so the vector path)
-        let same = out_with(&case, Mock::speed(50.0).with_marks(|_| 2), 1, |s| s.vectors_quality = 4);
-        assert!(matches!(same, Err(FxError::Unsupported(_))));
+    }
+    // the same marker on both sides keeps the user's choice (and so the vector path)
+    for case in moving_cases() {
+        let tweak = |s: &mut EngineSettings| {
+            sensitive(s);
+            s.vectors_quality = 4;
+        };
+        assert_vector_path(&case, || Mock::speed(50.0).with_marks(|_| 2), 1, tweak, half(4, 1));
     }
 }
 

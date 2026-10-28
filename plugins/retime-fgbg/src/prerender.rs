@@ -1,4 +1,4 @@
-//! The pre-render checkout list of plugin 03, for the single layer configuration.
+//! The pre-render checkout list of plugin 03, with or without FG matte layers.
 //!
 //! Differences from plugin 01's list (`retime_engine::planner::checkouts`):
 //!
@@ -9,12 +9,15 @@
 //!   three FG matte layers at `X + off` and at `-X` (and again at `X + off2` with input fields),
 //!   before its own checkout;
 //! * the times of the plan checkouts are absolute layer times `T = trunc(f58 * n + 0.5)` (no
-//!   `base`).
+//!   `base`);
+//! * with FG matte layers (`nfg >= 1`) the plan has the kind 2 entries of the mattes
+//!   (`planner::plan_layers`): every matte at the two frames of the pair, after the
+//!   main entries, whatever the vectors (the fast path composes the displayed group too).
 //!
 //! Registrations that are not pixel inputs are not listed.
 
 use fx_core::{Checkout, Result};
-use retime_engine::planner::{plan, EntryKind, LAYER_ALT_A, LAYER_ALT_B};
+use retime_engine::planner::{plan_layers, EntryKind, LAYER_ALT_A, LAYER_ALT_B};
 use retime_engine::timeline::{frame_positions, TimeMap};
 
 /// Layer ids of the three FG matte layers.
@@ -79,27 +82,22 @@ pub fn probes(req: &PreRender03) -> Vec<Checkout> {
 /// 1. [`probes`];
 /// 2. `Display == Source`: one checkout of Alt Source A at `X` (even when A is empty), then nothing
 ///    else;
-/// 3. otherwise the plan (`planner::plan` with `t0 = X / lts` and `t1 = (ts + X) / lts`) and for
-///    every entry `k`, with `off = T(t_k)` and `off2 = T(t_k + 0.5)` (`map.frame_time`): with
-///    `register_layers` set, Alt Source A, Alt Source B and the three FG matte layers each at `X + off` and
-///    then at `-X`, with input fields the five layers again at `X + off2`; then the entry's own
-///    checkout at `T(t_k)` (Alt Source A, or the input layer when A has no pixels, for the main
-///    frames; Alt Source B for the tracking frames) and with input fields at `T(t_k + 0.5)`.
-///
-/// With FG matte layers and `Display != Source` the plan of the multi layer path is not known, so
-/// the list is an `FxError::Unsupported` instead of a guess.
-pub fn checkouts(req: &PreRender03, map: &dyn TimeMap, multi_layer_message: &str) -> Result<Vec<Checkout>> {
+/// 3. otherwise the plan (`planner::plan_layers` with `t0 = X / lts`, `t1 = (ts + X) / lts` and
+///    the FG matte count) and for every entry `k`, with `off = T(t_k)` and `off2 = T(t_k + 0.5)`
+///    (`map.frame_time`): with `register_layers` set, Alt Source A, Alt Source B and the three FG
+///    matte layers each at `X + off` and then at `-X`, with input fields the five layers again at
+///    `X + off2`; then the entry's own checkout at `T(t_k)` (Alt Source A, or the input layer when
+///    A has no pixels, for the main frames; Alt Source B for the tracking frames; FG matte `k` for
+///    a kind 2 entry) and with input fields at `T(t_k + 0.5)`.
+pub fn checkouts(req: &PreRender03, map: &dyn TimeMap) -> Result<Vec<Checkout>> {
     let mut out = probes(req);
     let cur = req.current_time;
     if req.display_source {
         out.push(co(Some(LAYER_ALT_A), cur));
         return Ok(out);
     }
-    if req.fg_count > 0 {
-        return Err(fx_core::FxError::Unsupported(multi_layer_message.to_string()));
-    }
     let (t0, t1) = frame_positions(cur, req.time_step, req.local_time_step);
-    let p = plan(map, t0, t1, req.vectors_quality, req.interp, req.blur, !req.alt_b_present)?;
+    let p = plan_layers(map, t0, t1, req.vectors_quality, req.interp, req.blur, !req.alt_b_present, req.fg_count)?;
     let five: [Option<&'static str>; 5] =
         [Some(LAYER_ALT_A), Some(LAYER_ALT_B), Some(LAYER_FG_MATTE[0]), Some(LAYER_FG_MATTE[1]), Some(LAYER_FG_MATTE[2])];
     for entry in &p.entries {
@@ -122,6 +120,8 @@ pub fn checkouts(req: &PreRender03, map: &dyn TimeMap, multi_layer_message: &str
         let layer = match entry.kind {
             EntryKind::Main => req.alt_a_present.then_some(LAYER_ALT_A),
             EntryKind::LayerB => Some(LAYER_ALT_B),
+            // plan_layers gives at most three mattes
+            EntryKind::Matte(k) => Some(LAYER_FG_MATTE[k]),
         };
         out.push(co(layer, map.frame_time(t)));
         if req.input_fields {

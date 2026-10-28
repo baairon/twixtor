@@ -125,9 +125,9 @@ impl Effect for Retime {
     /// Time Remap Mode Speed and Frame Number with Nearest, Blend and Weighted Blend. Exact frame
     /// positions and Vectors set to No Vectors take the frame blend path; a position between frames
     /// with Vectors on (the default, Best) takes the optical flow path (flow solver, inverse warps,
-    /// Smart Blend when its checkbox is on, Blur Compensation). Frames below the solver's 2 x 2
-    /// working size return `FxError::Unsupported` with the reason; there is no silent fallback to
-    /// the frame blend.
+    /// Smart Blend when its checkbox is on, Blur Compensation). The motion search never halves
+    /// below 2 x 2, and a frame with a side of 1 has no search and renders as No Vectors (the tiny
+    /// frames rule, parity gap G7); there is no other fallback to the frame blend.
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
         glue::render_temporal(cx, env, output)
     }

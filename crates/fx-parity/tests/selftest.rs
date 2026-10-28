@@ -9,6 +9,7 @@
 use fx_parity::cases::{self, Case, CaseKind, InputFile, Plan, TemporalPlan, TestSet};
 use fx_parity::checklist;
 use fx_parity::effects::{EffectInfo, EffectKind};
+use fx_parity::families;
 use fx_parity::run::{self, RunOptions, Status};
 use fx_parity::selfcheck::{self, SelfcheckOptions};
 use fx_parity::sources;
@@ -1133,4 +1134,169 @@ fn command_line_errors_use_the_documented_exit_codes() {
     let help = String::from_utf8_lossy(&parity(&["--help"]).stdout).to_string();
     assert!(help.contains("selfcheck") && help.contains("--max-cases-per-effect"));
     assert!(help.contains("fx-parity checklist --testset DIR") && help.contains("graded error"));
+}
+
+// ---- the reference case families ----------------------------------------------------------
+
+/// `vfx list --json --all` as JSON, for the `gaps` lists the harness itself does not read.
+fn list_json() -> Value {
+    let out = Command::new(&vfx().path).args(["list", "--json", "--all"]).output().expect("run vfx list");
+    assert!(out.status.success());
+    serde_json::from_slice(&out.stdout).expect("vfx list --json is JSON")
+}
+
+#[test]
+fn every_family_case_is_a_setting_the_built_vfx_takes_and_every_listed_gap_has_a_family() {
+    // the families are built from the real effect list: none of their cases is dropped
+    let ids: Vec<String> = families::FAMILIES.iter().map(|f| f.id.to_string()).collect();
+    let built = families::build(effects(), &ids).expect("every family setting is known to vfx");
+    for (id, n) in &built.counts {
+        assert_eq!(*n, families::cases_of(id).len(), "{id} lost cases");
+    }
+    assert_eq!(built.cases.len(), families::all().len());
+    // vfx itself validates every param, value, key and layer of every case
+    let errors: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+    parallel(&built.cases, |c| {
+        if let Err(e) = vfx().check(c) {
+            errors.lock().unwrap().push(format!("{}: {e}", c.id));
+        }
+    });
+    let errors = errors.into_inner().unwrap();
+    assert!(errors.is_empty(), "{errors:#?}");
+    // the register as each effect lists it: every gap has a family and the same title
+    let list = list_json();
+    let mut listed: Vec<String> = Vec::new();
+    for e in list.as_array().unwrap() {
+        for g in e["gaps"].as_array().into_iter().flatten() {
+            let (id, title) = (g["id"].as_str().unwrap(), g["title"].as_str().unwrap());
+            if e["hidden"].as_bool() == Some(true) {
+                continue;
+            }
+            assert_eq!(families::title(id), title, "{id} of {}", e["id"]);
+            assert!(families::FAMILIES.iter().any(|f| f.gaps.contains(&id)), "{id} of {} has no reference case family", e["id"]);
+            listed.push(id.to_string());
+        }
+    }
+    // and every register gap a family names is listed by some effect (G7 and K1 are not in the register)
+    for f in families::FAMILIES.iter().filter(|f| !f.observe_only) {
+        for g in f.gaps {
+            assert!(listed.iter().any(|l| l == g), "{} names {g}, which no effect lists", f.id);
+        }
+    }
+}
+
+#[test]
+fn gen_families_writes_a_set_that_checklist_and_run_take_and_runnable_cases_note_their_gaps() {
+    if ffmpeg_or_skip().is_none() {
+        return;
+    }
+    let dir = scratch("families");
+    let vfx_path = vfx().path.to_str().unwrap().to_string();
+    let out = parity(&["gen", "--out", dir.to_str().unwrap(), "--families", "all", "--vfx", &vfx_path]);
+    assert_eq!(code(&out), 0, "{}", String::from_utf8_lossy(&out.stderr));
+    let stdout = String::from_utf8_lossy(&out.stdout).to_string();
+    let set: TestSet = serde_json::from_str(&std::fs::read_to_string(dir.join("cases.json")).unwrap()).unwrap();
+    let counts: Vec<(&str, usize)> = families::FAMILIES.iter().map(|f| (f.id, families::cases_of(f.id).len())).collect();
+    assert_eq!(stdout.lines().nth(1), Some(families::summary(&counts).as_str()), "{stdout}");
+    assert_eq!(set.cases.len(), families::all().len());
+    assert!(set.cases.iter().all(|c| c.family.is_some() && c.is_temporal() && c.frames == families::FRAMES));
+    for f in &set.inputs {
+        let len = std::fs::metadata(dir.join(&f.file)).unwrap().len() as usize;
+        assert_eq!(len, f.frames * f.width * f.height * fx_core::Depth::from_bits(f.depth).unwrap().bytes_per_pixel(), "{}", f.file);
+    }
+    // the matte is the disc of the main clip: frame 5 of fgdisc_matte is white exactly where the disc is
+    let matte = set.inputs.iter().find(|f| f.file == "inputs/fgdisc_matte-64x48.d8.f12.rgba").expect("the hard matte");
+    let (cx, cy, r) = (19.0 + 2.0 * 5.0, 16.0 + 5.0, 10.0);
+    let bytes = std::fs::read(dir.join(&matte.file)).unwrap();
+    let frame = &bytes[5 * 64 * 48 * 4..6 * 64 * 48 * 4];
+    for y in 0..48 {
+        for x in 0..64 {
+            let inside = (x as f64 - cx) * (x as f64 - cx) + (y as f64 - cy) * (y as f64 - cy) <= r * r;
+            assert_eq!(frame[(y * 64 + x) * 4], if inside { 255 } else { 0 }, "matte at {x},{y}");
+        }
+    }
+
+    let out = parity(&["checklist", "--testset", dir.to_str().unwrap(), "--vfx", &vfx_path]);
+    assert_eq!(code(&out), 0, "{}", String::from_utf8_lossy(&out.stderr));
+    let md = std::fs::read_to_string(dir.join("CHECKLIST.md")).unwrap();
+    assert!(md.contains("## Parity gaps these cases settle") && md.contains("FG Matte popup"));
+    assert_eq!(md.matches("\n- settles: ").count(), set.cases.len());
+    assert!(md.is_ascii());
+
+    // references from vfx itself for every case it renders; a case it cannot render yet must be
+    // refused as unsupported (a control the build does not support yet), never fail otherwise
+    let refs = dir.join("refs");
+    std::fs::create_dir_all(&refs).unwrap();
+    let rendered = AtomicUsize::new(0);
+    let odd: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+    parallel(&set.cases, |c| match vfx().apply_clip_noted(c, &dir, Threads::Inherit) {
+        Ok((clip, _)) => {
+            std::fs::write(refs.join(&c.reference), clip).unwrap();
+            rendered.fetch_add(1, Ordering::SeqCst);
+        }
+        Err(e) if e.contains("exited with code 3") && e.contains("unsupported") => {}
+        Err(e) => odd.lock().unwrap().push(format!("{}: {e}", c.id)),
+    });
+    let odd = odd.into_inner().unwrap();
+    assert!(odd.is_empty(), "{odd:#?}");
+    let rendered = rendered.into_inner();
+    assert!(rendered >= families::cases_of("gap-tiny").len(), "the tiny frames render today: {rendered}");
+
+    let out = parity(&["run", "--testset", dir.to_str().unwrap(), "--refs", refs.to_str().unwrap(), "--json", "--vfx", &vfx_path]);
+    assert_eq!(code(&out), 0, "{}", String::from_utf8_lossy(&out.stderr));
+    // every family case that renders prints the notes of the gaps it is there to settle
+    let warnings = String::from_utf8_lossy(&out.stderr).to_string();
+    assert!(!warnings.contains("printed no note"), "{warnings}");
+    let report: Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(report["summary"]["pass"].as_u64(), Some(rendered as u64));
+    assert_eq!(report["summary"]["fail"].as_u64(), Some(0));
+    let fams = report["families"].as_object().expect("a families block");
+    assert_eq!(fams.len(), families::FAMILIES.len());
+    let compared: u64 = fams.values().map(|f| f["compared"].as_u64().unwrap()).sum();
+    assert_eq!(compared, rendered as u64);
+    for (id, f) in fams {
+        let n = families::cases_of(id).len() as u64;
+        assert_eq!(f["cases"].as_u64(), Some(n), "{id}");
+        assert_eq!(f["exact"], f["compared"], "{id}: references made by vfx itself are bit exact");
+        assert_eq!(f["settled"].as_bool(), Some(f["compared"].as_u64() == Some(n)), "{id}");
+    }
+    assert_eq!(fams["gap-tiny"]["settled"], true);
+    assert!(report["cases"].as_array().unwrap().iter().all(|c| c["family"].is_string() && c["notes"].is_array()));
+}
+
+#[test]
+fn run_warns_when_a_family_case_prints_no_note_and_reads_the_real_note_lines() {
+    // the hidden selftest-gap effect notes its gap T1 when `gap` is on; as cases of a family this
+    // build does not know, any note is expected, so the case with `gap` off is the one to warn
+    let plan = Plan { temporal: TemporalPlan { sizes: vec![(5, 4)], frames: 3, ..TemporalPlan::default() }, depths: vec![8], ..Plan::default() };
+    let built = build_set("family-notes", &plan, &[effect("selftest-gap")]);
+    let mut set: TestSet = serde_json::from_str(&std::fs::read_to_string(built.dir.join("cases.json")).unwrap()).unwrap();
+    for c in set.cases.iter_mut() {
+        c.family = Some("gap-later".into());
+        c.label = format!("gap-later-{}", c.label);
+    }
+    std::fs::write(built.dir.join("cases.json"), serde_json::to_string_pretty(&set).unwrap()).unwrap();
+    let on: Vec<&Case> = set.cases.iter().filter(|c| c.params.iter().any(|p| p == "gap=1")).collect();
+    let off: Vec<&Case> = set.cases.iter().filter(|c| !c.params.iter().any(|p| p == "gap=1")).collect();
+    assert!(!on.is_empty() && !off.is_empty());
+    let (clip, notes) = vfx().apply_clip_noted(on[0], &built.dir, Threads::Inherit).unwrap();
+    assert_eq!(clip, std::fs::read(built.refs.join(&on[0].reference)).unwrap(), "the clip is the one apply_clip gives");
+    assert_eq!(notes.len(), 1, "{notes:?}");
+    assert_eq!(fx_parity::vfx::note_gap(&notes[0]), Some("T1"), "{}", notes[0]);
+    let warnings = std::sync::Mutex::new(Vec::new());
+    let results = run::run(&built.options(), &|m| warnings.lock().unwrap().push(m.to_string())).unwrap();
+    assert!(results.iter().all(|r| r.status == Status::Pass));
+    let warnings = warnings.into_inner().unwrap();
+    assert_eq!(warnings.len(), off.len(), "{warnings:#?}");
+    for c in &off {
+        assert!(warnings.iter().any(|w| w.contains(&c.id) && w.contains("printed no note")), "{}: {warnings:#?}", c.id);
+    }
+    for c in &on {
+        assert!(!warnings.iter().any(|w| w.contains(&c.id)), "{}", c.id);
+        let r = results.iter().find(|r| r.case.id == c.id).unwrap();
+        assert_eq!(r.notes.len(), 1);
+    }
+    let report = run::to_json(&results, false);
+    assert_eq!(report["families"]["gap-later"]["settled"], true);
+    assert_eq!(report["families"]["gap-later"]["exact"].as_u64(), Some(set.cases.len() as u64));
 }

@@ -1,8 +1,16 @@
 //! File backed clips for temporal effects: random access to raw frames, and the
 //! spool file that gives piped input a seekable form.
+//!
+//! Time to frame mapping (precision contract): a clip read at the output rate maps the tick `t`
+//! to frame `t div_euclid time_step`, as it always has. A clip with its own rate `R = n/d`
+//! (`vfx apply --clip-fps`, `--layer-fps`) maps it to `floor(t * n / (time_scale * d))`, the
+//! frame whose span `[i/R, (i+1)/R)` seconds holds the tick's time, in exact `i128` integer
+//! arithmetic with no float step (V: the host shows the footage frame covering a time; U: a checkout at an exact time between two composition frames returns the footage frame
+//! at that time, not one quantised to the composition frame, gap G-R1). At `R` equal to the output
+//! rate both formulas give the same frame for every tick, so the default path is the old one.
 
 use crate::error::CliError;
-use fx_core::{Depth, Frame, FxError, Layer, TimeBase};
+use fx_core::{Depth, Frame, FxError, Layer, Rational, TimeBase};
 use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
@@ -43,7 +51,9 @@ struct Inner {
 }
 
 /// A clip of whole frames back to back in a file, in one of the wire formats.
-/// Frame `i` covers the ticks `i * time_step .. (i + 1) * time_step`, like `MemLayer`.
+/// Frame `i` covers the ticks `i * time_step .. (i + 1) * time_step`, like `MemLayer`, unless
+/// [`RawClip::with_rate`] gave the clip a rate of its own: then frame `i` covers `i / R ..
+/// (i + 1) / R` seconds.
 pub struct RawClip {
     /// How messages name the clip, for example `layer overlay C:\clips\o.raw`.
     what: String,
@@ -53,6 +63,8 @@ pub struct RawClip {
     frame_len: u64,
     frames: u64,
     time: TimeBase,
+    /// The clip's own rate when it differs from the time base's; `None` reads at the output rate.
+    rate: Option<Rational>,
     note: IoNote,
     reads: AtomicU64,
     inner: Mutex<Inner>,
@@ -85,6 +97,7 @@ impl RawClip {
             frame_len,
             frames,
             time,
+            rate: None,
             note,
             reads: AtomicU64::new(0),
             inner: Mutex::new(Inner { file, cache: Vec::new(), capacity }),
@@ -94,6 +107,22 @@ impl RawClip {
     /// Number of whole frames in the file.
     pub fn frame_count(&self) -> u64 {
         self.frames
+    }
+
+    /// Reads the clip at its own rate `rate` instead of the output rate. A rate equal to the time
+    /// base's keeps the output rate path, which maps every tick to the same frame.
+    pub fn with_rate(mut self, rate: Rational) -> RawClip {
+        self.rate = (rate != self.time.fps()).then_some(rate);
+        self
+    }
+
+    /// The clip frame that holds the tick `time` (negative before the start), as `i128` so that no
+    /// tick and no rate can overflow it.
+    fn index_of(&self, time: i64) -> i128 {
+        match self.rate {
+            None => self.time.frame_of(time) as i128,
+            Some(r) => (time as i128 * r.num as i128).div_euclid(self.time.time_scale as i128 * r.den as i128),
+        }
     }
 
     /// How many frames were read from the file so far (cache hits do not count).
@@ -129,7 +158,7 @@ impl Layer for RawClip {
     }
 
     fn frame_at(&self, time: i64) -> fx_core::Result<Option<Arc<Frame>>> {
-        let Ok(index) = u64::try_from(self.time.frame_of(time)) else { return Ok(None) };
+        let Ok(index) = u64::try_from(self.index_of(time)) else { return Ok(None) };
         if index >= self.frames {
             return Ok(None);
         }
@@ -154,6 +183,17 @@ impl Layer for RawClip {
         inner.cache.push((index, frame.clone()));
         Ok(Some(frame))
     }
+}
+
+/// How many output frames at `fps` start inside a clip of `frames` frames at `rate`: the output
+/// frames `k` with `k / fps < frames / rate` seconds, `ceil(frames * rate.den * fps.num /
+/// (rate.num * fps.den))` in exact integers. Each of them shows a frame of the clip at its start
+/// time, and at `rate == fps` the count is `frames` itself. U: the length a host gives such a
+/// layer is not established; this is the composition frames the layer spans.
+pub fn output_frames(frames: u64, rate: Rational, fps: Rational) -> u64 {
+    let num = frames as u128 * rate.den as u128 * fps.num as u128;
+    let den = rate.num as u128 * fps.den as u128;
+    u64::try_from(num.div_ceil(den)).unwrap_or(u64::MAX)
 }
 
 /// Removes the spool file when dropped, whichever way the run ends: success, an
@@ -302,6 +342,80 @@ pub mod tests {
         assert_eq!([marker(&clip, -1), marker(&clip, 3003), marker(&clip, i64::MIN), marker(&clip, i64::MAX)], [None; 4]);
         let f = clip.frame_at(1500).unwrap().unwrap();
         assert_eq!(f.to_bytes(), [1, 0, 0, 255, 1, 1, 0, 255]);
+    }
+
+    fn rate(text: &str) -> Rational {
+        Rational::parse(text).unwrap()
+    }
+
+    #[test]
+    fn a_clip_rate_maps_ticks_to_the_frame_covering_their_time() {
+        let dir = TempDir::new("rate");
+        let path = dir.file("c.raw", &clip_bytes(60));
+        // 48 fps footage in a 24 fps time base (100 ticks a frame): output frame n starts on
+        // footage frame 2n, and the tick halfway through it is footage frame 2n + 1
+        let twice = open(&path, base()).unwrap().with_rate(rate("48"));
+        assert_eq!([0, 49, 50, 99, 100, 150, 1000].map(|t| marker(&twice, t)), [0, 0, 1, 1, 2, 3, 20].map(Some));
+        // 25 against 24: frame i covers [i/25, (i+1)/25) s = ticks [96i, 96(i+1)), so output
+        // frames 0..=23 show footage 0..=23 and output frame 24 shows footage 25
+        let pal = open(&path, base()).unwrap().with_rate(rate("25"));
+        let shown: Vec<u8> = (0..26).map(|n| marker(&pal, n * 100).unwrap()).collect();
+        let want: Vec<u8> = (0..26u32).map(|n| (n * 25 / 24) as u8).collect();
+        assert_eq!(shown, want);
+        assert_eq!((shown[23], shown[24]), (23, 25));
+        assert_eq!([95, 96, 191, 192].map(|t| marker(&pal, t)), [0, 1, 1, 2].map(Some));
+        // NTSC footage in a 24 fps base, and 24 fps footage in an NTSC base (30000 ticks a second)
+        let ntsc = open(&path, base()).unwrap().with_rate(rate("30000/1001"));
+        for n in 0..40i64 {
+            assert_eq!(marker(&ntsc, n * 100), Some((n * 100 * 30000 / (2400 * 1001)) as u8), "{n}");
+        }
+        let film = open(&path, TimeBase::from_fps(rate("30000/1001"))).unwrap().with_rate(rate("24"));
+        assert_eq!([0, 1249, 1250, 2500, 30000].map(|t| marker(&film, t)), [0, 0, 1, 2, 24].map(Some));
+        // before the start and past the end there is no frame, and no tick overflows
+        for clip in [&twice, &pal, &ntsc, &film] {
+            assert_eq!([-1, i64::MIN, i64::MAX].map(|t| marker(clip, t)), [None; 3]);
+        }
+        assert_eq!(marker(&twice, 3000), None, "frame 60 is past a 60 frame clip");
+        assert_eq!(marker(&twice, 2999), Some(59));
+    }
+
+    #[test]
+    fn the_output_rate_given_as_a_clip_rate_is_the_old_mapping() {
+        let dir = TempDir::new("same");
+        let path = dir.file("c.raw", &clip_bytes(12));
+        for (time, fps) in [(base(), "24"), (TimeBase { time_scale: 48000, time_step: 2000 }, "24"), (TimeBase::from_fps(rate("30000/1001")), "60000/2002")] {
+            let plain = open(&path, time).unwrap();
+            let rated = open(&path, time).unwrap().with_rate(rate(fps));
+            assert_eq!(rated.rate, None, "{fps}");
+            for t in -3000..30000i64 {
+                assert_eq!(plain.index_of(t), rated.index_of(t));
+                // and the general formula agrees with the old one at that rate
+                let r = time.fps();
+                assert_eq!((t as i128 * r.num as i128).div_euclid(time.time_scale as i128 * r.den as i128), time.frame_of(t) as i128, "{t}");
+            }
+        }
+    }
+
+    #[test]
+    fn the_default_length_counts_the_output_frames_that_start_inside_the_clip() {
+        // 25 frames at 24 fps last 1.0417 s: output frames 0 to 62 of a 60 fps output start inside
+        assert_eq!(output_frames(25, rate("24"), rate("60")), 63);
+        assert_eq!(output_frames(24, rate("24"), rate("60")), 60);
+        assert_eq!(output_frames(50, rate("25"), rate("24")), 48);
+        assert_eq!(output_frames(51, rate("25"), rate("24")), 49);
+        assert_eq!(output_frames(60, rate("60"), rate("24")), 24);
+        assert_eq!(output_frames(61, rate("60"), rate("24")), 25);
+        assert_eq!(output_frames(1001, rate("30000/1001"), rate("24")), 802);
+        for (frames, fps) in [(0u64, "24"), (1, "24"), (37, "30000/1001"), (u64::MAX, "2997/100")] {
+            assert_eq!(output_frames(frames, rate(fps), rate(fps)), frames, "{frames} at {fps}");
+        }
+        assert_eq!(output_frames(u64::MAX, rate("1"), rate("4294967295")), u64::MAX, "saturates");
+        // every counted frame shows a clip frame and the next one would not
+        let dir = TempDir::new("len");
+        let path = dir.file("c.raw", &clip_bytes(25));
+        let clip = open(&path, TimeBase::default_for_rate(rate("60"))).unwrap().with_rate(rate("24"));
+        assert_eq!(marker(&clip, 62 * 100), Some(24));
+        assert_eq!(marker(&clip, 63 * 100), None);
     }
 
     #[test]

@@ -69,6 +69,10 @@ pub struct Case {
     /// Extra layer clips by layer id, relative to the test set directory. Temporal cases only.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub layers: BTreeMap<String, String>,
+    /// The reference case family the case belongs to (`gap-shrink`, ...; see [`crate::families`]),
+    /// None for the cases of the default matrix, which therefore serialise as they always did.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub family: Option<String>,
 }
 
 impl Case {
@@ -161,11 +165,11 @@ impl Default for Plan {
     }
 }
 
-fn fnv1a(text: &str) -> u32 {
+pub(crate) fn fnv1a(text: &str) -> u32 {
     text.bytes().fold(0x811c_9dc5u32, |h, b| (h ^ b as u32).wrapping_mul(0x0100_0193))
 }
 
-fn safe(text: &str) -> String {
+pub(crate) fn safe(text: &str) -> String {
     text.chars().map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' }).collect()
 }
 
@@ -173,7 +177,7 @@ fn input_path(source: &str, w: usize, h: usize, depth: u32) -> String {
     format!("inputs/{source}-{w}x{h}.d{depth}.{}", sources::pix_fmt(depth))
 }
 
-fn clip_path(source: &str, w: usize, h: usize, depth: u32, frames: usize) -> String {
+pub(crate) fn clip_path(source: &str, w: usize, h: usize, depth: u32, frames: usize) -> String {
     format!("inputs/{source}-{w}x{h}.d{depth}.f{frames}.{}", sources::pix_fmt(depth))
 }
 
@@ -276,6 +280,7 @@ fn frame_cases(effect: &EffectInfo, plan: &Plan, cases: &mut Vec<Case>) {
                         frames: 1,
                         fps: None,
                         layers: BTreeMap::new(),
+                        family: None,
                     });
                 }
             }
@@ -442,6 +447,7 @@ fn temporal_cases(effect: &EffectInfo, plan: &Plan, clips: &mut BTreeMap<String,
                             frames: t.frames,
                             fps: Some(fps.clone()),
                             layers,
+                            family: None,
                         },
                     });
                 }
@@ -602,6 +608,29 @@ mod tests {
         assert_eq!((c.kind, c.frames, c.fps.clone(), c.layers.len()), (CaseKind::Frame, 1, None, 0));
         assert_eq!(set.inputs[0].frames, 1);
         assert_eq!(c.frame_len(), 2 * 3 * 4);
+    }
+
+    #[test]
+    fn a_matrix_case_has_no_family_field_and_a_family_case_round_trips() {
+        let cases = build(&[shift_like(), effect("a", vec![amount()])], &Plan::default());
+        assert!(cases.iter().all(|c| c.family.is_none()));
+        let text = serde_json::to_string_pretty(&cases).unwrap();
+        assert!(!text.contains("family"), "a matrix case serialises as before families existed");
+        let mut fam = cases.iter().find(|c| c.is_temporal()).unwrap().clone();
+        fam.family = Some("gap-shrink".into());
+        let one = serde_json::to_string(&fam).unwrap();
+        assert!(one.contains(r#""family":"gap-shrink""#), "{one}");
+        assert_eq!(serde_json::from_str::<Case>(&one).unwrap(), fam);
+        // the field is last, so the fields before it keep their place
+        assert!(one.ends_with(r#","family":"gap-shrink"}"#), "{one}");
+    }
+
+    #[test]
+    fn a_cases_file_without_families_loads_with_none() {
+        let old = r#"{"id":"i","effect":"e","label":"all-default","params":[],"depth":8,"width":2,"height":3,"source":"testsrc2",
+            "input":"inputs/a","reference":"r","kind":"temporal","frames":4,"fps":"24"}"#;
+        assert_eq!(serde_json::from_str::<Case>(old).unwrap().family, None);
+        assert_eq!(FORMAT, 1, "families need no new format");
     }
 
     // ---- temporal plans ----

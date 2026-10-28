@@ -8,12 +8,17 @@
 //! * [`encode_vectors`]: `FlowField` -> encoded image.
 //! * [`decode_vectors`]: encoded image -> `FlowField`; [`vector_hole_mask`] is the mask built
 //!   from the alpha channel for the hole fill; [`apply_vec_scale`] applies Vec Scale X / Y.
+//! * [`encode_vectors_merged`] and [`merge_flows`]: the matte weighted merge of the layered Create
+//!   Vectors pass (rule G1d): the per layer vectors of [`encode_vectors`] summed with their
+//!   weights in layer order from `0.0`, then today's clamp and store (or, for the Debug views, the
+//!   sum in output pixels).
 //!
 //! The push-pull hole fill of Vectors In is not here ([`crate::holefill`]). The order is
 //! [`decode_vectors_with_holes`] -> hole fill (`flow`, `holes`) -> [`apply_vec_scale`].
 
 use crate::flow::FlowField;
 use crate::image::{Image, Samples, CHANNELS};
+use crate::matte::Matte;
 use crate::warp::Flow;
 use fx_core::{par_rows, FxError, Result};
 
@@ -132,6 +137,188 @@ pub fn encode_vectors_image(
     let mut img = Image::new(width, height, fmt);
     encode_vectors(&mut img, flow, scale)?;
     Ok(img)
+}
+
+/// The encoded zero vector image of the given size and format: every pixel holds what
+/// [`encode_vectors`] writes for a zero flow, alpha the white of the depth, R and G the centre
+/// (127, 32767 or 0.5), B 0. It has no size limit: Create Vectors writes it for a frame with a
+/// side of 1, which has no motion search (U, ours, parity gap G7, see
+/// [`crate::prep::searchable`]).
+pub fn zero_vectors_image(width: usize, height: usize, fmt: crate::image::Fmt) -> Image {
+    let mut img = Image::new(width, height, fmt);
+    match &mut img.samples {
+        Samples::U8(out) => out.chunks_exact_mut(CHANNELS).for_each(|px| px.copy_from_slice(&[0xff, 127, 127, 0])),
+        Samples::U16(out) => out.chunks_exact_mut(CHANNELS).for_each(|px| px.copy_from_slice(&[0xffff, 32767, 32767, 0])),
+        Samples::F32(out) => out.chunks_exact_mut(CHANNELS).for_each(|px| px.copy_from_slice(&[1.0, 0.5, 0.5, 0.0])),
+    }
+    img
+}
+
+/// The per layer constants of the merged encoder and of [`merge_flows`]: the sampler of one
+/// layer's flow, its sample step `(sx, sy)`, its scale `(kx, ky)` and its weights.
+struct MergeLayer<'a> {
+    fl: Flow<'a>,
+    sx: f32,
+    sy: f32,
+    kx: f32,
+    ky: f32,
+    weight: &'a [f32],
+}
+
+/// Checks the layers of a merge onto a `dw x dh` output and returns their constants: per layer
+/// `sx = fw1 / dw1`, `sy = fh1 / dh1` and `kx = (dw1 / fw1) / scale`, `ky = (dh1 / fh1) / scale`
+/// (`scale = None` leaves out the division: `kx = dw1 / fw1`), all in single precision with the
+/// sizes minus one converted to f32, exactly as [`encode_vectors`] computes them.
+fn merge_layers<'a>(
+    dw: usize,
+    dh: usize,
+    layers: &[(&'a FlowField, &'a Matte)],
+    scale: Option<f32>,
+    what: &str,
+) -> Result<Vec<MergeLayer<'a>>> {
+    if layers.is_empty() {
+        return Err(FxError::Mismatch(format!("{what}: no layer to merge")));
+    }
+    if dw < 2 || dh < 2 {
+        return Err(FxError::Mismatch(format!("{what} needs an output of at least 2x2 (output {dw}x{dh})")));
+    }
+    let (dw1, dh1) = ((dw as i32 - 1) as f32, (dh as i32 - 1) as f32);
+    let mut out = Vec::with_capacity(layers.len());
+    for (k, &(flow, m)) in layers.iter().enumerate() {
+        if flow.width < 2 || flow.height < 2 || flow.data.len() != flow.width * flow.height * 2 {
+            return Err(FxError::Mismatch(format!(
+                "{what}: layer {k} has a flow of {}x{} holding {} values (at least 2x2 needed)",
+                flow.width,
+                flow.height,
+                flow.data.len()
+            )));
+        }
+        if m.width != dw || m.height != dh || m.data.len() != dw * dh {
+            return Err(FxError::Mismatch(format!(
+                "{what}: the weight of layer {k} is {}x{} for an output of {dw}x{dh}",
+                m.width, m.height
+            )));
+        }
+        let (fw1, fh1) = ((flow.width as i32 - 1) as f32, (flow.height as i32 - 1) as f32);
+        let (kx, ky) = match scale {
+            Some(s) => ((dw1 / fw1) / s, (dh1 / fh1) / s),
+            None => (dw1 / fw1, dh1 / fh1),
+        };
+        out.push(MergeLayer { fl: Flow::new(flow), sx: fw1 / dw1, sy: fh1 / dh1, kx, ky, weight: &m.data });
+    }
+    Ok(out)
+}
+
+/// The weighted sum of the layers at output pixel `(x, y)` of a `width` wide output: from
+/// `(0.0, 0.0)`, for the layers in their order, `[u, v] = bilerp(x * sx, y * sy)` and
+/// `acc_x = acc_x + w * (u * kx)`, `acc_y = acc_y + w * (v * ky)` (single precision, in this order).
+#[inline(always)]
+fn merged_at(per: &[MergeLayer<'_>], x: usize, y: usize, width: usize) -> (f32, f32) {
+    let (mut ax, mut ay) = (0.0f32, 0.0f32);
+    for l in per {
+        let [u, v] = l.fl.bilerp(x as f32 * l.sx, y as f32 * l.sy);
+        let wk = l.weight[y * width + x];
+        ax = ax + wk * (u * l.kx);
+        ay = ay + wk * (v * l.ky);
+    }
+    (ax, ay)
+}
+
+/// The vector image of a layered Create Vectors render (one flow per layer V, the matte
+/// weighted merge U; rule G1d): `layers` holds, for the layers `first..=last` of Layers Output in
+/// that order, each layer's flow (`X(p) ~ Y(p + flow(p))`, any size of at least 2x2, usually the
+/// working resolution) and its weight at the output size, the OVER weight of
+/// `matte::over_weights` (raw mattes, Main_BG 1).
+///
+/// Per output pixel `(x, y)` (U, ours): every layer's vector is what [`encode_vectors`] computes
+/// for it, `(u * kx, v * ky)` with `[u, v]` the flow sampled bilinearly at `(x * sx, y * sy)` and
+/// `sx`, `sy`, `kx`, `ky` from the size of that layer's flow; the merged value is the sum over
+/// the layers in their order, starting from `0.0`: `acc_x = acc_x + w_k * (u_k * kx_k)` (f32, no
+/// fused multiply add), the same for `y`. The sum then takes today's clamp and store of
+/// [`encode_vectors`] per depth; alpha is white and blue 0 in every pixel (the channel copy of
+/// the merge gives the opaque alpha and the zero blue, I).
+///
+/// One layer of weight 1.0 everywhere is [`encode_vectors`] bit for bit (`0.0 + 1.0 * v` is `v`
+/// up to the sign of a zero, which the store does not see). Records gap G1d.
+///
+/// Errors: `Mismatch` for an empty list, an output or a flow below 2x2, a flow whose data does not
+/// match its size and a weight of another size than `dst`.
+pub fn encode_vectors_merged(dst: &mut Image, layers: &[(&FlowField, &Matte)], scale: f32) -> Result<()> {
+    let per = merge_layers(dst.width, dst.height, layers, Some(scale), "vector merge")?;
+    fx_core::gaps::record(&crate::gaps::G1D);
+    let width = dst.width;
+    let per = &per;
+    let sample = move |x: usize, y: usize| -> (f32, f32) { merged_at(per, x, y, width) };
+    match &mut dst.samples {
+        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                let (mut a, mut b) = sample(x, y);
+                clamp_unit(&mut a);
+                clamp_unit(&mut b);
+                let (a, b) = (a + 1.0f32, b + 1.0f32);
+                px[0] = 0xff;
+                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;
+                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;
+                px[3] = 0;
+            }
+        }),
+        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                let (mut a, mut b) = sample(x, y);
+                clamp_unit(&mut a);
+                clamp_unit(&mut b);
+                let (a, b) = (a + 1.0f32, b + 1.0f32);
+                px[0] = 0xffff;
+                px[1] = cvtt64(a as f64 * 32767.0 + 0.5) as u16;
+                px[2] = cvtt64(b as f64 * 32767.0 + 0.5) as u16;
+                px[3] = 0;
+            }
+        }),
+        Samples::F32(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                let (a, b) = sample(x, y);
+                px[0] = 1.0;
+                px[1] = (a + 1.0f32) * 0.5f32;
+                px[2] = (b + 1.0f32) * 0.5f32;
+                px[3] = 0.0;
+            }
+        }),
+    }
+    Ok(())
+}
+
+/// [`encode_vectors_merged`] into a new image of the given size and format.
+pub fn encode_vectors_merged_image(
+    width: usize,
+    height: usize,
+    fmt: crate::image::Fmt,
+    layers: &[(&FlowField, &Matte)],
+    scale: f32,
+) -> Result<Image> {
+    let mut img = Image::new(width, height, fmt);
+    encode_vectors_merged(&mut img, layers, scale)?;
+    Ok(img)
+}
+
+/// The merged flow of a layered render at the output size `width x height`, in pixels of the
+/// output (`X(p) ~ Y(p + flow(p))`): the flow the Debug views use with FG layers (rule G4: "with
+/// `nfg >= 1` the merged flow"). It is the sum of [`encode_vectors_merged`] before the division by
+/// `Max Displace`, the clamp and the store (U, ours): per output pixel, from `0.0` and in the
+/// order of `layers`, `acc_x = acc_x + w_k * (u_k * kx_k)` with `kx_k = dw1 / fw1_k` and
+/// `ky_k = dh1 / fh1_k` (f32), the same sampling and weights as the encoder. No gap is recorded
+/// here (the Debug view that uses it does). Errors as [`encode_vectors_merged`].
+pub fn merge_flows(width: usize, height: usize, layers: &[(&FlowField, &Matte)]) -> Result<FlowField> {
+    let per = merge_layers(width, height, layers, None, "flow merge")?;
+    let mut out = FlowField::new(width, height);
+    let per = &per;
+    par_rows(&mut out.data, width * 2, |y, row| {
+        for (x, o) in row.chunks_exact_mut(2).enumerate() {
+            let (a, b) = merged_at(per, x, y, width);
+            o[0] = a;
+            o[1] = b;
+        }
+    });
+    Ok(out)
 }
 
 /// Decodes an encoded vector image into a flow field of the same size. The integer depths are
@@ -255,3 +442,5 @@ pub fn apply_vec_scale(flow: &mut FlowField, sx: f32, sy: f32) {
 
 #[cfg(test)]
 mod tests;
+#[cfg(test)]
+mod merge_tests;

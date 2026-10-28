@@ -321,36 +321,97 @@ fn half_speed_with_the_default_vectors_runs_the_optical_flow_path_end_to_end() {
     }
 }
 
-/// What the user sees when the flow path cannot serve a request: exit code 3, the frame that failed and the reason. A 3 x 2
-/// clip is below the 2 x 2 working size the solver needs at Best; the exact frames of the same run are fine.
+/// Output frame `n` (odd, half speed) of the vector path computed in process from explicit inputs: the two source
+/// frames of `clip`, the selection of the half speed position with the vectors quality of Best (4), `solve_flows`
+/// and `compose_vectors`. Only the warping code, interpolation, sensitivity and render quality come from the settings
+/// of `params`; the front-end's vectors quality and the routing of the core are not used.
+fn vector_frame(clip: &[Frame], params: &[(&str, &str)], n: usize) -> Frame {
+    use retime_engine::compose::{compose_vectors, solve_flows, Rendered};
+    use retime_engine::image::Image;
+    use retime_engine::timeline::Selection;
+    let rig = common::Rig::new(clip.to_vec(), params).with_frames(clip.len() as u64);
+    let settings = retime_engine::frontend::read_settings(&retime::WIRING, &rig.cx(n as u64), &rig.env()).unwrap();
+    let k = (n - 1) / 2;
+    let (a, b) = (Image::from_frame(&clip[k]), Image::from_frame(&clip[k + 1]));
+    let pos = n as f32 / 2.0;
+    let sel = Selection { s0: pos, s1: pos + 0.5, a: k as i32, b: k as i32 + 1, wa: 0.5, exact: false, vectors_quality: 4, interp: settings.interp };
+    let flows = solve_flows(&settings, &sel, &a, &b).unwrap();
+    Rendered::Image(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap()).into_frame()
+}
+
+/// A 3 x 2 or 2 x 2 clip was below the 2 x 2 working size of Best; the motion search never halves below 2 x 2 (the
+/// tiny frames rule, parity gap G7), so through the real binary the in-between frames of a clip whose texture moves by
+/// a sub-pixel amount run the vector path at the clip's own size and the run exits 0. Every in-between frame is the
+/// vector path computed in process from explicit inputs and differs from the binary's own `vectors=1` run, so a fall
+/// back to the frame blend (in the core or in the front-end) fails here; the frames on source frames are the same in
+/// both runs.
 #[test]
-fn the_flow_path_refuses_what_it_cannot_serve_with_exit_code_3_and_the_reason() {
+fn tiny_clips_run_the_vector_path_through_the_binary() {
     let bin = vfx().expect("fx-cli builds");
-    let dir = Scratch::new("refuse");
-    let tiny = dir.path("tiny.raw");
-    let frames: Vec<Frame> = (0..4u8).map(|k| common::f8(3, 2, &[[10 * k, 20, 30, 255]; 6])).collect();
-    std::fs::write(&tiny, frames.iter().flat_map(|f| f.to_bytes()).collect::<Vec<u8>>()).unwrap();
-    let run = |speed: &str| {
-        Command::new(bin)
-            .args(["apply", "retime", "--width", "3", "--height", "2", "--depth", "8", "--fps", "24", "--in"])
-            .arg(&tiny)
-            .arg("--out")
-            .arg(dir.path("out.raw"))
-            .args(["--frames", "4", "--param", &format!("speed_percent={speed}")])
-            .output()
-            .expect("run vfx")
-    };
-    let r = run("50");
-    assert_eq!(r.status.code(), Some(3), "{}", String::from_utf8_lossy(&r.stderr));
-    let stderr = String::from_utf8_lossy(&r.stderr);
-    assert!(stderr.contains("frame 1"), "{stderr}");
-    assert!(
-        stderr.contains("unsupported: optical flow: working size 1x1 (output 3x2, reduction 1) is below 2x2, which is not supported"),
-        "{stderr}"
-    );
-    // exact positions never reach the solver
-    let r = run("100");
-    assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
+    let dir = Scratch::new("tiny");
+    for depth in [Depth::U8, Depth::U16, Depth::F32] {
+        for (w, h) in [(3usize, 2usize), (2, 2)] {
+            let clip = common::moving::tiny_texture_clip(depth, w, h, 4);
+            let input = dir.path(&format!("tiny{}_{w}x{h}.raw", depth.bits()));
+            std::fs::write(&input, clip.iter().flat_map(|f| f.to_bytes()).collect::<Vec<u8>>()).unwrap();
+            for mode in [&[("frame_interp", "2")][..], &[("frame_interp", "3"), ("smart_blend", "1")]] {
+                let mut params = vec![("speed_percent", "50"), ("sensitivity", "100")];
+                params.extend_from_slice(mode);
+                let run = |extra: &[&str], name: &str| -> Vec<Frame> {
+                    let mut args: Vec<String> = params.iter().map(|(id, v)| format!("{id}={v}")).collect();
+                    args.extend(extra.iter().map(|e| e.to_string()));
+                    let args: Vec<&str> = args.iter().map(String::as_str).collect();
+                    let out = dir.path(name);
+                    let r = apply_sized(bin, depth, (w, h), &input, &out, 6, &args);
+                    assert!(r.status.success(), "{depth:?} {w}x{h} {args:?}: {}", String::from_utf8_lossy(&r.stderr));
+                    read_frames_sized(&out, depth, (w, h))
+                };
+                let got = run(&[], "out.raw");
+                let plain = run(&["vectors=1"], "plain.raw");
+                assert_eq!((got.len(), plain.len()), (6, 6));
+                for n in 0..6 {
+                    let case = format!("{depth:?} {w}x{h} {mode:?} frame {n}");
+                    if n % 2 == 1 {
+                        assert_eq!(got[n], vector_frame(&clip, &params, n), "{case}");
+                        assert_ne!(got[n], plain[n], "{case}: the frame blend");
+                    } else {
+                        assert_eq!(got[n], plain[n], "{case}: on a source frame");
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// Clips with a side of 1 pixel have no motion search: every mode renders through the real binary, exits 0, and gives
+/// the bytes of the same run with `vectors=1`.
+#[test]
+fn one_pixel_clips_render() {
+    let bin = vfx().expect("fx-cli builds");
+    let dir = Scratch::new("onepx");
+    for depth in [Depth::U8, Depth::U16, Depth::F32] {
+        for (w, h) in [(1usize, 1usize), (1, 3), (5, 1)] {
+            let clip: Vec<Frame> = (0..4).map(|k| common::moving::DEFAULT.frame_at(depth, w, h, k as f64)).collect();
+            let input = dir.path(&format!("in{}_{w}x{h}.raw", depth.bits()));
+            std::fs::write(&input, clip.iter().flat_map(|f| f.to_bytes()).collect::<Vec<u8>>()).unwrap();
+            for mode in [&["smart_blend=0", "frame_interp=2"][..], &["smart_blend=1", "frame_interp=3", "blur_compensation=2"], &["frame_interp=1", "vectors=2"]] {
+                let run = |extra: &[&str], name: &str| {
+                    let out = dir.path(name);
+                    let mut params = vec!["speed_percent=37.5"];
+                    // the No Vectors run replaces the mode's own Vectors value (vfx refuses a repeated id)
+                    params.extend(mode.iter().filter(|p| extra.is_empty() || !p.starts_with("vectors=")));
+                    params.extend_from_slice(extra);
+                    let r = apply_sized(bin, depth, (w, h), &input, &out, 6, &params);
+                    assert!(r.status.success(), "{depth:?} {w}x{h} {params:?}: {}", String::from_utf8_lossy(&r.stderr));
+                    std::fs::read(&out).unwrap()
+                };
+                let searched = run(&[], "searched.raw");
+                let plain = run(&["vectors=1"], "plain.raw");
+                assert_eq!(searched.len(), 6 * w * h * depth.bytes_per_pixel());
+                assert!(searched == plain, "{depth:?} {w}x{h} {mode:?}: differs from vectors=1");
+            }
+        }
+    }
 }
 
 /// Smart Blend (`smart_blend=1`) through the real binary at the three depths, on the moving texture and on the scene with

@@ -116,30 +116,56 @@ fn display_source_shows_the_frame_at_the_offset_without_retiming() {
     }
 }
 
+/// Output frame `n` of half speed (n odd: between source frames `(n - 1) / 2` and `(n + 1) / 2`)
+/// computed from explicit inputs: the two source frames of the clip, the selection of the half
+/// speed position with the vectors quality of Best (4), `solve_flows` and `compose_vectors`. Only
+/// the warping code, interpolation, sensitivity and render quality come from the settings the
+/// front-end reads; its vectors quality and the routing of the core are not used, so a render that
+/// falls back to the frame blend does not match it.
+fn engine_frame(rig: &Rig, n: u64) -> fx_core::Frame {
+    use retime_engine::compose::{compose_vectors, solve_flows, Rendered};
+    use retime_engine::image::Image;
+    use retime_engine::timeline::Selection;
+    let cx = rig.cx(n);
+    let env = rig.env();
+    let settings = retime_engine::frontend::read_settings(&retime::WIRING, &cx, &env).unwrap();
+    let k = ((n - 1) / 2) as usize;
+    let frame = |i: usize| Image::from_frame(&*fx_core::Layer::frame_at(&rig.input, (i as i64) * 100).unwrap().expect("frame"));
+    let (a, b) = (frame(k), frame(k + 1));
+    let pos = n as f32 / 2.0;
+    let sel = Selection { s0: pos, s1: pos + 0.5, a: k as i32, b: k as i32 + 1, wa: 0.5, exact: false, vectors_quality: 4, interp: settings.interp };
+    let flows = solve_flows(&settings, &sel, &a, &b).unwrap();
+    Rendered::Image(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap()).into_frame()
+}
+
 #[test]
-fn a_position_between_frames_with_vectors_on_runs_the_solver_and_tiny_frames_are_refused_by_name() {
-    // The golden frames are 3 x 2 and 2 x 2 pixels: below the 2 x 2 working size the solver needs at Best
-    // (half resolution). The position between frames takes the vector path (it does not fall back to the
-    // frame blend) and the solver's message says why it cannot run. Real motion is in `vector.rs`.
-    for set in sets() {
-        let rig = set.rig(&[("speed_percent", "50")]);
-        for n in [1u64, 3, 5] {
-            match rig.render(n) {
-                Err(FxError::Unsupported(m)) => assert!(m.contains("below 2x2"), "{m}"),
-                other => panic!("frame {n}: expected Unsupported, got {other:?}"),
+fn a_position_between_frames_with_vectors_on_runs_the_vector_path_on_tiny_frames() {
+    // Frames of 3 x 2 and 2 x 2 pixels of a texture that moves by a sub-pixel amount. The motion search never halves
+    // below 2 x 2 (the tiny frames rule, parity gap G7), so Best searches them at their own size: a position between
+    // frames takes the vector path. Its output is the solve and the composition computed from explicit inputs, and
+    // it differs from the No Vectors render of the same clip, so a silent fall back to the frame blend fails here.
+    // Real motion is in `vector.rs`.
+    for depth in [fx_core::Depth::U8, fx_core::Depth::U16, fx_core::Depth::F32] {
+        for (w, h) in [(3usize, 2usize), (2, 2)] {
+            let clip = common::moving::tiny_texture_clip(depth, w, h, 4);
+            for smart in ["0", "1"] {
+                for interp in ["1", "2", "3"] {
+                    let params = [("speed_percent", "50"), ("sensitivity", "100"), ("smart_blend", smart), ("frame_interp", interp)];
+                    let rig = Rig::new(clip.clone(), &params).with_frames(6);
+                    let mut no_vectors = params.to_vec();
+                    no_vectors.push(("vectors", "1"));
+                    let plain = Rig::new(clip.clone(), &no_vectors).with_frames(6);
+                    for n in [1u64, 3, 5] {
+                        let case = format!("{depth:?} {w}x{h} smart {smart} interp {interp} frame {n}");
+                        let got = rig.render(n).unwrap_or_else(|e| panic!("{case}: {e}"));
+                        assert_eq!(got, engine_frame(&rig, n), "{case}");
+                        assert_ne!(got, plain.render(n).unwrap(), "{case}: the frame blend");
+                    }
+                    // the even frames are on frames: the fast path, never the vector path
+                    assert_eq!(rig.render(2).unwrap(), plain.render(2).unwrap());
+                }
             }
         }
-        // the even frames of the same run are on frames and render
-        assert_eq!(rig.render(2).unwrap(), set.rt[1]);
-        let msg = rig.render(1).unwrap_err().to_string();
-        assert!(msg.starts_with("unsupported: optical flow: working size"), "{msg}");
-        // Smart Blend runs the same solver: the same refusal for tiny frames, and exact frames never reach the vector path
-        let sb = set.rig(&[("speed_percent", "50"), ("smart_blend", "1")]);
-        match sb.render(1) {
-            Err(FxError::Unsupported(m)) => assert!(m.contains("below 2x2"), "{m}"),
-            other => panic!("expected the solver's Unsupported, got {other:?}"),
-        }
-        assert_eq!(sb.render(2).unwrap(), set.rt[1], "an exact frame never reaches the vector path");
     }
 }
 

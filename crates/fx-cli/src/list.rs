@@ -27,6 +27,17 @@ struct EffectInfo {
     params: Vec<ParamSpec>,
     /// Extra input layers of a temporal effect; empty for a frame effect.
     layers: Vec<LayerSpec>,
+    /// The open parity gaps the effect can note. Left out when it has none, so the entry of
+    /// such an effect reads as it did before gaps existed.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    gaps: Vec<GapInfo>,
+}
+
+#[derive(Serialize)]
+struct GapInfo {
+    id: &'static str,
+    title: &'static str,
+    controls: &'static [&'static str],
 }
 
 pub fn to_json(entries: &[Entry]) -> String {
@@ -40,6 +51,7 @@ pub fn to_json(entries: &[Entry]) -> String {
             hidden: e.hidden,
             params: e.effect.params(),
             layers: e.effect.layers(),
+            gaps: e.effect.gaps().iter().map(|g| GapInfo { id: g.id, title: g.title, controls: g.controls }).collect(),
         })
         .collect();
     let mut text = serde_json::to_string_pretty(&list).expect("effect list serializes");
@@ -94,7 +106,7 @@ fn strings<const N: usize>(cells: [&str; N]) -> Vec<String> {
 }
 
 /// Left aligned columns separated by two spaces, no trailing whitespace.
-fn render(rows: &[Vec<String>]) -> String {
+pub(crate) fn render(rows: &[Vec<String>]) -> String {
     let cols = rows.iter().map(Vec::len).max().unwrap_or(0);
     let widths: Vec<usize> = (0..cols)
         .map(|c| rows.iter().filter_map(|r| r.get(c)).map(|s| s.chars().count()).max().unwrap_or(0))
@@ -165,6 +177,87 @@ mod tests {
         assert_eq!(find("selftest-invert")["kind"], "frame");
         assert_eq!(find("selftest-invert")["layers"], serde_json::json!([]));
         assert_eq!(find("retime")["hidden"], false);
+    }
+
+    #[test]
+    fn an_entry_without_gaps_is_byte_identical_to_the_listing_before_gaps() {
+        // the entry as it was before `gaps` existed, field for field
+        #[derive(Serialize)]
+        struct Before {
+            id: &'static str,
+            name: &'static str,
+            family: &'static str,
+            kind: EffectKind,
+            hidden: bool,
+            params: Vec<ParamSpec>,
+            layers: Vec<LayerSpec>,
+        }
+        let plain: Vec<Entry> = registry::all().into_iter().filter(|e| e.effect.gaps().is_empty()).collect();
+        assert!(plain.iter().any(|e| e.effect.id() == "retime") && plain.iter().any(|e| e.effect.id() == "selftest-invert"));
+        let before: Vec<Before> = plain
+            .iter()
+            .map(|e| Before {
+                id: e.effect.id(),
+                name: e.effect.name(),
+                family: e.family,
+                kind: e.effect.kind(),
+                hidden: e.hidden,
+                params: e.effect.params(),
+                layers: e.effect.layers(),
+            })
+            .collect();
+        let mut want = serde_json::to_string_pretty(&before).unwrap();
+        want.push('\n');
+        assert_eq!(to_json(&plain), want);
+    }
+
+    #[test]
+    fn gaps_come_last_as_id_title_and_controls_only_where_an_effect_has_some() {
+        let text = to_json(&registry::all());
+        let v: serde_json::Value = serde_json::from_str(&text).unwrap();
+        let list = v.as_array().unwrap();
+        let find = |id: &str| list.iter().find(|e| e["id"] == id).unwrap_or_else(|| panic!("{id} missing"));
+        for id in ["retime", "selftest-invert", "selftest-shift", "selftest-integrate", "selftest-threads"] {
+            assert!(find(id).get("gaps").is_none(), "{id}");
+        }
+        let gap = &find("selftest-gap")["gaps"];
+        assert_eq!(gap, &serde_json::json!([{"id": "T1", "title": "notes plumbing test", "controls": ["gap"]}]));
+        let ids = |id: &str| find(id)["gaps"].as_array().unwrap().iter().map(|g| g["id"].as_str().unwrap().to_string()).collect::<Vec<_>>();
+        assert_eq!(ids("create-vectors"), ["G1", "G1b", "G1c", "G1d", "G2", "G3", "G4", "G5"]);
+        assert_eq!(ids("retime-fgbg"), ["G1", "G1b", "G1c", "G1f", "G1g", "G1h", "G2", "G3", "G6"]);
+        assert_eq!(ids("vectors-in"), ["G1", "G1c", "G1e", "G1f", "G1g", "G1h"]);
+        // the top level keys of every entry in text order: `gaps` comes last, after `layers`
+        let mut keys: Vec<Vec<&str>> = Vec::new();
+        for line in text.lines() {
+            if line == "  {" {
+                keys.push(Vec::new());
+            } else if let Some(rest) = line.strip_prefix("    \"") {
+                keys.last_mut().unwrap().push(&rest[..rest.find('"').unwrap()]);
+            }
+        }
+        assert_eq!(keys.len(), list.len());
+        let before = ["id", "name", "family", "kind", "hidden", "params", "layers"];
+        for (k, e) in keys.iter().zip(list) {
+            let has = e.get("gaps").is_some();
+            assert_eq!(k[..before.len()], before, "{}", e["id"]);
+            let after: &[&str] = if has { &["gaps"] } else { &[] };
+            assert_eq!(&k[before.len()..], after, "{}", e["id"]);
+        }
+    }
+
+    #[test]
+    fn every_gap_of_an_effect_names_controls_of_that_effect() {
+        for e in registry::all() {
+            let params: Vec<&str> = e.effect.params().iter().map(|p| p.id).collect();
+            let layers: Vec<&str> = e.effect.layers().iter().map(|l| l.id).collect();
+            let gaps = e.effect.gaps();
+            assert!(gaps.windows(2).all(|w| w[0].id < w[1].id), "{}: gaps in id order", e.effect.id());
+            for g in gaps {
+                for c in g.controls {
+                    assert!(params.contains(c) || layers.contains(c), "{}: {} names `{c}`, which it does not have", e.effect.id(), g.id);
+                }
+            }
+        }
     }
 
     #[test]

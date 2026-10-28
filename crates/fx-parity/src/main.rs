@@ -1,9 +1,9 @@
 //! `fx-parity`: build the test set, write the checklist for rendering its references, check
 //! `vfx` against reference frames and clips, and check the temporal cases for determinism.
 
-use fx_parity::args::{self, ChecklistArgs, Command, GenArgs, RunArgs, SelfcheckArgs};
+use fx_parity::args::{self, ChecklistArgs, Command, DevcheckArgs, GenArgs, RunArgs, SelfcheckArgs};
 use fx_parity::cases::Plan;
-use fx_parity::{checklist, run, selfcheck, sources, testgen};
+use fx_parity::{checklist, devcheck, families, run, selfcheck, sources, testgen};
 use std::io::Write;
 use std::process::ExitCode;
 
@@ -56,9 +56,13 @@ fn cmd_gen(a: GenArgs) -> Result<u8, String> {
         effects: a.effects,
         plan,
         jobs: a.jobs.unwrap_or_else(default_jobs),
+        families: a.families,
     };
     let s = testgen::generate(&opts, &|m| eprintln!("fx-parity: {m}"))?;
     println!("wrote {}: {} cases for {} effects, {} inputs", s.manifest.display(), s.cases, s.effects, s.inputs);
+    if let Some(counts) = &s.families {
+        println!("{}", families::summary(counts));
+    }
     Ok(0)
 }
 
@@ -104,6 +108,19 @@ fn cmd_selfcheck(a: SelfcheckArgs) -> Result<u8, String> {
     Ok(if selfcheck::all_ok(&checks) { 0 } else { MISMATCH })
 }
 
+fn cmd_devcheck(a: DevcheckArgs) -> Result<u8, String> {
+    let opts = devcheck::DevcheckOptions { testsets: a.testsets, effect: a.effect, max_cases: a.max_cases.unwrap_or(0), devices: a.devices, vfx: a.vfx };
+    let (devices, results) = devcheck::run(&opts, &|m| eprintln!("fx-parity: {m}"))?;
+    let mut out = std::io::stdout().lock();
+    let written = if a.json {
+        writeln!(out, "{}", serde_json::to_string_pretty(&devcheck::to_json(&devices, &results)).expect("report serializes"))
+    } else {
+        devcheck::write_human(&devices, &results, &mut out)
+    };
+    written.map_err(|e| format!("cannot write the report: {e}"))?;
+    Ok(if devcheck::all_identical(&results) { 0 } else { MISMATCH })
+}
+
 fn cmd_checklist(a: ChecklistArgs) -> Result<u8, String> {
     let opts = checklist::ChecklistOptions { testset: a.testset, out: a.out, vfx: a.vfx };
     let s = checklist::generate(&opts, &|m| eprintln!("fx-parity: warning: {m}"))?;
@@ -128,6 +145,7 @@ fn main() -> ExitCode {
         Command::Run(a) => cmd_run(a),
         Command::Selfcheck(a) => cmd_selfcheck(a),
         Command::Checklist(a) => cmd_checklist(a),
+        Command::Devcheck(a) => cmd_devcheck(a),
     };
     match result {
         Ok(code) => ExitCode::from(code),

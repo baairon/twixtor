@@ -2,6 +2,7 @@
 
 use crate::cases::{self, InputFile, Plan, TestSet};
 use crate::effects::{EffectInfo, EffectKind, Kind};
+use crate::families;
 use crate::sources;
 use crate::vfx::Vfx;
 use std::path::{Path, PathBuf};
@@ -16,6 +17,9 @@ pub struct GenOptions {
     pub effects: Option<Vec<String>>,
     pub plan: Plan,
     pub jobs: usize,
+    /// Family ids: write the cases of these reference case families ([`families`]) instead of
+    /// the matrix of `plan`. None writes the matrix, exactly as before families existed.
+    pub families: Option<Vec<String>>,
 }
 
 pub struct GenSummary {
@@ -23,6 +27,8 @@ pub struct GenSummary {
     pub inputs: usize,
     pub cases: usize,
     pub manifest: PathBuf,
+    /// With families: each family written and its case count, in family order.
+    pub families: Option<Vec<(&'static str, usize)>>,
 }
 
 /// `FFMPEG` from the environment, else `ffmpeg` on PATH.
@@ -71,9 +77,11 @@ pub fn render_input(ffmpeg: &Path, source: &str, depth: u32, w: usize, h: usize,
 /// Renders one clip of `frames` frames into `dest` as raw bytes in the depth's wire format.
 pub fn render_clip(ffmpeg: &Path, source: &str, depth: u32, w: usize, h: usize, frames: usize, dest: &Path) -> Result<(), String> {
     let part = dest.with_extension(format!("{}.part", dest.extension().and_then(|e| e.to_str()).unwrap_or("raw")));
+    // a family clip has its own expressions; every other name is a clip of the matrix
+    let graph = sources::family_graph(source, depth, w, h).unwrap_or_else(|| sources::clip_graph(source, depth, w, h, frames));
     let out = Command::new(ffmpeg)
         .args(["-v", "error", "-nostdin", "-y", "-f", "lavfi", "-i"])
-        .arg(sources::clip_graph(source, depth, w, h, frames))
+        .arg(graph)
         .args(["-frames:v", &frames.to_string(), "-an", "-fps_mode", "passthrough", "-pix_fmt", sources::pix_fmt(depth), "-f", "rawvideo"])
         .arg(&part)
         .stdin(Stdio::null())
@@ -96,7 +104,7 @@ pub fn render_clip(ffmpeg: &Path, source: &str, depth: u32, w: usize, h: usize, 
 
 /// Renders a still or a clip, whichever the source is.
 fn render_file(ffmpeg: &Path, f: &InputFile, dest: &Path) -> Result<(), String> {
-    if sources::find_clip(&f.source).is_some() {
+    if sources::find_clip(&f.source).is_some() || sources::find_family(&f.source).is_some() {
         render_clip(ffmpeg, &f.source, f.depth, f.width, f.height, f.frames, dest)
     } else {
         render_input(ffmpeg, &f.source, f.depth, f.width, f.height, dest)
@@ -154,13 +162,25 @@ pub fn generate(opts: &GenOptions, log: &(dyn Fn(&str) + Sync)) -> Result<GenSum
         }
     }
 
-    let built = cases::build_all(&effects, &opts.plan);
-    // stills only for the frame effects, and only the clips the kept temporal cases use
-    let mut inputs = if effects.iter().any(|e| e.kind == EffectKind::Frame) { opts.plan.inputs() } else { Vec::new() };
-    inputs.extend(built.clip_inputs.iter().cloned());
-    if inputs.is_empty() {
-        return Err("the sources, sizes and depths given leave nothing to render (the range source exists only at 32 bpc)".into());
-    }
+    let (all_cases, inputs, family_counts) = match &opts.families {
+        None => {
+            let built = cases::build_all(&effects, &opts.plan);
+            // stills only for the frame effects, and only the clips the kept temporal cases use
+            let mut inputs = if effects.iter().any(|e| e.kind == EffectKind::Frame) { opts.plan.inputs() } else { Vec::new() };
+            inputs.extend(built.clip_inputs.iter().cloned());
+            if inputs.is_empty() {
+                return Err("the sources, sizes and depths given leave nothing to render (the range source exists only at 32 bpc)".into());
+            }
+            (built.cases, inputs, None)
+        }
+        Some(ids) => {
+            let built = families::build(&effects, ids)?;
+            if built.cases.is_empty() {
+                return Err(format!("the families {} have no case for the effects given", ids.join(", ")));
+            }
+            (built.cases, built.inputs, Some(built.counts))
+        }
+    };
     let dir = opts.out.join("inputs");
     std::fs::create_dir_all(&dir).map_err(|e| format!("cannot create {}: {e}", dir.display()))?;
     let clips = inputs.iter().filter(|f| f.frames > 1 || sources::find_clip(&f.source).is_some()).count();
@@ -170,12 +190,12 @@ pub fn generate(opts: &GenOptions, log: &(dyn Fn(&str) + Sync)) -> Result<GenSum
         render_file(&ffmpeg, f, &opts.out.join(&f.file))
     })?;
 
-    let set = TestSet { format: cases::FORMAT, ffmpeg: version, inputs: inputs.clone(), cases: built.cases };
+    let set = TestSet { format: cases::FORMAT, ffmpeg: version, inputs: inputs.clone(), cases: all_cases };
     let manifest = opts.out.join("cases.json");
     let mut text = serde_json::to_string_pretty(&set).map_err(|e| format!("cannot encode cases.json: {e}"))?;
     text.push('\n');
     std::fs::write(&manifest, text).map_err(|e| format!("cannot write {}: {e}", manifest.display()))?;
-    Ok(GenSummary { effects: effects.len(), inputs: inputs.len(), cases: set.cases.len(), manifest })
+    Ok(GenSummary { effects: effects.len(), inputs: inputs.len(), cases: set.cases.len(), manifest, families: family_counts })
 }
 
 #[cfg(test)]

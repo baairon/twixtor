@@ -143,7 +143,7 @@ fn span<S: Sink>(l: &Edge, r: &Edge, y: f32, w1: i32, sink: &mut S) {
     }
 }
 
-/// Scan converts one triangle of the mesh (`FUN_1806a9160`). `w1` and `h1` are the destination
+/// Scan converts one triangle of the mesh. `w1` and `h1` are the destination
 /// `width - 1` and `height - 1`. Rows `y_start..=y_end`, closed spans in x (shared edges are covered by
 /// both triangles), edges active for `a.y <= y < b.y`; the last row `h1` is only reached through the
 /// degenerate pass at the end.

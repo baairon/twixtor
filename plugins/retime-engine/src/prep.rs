@@ -5,6 +5,21 @@
 //! The engine images arriving here are PREMULTIPLIED A, R, G, B images (8 bpc: 0..255, 16 bpc:
 //! 0..65535, float: white 1.0). The output of the luma stage is a single channel float image in
 //! the range 0..255 (`Plane`).
+//!
+//! The `_with` functions ([`blur5_with`], [`resample_with`], [`reduce_with`],
+//! [`edge_enhance_with`]) take the solver's wrap-around (360) flag, `FlowSettings::wrap` (rule G6,
+//! U: the 360 variants of the pyramid filters are not established; this project states that
+//! under the flag every horizontal blur and resample that
+//! builds the solver's input is circular). With the flag off each one IS the plain function (it
+//! calls it), so the plain path keeps its bytes. With the flag on the horizontal passes are the
+//! `_wrapx` primitives of `flow::conv` and `flow::sample` (tap indices modulo the width, no border
+//! renormalisation; the horizontal resample keeps the period, `sx = sw / dw`, the right neighbour
+//! of the last column is column 0) and the vertical passes are the plain ones. Precision: those
+//! primitives' (single precision in the order written, no fused multiply add, rows through rayon
+//! row chunks, so the output does not depend on the thread count). When every halving of a frame
+//! has an even width, a circular rotation of the input by a multiple of `2^r` columns rotates the
+//! output of [`reduce_with`] by that multiple divided by `2^r`, bit for bit (every value is computed
+//! from the same neighbours by the same chain).
 
 use fx_core::FxError;
 use rayon::prelude::*;
@@ -37,6 +52,13 @@ impl Plane {
 /// resolution; 0 means "no vectors" and never reaches the solver. `hiq` is true for a high quality
 /// render; for lower quality one more halving is applied (R 0 -> 1, 1 -> 2, 2 -> 3, 3 stays).
 /// Values of `q` above 5 are rejected by [`crate::flow::FlowSettings::geometry`].
+///
+/// Tiny frames (U, ours, parity gap G7: the original divides by zero in its resample below 2x2):
+/// the reduction never halves below 2x2. While `R > 0` and `(W >> R, H >> R)` has a side below
+/// 2, `R` drops by one, so a frame too small for its halvings is searched at the last size of at
+/// least 2x2 (6x6 at High, `q` 3: 3x3, not 1x1). Every size whose working size was at least 2x2
+/// keeps its `R`. A frame with a side below 2 ends at `R = 0` with that side; it is not
+/// [`searchable`] and never reaches the solver.
 pub fn flow_resolution(q: u8, hiq: bool, w: usize, h: usize) -> (u32, usize, usize) {
     let mut r: u32 = match q {
         0 | 1 | 2 => 3,
@@ -52,12 +74,40 @@ pub fn flow_resolution(q: u8, hiq: bool, w: usize, h: usize) -> (u32, usize, usi
             x => x,
         };
     }
+    while r > 0 && ((w >> r) < 2 || (h >> r) < 2) {
+        r -= 1;
+    }
     let (mut w0, mut h0) = (w, h);
     for _ in 0..r {
         w0 /= 2;
         h0 /= 2;
     }
     (r, w0, h0)
+}
+
+/// Whether a frame of `w x h` pixels has a motion search: both sides are at least 2 (U, ours, parity
+/// gap G7). With the reduction of [`flow_resolution`] a searchable frame always has a working size
+/// of at least 2x2.
+///
+/// Contract for every caller: the optical flow solver, the layered (FG matte)
+/// paths and the Debug views run only when `searchable(width, height)` holds for the output
+/// frame. A frame that is not searchable (a side of 1, or an empty side) takes the fast path,
+/// exactly as `Vectors` = No Vectors (`vectors=1`): Nearest copies, Blend and Weighted Blend
+/// crossfade the two frames; Create Vectors writes the zero vector (127, 32767 or 0.5 in R and G,
+/// B 0, alpha opaque). The front-ends apply it by passing a vectors quality of 0
+/// ([`searched_quality`]).
+pub fn searchable(w: usize, h: usize) -> bool {
+    w >= 2 && h >= 2
+}
+
+/// The vectors quality a front-end passes to the planner and the core for an output frame of
+/// `w x h`: `vectors_quality` itself when the frame is [`searchable`], else 0 (No Vectors).
+pub fn searched_quality(vectors_quality: i32, w: usize, h: usize) -> i32 {
+    if searchable(w, h) {
+        vectors_quality
+    } else {
+        0
+    }
 }
 
 /// Number of pyramid levels for the working size `(w0, h0)`; `min_size` is 2 in every caller.
@@ -204,6 +254,45 @@ pub fn reduce(mut t: Plane, r: u32) -> Plane {
     t
 }
 
+/// [`blur5`], or with `wrap` its horizontal wrap-around variant (G6, U; module header): the
+/// circular horizontal pass of `conv::blur5_wrapx`, then the plain vertical pass. Without `wrap`
+/// it is [`blur5`].
+pub fn blur5_with(p: &mut Plane, wrap: bool) {
+    if !wrap {
+        blur5(p);
+        return;
+    }
+    conv::blur5_wrapx(&mut p.data, p.width, p.height);
+}
+
+/// [`resample`], or with `wrap` the resample of a plane that is periodic in x (G6, U; module
+/// header): `sample::resample1_wrapx`, `sx = sw / dw` with column 0 right of the last column, the
+/// rows corner aligned as in [`resample`]. Without `wrap` it is [`resample`].
+pub fn resample_with(src: &Plane, dw: usize, dh: usize, wrap: bool) -> Plane {
+    if !wrap {
+        return resample(src, dw, dh);
+    }
+    Plane { width: dw, height: dh, data: sample::resample1_wrapx(&src.data, src.width, src.height, dw, dh) }
+}
+
+/// [`reduce`], or with `wrap` the reduction of a frame that is periodic in x (G6, U): `r` stages
+/// of [`blur5_with`] followed by [`resample_with`] to the halved size (`w / 2`, `h / 2`,
+/// truncating, the sizes of [`reduce`]), both with the flag. Without `wrap` it is [`reduce`].
+/// With an even width at every stage the horizontal resample reads the columns `2 x` exactly
+/// (`sx = 2`, fraction 0); an odd width keeps the period with `sx = w / (w / 2)`.
+pub fn reduce_with(t: Plane, r: u32, wrap: bool) -> Plane {
+    if !wrap {
+        return reduce(t, r);
+    }
+    let mut t = t;
+    for _ in 0..r {
+        blur5_with(&mut t, true);
+        let (nw, nh) = (t.width / 2, t.height / 2);
+        t = resample_with(&t, nw, nh, true);
+    }
+    t
+}
+
 /// Delinearize: `p = (max(p, 0) / 255) ^ (1 / 2.2) * 255` in single precision with
 /// `gamma = 2.2f`. The power is the double precision `pow` rounded to single, which differs from a
 /// single precision `powf` for about 1 in 8000 arguments (1 ulp).
@@ -227,6 +316,67 @@ pub fn edge_enhance(p: &mut Plane) {
     conv::blur_gaussian(&mut p.data, w, h, 1, 2.0);
     let g = crate::flow::calc_grad(&p.data, w, h);
     p.data.par_chunks_mut(w).enumerate().for_each(|(y, row)| {
+        for (x, v) in row.iter_mut().enumerate() {
+            let gx = g[(y * w + x) * 2];
+            let gy = g[(y * w + x) * 2 + 1];
+            let m = (gx * gx + gy * gy).sqrt();
+            let f = if m <= 20.0f32 { m * 0.05f32 } else { 1.0f32 };
+            *v = (f * 255.0f32 + *v) * 0.5f32;
+        }
+    });
+}
+
+/// The gradient of [`edge_enhance`] (the solver's `calc_grad`) with its horizontal difference
+/// circular (G6, U): at every column `gx = (((I(x) - I(x - 1)) + 0.0) + (I(x + 1) - I(x))) / 2`
+/// with the columns taken modulo the width, the interior chain of `calc_grad` (whose interior
+/// columns divide by `1.0 + 1.0`), so every column `1 <= x <= w - 2` equals `calc_grad` bit for
+/// bit and the columns 0 and `w - 1` read across the seam. `gy` is that of `calc_grad` (one sided
+/// at the top and bottom rows). U: it is not the solver's wrap gradient `(I(x + 1) - I(x - 1)) /
+/// 2` (`flow::calc_grad_wrap`, the variant of the solver), which rounds differently
+/// at every column; the transform only becomes circular. A width of 1 gives `gx = 0`.
+fn calc_grad_wrapx(img: &[f32], w: usize, h: usize) -> Vec<f32> {
+    let mut g = vec![0.0f32; w * h * 2];
+    if w == 0 || h == 0 {
+        return g;
+    }
+    g.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+        for x in 0..w {
+            let c = img[y * w + x];
+            let left = img[y * w + (x + w - 1) % w];
+            let right = img[y * w + (x + 1) % w];
+            let nx = ((c - left) + 0.0f32) + (right - c);
+            let dx = 1.0f32 + 1.0f32;
+            let mut ny = 0.0f32;
+            let mut dy = 0.0f32;
+            if y >= 1 {
+                ny = (c - img[(y - 1) * w + x]) + 0.0f32;
+                dy = 1.0;
+            }
+            if y + 1 <= h - 1 {
+                ny = ny + (img[(y + 1) * w + x] - c);
+                dy = dy + 1.0;
+            }
+            row[x * 2] = nx / dx;
+            row[x * 2 + 1] = ny / dy;
+        }
+    });
+    g
+}
+
+/// [`edge_enhance`], or with `wrap` its horizontally circular variant (G6, U): the Gaussian of
+/// radius 2.0 through `conv::blur_gaussian_wrapx` (circular horizontal pass, plain vertical pass),
+/// the gradient of [`calc_grad_wrapx`], then the per pixel map of [`edge_enhance`] unchanged
+/// (`m = sqrt(gx*gx + gy*gy)`, `v = m <= 20.0 ? m * 0.05 : 1.0`, `p = (v * 255.0 + p) * 0.5`,
+/// single precision). Without `wrap` it is [`edge_enhance`].
+pub fn edge_enhance_with(p: &mut Plane, wrap: bool) {
+    if !wrap {
+        edge_enhance(p);
+        return;
+    }
+    let (w, h) = (p.width, p.height);
+    conv::blur_gaussian_wrapx(&mut p.data, w, h, 1, 2.0);
+    let g = calc_grad_wrapx(&p.data, w, h);
+    p.data.par_chunks_mut(w.max(1)).enumerate().for_each(|(y, row)| {
         for (x, v) in row.iter_mut().enumerate() {
             let gx = g[(y * w + x) * 2];
             let gy = g[(y * w + x) * 2 + 1];
@@ -261,6 +411,84 @@ mod tests {
         // truncating halving
         assert_eq!(flow_resolution(4, true, 1921, 1081), (1, 960, 540));
         assert_eq!(flow_resolution(1, true, 100, 75), (3, 12, 9));
+    }
+
+    /// The reduction rule before the tiny frames rule: the table, one more halving at draft, no
+    /// floor at 2x2.
+    fn old_flow_resolution(q: u8, hiq: bool, w: usize, h: usize) -> (u32, usize, usize) {
+        let mut r: u32 = match q {
+            0 | 1 | 2 => 3,
+            3 => 2,
+            4 => 1,
+            _ => 0,
+        };
+        if !hiq && r < 3 {
+            r += 1;
+        }
+        (r, w >> r, h >> r)
+    }
+
+    #[test]
+    fn searched_sizes_keep_their_reduction() {
+        let mut kept = 0;
+        let mut lowered = 0;
+        for w in 1..=64usize {
+            for h in 1..=64usize {
+                for q in 1..=5u8 {
+                    for hiq in [true, false] {
+                        let (r_old, w_old, h_old) = old_flow_resolution(q, hiq, w, h);
+                        let (r, w0, h0) = flow_resolution(q, hiq, w, h);
+                        let case = format!("{w}x{h} q={q} hiq={hiq}");
+                        // the working size is always the truncating halvings of the frame size
+                        assert_eq!((w0, h0), (w >> r, h >> r), "{case}");
+                        assert!(r <= r_old, "{case}");
+                        if w_old >= 2 && h_old >= 2 {
+                            // every size that rendered before the rule keeps its reduction, so its
+                            // geometry and every value of its solve stay as they were
+                            assert_eq!((r, w0, h0), (r_old, w_old, h_old), "{case}");
+                            kept += 1;
+                        } else if searchable(w, h) {
+                            // the largest reduction that leaves at least 2x2
+                            assert!(w0 >= 2 && h0 >= 2, "{case}: {w0}x{h0}");
+                            assert!(r == r_old || (w >> (r + 1)) < 2 || (h >> (r + 1)) < 2, "{case}: R {r}");
+                            lowered += 1;
+                        } else {
+                            // a side of 1: no halving at all, and the frame is not searched
+                            assert_eq!((r, w0, h0), (0, w, h), "{case}");
+                        }
+                        let geometry = crate::flow::FlowSettings::new(q, hiq, 0.7).geometry(w, h);
+                        assert_eq!(geometry.is_ok(), searchable(w, h), "{case}: {geometry:?}");
+                    }
+                }
+            }
+        }
+        assert!(kept > 0 && lowered > 0, "kept {kept}, lowered {lowered}");
+        // the examples of the documentation: 6x6 at High (q 3, the popup value 4) is searched at 3x3
+        // (the old R 2 gave 1x1), 2x2 at Sloppy at 2x2, 100x3 at full resolution draft at 100x3 (R 0,
+        // the old R 1 gave 50x1)
+        assert_eq!(old_flow_resolution(3, true, 6, 6), (2, 1, 1));
+        assert_eq!(flow_resolution(3, true, 6, 6), (1, 3, 3));
+        assert_eq!(flow_resolution(1, true, 2, 2), (0, 2, 2));
+        assert_eq!(flow_resolution(1, false, 17, 16), (3, 2, 2));
+        assert_eq!(flow_resolution(5, false, 100, 3), (0, 100, 3));
+        assert_eq!(flow_resolution(5, true, 1, 17), (0, 1, 17));
+        assert_eq!(flow_resolution(1, false, 17, 1), (0, 17, 1));
+    }
+
+    #[test]
+    fn side_of_one_is_no_vectors() {
+        for (w, h) in [(1usize, 1usize), (1, 2), (2, 1), (1, 17), (17, 1), (1, 1000), (0, 5), (5, 0)] {
+            assert!(!searchable(w, h), "{w}x{h}");
+            for vq in 0..=4 {
+                assert_eq!(searched_quality(vq, w, h), 0, "{w}x{h} vq {vq}");
+            }
+        }
+        for (w, h) in [(2usize, 2usize), (2, 33), (33, 2), (3, 3), (1920, 1080)] {
+            assert!(searchable(w, h), "{w}x{h}");
+            for vq in 0..=4 {
+                assert_eq!(searched_quality(vq, w, h), vq, "{w}x{h} vq {vq}");
+            }
+        }
     }
 
     #[test]
@@ -359,6 +587,31 @@ mod tests {
         for v in &r.data {
             assert!((v - 64.0).abs() < 1e-4);
         }
+    }
+
+    #[test]
+    fn circular_edge_gradient_hand_values() {
+        let (w, h) = (4usize, 3usize);
+        let img = [1.0f32, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 3.0, 5.0, 7.0, 11.0];
+        let g = calc_grad_wrapx(&img, w, h);
+        // gx = (((c - l) + 0) + (r - c)) / 2 with the columns modulo 4
+        let gx = |y: usize| (0..w).map(|x| g[(y * w + x) * 2]).collect::<Vec<f32>>();
+        assert_eq!(gx(0), vec![-3.0, 1.5, 3.0, -1.5]);
+        assert_eq!(gx(1), vec![-48.0, 24.0, 48.0, -24.0]);
+        // gy is one sided at the top and bottom rows, as in calc_grad
+        assert_eq!((g[1], g[(4 + 1) * 2 + 1]), (15.0, ((32.0f32 - 2.0) + (5.0 - 32.0)) / 2.0));
+        // the interior columns and every gy are calc_grad's bit for bit; the seam columns are not
+        let plain = crate::flow::calc_grad(&img, w, h);
+        for y in 0..h {
+            for x in 0..w {
+                let i = (y * w + x) * 2;
+                assert_eq!(g[i + 1].to_bits(), plain[i + 1].to_bits(), "gy ({x}, {y})");
+                assert_eq!(g[i].to_bits() == plain[i].to_bits(), x >= 1 && x + 1 < w, "gx ({x}, {y})");
+            }
+        }
+        // a width of 2 reads the other column on both sides, a width of 1 gives 0
+        assert_eq!(calc_grad_wrapx(&[1.0, 5.0, 2.0, 9.0], 2, 2)[0], 0.0);
+        assert_eq!(calc_grad_wrapx(&[3.0, 7.0], 1, 2)[0], 0.0);
     }
 
     #[test]

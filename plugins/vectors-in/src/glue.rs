@@ -13,15 +13,19 @@
 //!    output is a size mismatch). The FIRST problem decides;
 //! 2. the rate check (`out < 0.01 || in <= 0.01`: a size mismatch);
 //! 3. `Display == Source`: the source frame at `current_time`;
-//! 4. otherwise the core, with the Vectors In flows ([`compose::retime_with_flows`]).
+//! 4. otherwise the core, with the Vectors In flows ([`compose::retime_with_flows`]), or with FG
+//!    matte layers the layered core ([`compose::retime_layers_with_flows`]): the vector layers
+//!    are loaded once per layer of the Display group with the layer's matte step (rule G1e), each
+//!    layer is warped with its own flows and the group is composed bottom up.
 //!
 //! A failed probe or rate check writes the fill its error stands for (red at half alpha for a size
 //! mismatch, the plugin's blue for a missing source) and the render still succeeds, so a failure is
 //! visible.
 //!
 //! A FG Matte layer with pixels (the count `n` of the probe loop, which stops at the first empty
-//! one) selects the multi layer path (one flow per layer, mattes, Main_BG compositing), which is an
-//! `FxError::Unsupported` here for every Display except the Source one.
+//! one) selects the n-layer path ([`layer_job`]) for every Display except the Source one; with
+//! `n = 0` the render is the single layer core of today, byte for byte, and the Display values 3
+//! to 6 select the one group, so they render as the output.
 //!
 //! The Warping popup "Forward" (warp code 2, the default) is served by the engine's forward warp
 //! and a single vector layer by its flow inversion (`compose::invert_flow`), so neither is refused.
@@ -38,6 +42,8 @@ use retime_engine::compose::{self, Rendered};
 use retime_engine::frontend::{self, fixed_reader, ticks_i32};
 use retime_engine::host::{layer_is_set, EngineSettings, EnvHost, LayerIds};
 use retime_engine::image::{error_frame, ErrorKind, Fmt, MissingLayerStyle};
+use retime_engine::layers::{LayerJob, LayerParams};
+use retime_engine::prep;
 use retime_engine::timeline::Rates;
 
 /// The ids the host adapter reads: the retimed layer is the `source` layer when set (else the input); the second
@@ -62,13 +68,32 @@ pub fn warp_code(popup_value: i32) -> i32 {
     }
 }
 
-/// The message of a FG Matte layer being set.
-pub const FG_UNSUPPORTED: &str = "a FG Matte layer is set: the multi layer path (one flow per \
-     layer, the Vectors layers loaded once per layer, mattes, Main_BG compositing) is not implemented; remove \
-     the FG Matte layers (this render handles the single layer case only)";
+/// The ids of the matte channel popup and the inverse matte shrink slider of FG1 to FG3.
+const FG_CHAN_IDS: [&str; 3] = ["fg1_matte_chan", "fg2_matte_chan", "fg3_matte_chan"];
+const FG_SHRINK_IDS: [&str; 3] = ["fg1_inv_matte_shrink", "fg2_inv_matte_shrink", "fg3_inv_matte_shrink"];
+
+/// The layer job of a render with `fg_count` FG matte layers: FG k's `fgk_matte_chan` and
+/// `fgk_inv_matte_shrink` (the 16.16 reader, in pixels at the downsample ratio 1; I: as the other
+/// sliders are read), read at `current_time`; plugin 04 solves nothing, so every layer has the
+/// constant [`SENSITIVITY`] and tracks; the group is the Display popup's
+/// (`LayerJob::display_group`).
+pub fn layer_job(settings: &EngineSettings, curves: &ParamCurves, fg_count: usize) -> Result<LayerJob> {
+    let t = i64::from(settings.current_time);
+    let mut fg = Vec::with_capacity(fg_count);
+    for k in 0..fg_count {
+        fg.push(LayerParams {
+            matte_chan: popup(curves, FG_CHAN_IDS[k], t)?,
+            sensitivity: SENSITIVITY,
+            shrink: fixed_reader(fixed(curves, FG_SHRINK_IDS[k], t)?, 1.0f32),
+            track: true,
+        });
+    }
+    let main_bg = LayerParams { matte_chan: 0, sensitivity: SENSITIVITY, shrink: 0.0, track: true };
+    Ok(LayerJob::for_display(&fg, main_bg, popup(curves, "display", t)?))
+}
 
 /// The settings of one render: the engine's and the one flag the rate model raises.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Debug)]
 pub struct Settings {
     pub engine: EngineSettings,
     /// The rate check failed (`out < 0.01 || in <= 0.01`); `engine.rates` then holds a placeholder
@@ -151,7 +176,8 @@ pub fn read_settings(cx: &TemporalContext, env: &Env<'_>) -> Result<Settings> {
         input_fields: FieldOrder::Progressive,
         display_source: popup(curves, "display", t)? == 2,
         src_time_offset_fixed: 0,
-        vectors_quality: VECTORS_QUALITY,
+        // tiny frames (G7, U): a frame with a side of 1 has no motion search and renders as No Vectors
+        vectors_quality: prep::searched_quality(VECTORS_QUALITY, cx.width, cx.height),
         interp: popup(curves, "frame_interp", t)? - 1,
         blur: fixed_reader(fixed(curves, "blur_compensation", t)?, 1.0f32),
         sensitivity: SENSITIVITY,
@@ -164,6 +190,9 @@ pub fn read_settings(cx: &TemporalContext, env: &Env<'_>) -> Result<Settings> {
         alt_a_present: layer_is_set(env.layer(LAYER_SOURCE)),
         no_tracking_layer: true,
         missing_layer_style: MissingLayerStyle::BlueAlphaSlip,
+        wrap_360: false,
+        device: cx.device,
+        stages: retime_engine::stages::StageSet::from_context(cx),
     };
     Ok(Settings { engine, rate_error })
 }
@@ -251,7 +280,7 @@ pub(crate) fn dependencies(cx: &TemporalContext, env: &Env<'_>) -> Result<Vec<Ch
         return Ok(prerender::probes(&req));
     }
     let map = time_map(&settings, env)?;
-    prerender::checkouts(&req, &map, FG_UNSUPPORTED)
+    prerender::checkouts(&req, &map)
 }
 
 /// `Effect::render_temporal`: probes, settings, time map, host, the checks of this module, the core, the finish.
@@ -276,28 +305,32 @@ pub(crate) fn render_temporal(cx: &TemporalContext, env: &Env<'_>, output: &mut 
     }
     let map = time_map(&settings, env)?;
     let host = EnvHost::new(env, &settings, &map, IDS)?;
-    let rendered = render(&settings, env, &host, &map, &probe)?;
+    let rendered = render(&settings, env, host, &map, &probe)?;
     frontend::finish(rendered, output);
     Ok(())
 }
 
-/// The render of one frame once the probes passed: the Source display, the multi layer refusal, the checks of the
-/// vector path and the core with the Vectors In flows.
-fn render(
+/// The render of one frame once the probes passed: the Source display, then the core with the
+/// Vectors In flows, single layer or layered.
+fn render<'e>(
     settings: &EngineSettings,
-    env: &Env<'_>,
-    host: &EnvHost<'_>,
+    env: &'e Env<'_>,
+    host: EnvHost<'e>,
     map: &VectorsInTimeMap<CurveParams04<'_>>,
     probe: &Probe,
 ) -> Result<Rendered> {
     if settings.display_source {
         // the source layer at current_time through the prepare; the overlay draws nothing
-        return compose::render(settings, host);
+        return compose::render(settings, &host);
     }
-    if probe.fg_count > 0 {
-        return Err(FxError::Unsupported(FG_UNSUPPORTED.into()));
+    if probe.fg_count == 0 {
+        return compose::retime_with_flows(settings, &host, |sel| {
+            vectorin::load_flows(env, settings, map, sel, probe.has_prev, probe.has_next)
+        });
     }
-    compose::retime_with_flows(settings, host, |sel| {
-        vectorin::load_flows(env, settings, map, sel, probe.has_prev, probe.has_next)
+    let host = host.with_mattes(env, &LAYER_FG_MATTE[..probe.fg_count])?;
+    let job = layer_job(settings, env.params, probe.fg_count)?;
+    compose::retime_layers_with_flows(settings, &host, &job, |sel, _k, mattes| {
+        vectorin::load_layer_flows(env, settings, map, sel, probe.has_prev, probe.has_next, mattes)
     })
 }

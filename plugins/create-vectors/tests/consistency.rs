@@ -43,15 +43,35 @@ impl Layer for Recorder {
     }
 }
 
+/// The clip sizes: 12 x 10, and the tiny frames 1 x 4 (a side of 1: the zero vector) and 2 x 2 (searched at
+/// its own size).
+const SIZES: [(usize, usize); 3] = [(12, 10), (1, 4), (2, 2)];
+
 fn clip() -> Vec<Frame> {
-    random_clip(Depth::U8, 12, 10, 10, 7)
+    clip_of(12, 10)
+}
+
+fn clip_of(w: usize, h: usize) -> Vec<Frame> {
+    random_clip(Depth::U8, w, h, 10, 7)
 }
 
 /// One run: returns (the dependencies, the fetches of every layer id, whether the render succeeded).
 fn run(params: &[(&str, &str)], with_alt: bool, fg: usize, n: u64, base: TimeBase) -> (Vec<Checkout>, Vec<(Option<&'static str>, i64)>, bool) {
-    let input = Recorder::new(clip());
-    let alt = Recorder::new(clip());
-    let fgs: Vec<Arc<Recorder>> = (0..3).map(|_| Recorder::new(clip())).collect();
+    run_at(params, with_alt, fg, n, base, (12, 10))
+}
+
+/// [`run`] on a clip of `w x h`.
+fn run_at(
+    params: &[(&str, &str)],
+    with_alt: bool,
+    fg: usize,
+    n: u64,
+    base: TimeBase,
+    (w, h): (usize, usize),
+) -> (Vec<Checkout>, Vec<(Option<&'static str>, i64)>, bool) {
+    let input = Recorder::new(clip_of(w, h));
+    let alt = Recorder::new(clip_of(w, h));
+    let fgs: Vec<Arc<Recorder>> = (0..3).map(|_| Recorder::new(clip_of(w, h))).collect();
     let mut layers = LayerSet::new();
     if with_alt {
         layers.insert("alt_source_a", alt.clone());
@@ -62,9 +82,9 @@ fn run(params: &[(&str, &str)], with_alt: bool, fg: usize, n: u64, base: TimeBas
     }
     let curves = curves(params);
     let env = Env { params: &curves, input: &*input, layers: &layers };
-    let cx = TemporalContext::new(12, 10, Depth::U8, base, n, 12);
+    let cx = TemporalContext::new(w, h, Depth::U8, base, n, 12);
     let deps = CreateVectors.dependencies(&cx, &env).unwrap();
-    let mut out = Frame::new(12, 10, Depth::U8);
+    let mut out = Frame::new(w, h, Depth::U8);
     let ok = CreateVectors.render_temporal(&cx, &env, &mut out).is_ok();
     let mut fetched = Vec::new();
     for t in input.take() {
@@ -92,15 +112,17 @@ fn every_fetch_of_the_render_is_in_the_dependencies() {
                     for with_alt in [false, true] {
                         for fg in 0..3 {
                             for n in [0u64, 1, 5, 9, 11] {
-                                let params = [("display", display), ("track_frame", track), ("vector_resolution", res), ("prep", prep), ("max_displace", "16")];
-                                let (deps, fetched, _) = run(&params, with_alt, fg, n, base);
-                                for (layer, time) in &fetched {
-                                    assert!(
-                                        deps.contains(&Checkout { layer: *layer, time: *time }),
-                                        "display {display} track {track} alt {with_alt} fg {fg} frame {n}: fetch {layer:?}@{time} not announced in {deps:?}"
-                                    );
+                                for size in SIZES {
+                                    let params = [("display", display), ("track_frame", track), ("vector_resolution", res), ("prep", prep), ("max_displace", "16")];
+                                    let (deps, fetched, _) = run_at(&params, with_alt, fg, n, base, size);
+                                    for (layer, time) in &fetched {
+                                        assert!(
+                                            deps.contains(&Checkout { layer: *layer, time: *time }),
+                                            "display {display} track {track} alt {with_alt} fg {fg} {size:?} frame {n}: fetch {layer:?}@{time} not announced in {deps:?}"
+                                        );
+                                    }
+                                    cases += 1;
                                 }
-                                cases += 1;
                             }
                         }
                     }
@@ -108,7 +130,7 @@ fn every_fetch_of_the_render_is_in_the_dependencies() {
             }
         }
     }
-    assert_eq!(cases, 2 * 3 * 2 * 3 * 2 * 3 * 5);
+    assert_eq!(cases, 2 * 3 * 2 * 3 * 2 * 3 * 5 * 3);
 }
 
 #[test]
@@ -140,12 +162,28 @@ fn the_source_display_fetches_the_source_at_the_current_time_only() {
 }
 
 #[test]
-fn a_refused_render_fetches_no_pixels() {
-    // FG matte, Debug, Track off: refused before any frame is fetched
+fn layered_debug_and_tracker_renders_fetch_the_pair_then_the_mattes() {
+    // FG mattes, Debug and Track off render (they were refused before any fetch): the source at t_a
+    // then t_b, then every active matte at t_a and t_b, FG1 first, all announced
     let base = TimeBase::default_for_rate(Rational::new(30, 1).unwrap());
-    for (params, fg) in [(vec![("max_displace", "16")], 1), (vec![("display", "3")], 0), (vec![("main_bg_track", "0")], 0)] {
-        let (_, fetched, ok) = run(&params, false, fg, 4, base);
-        assert!(!ok);
-        assert!(fetched.is_empty(), "{fetched:?}");
+    let cases: [(Vec<(&str, &str)>, usize, (i64, i64)); 5] = [
+        (vec![("max_displace", "16")], 1, (400, 300)),
+        (vec![("max_displace", "16"), ("layers_output", "3")], 2, (400, 300)),
+        (vec![("display", "3")], 0, (500, 400)),
+        (vec![("display", "3"), ("track_frame", "2")], 2, (300, 400)),
+        (vec![("main_bg_track", "0"), ("pt1_use", "5")], 0, (400, 300)),
+    ];
+    for (params, fg, (ta, tb)) in cases {
+        let (deps, fetched, ok) = run(&params, false, fg, 4, base);
+        assert!(ok, "{params:?}");
+        let mut want = vec![(None, ta), (None, tb)];
+        for id in ["fg1_matte", "fg2_matte", "fg3_matte"].iter().take(fg) {
+            want.push((Some(*id), ta));
+            want.push((Some(*id), tb));
+        }
+        assert_eq!(fetched, want, "{params:?} fg {fg}");
+        for (layer, time) in &fetched {
+            assert!(deps.contains(&Checkout { layer: *layer, time: *time }));
+        }
     }
 }

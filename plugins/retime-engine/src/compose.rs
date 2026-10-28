@@ -10,13 +10,15 @@
 use crate::blend::{blend, copy, weighted_blend_noflow};
 use crate::host::{EngineHost, EngineSettings};
 use crate::image::{error_frame, Image};
+use crate::layers::{LayerJob, LayerMattes};
+use crate::points::UserPoint;
 use crate::timeline::{frame_positions, select, source_display_time, Selection};
 use fx_core::{Frame, FxError, Result};
 
 mod vector;
 
 pub use vector::{
-    check_supported, compose_vectors, flow_from_vector_image, flow_settings, invert_flow, nearest_uses_f_ab,
+    check_supported, compose_vectors, flow_from_vector_image, flow_settings, invert_flow, invert_flow_on, nearest_uses_f_ab,
     solve_flows, Flows,
 };
 
@@ -43,7 +45,7 @@ impl Rendered {
 
 /// The error fill for the flags the host has set so far, if any: red for a size mismatch first,
 /// then the missing layer fill.
-fn issue_fill(settings: &EngineSettings, host: &dyn EngineHost) -> Option<Rendered> {
+pub(crate) fn issue_fill(settings: &EngineSettings, host: &dyn EngineHost) -> Option<Rendered> {
     let kind = host.issues().error_kind(settings.missing_layer_style)?;
     Some(Rendered::Error(error_frame(kind, settings.width, settings.height, settings.fmt.depth())))
 }
@@ -126,6 +128,69 @@ where
         return vector::vector_path_with_flows(settings, host, &sel, flows);
     }
     fast_path(settings, host, &sel)
+}
+
+/// The core of a render with FG matte layers (`job.nfg >= 1`) or tracking points (the
+/// module `crate::layers`): the frame selection of [`retime`], then
+/// - on the vector path with `nfg >= 1`: per layer of the group `job.first..=job.last` a solve
+///   with its own sensitivity, mask pyramids and user displacement, the warps of the warping code
+///   per layer, the bottom up composition, the hole fill of codes 1 and 2, the final stage and the
+///   blur tail with the flow of layer `last`;
+/// - on the vector path with `nfg = 0`: today's vector path when no point is in use, else the
+///   solves with the points' user displacement and today's composition;
+/// - on the fast path: today's fast path with `nfg = 0`, else the composite of the displayed group
+///   of the two unwarped frames.
+///
+/// `points` gets the [`Selection`] and returns the tracking points in use of every layer
+/// (`nfg + 1` lists, Main_BG last); it is called on the vector path only (exact frames,
+/// No Vectors and segment rows never build the user displacement). With `nfg = 0` and no point
+/// this is [`retime`] byte for byte: the same functions in the same order. A job
+/// that fails `LayerJob::check` is `FxError::Mismatch`.
+pub fn retime_layers<G>(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, points: G) -> Result<Rendered>
+where
+    G: FnOnce(&Selection) -> Result<Vec<Vec<UserPoint>>>,
+{
+    job.check()?;
+    let sel = select_frames(settings, host)?;
+    if sel.vectors_quality != 0 && !sel.exact {
+        if job.nfg > 0 {
+            return crate::layers::vector_path(settings, host, job, &sel, points);
+        }
+        let pts = points(&sel)?;
+        crate::layers::check_point_lists(&pts, job)?;
+        if pts[0].is_empty() {
+            return vector::vector_path(settings, host, &sel);
+        }
+        return crate::layers::single_layer_with_points(settings, host, &sel, &job.layers[0], &pts[0]);
+    }
+    if job.nfg > 0 {
+        return crate::layers::fast_path(settings, host, job, &sel);
+    }
+    fast_path(settings, host, &sel)
+}
+
+/// [`retime_layers`] with external flows, the Vectors In branch with FG layers: `flows` is
+/// called once per layer `k` of the group, FG1 first, with the [`Selection`] and the layer's
+/// tracking mattes at frames `A` and `B` (`LayerMattes`), and returns that layer's [`Flows`] (a
+/// missing one is inverted per layer as in [`retime_with_flows`]); the composition is the layered
+/// one of [`retime_layers`]. With `nfg = 0` it IS [`retime_with_flows`], whose closure asks
+/// `flows` for layer 0 with the constant matte 1 at both frames, so it equals it byte for byte.
+pub fn retime_layers_with_flows<F>(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, mut flows: F) -> Result<Rendered>
+where
+    F: FnMut(&Selection, usize, &LayerMattes<'_>) -> Result<Flows>,
+{
+    job.check()?;
+    if job.nfg == 0 {
+        return retime_with_flows(settings, host, |sel| {
+            let one = crate::matte::Matte::filled(settings.width, settings.height, 1.0);
+            flows(sel, 0, &LayerMattes { at_a: &one, at_b: &one })
+        });
+    }
+    let sel = select_frames(settings, host)?;
+    if sel.vectors_quality != 0 && !sel.exact {
+        return crate::layers::vector_path_with_flows(settings, host, job, &sel, flows);
+    }
+    crate::layers::fast_path(settings, host, job, &sel)
 }
 
 /// Steps 2 and 3 of [`retime`]: fetch `A` and `B`, clear the output, [`interpolate`].

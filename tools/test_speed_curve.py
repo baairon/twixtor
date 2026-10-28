@@ -7,8 +7,10 @@ the expected positions are worked out by hand from the half frame sum in the mod
 """
 
 import contextlib
+import importlib.util
 import io
 import os
+import struct
 import sys
 import unittest
 from fractions import Fraction
@@ -22,6 +24,8 @@ sys.path.insert(0, HERE)
 import speed_curve as tool  # noqa: E402
 
 PLAN = "100@0e;100@120e;150@168e;40@204e;40@400e;100@454e;100@664e"
+# the Bezier cases fx-core's curves.rs reproduces bit for bit, and their generator
+FIXTURES = os.path.join(HERE, "..", "crates", "fx-core", "tests", "fixtures")
 
 
 def keys_of(text, step=100):
@@ -204,6 +208,162 @@ class Tail(unittest.TestCase):
         self.assertGreater(lock.base, tool.EXACT)
         self.assertIsNotNone(lock.shift)
         self.assertLessEqual(lock.error, tool.LOCK_ERROR)
+
+
+def handle_keys(text, limit=tool.SPEED_LIMIT):
+    """keys at 24 fps: 100 ticks a frame, 2400 a second."""
+    return tool.parse_keys(text, 100, 2400, limit)
+
+
+def fixture_cases():
+    """bezier_cases.hex as (ticks a frame, ticks a second, key text, limit, [(tick, value bytes)])."""
+    with open(os.path.join(FIXTURES, "bezier_cases.hex"), encoding="ascii") as f:
+        data = bytes.fromhex("".join(f.read().split()))
+    assert data[:4] == b"BEZ1"
+    at, out = 8, []
+    for _ in range(struct.unpack_from("<I", data, 4)[0]):
+        step, per_second, size = struct.unpack_from("<III", data, at)
+        text = data[at + 12:at + 12 + size].decode("ascii")
+        limit, count = struct.unpack_from("<dI", data, at + 12 + size)
+        at += 12 + size + 12
+        values = [(struct.unpack_from("<q", data, at + 16 * i)[0], data[at + 16 * i + 8:at + 16 * i + 16])
+                  for i in range(count)]
+        at += 16 * count
+        out.append((step, per_second, text, limit, values))
+    assert at == len(data)
+    return out
+
+
+class Handles(unittest.TestCase):
+    def test_handles_parse_by_the_rules_of_vfx(self):
+        keys = handle_keys("100@0o-2.5/33.3;50@24.5i0/100h;80@30i7/0.1o1/50")
+        self.assertEqual([k.tick for k in keys], [0, 2450, 3000])
+        self.assertEqual(keys[0].out, tool.Handle(-2.5, 33.3, -2.5 / 2400, "-2.5/33.3"))
+        self.assertEqual((keys[1].inc.speed, keys[1].inc.influence, keys[1].hold, keys[1].out), (0.0, 100.0, True, None))
+        self.assertEqual((keys[2].inc.text, keys[2].out.text, keys[2].hold, keys[2].ease), ("7/0.1", "1/50", False, False))
+        # the speed per tick is the speed per second divided once by the ticks a second
+        self.assertEqual(tool.parse_keys("1@0o7/50;2@5", 1001, 30000)[0].out.per_tick, 7.0 / 30000)
+        self.assertEqual(tool.ticks_per_second(Fraction(30000, 1001)), 30000)
+        self.assertEqual(tool.ticks_per_second(Fraction(24)), 2400)
+        # frames that read before read the same
+        self.assertEqual([(k.tick, k.hold, k.ease, k.inc, k.out) for k in handle_keys("1@2e1;2@30e;3@40h")],
+                         [(2000, False, False, None, None), (3000, False, True, None, None), (4000, True, False, None, None)])
+        rule = "is not an ease handle (i or o, then SPEED/INFLUENCE, as in i0/33.3)"
+        for text, message in [
+            ("100@24i0/", f"`24i0/`: `i0/` {rule}"),
+            ("100@24i0", f"`24i0`: `i0` {rule}"),
+            ("100@24i0/33.3x", f"`24i0/33.3x`: `x` {rule}"),
+            ("100@24i0/33.3o", f"`24i0/33.3o`: `o` {rule}"),
+            ("100@24o1/2i3/4", f"`24o1/2i3/4`: `i3/4` {rule}"),
+            ("100@24i1/2i3/4", f"`24i1/2i3/4`: `i3/4` {rule}"),
+            ("100@24i1./2", f"`24i1./2`: `i1./2` {rule}"),
+            ("100@24i-/2", f"`24i-/2`: `i-/2` {rule}"),
+            ("100@24i1e5/50", f"`24i1e5/50`: `i1` {rule}"),
+            (f"100@24i{'9' * 400}/5", f"handle speed {'9' * 400} is outside -1000000000..=1000000000"),
+            ("100@24o1000000000.5/50", "handle speed 1000000000.5 is outside -1000000000..=1000000000"),
+            ("100@24i-1000000001/50", "handle speed -1000000001 is outside -1000000000..=1000000000"),
+            ("100@24i0/0", "influence 0 is outside 0.1..=100"),
+            ("100@24o5/100.5", "influence 100.5 is outside 0.1..=100"),
+            ("100@24i0/50e", "a key with ease handles cannot also end in e"),
+            ("100@24i1/50o0/50h", "a held key has no outgoing handle"),
+            ("100@24hi0/50", "`100@24hi0/50` is not value@frame (a frame may end in h to hold or e to ease, not both)"),
+            ("100@24i.5/50", "`100@24i.5/50` is not value@frame (a frame may end in h to hold or e to ease, not both)"),
+        ]:
+            with self.assertRaises(tool.CurveError, msg=text) as caught:
+                handle_keys(text)
+            self.assertEqual(str(caught.exception), message, text)
+        # the fastest handles allowed keep the curve finite on the longest segments; a case
+        # of two 300 digit speeds is refused cleanly instead of crashing in the fixed point step
+        long = tool.Curve(handle_keys("0@0o1000000000/100;100@10000000000i-1000000000.0/100"))
+        self.assertTrue(all(0 <= long.percent_at(t) <= tool.SPEED_LIMIT for t in (1, 2, 1000, 10 ** 7, 5 * 10 ** 11)))
+        nines = "9" * 300
+        code, out, err = run_main("--keys", f"100@0o{nines}/100;100@1e10i{nines}/100", "--fps", "24",
+                                  "--clip-frames", "100", "--frames", "5")
+        self.assertEqual((code, out), (1, ""))
+        self.assertEqual(err.strip(), f"[error] --keys: handle speed {nines} is outside -1000000000..=1000000000")
+        # only a key with a handle needs the ticks a second
+        self.assertEqual(len(tool.parse_keys("100@0e;50@10h;20@20", 100)), 3)
+        with self.assertRaises(tool.CurveError):
+            tool.parse_keys("100@0o0/50;50@10", 100)
+        # limit bounds the values
+        with self.assertRaises(tool.CurveError):
+            handle_keys("100@0;151@10", limit=150.0)
+
+    def test_the_fixture_values(self):
+        cases = fixture_cases()
+        self.assertGreaterEqual(len(cases), 40)
+        compared = 0
+        for step, per_second, text, limit, values in cases:
+            curve = tool.Curve(tool.parse_keys(text, step, per_second, limit), limit)
+            for tick, value in values:
+                self.assertEqual(struct.pack("<d", curve.percent_at(tick)), value, (text, tick))
+                compared += 1
+        self.assertGreaterEqual(compared, 5000)
+        # the generator writes the same file again, byte for byte
+        spec = importlib.util.spec_from_file_location("gen_bezier", os.path.join(FIXTURES, "gen_bezier.py"))
+        gen = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gen)
+        with open(os.path.join(FIXTURES, "bezier_cases.hex"), encoding="ascii") as f:
+            self.assertEqual(gen.hex_text(gen.build()), f.read())
+
+    def test_handles_shape_the_curve_as_the_effect_does(self):
+        third = "33.33333333333333"
+        # a handle of speed 0 at a third of the segment is an eased end, the straight line's speed a plain one
+        for handles, closed in [(f"100@0o0/{third};300@10i0/{third}", "100@0e;300@10e"),
+                                (f"100@0o480/{third};300@10i480/{third}", "100@0;300@10"),
+                                (f"100@0e;300@10i480/{third}", "100@0e;300@10"),
+                                (f"100@0o480/{third};300@10e", "100@0;300@10e")]:
+            a, b = tool.Curve(handle_keys(handles)), tool.Curve(handle_keys(closed))
+            worst = max(abs(a.percent_at(t) - b.percent_at(t)) for t in range(1001))
+            self.assertLess(worst, 1e-9, handles)
+        # the speed is per second: 240 a second leaves the key at 0.1 a tick
+        c = tool.Curve(handle_keys("0@0o240/50;500@100"))
+        self.assertAlmostEqual(c.percent_at(1) - c.percent_at(0), 0.1, places=3)
+        # an overshooting handle is held at the end of the range
+        c = tool.Curve(handle_keys("9000@0o90000/60;10000@6"))
+        values = [c.percent_at(t) for t in range(601)]
+        self.assertEqual(max(values), tool.SPEED_LIMIT)
+        self.assertTrue(all(9000 <= v <= tool.SPEED_LIMIT for v in values))
+        c = tool.Curve(handle_keys("100@0o5000/50;150@10", limit=150.0), limit=150.0)
+        self.assertEqual(c.percent_at(500), 150.0)
+        # handles with no segment to shape change nothing; on a key the curve is its value exactly
+        ticks = range(-5, 1006)
+        loose = tool.Curve(handle_keys("100@0i50/50;200@10o-70/20"))
+        plain = tool.Curve(handle_keys("100@0;200@10"))
+        self.assertEqual([loose.percent_at(t) for t in ticks], [plain.percent_at(t) for t in ticks])
+        self.assertEqual(struct.pack("<d", tool.Curve(handle_keys("100@0;0@10o5/50;300@20")).percent_at(1000)),
+                         struct.pack("<d", 0.0))
+        # Speed mode positions follow the handles: a slow start, then the same 100% as a plain ramp
+        pos = tool.positions(tool.Curve(handle_keys("0@0o0/50;100@4;100@10")), 100, 10)
+        ramp = positions_of("0@0;100@4;100@10", 10)
+        self.assertLess(pos[4], ramp[4])
+        self.assertAlmostEqual(pos[10] - pos[9], 1.0)
+
+    def test_reports_and_the_tail_keep_the_handles(self):
+        keys = handle_keys("100@0e;40@24i0/50o-12.5/40;40@36i0/20h;100@48;100@96")
+        self.assertEqual([tool.key_text(k) for k in keys], ["100@0e", "40@24i0/50o-12.5/40", "40@36i0/20h", "100@48", "100@96"])
+        self.assertEqual(handle_keys(";".join(tool.key_text(k) for k in keys)), keys)
+        moved = tool.moved_keys(keys, 1, 25, 100)
+        self.assertEqual(tool.key_text(moved[1]), "40@24.25i0/50o-12.5/40")
+        # two equal keys stay flat unless a handle between them has a speed: the tail starts after the bend
+        flat = tool.lock_tail(handle_keys("100@0;50@24;100@48o0/50;100@96i0/50"), 100)
+        bent = tool.lock_tail(handle_keys("100@0;50@24;100@48o30/50;100@96"), 100)
+        self.assertEqual((flat.first, bent.first), (1, 2))
+        # handle keys were shaped on purpose, so they get no bend warning
+        a = tool.analyse(handle_keys("100@0;40@36i0/33.3o0/33.3;40@100"), Fraction(24), 1000, 100, 0.0, [])
+        self.assertEqual(a["bends"], [])
+        # the key table shows the handles as written in an ease column as wide as they need
+        code, out, _ = run_main("--keys", "100@0o0/50;40@24i-10/33.3h;100@36", "--fps", "24", "--clip-frames", "100")
+        self.assertEqual(code, 0, out)
+        self.assertIn("key frame    time   speed  ease            source frame  source time", out)
+        lines = out.splitlines()
+        first = next(i for i, line in enumerate(lines) if line.startswith("key frame")) + 1
+        rows = lines[first:first + 3]
+        self.assertTrue("100%  o0/50     " in rows[0] and "40%  i-10/33.3 hold " in rows[1], rows)
+        self.assertEqual(len({len(r) for r in rows}), 1, rows)
+        # and the plain table is as it was
+        _, out, _ = run_main("--keys", "100@0;40@24h;100@36e", "--fps", "24", "--clip-frames", "100")
+        self.assertIn("key frame    time   speed  ease   source frame  source time", out)
 
 
 class Command(unittest.TestCase):

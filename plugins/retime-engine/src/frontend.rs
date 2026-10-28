@@ -11,6 +11,7 @@ use crate::compose::{self, Rendered};
 use crate::host::{layer_is_set, EngineHost, EngineSettings, EnvHost, LayerIds};
 use crate::image::{Fmt, MissingLayerStyle};
 use crate::planner::{checkouts, PreRender};
+use crate::prep;
 use crate::timeline::{Rates, TimeMap, TimeParams};
 use fx_core::{float_to_fixed, Checkout, Env, FieldOrder, Frame, FxError, ParamCurves, ParamValue, Quality, Result, TemporalContext};
 
@@ -214,7 +215,8 @@ pub fn read_settings(wiring: &Wiring, cx: &TemporalContext, env: &Env<'_>) -> Re
         input_fields,
         display_source: popup(curves, ids.display, t, 1)? == 2,
         src_time_offset_fixed: fixed(curves, ids.src_time_offset, t)?,
-        vectors_quality: popup(curves, ids.vectors, t, 1)? - 1,
+        // tiny frames (G7, U): a frame with a side of 1 has no motion search and renders as No Vectors
+        vectors_quality: prep::searched_quality(popup(curves, ids.vectors, t, 1)? - 1, cx.width, cx.height),
         interp: popup(curves, ids.frame_interp, t, 1)? - 1,
         blur: fixed_reader(fixed(curves, ids.blur_compensation, t)?, 1.0f32),
         sensitivity: fixed_reader(fixed(curves, ids.sensitivity, t)?, 1.0f32) / 100.0f32,
@@ -227,6 +229,9 @@ pub fn read_settings(wiring: &Wiring, cx: &TemporalContext, env: &Env<'_>) -> Re
         alt_a_present: layer_is_set(env.layer(wiring.layers.alt_a)),
         no_tracking_layer: !layer_is_set(env.layer(wiring.layers.alt_b)),
         missing_layer_style: wiring.missing_layer,
+        wrap_360: false,
+        device: cx.device,
+        stages: crate::stages::StageSet::from_context(cx),
     })
 }
 
@@ -385,8 +390,8 @@ mod tests {
     fn hold_keys_on_a_popup_hold_and_floats_interpolate() {
         let mut c = curves();
         c.set_keys("marks", vec![
-            Keyframe { time: 0, value: ParamValue::Int(1), hold: false, ease: false },
-            Keyframe { time: 1000, value: ParamValue::Int(3), hold: false, ease: false },
+            Keyframe::new(0, ParamValue::Int(1)),
+            Keyframe::new(1000, ParamValue::Int(3)),
         ])
         .unwrap();
         let p = CurveTimeParams::new(&c, IDS).unwrap();

@@ -201,3 +201,18 @@ fn the_wiring_names_exist_in_params() {
     assert!(vectors_in::VectorsIn.layers().iter().all(|l| l.optional));
     assert_eq!(vectors_in::VectorsIn.kind(), fx_core::EffectKind::Temporal);
 }
+
+#[test]
+fn the_wrap_flag_is_off_and_the_device_request_is_carried() {
+    let r = rig(&[]);
+    let e = read(&r, 2).engine;
+    assert!(!e.wrap_360);
+    assert_eq!(e.device, fx_core::DeviceRequest::Cpu);
+    for device in [fx_core::DeviceRequest::Gpu, fx_core::DeviceRequest::GpuIndex(4)] {
+        let mut cx = r.cx(2);
+        cx.device = device;
+        let got = glue::read_settings(&cx, &r.env()).unwrap();
+        assert_eq!(got.engine, retime_engine::host::EngineSettings { device, ..e.clone() });
+        assert!(!got.rate_error);
+    }
+}

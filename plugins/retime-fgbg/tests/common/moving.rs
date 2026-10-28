@@ -106,3 +106,33 @@ pub fn error(got: &Frame, want: &Frame, margin: usize) -> (f64, f64) {
     }
     (sum / n as f64, max)
 }
+
+/// The texture of the tiny frame checks: strong gradients in x and y that are not parallel, a different
+/// phase per colour channel, so a frame of a few pixels (3 x 2, 2 x 2) solves to a non zero flow at
+/// Sensitivity 100 and the vector path gives other bytes than the frame blend.
+pub fn tiny_texture(c: usize, x: f64, y: f64) -> f64 {
+    let p = 2.3 * c as f64;
+    0.5 + 0.45 * (2.1 * x + 0.4 + p).sin() * (1.7 * y - 0.2 + 0.5 * p).cos()
+}
+
+/// A clip of `count` opaque frames of [`tiny_texture`] moving by (0.6, 0.35) pixels per frame (a sub-pixel
+/// shift between consecutive frames), quantised to the depth.
+pub fn tiny_texture_clip(depth: Depth, width: usize, height: usize, count: usize) -> Vec<Frame> {
+    (0..count)
+        .map(|k| {
+            let mut f = Frame::new(width, height, depth);
+            for y in 0..height {
+                for x in 0..width {
+                    let (px, py) = (x as f64 - 0.6 * k as f64, y as f64 - 0.35 * k as f64);
+                    let [r, g, b] = [tiny_texture(0, px, py), tiny_texture(1, px, py), tiny_texture(2, px, py)];
+                    match &mut f.pixels {
+                        Pixels::U8(px) => px[y * width + x] = [q8(r), q8(g), q8(b), 255],
+                        Pixels::U16(px) => px[y * width + x] = [q16(r), q16(g), q16(b), 65535],
+                        Pixels::F32(px) => px[y * width + x] = [r as f32, g as f32, b as f32, 1.0],
+                    }
+                }
+            }
+            f
+        })
+        .collect()
+}

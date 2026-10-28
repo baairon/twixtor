@@ -161,17 +161,38 @@ fn the_fg_matte_probes_and_the_layers_without_any_vector_layer_are_announced_too
     for n in 0..4 {
         assert_eq!(check(&[("speed_percent", "50")], false, false, false, n).unwrap(), 0);
     }
-    // an FG matte layer (refusal): the matte is only probed by size, nothing is fetched from it
-    let l = Layers::new();
-    let mut layers = LayerSet::new();
-    layers.insert("vectors_prev", l.prev.clone());
-    layers.insert("vectors_next", l.next.clone());
-    layers.insert("fg1_matte", Arc::new(layer(clip())));
-    let curves = curves(&[("warping", "1")]);
-    let env = Env { params: &curves, input: &*l.input, layers: &layers };
-    let cx = fx_core::TemporalContext::new(W, H, Depth::U8, time(), 1, 12);
-    assert!(VectorsIn.dependencies(&cx, &env).is_err());
-    let mut out = Frame::new(W, H, Depth::U8);
-    assert!(VectorsIn.render_temporal(&cx, &env, &mut out).is_err());
-    assert!(l.input.take().is_empty() && l.prev.take().len() <= 1);
+    // FG matte layers (the n-layer path): every fetch of the input, the vector layers and the mattes was announced,
+    // between frames and on them, for every Display but the Source one and with one to three mattes
+    for nfg in 1..=3usize {
+        for params in [vec![("warping", "1"), ("speed_percent", "50")], vec![("speed_percent", "50"), ("display", "3")], vec![("display", "6")]] {
+            for n in 0..4u64 {
+                let l = Layers::new();
+                let mattes: Vec<Arc<Recorder>> = (0..nfg).map(|_| Recorder::new(clip())).collect();
+                let mut layers = LayerSet::new();
+                layers.insert("vectors_prev", l.prev.clone());
+                layers.insert("vectors_next", l.next.clone());
+                for (k, m) in mattes.iter().enumerate() {
+                    layers.insert(["fg1_matte", "fg2_matte", "fg3_matte"][k], m.clone());
+                }
+                let curves = curves(&params);
+                let env = Env { params: &curves, input: &*l.input, layers: &layers };
+                let cx = fx_core::TemporalContext::new(W, H, Depth::U8, time(), n, 12);
+                let deps = VectorsIn.dependencies(&cx, &env).unwrap();
+                let mut out = Frame::new(W, H, Depth::U8);
+                VectorsIn.render_temporal(&cx, &env, &mut out).unwrap_or_else(|e| panic!("{params:?} nfg {nfg} frame {n}: {e}"));
+                let mut fetched = vec![("input", None, l.input.take()), ("vectors_prev", Some("vectors_prev"), l.prev.take()), ("vectors_next", Some("vectors_next"), l.next.take())];
+                for (k, m) in mattes.iter().enumerate() {
+                    let id = ["fg1_matte", "fg2_matte", "fg3_matte"][k];
+                    let log = m.take();
+                    assert!(!log.is_empty(), "{params:?} nfg {nfg} frame {n}: matte {k} is fetched");
+                    fetched.push((id, Some(id), log));
+                }
+                for (name, layer, log) in fetched {
+                    for t in log {
+                        assert!(deps.contains(&Checkout { layer, time: t }), "{params:?} nfg {nfg} frame {n}: {name} fetched at {t}, dependencies {deps:?}");
+                    }
+                }
+            }
+        }
+    }
 }

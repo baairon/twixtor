@@ -38,7 +38,7 @@ pub(crate) fn level_count(w: usize, h: usize) -> usize {
 /// Levels 1.. of the pyramid; level 0 is the source and is passed separately to [`Pyramid::sample`].
 pub(crate) struct Pyramid {
     pub levels: Vec<Image>,
-    /// Total number of levels (`*(int *)(pyr + 8)`), level 0 included.
+    /// Total number of levels, level 0 included.
     pub count: usize,
 }
 
@@ -115,7 +115,7 @@ pub(crate) fn tap(img: &Image, u: f32, v: f32) -> [f32; 4] {
 // ------------------------------------------------------------------------------------------------
 
 /// The half kernel of the 5 tap binomial filter: 3 taps `[0.375, 0.25, 0.0625]`.
-const BLUR5_TAPS: [f32; 3] = [0.375, 0.25, 0.0625];
+pub(crate) const BLUR5_TAPS: [f32; 3] = [0.375, 0.25, 0.0625];
 
 /// Truncation toward zero, used by the integer stores of the blur.
 #[inline(always)]

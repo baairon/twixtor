@@ -260,22 +260,116 @@ fn alt_src_through_the_binary_replaces_the_input() {
     assert_eq!(std::fs::read(&a).unwrap(), std::fs::read(&b).unwrap());
 }
 
+/// A matte clip as raw 8 bpc frames: an opaque white disc of radius `r` on transparent black,
+/// moving by `(2, 1)` px a frame from `(cx, cy)`.
+fn make_disc_matte(dir: &Scratch, name: &str, cx: f64, cy: f64, r: f64) -> PathBuf {
+    let out = dir.path(name);
+    let mut bytes = Vec::with_capacity(W * H * 4 * SOURCE_FRAMES);
+    for k in 0..SOURCE_FRAMES {
+        for i in 0..W * H {
+            let (x, y) = ((i % W) as f64, (i / W) as f64);
+            let d = ((x - cx - 2.0 * k as f64).powi(2) + (y - cy - k as f64).powi(2)).sqrt();
+            bytes.extend_from_slice(if d <= r { &[255, 255, 255, 255] } else { &[0, 0, 0, 0] });
+        }
+    }
+    std::fs::write(&out, bytes).unwrap();
+    out
+}
+
+/// The note line `vfx` prints for gap `id` with its register title.
+fn note(id: &str) -> String {
+    let title = match id {
+        "G1" => "matte shrink tail",
+        "G1b" => "mask-aware block matching cost",
+        "G1c" => "layer visibility direction",
+        "G1d" => "create-vectors merge",
+        "G2" => "tracking point displacement",
+        "G3" => "Draw Geom drawing",
+        "G4" => "four Debug view compositions",
+        "G5" => "second tracker arithmetic",
+        other => panic!("no gap {other}"),
+    };
+    format!("vfx: note: create-vectors: {id} {title}: a stated rule that no Twixtor reference render has graded yet (README: parity gaps)")
+}
+
 #[test]
-fn what_the_port_cannot_do_is_a_clean_error_of_the_binary() {
+fn the_layered_paths_render_through_the_binary_and_note_each_gap_once() {
     let bin = vfx().expect("fx-cli builds");
-    let dir = Scratch::new("unsupported");
+    let dir = Scratch::new("layered");
     let clip = make_moving_clip(&dir, Depth::U8);
+    let fg1 = make_disc_matte(&dir, "fg1.raw", 22.0, 20.0, 12.0);
+    let fg2 = make_disc_matte(&dir, "fg2.raw", 38.0, 26.0, 10.0);
     let out = dir.path("out.raw");
-    // Display Debug: exit code 3 and the precise message on stderr
-    let r = apply(bin, Depth::U8, &clip, &out, 4, &["display=3", "debug_view_method=1"], &[]);
-    assert_eq!(r.status.code(), Some(3), "{}", String::from_utf8_lossy(&r.stderr));
-    let err = String::from_utf8_lossy(&r.stderr);
-    assert!(err.contains("Debug View Method \"Warp\"") && err.contains("the forward warp of the first frame with the flow"), "{err}");
-    // a FG matte layer
-    let r = apply(bin, Depth::U8, &clip, &out, 4, &[], &[("fg1_matte", &clip)]);
-    assert_eq!(r.status.code(), Some(3), "{}", String::from_utf8_lossy(&r.stderr));
-    assert!(String::from_utf8_lossy(&r.stderr).contains("a FG Matte layer is set"));
-    // the Source display needs none of this
-    let r = apply(bin, Depth::U8, &clip, &out, 4, &["display=1"], &[("fg1_matte", &clip)]);
-    assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
+    let one: &[(&str, &Path)] = &[("fg1_matte", &fg1)];
+    let two: &[(&str, &Path)] = &[("fg1_matte", &fg1), ("fg2_matte", &fg2)];
+    let cases: Vec<(&[&str], &[(&str, &Path)], &[&str])> = vec![
+        (&[], &[], &[]),
+        (&["display=1"], one, &[]),
+        (&["display=1", "pt1_use=2", "pt1_pos=20,15", "draw_geom=1"], &[], &[]),
+        (&["display=3", "debug_view_method=1"], &[], &[]),
+        (&["fg1_track=0", "fg2_sensitivity=10"], &[], &[]),
+        (&[], one, &["G1", "G1b", "G1d"]),
+        (&["fg1_inv_matte_shrink=2"], one, &["G1", "G1b", "G1d"]),
+        (&["layers_output=3"], two, &["G1", "G1b", "G1c", "G1d"]),
+        // no layer of the group tracks: no solve, so neither the masks nor the visibility order run
+        (&["fg1_track=0", "fg2_track=0", "main_bg_track=0"], two, &["G1", "G1d", "G5"]),
+        (&["display=3"], &[], &["G4"]),
+        (&["display=3", "debug_view_method=3"], one, &["G1", "G1b", "G1d", "G4"]),
+        (&["main_bg_track=0"], &[], &["G5"]),
+        (&["main_bg_track=0", "pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &["G5"]),
+        (&["pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &["G2"]),
+        (&["display=1", "pt1_use=2", "pt1_pos=20,15"], &[], &["G3"]),
+        (&["display=3", "debug_view_method=1", "pt1_use=2", "pt1_pos=20,15"], &[], &["G2", "G3"]),
+    ];
+    for (params, layers, gaps) in cases {
+        let mut p = vec!["max_displace=16"];
+        p.extend_from_slice(params);
+        let r = apply(bin, Depth::U8, &clip, &out, SOURCE_FRAMES, &p, layers);
+        let err = String::from_utf8_lossy(&r.stderr).to_string();
+        assert_eq!(r.status.code(), Some(0), "{params:?}: {err}");
+        assert_eq!(read_frames(&out, Depth::U8).len(), SOURCE_FRAMES);
+        let mut lines: Vec<&str> = err.lines().collect();
+        lines.sort_unstable();
+        let mut want: Vec<String> = gaps.iter().map(|g| note(g)).collect();
+        want.sort_unstable();
+        assert_eq!(lines, want, "{params:?} with {} layers: each note once", layers.len());
+    }
+    // FG layers move the vectors: the layered output is not the single layer one
+    let plain = dir.path("plain.raw");
+    assert!(apply(bin, Depth::U8, &clip, &plain, SOURCE_FRAMES, &["max_displace=16"], &[]).status.success());
+    assert!(apply(bin, Depth::U8, &clip, &out, SOURCE_FRAMES, &["max_displace=16", "layers_output=2"], one).status.success());
+    assert_ne!(std::fs::read(&out).unwrap(), std::fs::read(&plain).unwrap());
+}
+
+#[test]
+fn a_side_of_one_is_the_zero_vector_through_the_binary_and_notes_nothing() {
+    let bin = vfx().expect("fx-cli builds");
+    let dir = Scratch::new("side1");
+    for (w, h) in [(1usize, 17usize), (17, 1), (1, 1)] {
+        let clip = dir.path("in.raw");
+        let matte = dir.path("matte.raw");
+        let bytes: Vec<u8> = (0..w * h * 4 * 4).map(|i| (i * 37 % 251) as u8).collect();
+        std::fs::write(&clip, &bytes).unwrap();
+        std::fs::write(&matte, bytes.iter().rev().copied().collect::<Vec<u8>>()).unwrap();
+        for params in [&["display=3", "debug_view_method=2"][..], &["main_bg_track=0", "pt1_use=5"], &["layers_output=2", "fg1_inv_matte_shrink=3"]] {
+            let out = dir.path("out.raw");
+            let mut cmd = Command::new(bin);
+            cmd.args(["apply", "create-vectors", "--width", &w.to_string(), "--height", &h.to_string(), "--depth", "8", "--fps", "30", "--in"])
+                .arg(&clip)
+                .arg("--out")
+                .arg(&out)
+                .args(["--frames", "4"])
+                .arg("--layer")
+                .arg(format!("fg1_matte={}", matte.display()));
+            for p in params {
+                cmd.args(["--param", p]);
+            }
+            let r = cmd.output().unwrap();
+            assert_eq!(r.status.code(), Some(0), "{w}x{h} {params:?}: {}", String::from_utf8_lossy(&r.stderr));
+            assert!(r.stderr.is_empty(), "{w}x{h} {params:?}: {}", String::from_utf8_lossy(&r.stderr));
+            let got = std::fs::read(&out).unwrap();
+            assert_eq!(got.len(), w * h * 4 * 4);
+            assert!(got.chunks(4).all(|p| p == [127, 127, 0, 255]), "{w}x{h} {params:?}");
+        }
+    }
 }

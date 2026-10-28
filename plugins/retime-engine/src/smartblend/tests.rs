@@ -869,12 +869,87 @@ fn smart_finish_combines_inverts_and_fills() {
     // a coverage of the wrong size
     let mut c = Coverage::new(w, h + 1, 0);
     assert!(matches!(smart_finish(&mut out, &mut c, &cov2, false), Err(FxError::Mismatch(_))));
-    // the 360 flag with a hole is refused, without a hole accepted
+    // the 360 flag: without a hole the image is kept, with holes the wrapped fill runs (G6) on the
+    // combined and inverted mask, exactly as the hole fill does on its own
     let mut full = Coverage::new(w, h, 255);
     let none = Coverage::new(w, h, 255);
+    let before = out.clone();
     smart_finish(&mut out, &mut full, &none, true).unwrap();
-    let mut some = Coverage::new(w, h, 0);
-    assert!(matches!(smart_finish(&mut out, &mut some, &Coverage::new(w, h, 0), true), Err(FxError::Unsupported(_))));
+    assert!(same_bits(&out, &before));
+    let mut c1 = Coverage::new(w, h, 255);
+    let mut c2 = Coverage::new(w, h, 255);
+    for x in [0usize, 1, w - 1] {
+        c1.data[3 * w + x] = 0;
+        c2.data[3 * w + x] = 0;
+    }
+    c1.data[6 * w + 8] = 0; // only one side empty: kept
+    let mut wrapped = img.clone();
+    smart_finish(&mut wrapped, &mut c1, &c2, true).unwrap();
+    let mut holes = Coverage::new(w, h, 0);
+    for x in [0usize, 1, w - 1] {
+        holes.data[3 * w + x] = 255;
+    }
+    let mut want = img.clone();
+    crate::holefill::fill_holes(&mut want, &holes, true).unwrap();
+    assert_eq!(c1, holes);
+    assert!(same_bits(&wrapped, &want));
+    let mut p1 = Coverage::new(w, h, 255);
+    for x in [0usize, 1, w - 1] {
+        p1.data[3 * w + x] = 0;
+    }
+    let mut plain = img.clone();
+    smart_finish(&mut plain, &mut p1, &Coverage::new(w, h, 0), false).unwrap();
+    assert_eq!(p1, holes);
+    assert!(!same_bits(&plain, &wrapped), "the seam hole is filled from both sides with the flag");
+}
+
+#[test]
+fn the_360_compositions_wrap_their_warps_and_leave_no_hole_to_fill() {
+    // with is360 the inverse warps wrap and keep the coverage at 255, so the hole fill is the
+    // identity: blend_smart is the composite of the two 360 warps, nearest_smart the 360 warp
+    let mut rng = Rng(23);
+    let (w, h) = (24usize, 14usize);
+    let wopts = WarpOpts { hold: false, is360: true, mode: 1 };
+    for fmt in [Fmt::U8, Fmt::U16, Fmt::F32] {
+        // opaque frames, so that the binary alpha composite has something to show
+        let a = opaque(fmt, w, h, &mut rng);
+        let b = opaque(fmt, w, h, &mut rng);
+        let mut fab = FlowField::new(w, h);
+        let mut fba = FlowField::new(w, h);
+        for i in 0..w * h {
+            fab.data[i * 2] = 9.5;
+            fab.data[i * 2 + 1] = -1.25 - (i % 7) as f32;
+            fba.data[i * 2] = -7.0;
+            fba.data[i * 2 + 1] = 2.5;
+        }
+        let wa = 0.35f32;
+        let frac = 1.0f32 - wa;
+        for binary in [false, true] {
+            let mut out = Image::new(w, h, fmt);
+            blend_smart(&mut out, &a, &fba, &b, &fab, wa, SmartOpts { binary_alpha: binary, is360: true }).unwrap();
+            let mut ta = Image::new(w, h, fmt);
+            let ca = inv_warp_coverage(&mut ta, &a, &fba, frac, wopts).unwrap();
+            let mut tb = Image::new(w, h, fmt);
+            let cb = inv_warp_coverage(&mut tb, &b, &fab, wa, wopts).unwrap();
+            assert!(ca.data.iter().chain(&cb.data).all(|&c| c == 255));
+            let mut want = Image::new(w, h, fmt);
+            if binary {
+                smart_blend_binary(&mut want, &ta, &tb, frac).unwrap();
+            } else {
+                smart_blend(&mut want, &ta, &tb, frac).unwrap();
+            }
+            assert!(same_bits(&out, &want), "{fmt:?} binary {binary}");
+            // and it is not the plain composition: the samples wrap instead of fading
+            let mut plain = Image::new(w, h, fmt);
+            blend_smart(&mut plain, &a, &fba, &b, &fab, wa, SmartOpts { binary_alpha: binary, is360: false }).unwrap();
+            assert!(!same_bits(&out, &plain), "{fmt:?} binary {binary}");
+        }
+        let mut out = Image::new(w, h, fmt);
+        nearest_smart(&mut out, &a, &b, &fab, 0.3, SmartOpts { binary_alpha: false, is360: true }).unwrap();
+        let mut want = Image::new(w, h, fmt);
+        inv_warp(&mut want, &b, &fab, 0.3, wopts).unwrap();
+        assert!(same_bits(&out, &want), "{fmt:?} nearest");
+    }
 }
 
 #[test]

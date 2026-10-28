@@ -11,8 +11,10 @@ where the speed bends or jumps.
   python tools/speed_curve.py --keys "100@0;40@60;100@120" --fps 24 --clip-frames 240 --start 13 --mark hit=14.2
 
   --keys K            the keyframes V@F;V@F as for --param speed_percent: F is the output frame (a
-                      trailing h holds the key, a trailing e eases it). quote it in a shell, the ; ends
-                      a command there. a leading speed_percent= is accepted.
+                      trailing h holds the key, a trailing e eases it; iS/I and oS/I after F are the
+                      key's incoming and outgoing Bezier handles, S percent points a second and I the
+                      influence in percent). quote it in a shell, the ; ends a command there. a
+                      leading speed_percent= is accepted.
   --fps R             the frame rate of the clip and of the output, 60, 24 or a fraction such as
                       30000/1001. the clip is assumed to play at the output rate.
   --clip-frames N     frames in the clip the effect reads (the trimmed clip, not the whole recording).
@@ -45,12 +47,20 @@ EXACT = 0.005
 # the tail search accepts a position this close to a whole frame, inside the tolerance above
 LOCK_ERROR = 0.002
 SPEED_LIMIT = 10000.0
+# the largest handle speed either way (vfx's bound): a handle's reach stays finite on any segment
+HANDLE_SPEED_LIMIT = 1e9
 # a plain key that changes the slope of the speed by more than this many points a frame is reported
 BEND = 1.0
 # a rough cost of one interpolated frame at 1080p, for the time estimate only
 SECONDS_PER_INTERPOLATED_FRAME = 0.25
 
-Key = namedtuple("Key", "frame tick value hold ease")
+# inc and out are the key's ease handles (Handle or None): inc shapes the segment into the key, out the one
+# after it
+Key = namedtuple("Key", "frame tick value hold ease inc out", defaults=(None, None))
+# speed in percent points a second and influence in percent as read, per_tick the speed divided once by the
+# ticks a second (what the curve uses), text the S/I as written
+Handle = namedtuple("Handle", "speed influence per_tick text")
+HANDLE_CHARS = "0123456789./-"
 
 
 class CurveError(Exception):
@@ -88,7 +98,69 @@ def ticks_per_frame(fps):
     return 100 if fps.denominator == 1 else fps.denominator
 
 
-def parse_keys(text, step):
+def ticks_per_second(fps):
+    """the ticks a second of that time base: 2400 at 24, 30000 at 30000/1001."""
+    return ticks_per_frame(fps) * fps.numerator // fps.denominator
+
+
+def handle_start(frame):
+    """the index of the first i or o followed by a digit or -, where the handles begin, or None."""
+    for i, c in enumerate(frame[:-1]):
+        if c in ("i", "o") and frame[i + 1] in "0123456789-":
+            return i
+    return None
+
+
+def is_handle_number(text):
+    return re.fullmatch(r"-?[0-9]+(\.[0-9]+)?", text) is not None
+
+
+def not_a_handle(frame, text):
+    return f"`{frame}`: `{text}` is not an ease handle (i or o, then SPEED/INFLUENCE, as in i0/33.3)"
+
+
+def parse_handle(frame, text, per_second):
+    """the handle at the start of text (i or o, then every character a handle can hold) and the text
+    after it, as vfx reads it."""
+    n = 1
+    while n < len(text) and text[n] in HANDLE_CHARS:
+        n += 1
+    token, rest = text[:n], text[n:]
+    speed, slash, influence = token[1:].partition("/")
+    if not slash or not is_handle_number(speed) or not is_handle_number(influence):
+        raise CurveError(not_a_handle(frame, token))
+    if not -HANDLE_SPEED_LIMIT <= float(speed) <= HANDLE_SPEED_LIMIT:
+        raise CurveError(f"handle speed {speed} is outside -{HANDLE_SPEED_LIMIT:.0f}..={HANDLE_SPEED_LIMIT:.0f}")
+    if not 0.1 <= float(influence) <= 100:
+        raise CurveError(f"influence {influence} is outside 0.1..=100")
+    if per_second is None:
+        raise CurveError(f"`{frame}` has an ease handle, which needs the ticks a second (per_second)")
+    return Handle(float(speed), float(influence), float(speed) / per_second, token[1:]), rest
+
+
+def split_frame(frame, per_second):
+    """F[iS/I][oS/I][h|e] as (number text, hold, ease, inc, out); None when the frame has no handle, so
+    the suffix rules of before apply."""
+    start = handle_start(frame)
+    if start is None:
+        return None
+    rest, inc, out = frame[start:], None, None
+    if rest.startswith("i"):
+        inc, rest = parse_handle(frame, rest, per_second)
+    if rest.startswith("o") and handle_start(rest) == 0:
+        out, rest = parse_handle(frame, rest, per_second)
+    if rest == "e":
+        raise CurveError("a key with ease handles cannot also end in e")
+    if rest not in ("", "h"):
+        raise CurveError(not_a_handle(frame, rest))
+    if rest == "h" and out is not None:
+        raise CurveError("a held key has no outgoing handle")
+    return frame[:start], rest == "h", False, inc, out
+
+
+def parse_keys(text, step, per_second=None, limit=SPEED_LIMIT):
+    """the keys of text at `step` ticks a frame. per_second, the ticks a second, is needed only by keys
+    with ease handles; limit bounds the values (the speed_percent range by default)."""
     text = text.strip()
     if re.match(r"^[A-Za-z_]\w*=", text):
         text = text.split("=", 1)[1]
@@ -99,7 +171,11 @@ def parse_keys(text, step):
             raise CurveError(f"`{piece}` has no @frame")
         frame = frame.strip()
         hold = ease = False
-        if frame.endswith("h"):
+        inc = out = None
+        handles = split_frame(frame, per_second)
+        if handles is not None:
+            number, hold, ease, inc, out = handles
+        elif frame.endswith("h"):
             hold, number = True, frame[:-1]
         elif frame.endswith("e"):
             ease, number = True, frame[:-1]
@@ -112,19 +188,52 @@ def parse_keys(text, step):
             raise CurveError(f"`{piece}` is not value@frame (a frame may end in h to hold or e to ease, not both)") from None
         if not math.isfinite(number) or not math.isfinite(percent):
             raise CurveError(f"`{piece}` is not a finite number")
-        if abs(percent) > SPEED_LIMIT:
-            raise CurveError(f"speed {percent:g} is outside -{SPEED_LIMIT:g}..{SPEED_LIMIT:g}")
-        keys.append(Key(number, round_half_away(number * step), percent, hold, ease))
+        if abs(percent) > limit:
+            raise CurveError(f"speed {percent:g} is outside -{limit:g}..{limit:g}")
+        keys.append(Key(number, round_half_away(number * step), percent, hold, ease, inc, out))
     keys.sort(key=lambda k: k.tick)
     if any(a.tick == b.tick for a, b in zip(keys, keys[1:])):
         raise CurveError("two keyframes at the same time")
     return keys
 
 
+def bezier(u, n, va, d3, a, b):
+    """the value at progress u of a segment n ticks long from va to va + d3 with a handle at either end,
+    in the operation order of fx-core's curves.rs. a handle (per tick speed S, influence I) gives the
+    control point (I/100, (S*(I/100))*n) out of a and (1 - I/100, d3 - (S*(I/100))*n) into b, an eased
+    end (1/3, 0) or (1 - 1/3, d3), a plain one (1/3, d3/3) or (1 - 1/3, d3 - d3/3); 64 bisection steps
+    find the curve parameter."""
+    if a.out is not None:
+        x1, d1 = a.out.influence / 100, (a.out.per_tick * (a.out.influence / 100)) * n
+    elif a.ease:
+        x1, d1 = 1 / 3, 0.0
+    else:
+        x1, d1 = 1 / 3, d3 / 3
+    if b.inc is not None:
+        x2, d2 = 1 - b.inc.influence / 100, d3 - (b.inc.per_tick * (b.inc.influence / 100)) * n
+    elif b.ease:
+        x2, d2 = 1 - 1 / 3, d3
+    else:
+        x2, d2 = 1 - 1 / 3, d3 - d3 / 3
+    lo, hi = 0.0, 1.0
+    for _ in range(64):
+        m = (lo + hi) * 0.5
+        r = 1 - m
+        x = ((3 * r * r * m) * x1 + (3 * r * m * m) * x2) + m * m * m
+        if x < u:
+            lo = m
+        else:
+            hi = m
+    s = (lo + hi) * 0.5
+    r = 1 - s
+    return va + (((3 * r * r * s) * d1 + (3 * r * s * s) * d2) + (s * s * s) * d3)
+
+
 class Curve:
-    def __init__(self, keys):
+    def __init__(self, keys, limit=SPEED_LIMIT):
         self.keys = keys
         self.ticks = [k.tick for k in keys]
+        self.limit = limit
 
     def percent_at(self, tick):
         keys = self.keys
@@ -136,8 +245,19 @@ class Curve:
         a, b = keys[i], keys[i + 1]
         if a.hold:
             return a.value
-        u = eased_progress((tick - a.tick) / (b.tick - a.tick), a.ease, b.ease)
-        return a.value + (b.value - a.value) * u
+        if a.out is None and b.inc is None:
+            u = eased_progress((tick - a.tick) / (b.tick - a.tick), a.ease, b.ease)
+            return a.value + (b.value - a.value) * u
+        if tick == a.tick:
+            return a.value
+        n = b.tick - a.tick
+        y = bezier((tick - a.tick) / n, n, a.value, b.value - a.value, a, b)
+        # a handle may overshoot; the slider stays inside its range, as the effect clamps it
+        if y < -self.limit:
+            return -self.limit
+        if y > self.limit:
+            return self.limit
+        return y
 
 
 def walk(curve, step, first=0, out=0.0):
@@ -176,7 +296,7 @@ def lock_tail(keys, step):
     is fine already, None when no move of up to three frames does) and the error that move leaves."""
     final = keys[-1].value
     t = len(keys) - 1
-    while t > 0 and keys[t - 1].value == final and not keys[t - 1].hold:
+    while t > 0 and keys[t - 1].value == final and not keys[t - 1].hold and flat(keys[t - 1], keys[t]):
         t -= 1
     if t == 0 or final == 0 or final % 100:
         return None
@@ -202,9 +322,27 @@ def lock_tail(keys, step):
     return Lock(j, base, None, base)
 
 
+def flat(a, b):
+    """whether the segment from a to b, two keys of one value, stays at that value: a handle with a
+    speed bends it."""
+    return all(h is None or h.speed == 0 for h in (a.out, b.inc))
+
+
+def handles_text(k):
+    return (f"i{k.inc.text}" if k.inc else "") + (f"o{k.out.text}" if k.out else "")
+
+
+def mode_text(k):
+    """the ease column of the key table: hold, ease or -, or the handles as written (and hold)."""
+    if k.inc or k.out:
+        parts = (f"i{k.inc.text}" if k.inc else "", f"o{k.out.text}" if k.out else "", "hold" if k.hold else "")
+        return " ".join(part for part in parts if part)
+    return "hold" if k.hold else "ease" if k.ease else "-"
+
+
 def key_text(k):
     frame = f"{k.frame:.6f}".rstrip("0").rstrip(".")
-    return f"{k.value:g}@{frame}{'h' if k.hold else 'e' if k.ease else ''}"
+    return f"{k.value:g}@{frame}{handles_text(k)}{'h' if k.hold else 'e' if k.ease else ''}"
 
 
 def moved_keys(keys, first, dt, step):
@@ -273,7 +411,7 @@ def analyse(keys, fps, clip_frames, frames, start, marks):
     for i in range(1, len(keys) - 1):
         k = keys[i]
         before, after = keys[i - 1], keys[i + 1]
-        if k.hold or k.ease or before.hold:
+        if k.hold or k.ease or before.hold or k.inc or k.out:
             continue
         left = curve.percent_at(k.tick) - curve.percent_at(k.tick - step)
         right = curve.percent_at(k.tick + step) - curve.percent_at(k.tick)
@@ -307,19 +445,21 @@ def report(keys, fps, clip_frames, frames, start, marks, shown_start):
         clip += f" (recording {clock(start)} to {clock(start + clip_frames / rate)})"
     out(clip)
     out("")
-    head = "key frame    time   speed  ease   source frame  source time"
+    # the ease column widens for keys with handles, which it shows as written
+    modes = [mode_text(k) for k in keys]
+    wide = max([5] + [len(m) for m in modes])
+    head = "key frame    time   speed  ease" + " " * (wide - 5) + "   source frame  source time"
     if shown_start:
         head += "  recording time"
     out(head)
     key_pos = positions(Curve(keys), a["step"], max(1, int(math.ceil(keys[-1].frame))))
-    for k in keys:
+    for k, mode in zip(keys, modes):
         n = k.frame
         whole = int(math.floor(n))
         p = key_pos[whole] if whole < len(key_pos) else key_pos[-1]
         if n != whole and whole + 1 < len(key_pos):
             p += (key_pos[whole + 1] - key_pos[whole]) * (n - whole)
-        mode = "hold" if k.hold else "ease" if k.ease else "-"
-        row = f"{n:9g} {clock(n / rate):>7} {k.value:6g}%  {mode:<5} {p:12.1f}  {clock(p / rate):>11}"
+        row = f"{n:9g} {clock(n / rate):>7} {k.value:6g}%  {mode:<{wide}} {p:12.1f}  {clock(p / rate):>11}"
         if shown_start:
             row += f"  {clock(start + p / rate):>14}"
         out(row)
@@ -393,7 +533,9 @@ def main(argv=None):
                     "curve leaves the clip, how much needs interpolation and where the speed bends.")
     parser.add_argument("--keys", required=True, metavar="K",
                         help="keyframes V@F;V@F as for --param speed_percent, a trailing h on F holds the "
-                             "key and a trailing e eases it; quote the argument, the ; ends a command in a shell")
+                             "key and a trailing e eases it, iS/I and oS/I after F are incoming and outgoing "
+                             "Bezier handles (S points a second, I percent influence); quote the argument, "
+                             "the ; ends a command in a shell")
     parser.add_argument("--fps", required=True, type=parse_fps, metavar="R",
                         help="frame rate of the clip and the output: 60, 24 or a fraction such as 30000/1001")
     parser.add_argument("--clip-frames", required=True, type=int, metavar="N",
@@ -409,7 +551,7 @@ def main(argv=None):
     if args.clip_frames < 1:
         parser.error("--clip-frames must be at least 1")
     try:
-        keys = parse_keys(args.keys, ticks_per_frame(args.fps))
+        keys = parse_keys(args.keys, ticks_per_frame(args.fps), ticks_per_second(args.fps))
     except CurveError as e:
         print(f"[error] --keys: {e}", file=sys.stderr)
         return 1

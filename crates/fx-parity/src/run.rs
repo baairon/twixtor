@@ -2,6 +2,7 @@
 
 use crate::cases::{Case, TestSet};
 use crate::compare::{self, Comparison};
+use crate::families;
 use crate::vfx::{self, Threads, Vfx};
 use fx_core::{Depth, Frame};
 use serde_json::{json, Value};
@@ -59,6 +60,8 @@ pub struct CaseResult {
     pub testset: PathBuf,
     pub input_path: PathBuf,
     pub reference_path: PathBuf,
+    /// The `vfx: note:` lines of the run; empty when vfx did not run or printed none.
+    pub notes: Vec<String>,
 }
 
 /// One word of a command line, quoted when a shell would split or act on it.
@@ -175,6 +178,7 @@ pub fn run_case(vfx: &Vfx, testset: &Path, refs: &Path, case: &Case) -> CaseResu
         testset: testset.to_path_buf(),
         input_path: input_path.clone(),
         reference_path: reference_path.clone(),
+        notes: Vec::new(),
     };
     let failed = |error: String| result(Status::Fail, Some(error), None);
 
@@ -228,10 +232,12 @@ fn run_clip(
         Ok(b) => b,
         Err(e) => return failed(e),
     };
-    let output = match vfx.apply_clip(case, testset, Threads::Inherit) {
+    let (output, notes) = match vfx.apply_clip_noted(case, testset, Threads::Inherit) {
         Ok(o) => o,
         Err(e) => return failed(e),
     };
+    let failed = |error: String| CaseResult { notes: notes.clone(), ..failed(error) };
+    let result = |status, error, comparison| CaseResult { notes: notes.clone(), ..result(status, error, comparison) };
     if output.len() != expected.len() {
         return failed(format!(
             "vfx wrote {} bytes, {} frames of {}x{} at {} bpc are {}",
@@ -303,6 +309,15 @@ pub fn run(opts: &RunOptions, warn: &dyn Fn(&str)) -> Result<Vec<CaseResult>, St
         });
     }
     let vfx = Vfx::locate(opts.vfx.as_deref())?;
+    let results = run_cases(&vfx, opts, &cases);
+    for line in missing_notes(&results) {
+        warn(&line);
+    }
+    Ok(results)
+}
+
+/// Runs every case on `opts.jobs` threads, one result per case in case order.
+fn run_cases(vfx: &Vfx, opts: &RunOptions, cases: &[Case]) -> Vec<CaseResult> {
     let slots: Vec<Mutex<Option<CaseResult>>> = cases.iter().map(|_| Mutex::new(None)).collect();
     let next = AtomicUsize::new(0);
     std::thread::scope(|scope| {
@@ -312,12 +327,128 @@ pub fn run(opts: &RunOptions, warn: &dyn Fn(&str)) -> Result<Vec<CaseResult>, St
                 if i >= cases.len() {
                     break;
                 }
-                let r = run_case(&vfx, &opts.testset, &opts.refs, &cases[i]);
+                let r = run_case(vfx, &opts.testset, &opts.refs, &cases[i]);
                 *slots[i].lock().unwrap() = Some(r);
             });
         }
     });
-    Ok(slots.into_iter().map(|s| s.into_inner().unwrap().expect("every case ran")).collect())
+    slots.into_iter().map(|s| s.into_inner().unwrap().expect("every case ran")).collect()
+}
+
+/// The gap ids whose note a family case must print: its own list in [`families`], or for a
+/// case this build does not know, any note at all unless its family only observes. None when
+/// no note is expected.
+fn expected_notes(case: &Case) -> Option<Vec<String>> {
+    let family = case.family.as_deref()?;
+    match (families::find(family), families::family_case(case)) {
+        (_, Some(f)) if f.notes.is_empty() => None,
+        (_, Some(f)) => Some(f.notes.iter().map(|g| g.to_string()).collect()),
+        (Some(i), None) if i.observe_only => None,
+        _ => Some(Vec::new()),
+    }
+}
+
+/// One warning per family case whose vfx run printed no note, or not the note of a gap it is
+/// there to settle: either its settings no longer reach the rule, or the gap was retired and the
+/// family still names it.
+pub fn missing_notes(results: &[CaseResult]) -> Vec<String> {
+    let mut out = Vec::new();
+    for r in results {
+        // only a run that went through has notes to judge
+        if r.status == Status::NoReference || r.error.is_some() {
+            continue;
+        }
+        let Some(want) = expected_notes(&r.case) else { continue };
+        let family = r.case.family.as_deref().unwrap_or("");
+        let printed: Vec<&str> = r.notes.iter().filter_map(|l| crate::vfx::note_gap(l)).collect();
+        if want.is_empty() {
+            if printed.is_empty() {
+                out.push(format!("family case {} ({family}) printed no note: its settings may no longer reach an open rule", r.case.id));
+            }
+            continue;
+        }
+        let missing: Vec<&str> = want.iter().map(String::as_str).filter(|g| !printed.contains(g)).collect();
+        if !missing.is_empty() {
+            out.push(format!(
+                "family case {} ({family}) printed no note for {}: its settings no longer reach the rule, or the gap was retired and the family still names it",
+                r.case.id,
+                missing.iter().map(|g| format!("{g} ({})", families::title(g))).collect::<Vec<_>>().join(", ")
+            ));
+        }
+    }
+    out
+}
+
+/// What the references say about one family of the run.
+#[derive(Clone, Debug, PartialEq)]
+pub struct FamilyGrade {
+    pub family: String,
+    pub cases: usize,
+    /// Cases compared with a reference.
+    pub compared: usize,
+    /// Compared cases that are bit exact.
+    pub exact: usize,
+    /// Cases that FAIL: a difference, or a run or file that went wrong.
+    pub failed: usize,
+    /// Cases without a reference.
+    pub missing: usize,
+    /// The cases the family has in this build of fx-parity; 0 for a family it does not know.
+    pub full: usize,
+}
+
+impl FamilyGrade {
+    /// Every case compared and bit exact, and every case of the family present (a run narrowed to
+    /// one effect settles nothing): the family's rule matches the original, its note retires.
+    pub fn settled(&self) -> bool {
+        self.cases > 0 && self.exact == self.cases && self.cases >= self.full
+    }
+}
+
+/// One grade per family with a case in `results`, in the order the families first appear; empty
+/// when no case belongs to a family.
+pub fn family_grades(results: &[CaseResult]) -> Vec<FamilyGrade> {
+    let mut grades: Vec<FamilyGrade> = Vec::new();
+    for r in results {
+        let Some(family) = &r.case.family else { continue };
+        let at = match grades.iter().position(|g| &g.family == family) {
+            Some(at) => at,
+            None => {
+                let full = families::cases_of(family).len();
+                grades.push(FamilyGrade { family: family.clone(), cases: 0, compared: 0, exact: 0, failed: 0, missing: 0, full });
+                grades.len() - 1
+            }
+        };
+        let g = &mut grades[at];
+        g.cases += 1;
+        g.compared += usize::from(r.mean_abs_diff.is_some());
+        g.exact += usize::from(r.is_exact());
+        g.failed += usize::from(r.status == Status::Fail);
+        g.missing += usize::from(r.status == Status::NoReference);
+    }
+    grades
+}
+
+fn write_families(results: &[CaseResult], out: &mut impl Write) -> std::io::Result<()> {
+    let grades = family_grades(results);
+    if grades.is_empty() {
+        return Ok(());
+    }
+    writeln!(out, "\nfamilies")?;
+    let width = grades.iter().map(|g| g.family.len()).max().unwrap_or(0);
+    for g in &grades {
+        writeln!(
+            out,
+            "  {:<width$}  {} cases, {} compared, {} bit exact, {} FAIL, {} no reference: {}",
+            g.family,
+            g.cases,
+            g.compared,
+            g.exact,
+            g.failed,
+            g.missing,
+            if g.settled() { "settled, its note retires" } else { "open" }
+        )?;
+    }
+    Ok(())
 }
 
 fn params_text(case: &Case) -> String {
@@ -503,6 +634,7 @@ pub fn write_human(results: &[CaseResult], brief: bool, out: &mut impl Write) ->
         }
     }
     write_graded(results, out)?;
+    write_families(results, out)?;
     let t = totals(results);
     writeln!(out, "\n{} pass, {} FAIL, {} no reference, {} cases", t.pass, t.fail, t.no_reference, results.len())
 }
@@ -570,6 +702,10 @@ pub fn to_json(results: &[CaseResult], brief: bool) -> Value {
             if let Some((frame, mean)) = r.worst_frame {
                 v["worst_frame"] = json!({ "frame": frame, "mean_abs_diff": number(mean) });
             }
+            if let Some(family) = &c.family {
+                v["family"] = json!(family);
+                v["notes"] = json!(r.notes);
+            }
             if let Some(cmp) = &r.comparison {
                 v["differing_pixels"] = json!(cmp.differing_pixels);
                 v["max_abs_diff"] = number(cmp.max_abs_diff);
@@ -581,11 +717,23 @@ pub fn to_json(results: &[CaseResult], brief: bool) -> Value {
             v
         })
         .collect();
-    json!({
+    let mut report = json!({
         "summary": { "pass": t.pass, "fail": t.fail, "no_reference": t.no_reference, "total": results.len() },
         "graded": graded_json(results),
         "cases": cases,
-    })
+    });
+    let grades = family_grades(results);
+    if !grades.is_empty() {
+        let mut by_family = serde_json::Map::new();
+        for g in grades {
+            let v = json!({
+                "cases": g.cases, "compared": g.compared, "exact": g.exact, "failed": g.failed, "missing": g.missing, "settled": g.settled(),
+            });
+            by_family.insert(g.family, v);
+        }
+        report["families"] = Value::Object(by_family);
+    }
+    report
 }
 
 #[cfg(test)]
@@ -611,6 +759,7 @@ mod tests {
             frames: 1,
             fps: None,
             layers: BTreeMap::new(),
+            family: None,
         }
     }
 
@@ -627,6 +776,7 @@ mod tests {
             testset: PathBuf::from("set"),
             input_path: PathBuf::from("set/inputs/x"),
             reference_path: PathBuf::from("refs/r"),
+            notes: Vec::new(),
         }
     }
 
@@ -912,6 +1062,93 @@ mod tests {
         assert_eq!(brief["cases"].as_array().unwrap().len(), 2);
         assert_eq!(brief["graded"]["alpha"]["compared"], 2);
         assert!(to_json(&[], false)["graded"].as_object().unwrap().is_empty());
+    }
+
+    /// A temporal case of `family` with the given label, a result with `status` and these notes.
+    fn family_result(family: &str, label: &str, status: Status, mean: Option<f64>, notes: &[&str]) -> CaseResult {
+        let mut r = result(status, None, mean.map(|m| Comparison { max_abs_diff: m, mean_abs_diff: m, ..Comparison::default() }));
+        r.case.family = Some(family.to_string());
+        r.case.label = label.to_string();
+        r.case.id = format!("fx.{label}");
+        r.notes = notes.iter().map(|g| format!("vfx: note: retime-fgbg: {g} some title: a stated rule")).collect();
+        r
+    }
+
+    #[test]
+    fn family_grades_count_each_family_and_settle_only_when_every_case_is_exact() {
+        let rs = vec![
+            family_result("gap-a", "gap-a-x", Status::Pass, Some(0.0), &[]),
+            family_result("gap-b", "gap-b-x", Status::Fail, Some(0.5), &[]),
+            family_result("gap-a", "gap-a-y", Status::Pass, Some(0.0), &[]),
+            family_result("gap-b", "gap-b-y", Status::NoReference, None, &[]),
+            result(Status::Pass, None, Some(Comparison::default())),
+        ];
+        let g = family_grades(&rs);
+        assert_eq!(g.len(), 2);
+        assert_eq!((g[0].family.as_str(), g[0].cases, g[0].compared, g[0].exact, g[0].failed, g[0].missing), ("gap-a", 2, 2, 2, 0, 0));
+        assert!(g[0].settled());
+        assert_eq!((g[1].cases, g[1].compared, g[1].exact, g[1].failed, g[1].missing), (2, 1, 0, 1, 1));
+        assert!(!g[1].settled());
+        // a family without a single compared case is not settled
+        assert!(!family_grades(&[family_result("gap-c", "gap-c-x", Status::NoReference, None, &[])])[0].settled());
+        // nor is a known family of which only some cases ran, however exact they are
+        let part = family_grades(&[family_result("gap-blurflow", "gap-blurflow-fgbg-display1-blur1-speed200", Status::Pass, Some(0.0), &[])]);
+        assert_eq!((part[0].cases, part[0].exact, part[0].full), (1, 1, 2));
+        assert!(!part[0].settled());
+        let both = [
+            family_result("gap-blurflow", "gap-blurflow-fgbg-display1-blur1-speed200", Status::Pass, Some(0.0), &[]),
+            family_result("gap-blurflow", "gap-blurflow-fgbg-display3-blur1-speed200", Status::Pass, Some(0.0), &[]),
+        ];
+        assert!(family_grades(&both)[0].settled());
+        let v = to_json(&rs, false);
+        assert_eq!(v["families"]["gap-a"], json!({"cases": 2, "compared": 2, "exact": 2, "failed": 0, "missing": 0, "settled": true}));
+        assert_eq!(v["families"]["gap-b"]["settled"], false);
+        assert_eq!(v["cases"][0]["family"], "gap-a");
+        assert_eq!(v["cases"][4].get("family"), None);
+        let text = human(&rs, false);
+        assert!(text.contains("\nfamilies\n  gap-a  2 cases, 2 compared, 2 bit exact, 0 FAIL, 0 no reference: settled, its note retires\n"), "{text}");
+        assert!(text.contains("  gap-b  2 cases, 1 compared, 0 bit exact, 1 FAIL, 1 no reference: open\n"), "{text}");
+        assert!(text.ends_with("3 pass, 1 FAIL, 1 no reference, 5 cases\n"), "{text}");
+    }
+
+    #[test]
+    fn a_report_without_family_cases_is_the_report_of_before() {
+        let rs = vec![result(Status::Pass, None, Some(Comparison::default())), failing(), result(Status::NoReference, None, None)];
+        assert!(family_grades(&rs).is_empty());
+        let v = to_json(&rs, false);
+        assert!(v.get("families").is_none());
+        assert!(v["cases"].as_array().unwrap().iter().all(|c| c.get("family").is_none() && c.get("notes").is_none()));
+        assert_eq!(v.as_object().unwrap().keys().collect::<Vec<_>>(), ["cases", "graded", "summary"]);
+        assert!(!human(&rs, false).contains("families"));
+        assert!(missing_notes(&rs).is_empty());
+    }
+
+    #[test]
+    fn a_family_case_that_prints_no_note_is_a_warning() {
+        // gap-shrink's cv-lo5-shrink-2 must note G1 and G1d
+        let label = "gap-shrink-cv-lo5-shrink-2";
+        let both = family_result("gap-shrink", label, Status::Pass, Some(0.0), &["G1", "G1b", "G1d"]);
+        assert!(missing_notes(&[both]).is_empty());
+        let none = family_result("gap-shrink", label, Status::Pass, Some(0.0), &[]);
+        let w = missing_notes(&[none]);
+        assert_eq!(w.len(), 1);
+        assert!(w[0].contains("fx.gap-shrink-cv-lo5-shrink-2 (gap-shrink) printed no note for G1 (matte shrink tail), G1d (create-vectors merge)"), "{}", w[0]);
+        let one = family_result("gap-shrink", label, Status::Fail, Some(0.1), &["G1d"]);
+        assert!(missing_notes(&[one])[0].contains("printed no note for G1 (matte shrink tail):"), "a failing comparison still ran vfx");
+        // no run, no judgement: no reference, or an error
+        assert!(missing_notes(&[family_result("gap-shrink", label, Status::NoReference, None, &[])]).is_empty());
+        let mut broken = family_result("gap-shrink", label, Status::Fail, None, &[]);
+        broken.error = Some("vfx exited with code 3: vfx: error: unsupported: x".into());
+        assert!(missing_notes(&[broken]).is_empty());
+        // the observing families and the Warp view expect nothing
+        assert!(missing_notes(&[family_result("gap-tiny", "gap-tiny-cv-1x1", Status::Pass, Some(0.0), &[])]).is_empty());
+        assert!(missing_notes(&[family_result("gap-debug", "gap-debug-cv-view1-track1", Status::Pass, Some(0.0), &[])]).is_empty());
+        // a case this build does not know: any note will do, unless its family only observes
+        let unknown = family_result("gap-shrink", "gap-shrink-future", Status::Pass, Some(0.0), &[]);
+        assert!(missing_notes(&[unknown])[0].contains("printed no note: its settings may no longer reach an open rule"));
+        assert!(missing_notes(&[family_result("gap-shrink", "gap-shrink-future", Status::Pass, Some(0.0), &["G2"])]).is_empty());
+        assert!(missing_notes(&[family_result("gap-keys", "gap-keys-future", Status::Pass, Some(0.0), &[])]).is_empty());
+        assert!(missing_notes(&[family_result("gap-later", "gap-later-x", Status::Pass, Some(0.0), &[])])[0].contains("printed no note"));
     }
 
     #[test]

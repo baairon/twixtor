@@ -1,0 +1,69 @@
+{
+ "baseline": {
+  "commit": "d74f402e38129dd387fd044b508bd005b02bdee4",
+  "ref": "d74f402"
+ },
+ "corpora": {
+  "L1": {
+   "differ": 0,
+   "identical": 1955,
+   "refused_at_baseline": 74,
+   "refused_now_render": 74,
+   "rendered_at_baseline": 1955
+  },
+  "L2": {
+   "differ": 0,
+   "identical": 6090,
+   "refused_at_baseline": 444,
+   "refused_now_render": 444,
+   "rendered_at_baseline": 6090
+  },
+  "L3": {
+   "differ": 0,
+   "identical": 5028,
+   "refused_at_baseline": 492,
+   "refused_now_render": 492,
+   "rendered_at_baseline": 5028
+  }
+ },
+ "date": "2026-10-28",
+ "definition": {
+  "L1": {
+   "gen": [
+    "--effects",
+    "retime,create-vectors,retime-fgbg,vectors-in,selftest-invert,selftest-shift,selftest-integrate,selftest-threads"
+   ],
+   "quality": "high",
+   "strip": "fgN_matte layers"
+  },
+  "L2": {
+   "gen": [
+    "--effects",
+    "retime,create-vectors,retime-fgbg,vectors-in",
+    "--sizes",
+    "2x2,3x2,4x4,5x4,8x8,9x8,16x16,17x16",
+    "--frames",
+    "6",
+    "--max-cases-per-effect",
+    "0"
+   ],
+   "quality": "high",
+   "strip": "fgN_matte layers"
+  },
+  "L3": {
+   "effects": [
+    "retime",
+    "retime-fgbg",
+    "create-vectors"
+   ],
+   "from": "L2",
+   "kind": "temporal",
+   "quality": "draft"
+  }
+ },
+ "rules": {
+  "identical": "the new vfx exits 0 with the same stdout SHA-256 and size and the same stderr SHA-256",
+  "rendered": "the baseline vfx exits 0 on the case",
+  "threads": "RAYON_NUM_THREADS removed: the default thread count"
+ }
+}

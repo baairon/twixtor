@@ -16,7 +16,7 @@
 mod common;
 
 use common::*;
-use fx_core::{Checkout, Depth, FxError};
+use fx_core::{Checkout, Depth};
 
 const A: Option<&str> = Some("alt_source_a");
 const B: Option<&str> = Some("alt_source_b");
@@ -235,14 +235,39 @@ fn fg_matte_probes_stop_at_the_first_empty_layer() {
 }
 
 #[test]
-fn the_multi_layer_plan_is_not_guessed() {
-    // FG1 Matte present and the plan needed: the plan of the multi layer path has entries of kind 2 that this
-    // front-end does not know, so the list is an error and not a guess
-    let r = rig(&[]).with_layer("fg1_matte", clip());
-    match r.deps(7) {
-        Err(FxError::Unsupported(m)) => assert!(m.starts_with("a FG Matte layer is set"), "{m}"),
-        other => panic!("{other:?}"),
+fn the_matte_layers_add_their_kind_2_entries_after_the_main_ones() {
+    // FG1 Matte present, Alt Source B set, half speed: the plan is (B 3), (B 4), (Main 3), (Main 4), then the kind 2
+    // entries (FG1 3), (FG1 4); each entry has its registrations and its own checkout
+    let r = rig(&[("speed_percent", "50")]).with_layer("alt_source_b", clip()).with_layer("fg1_matte", clip());
+    let got = r.deps(7).unwrap();
+    let mut want = vec![cp(None, 700), cp(A, 700), cp(None, 700), cp(B, 700), cp(FG1, 700), cp(FG2, 700)];
+    for (layer, position) in [(B, 3i64), (B, 4), (None, 3), (None, 4), (FG1, 3), (FG1, 4)] {
+        want.extend(d(700, position * 100, None));
+        want.push(cp(layer, position * 100));
     }
+    assert_eq!(got, want);
+    // three mattes on an exact frame (the fast path composes the displayed group, so the mattes are fetched there
+    // too): two main entries, then FG1, FG2, FG3 at the two frames, FG1 first; every Display but Source alike
+    let three = |display: &str| {
+        rig(&[("display", display)]).with_layer("fg1_matte", clip()).with_layer("fg2_matte", clip()).with_layer("fg3_matte", clip())
+    };
+    let mut want = vec![cp(None, 700), cp(A, 700), cp(None, 700), cp(B, 700), cp(FG1, 700), cp(FG2, 700), cp(FG3, 700)];
+    for (layer, position) in [(None, 7i64), (None, 8), (FG1, 7), (FG1, 8), (FG2, 7), (FG2, 8), (FG3, 7), (FG3, 8)] {
+        want.extend(d(700, position * 100, None));
+        want.push(cp(layer, position * 100));
+    }
+    for display in ["1", "3", "4", "5", "6"] {
+        assert_eq!(three(display).deps(7).unwrap(), want, "display {display}");
+    }
+    // input fields: the half frame times for the matte entries as for the others
+    let got = rig(&[("input_fields", "3")]).with_layer("fg1_matte", clip()).deps(7).unwrap();
+    let mut want = vec![cp(None, 700), cp(A, 700), cp(None, 700), cp(B, 700), cp(FG1, 700), cp(FG2, 700)];
+    for (layer, off, off2) in [(None, 700i64, 725i64), (None, 750, 775), (FG1, 700, 725), (FG1, 750, 775)] {
+        want.extend(d(700, off, Some(off2)));
+        want.push(cp(layer, off));
+        want.push(cp(layer, off2));
+    }
+    assert_eq!(got, want);
 }
 
 #[test]
@@ -269,7 +294,7 @@ fn earlier_hosts_have_no_extra_registrations() {
         blur: 0.0,
         register_layers: false,
     };
-    let got = checkouts(&req, &map, "unused").unwrap();
+    let got = checkouts(&req, &map).unwrap();
     assert_eq!(got, vec![cp(None, 700), cp(A, 700), cp(None, 700), cp(B, 700), cp(FG1, 700), cp(None, 700), cp(None, 800)]);
 }
 

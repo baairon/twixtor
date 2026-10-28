@@ -51,18 +51,18 @@ fn the_defaults_are_the_parameter_defaults() {
 
 #[test]
 fn popups_map_to_the_engine_arguments() {
-    // a14: Vector Resolution Normal (half res) -> 4, Full res -> 5
+    // Vector Resolution: Normal (half res) -> 4, Full res -> 5
     assert_eq!(settings(&[("vector_resolution", "1")], 0).vector_settings().quality, 4);
     assert_eq!(settings(&[("vector_resolution", "2")], 0).vector_settings().quality, 5);
-    // a10 and a15: Prep Contrast/Edge Enhance and Delinearize
+    // Prep: Contrast/Edge Enhance and Delinearize
     let p = |v: &str| {
         let s = settings(&[("prep", v)], 0).vector_settings();
         (s.prep_contrast_edge, s.prep_delinearize)
     };
     assert_eq!((p("1"), p("2"), p("3")), ((false, false), (true, false), (false, true)));
-    // a16: Track RGB+A
+    // Track RGB+A
     assert!(settings(&[("track_rgb_a", "1")], 0).vector_settings().track_rgb_a);
-    // a11: Debug View Method, Warp 4, Blend 0, Diff 1, Detail Compare 2, Edge Compare 3
+    // Debug View Method: Warp 4, Blend 0, Diff 1, Detail Compare 2, Edge Compare 3
     let codes: Vec<i32> = (1..=5).map(|v| settings(&[("debug_view_method", &v.to_string())], 0).debug_view_code()).collect();
     assert_eq!(codes, vec![4, 0, 1, 2, 3]);
     // Display: 1 Source, 2 Vectors, 3 Debug
@@ -150,8 +150,18 @@ fn every_parameter_the_glue_reads_exists() {
         "track_rgb_a",
         "main_bg_sensitivity",
         "main_bg_track",
+        "layers_output",
+        "fg1_matte_chan",
+        "fg1_sensitivity",
+        "fg1_inv_matte_shrink",
+        "fg1_track",
+        "fg3_track",
         "pt1_use",
         "pt12_use",
+        "pt1_pos",
+        "pt12_pos",
+        "pt1_color",
+        "pt12_color",
     ];
     for id in wanted {
         assert!(CreateVectors.params().iter().any(|p| p.id == id), "{id}");
@@ -208,4 +218,50 @@ fn the_draw_geom_overlay_covers_the_layers_the_popup_names() {
     // with fewer layers the value clamps to the last (Main_BG)
     assert_eq!(overlay_layers(5, 2), Some((1, 1)));
     assert_eq!(overlay_layers(6, 1), Some((0, 0)));
+}
+
+#[test]
+fn the_fg_controls_and_layers_output_are_read_at_current_time() {
+    let s = settings(&[], 0);
+    assert_eq!(s.layers_output, 1);
+    for fg in s.fg {
+        assert_eq!((fg.matte_chan, fg.track), (1, true));
+        assert_eq!(fg.sensitivity.to_bits(), (70.0f32 / 100.0f32).to_bits());
+        assert_eq!(fg.shrink, 0.0);
+    }
+    let s = settings(
+        &[("layers_output", "4"), ("fg2_matte_chan", "4"), ("fg2_sensitivity", "33.333"), ("fg2_inv_matte_shrink", "2.5@0;4.5@4"), ("fg3_track", "0")],
+        2,
+    );
+    assert_eq!(s.layers_output, 4);
+    assert_eq!(s.fg[1].matte_chan, 4);
+    assert_eq!(s.fg[1].sensitivity.to_bits(), (fixed_reader(float_to_fixed(33.333), 1.0) / 100.0f32).to_bits());
+    assert_eq!(s.fg[1].shrink, 3.5, "keyed, read at the current time, in pixels at the downsample ratio 1");
+    assert!(!s.fg[2].track && s.fg[0].track);
+    // the layers of a render: FG1 to FGn, then Main_BG with its own sensitivity and Track
+    let s = settings(&[("main_bg_sensitivity", "40"), ("main_bg_track", "0"), ("fg1_sensitivity", "10")], 0);
+    let l = s.layers(1);
+    assert_eq!(l.len(), 2);
+    assert_eq!((l[0].sensitivity, l[1].sensitivity, l[1].track, l[1].shrink), (0.1, 0.4, false, 0.0));
+    assert_eq!(s.layers(0).len(), 1);
+    assert_eq!(s.layers(3).len(), 4);
+}
+
+#[test]
+fn layer_points_put_each_point_on_its_layer_at_both_times() {
+    use create_vectors::glue::layer_points;
+    use retime_engine::points::UserPoint;
+    // Pt 1 on FG2, Pt 2 on Main_BG, Pt 3 Don't Use, Pt 4 changes layer between the two times
+    let r = rig(&[("pt1_use", "3"), ("pt1_pos", "10,20@1;12,21@2"), ("pt2_use", "5"), ("pt2_pos", "5,6"), ("pt4_use", "2@0;3@2")]);
+    let c = &r.curves;
+    let p = layer_points(c, 200, 100, 2);
+    assert_eq!(p.len(), 3);
+    assert_eq!(p[0], Vec::<UserPoint>::new());
+    assert_eq!(p[1], vec![UserPoint { at_a: [12.0, 21.0], at_b: [10.0, 20.0] }]);
+    assert_eq!(p[2], vec![UserPoint { at_a: [5.0, 6.0], at_b: [5.0, 6.0] }]);
+    // with no FG layer every point in use is on the only layer, in point order
+    let p = layer_points(c, 200, 100, 0);
+    assert_eq!(p, vec![vec![UserPoint { at_a: [12.0, 21.0], at_b: [10.0, 20.0] }, UserPoint { at_a: [5.0, 6.0], at_b: [5.0, 6.0] }]]);
+    // FG2 does not exist with one FG layer: Pt 1 goes to Main_BG
+    assert_eq!(layer_points(c, 200, 100, 1)[1].len(), 2);
 }

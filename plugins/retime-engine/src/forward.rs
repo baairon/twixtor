@@ -27,9 +27,9 @@
 //! float, so the integer depths round once at the very end. The Gouraud variant
 //! (`pyramid = false`) and a supersampled path are not supported.
 
-mod mesh;
-mod pyramid;
-mod raster;
+pub(crate) mod mesh;
+pub(crate) mod pyramid;
+pub(crate) mod raster;
 
 #[cfg(test)]
 mod tests;
@@ -163,7 +163,7 @@ fn convert(out: &mut Image, acc: &[f32]) {
 
 /// True when every flow component is within `0.0001` of zero (compared as doubles; NaN passes
 /// the test, since only `0.0001 < |v|` fails it).
-fn flow_is_zero(flow: &FlowField) -> bool {
+pub(crate) fn flow_is_zero(flow: &FlowField) -> bool {
     for &v in &flow.data {
         let a = if v < 0.0 { -v } else { v };
         if 0.0001f64 < (a as f64) {
@@ -286,11 +286,18 @@ pub fn forward_warp_with(
 /// and `F_BA` otherwise (`compose::vector::nearest_uses_f_ab(wa, 3)` says which one to solve).
 /// Holes stay transparent black.
 pub fn nearest_forward(out: &mut Image, a: &Image, b: &Image, flow: &FlowField, wa: f32) -> Result<()> {
+    nearest_forward_on(&crate::stages::Cpu, out, a, b, flow, wa)
+}
+
+/// [`nearest_forward`] with the forward warps on `stages`.
+pub fn nearest_forward_on(
+    stages: &dyn crate::stages::Stages,
+out: &mut Image, a: &Image, b: &Image, flow: &FlowField, wa: f32) -> Result<()> {
     #[allow(clippy::neg_cmp_op_on_partial_ord)]
     if !(0.5f32 > wa) {
-        forward_warp(out, a, flow, 1.0f32 - wa)
+        stages.forward_warp(out, a, flow, 1.0f32 - wa)
     } else {
-        forward_warp(out, b, flow, wa)
+        stages.forward_warp(out, b, flow, wa)
     }
 }
 
@@ -304,11 +311,25 @@ pub fn nearest_forward_fill(
     wa: f32,
     opts: SmartOpts,
 ) -> Result<()> {
+    nearest_forward_fill_on(&crate::stages::Cpu, out, a, b, flow, wa, opts)
+}
+
+/// [`nearest_forward_fill`] with the forward warps on `stages`.
+pub fn nearest_forward_fill_on(
+    stages: &dyn crate::stages::Stages,
+
+    out: &mut Image,
+    a: &Image,
+    b: &Image,
+    flow: &FlowField,
+    wa: f32,
+    opts: SmartOpts,
+) -> Result<()> {
     #[allow(clippy::neg_cmp_op_on_partial_ord)]
     let mut cov = if !(0.5f32 > wa) {
-        forward_warp_coverage(out, a, flow, 1.0f32 - wa)?
+        stages.forward_warp_coverage(out, a, flow, 1.0f32 - wa)?
     } else {
-        forward_warp_coverage(out, b, flow, wa)?
+        stages.forward_warp_coverage(out, b, flow, wa)?
     };
     cov.invert();
     fill_holes(out, &cov, opts.is360)
@@ -326,11 +347,25 @@ pub fn blend_forward(
     f_ba: &FlowField,
     wa: f32,
 ) -> Result<()> {
+    blend_forward_on(&crate::stages::Cpu, out, a, f_ab, b, f_ba, wa)
+}
+
+/// [`blend_forward`] with the forward warps on `stages`.
+pub fn blend_forward_on(
+    stages: &dyn crate::stages::Stages,
+
+    out: &mut Image,
+    a: &Image,
+    f_ab: &FlowField,
+    b: &Image,
+    f_ba: &FlowField,
+    wa: f32,
+) -> Result<()> {
     let frac = 1.0f32 - wa;
     let mut ta = Image::new(a.width, a.height, a.fmt());
-    forward_warp(&mut ta, a, f_ab, frac)?;
+    stages.forward_warp(&mut ta, a, f_ab, frac)?;
     let mut tb = Image::new(b.width, b.height, b.fmt());
-    forward_warp(&mut tb, b, f_ba, wa)?;
+    stages.forward_warp(&mut tb, b, f_ba, wa)?;
     blend_tail(out, &ta, &tb, frac, None, SmartOpts::default())
 }
 
@@ -346,11 +381,26 @@ pub fn blend_forward_fill(
     wa: f32,
     opts: SmartOpts,
 ) -> Result<()> {
+    blend_forward_fill_on(&crate::stages::Cpu, out, a, f_ab, b, f_ba, wa, opts)
+}
+
+/// [`blend_forward_fill`] with the forward warps on `stages`.
+pub fn blend_forward_fill_on(
+    stages: &dyn crate::stages::Stages,
+
+    out: &mut Image,
+    a: &Image,
+    f_ab: &FlowField,
+    b: &Image,
+    f_ba: &FlowField,
+    wa: f32,
+    opts: SmartOpts,
+) -> Result<()> {
     let frac = 1.0f32 - wa;
     let mut ta = Image::new(a.width, a.height, a.fmt());
-    let mut cov1 = forward_warp_coverage(&mut ta, a, f_ab, frac)?;
+    let mut cov1 = stages.forward_warp_coverage(&mut ta, a, f_ab, frac)?;
     let mut tb = Image::new(b.width, b.height, b.fmt());
-    let cov2 = forward_warp_coverage(&mut tb, b, f_ba, wa)?;
+    let cov2 = stages.forward_warp_coverage(&mut tb, b, f_ba, wa)?;
     blend_tail(out, &ta, &tb, frac, Some((&mut cov1, &cov2)), opts)
 }
 
@@ -365,11 +415,25 @@ pub fn weighted_forward(
     f_ba: &FlowField,
     wa: f32,
 ) -> Result<()> {
+    weighted_forward_on(&crate::stages::Cpu, out, a, f_ab, b, f_ba, wa)
+}
+
+/// [`weighted_forward`] with the forward warps on `stages`.
+pub fn weighted_forward_on(
+    stages: &dyn crate::stages::Stages,
+
+    out: &mut Image,
+    a: &Image,
+    f_ab: &FlowField,
+    b: &Image,
+    f_ba: &FlowField,
+    wa: f32,
+) -> Result<()> {
     let frac = 1.0f32 - wa;
     let mut ta = Image::new(a.width, a.height, a.fmt());
-    forward_warp(&mut ta, a, f_ab, frac)?;
+    stages.forward_warp(&mut ta, a, f_ab, frac)?;
     let mut tb = Image::new(b.width, b.height, b.fmt());
-    forward_warp(&mut tb, b, f_ba, wa)?;
+    stages.forward_warp(&mut tb, b, f_ba, wa)?;
     weighted_tail(out, &mut ta, a, &mut tb, b, wa, None, SmartOpts::default())
 }
 
@@ -385,10 +449,25 @@ pub fn weighted_forward_fill(
     wa: f32,
     opts: SmartOpts,
 ) -> Result<()> {
+    weighted_forward_fill_on(&crate::stages::Cpu, out, a, f_ab, b, f_ba, wa, opts)
+}
+
+/// [`weighted_forward_fill`] with the forward warps on `stages`.
+pub fn weighted_forward_fill_on(
+    stages: &dyn crate::stages::Stages,
+
+    out: &mut Image,
+    a: &Image,
+    f_ab: &FlowField,
+    b: &Image,
+    f_ba: &FlowField,
+    wa: f32,
+    opts: SmartOpts,
+) -> Result<()> {
     let frac = 1.0f32 - wa;
     let mut ta = Image::new(a.width, a.height, a.fmt());
-    let mut cov1 = forward_warp_coverage(&mut ta, a, f_ab, frac)?;
+    let mut cov1 = stages.forward_warp_coverage(&mut ta, a, f_ab, frac)?;
     let mut tb = Image::new(b.width, b.height, b.fmt());
-    let cov2 = forward_warp_coverage(&mut tb, b, f_ba, wa)?;
+    let cov2 = stages.forward_warp_coverage(&mut tb, b, f_ba, wa)?;
     weighted_tail(out, &mut ta, a, &mut tb, b, wa, Some((&mut cov1, &cov2)), opts)
 }

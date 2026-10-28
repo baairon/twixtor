@@ -51,6 +51,7 @@ dependencies = [
  "fx-core",
  "rayon",
  "retime",
+ "retime-engine",
  "retime-fgbg",
  "serde",
  "serde_json",

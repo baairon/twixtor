@@ -29,8 +29,14 @@
 //! coarsest level that has support). Colour and alpha are filled independently: a transparent
 //! hole next to opaque pixels becomes opaque.
 //!
-//! The 360 variant (`is360`, which wraps horizontally) is not supported: with at least one hole
-//! it returns `FxError::Unsupported`.
+//! The 360 variant (`is360`, parity gap G6; the mode itself is U) treats the image as periodic in x. With the flag
+//! every step above is the same except the horizontal ones: the horizontal pass of each blur is
+//! circular (`blur5_wrapx` and `blur_gaussian_wrapx`: the interior chain of the plain pass with the
+//! tap index taken modulo the level width, no border renormalisation) and the horizontal resample
+//! keeps the period (`resample1_wrapx`: `sx = sw / dw`, the right neighbour of the last column is
+//! column 0). The vertical passes, the level sizes, the load, the combine and the write back are
+//! unchanged. Without a hole it is the identity as well, and the flag off is the plain fill above,
+//! bit for bit. A wrapped fill that runs records G6 (`fx_core::gaps::record`).
 //!
 //! Numerics: every arithmetic step is a single precision operation of the reused primitives
 //! (`crate::flow::conv`, `crate::flow::sample`, no fused multiply add, no reciprocal estimate) or
@@ -38,8 +44,8 @@
 //! depend on the thread count.
 
 use crate::blend::cvtt;
-use crate::flow::conv::{blur5, blur_gaussian};
-use crate::flow::sample::resample1;
+use crate::flow::conv::{blur5, blur5_wrapx, blur_gaussian, blur_gaussian_wrapx};
+use crate::flow::sample::{resample1, resample1_wrapx};
 use crate::flow::FlowField;
 use crate::image::{Image, Samples, CHANNELS};
 use crate::warp::Coverage;
@@ -128,16 +134,56 @@ pub fn geometry(w: usize, h: usize) -> Geometry {
     Geometry { dims, top: n - 1 }
 }
 
+/// The horizontal mode of the pyramid passes: the plain passes of the fill, or the wrap-around
+/// (360) passes of the `is360` flag (circular horizontal blurs, the horizontal resample keeps the
+/// period). The vertical passes are the same in both.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Passes {
+    Plain,
+    WrapX,
+}
+
+impl Passes {
+    /// The pull filter: `blur5` (or `blur5_wrapx`) of a 1 channel level.
+    #[inline]
+    fn blur5(self, data: &mut [f32], w: usize, h: usize) {
+        match self {
+            Passes::Plain => blur5(data, w, h),
+            Passes::WrapX => blur5_wrapx(data, w, h),
+        }
+    }
+
+    /// The level to level resample: `resample1` (or `resample1_wrapx`).
+    #[inline]
+    fn resample(self, src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
+        match self {
+            Passes::Plain => resample1(src, sw, sh, dw, dh),
+            Passes::WrapX => resample1_wrapx(src, sw, sh, dw, dh),
+        }
+    }
+
+    /// The push blur: the Gaussian of radius [`GAUSS_RADIUS`] (or its wrapped variant).
+    #[inline]
+    fn gauss(self, data: &mut [f32], w: usize, h: usize) {
+        match self {
+            Passes::Plain => blur_gaussian(data, w, h, 1, GAUSS_RADIUS),
+            Passes::WrapX => blur_gaussian_wrapx(data, w, h, 1, GAUSS_RADIUS),
+        }
+    }
+}
+
 /// The part of the fill that depends only on the hole mask: the weight pyramid. It is the same
 /// for every channel, so it is built once.
 struct Filler {
     geo: Geometry,
     hole: Vec<bool>,
     wts: Vec<Vec<f32>>,
+    passes: Passes,
 }
 
 impl Filler {
-    /// `None` when the mask has no hole (the fill is the identity then).
+    /// `None` when the mask has no hole (the fill is the identity then, with or without the 360
+    /// flag). With `is360` and a hole the wrapped passes run and G6 is recorded.
     fn new(w: usize, h: usize, mask: HoleMaskRef<'_>, is360: bool) -> Result<Option<Filler>> {
         if mask.len() != w * h {
             return Err(FxError::Mismatch(format!(
@@ -151,16 +197,17 @@ impl Filler {
         if !hole.iter().any(|&b| b) {
             return Ok(None);
         }
-        if is360 {
-            return Err(FxError::Unsupported(
-                "hole fill with the 360 flag set: the wrapping blur and resample modes are not implemented".into(),
-            ));
-        }
         if w < 2 || h < 2 {
             return Err(FxError::Unsupported(format!(
                 "hole fill of a {w}x{h} image: the pyramid resample divides by zero for a dimension of 1"
             )));
         }
+        let passes = if is360 {
+            fx_core::gaps::record(&crate::gaps::G6);
+            Passes::WrapX
+        } else {
+            Passes::Plain
+        };
         let geo = geometry(w, h);
         let mut wts: Vec<Vec<f32>> = Vec::with_capacity(geo.top + 1);
         wts.push(hole.iter().map(|&b| if b { 0.0f32 } else { 1.0f32 }).collect());
@@ -168,16 +215,17 @@ impl Filler {
             let (pw, ph) = geo.dims[k - 1];
             let (cw, ch) = geo.dims[k];
             let mut tmp = wts[k - 1].clone();
-            blur5(&mut tmp, pw, ph);
-            wts.push(resample1(&tmp, pw, ph, cw, ch));
+            passes.blur5(&mut tmp, pw, ph);
+            wts.push(passes.resample(&tmp, pw, ph, cw, ch));
         }
-        Ok(Some(Filler { geo, hole, wts }))
+        Ok(Some(Filler { geo, hole, wts, passes }))
     }
 
     /// Fills one channel in place. `plane` holds the native units of the depth (0..255,
     /// 0..65535, any float).
     fn fill(&self, plane: &mut [f32]) {
         let geo = &self.geo;
+        let passes = self.passes;
         // load: the value image of level 0, holes zeroed
         let mut vals: Vec<Vec<f32>> = Vec::with_capacity(geo.top + 1);
         let mut v0 = plane.to_vec();
@@ -192,8 +240,8 @@ impl Filler {
             let (pw, ph) = geo.dims[k - 1];
             let (cw, ch) = geo.dims[k];
             let mut tmp = vals[k - 1].clone();
-            blur5(&mut tmp, pw, ph);
-            vals.push(resample1(&tmp, pw, ph, cw, ch));
+            passes.blur5(&mut tmp, pw, ph);
+            vals.push(passes.resample(&tmp, pw, ph, cw, ch));
         }
         // push
         let (tw, th) = geo.dims[geo.top];
@@ -201,12 +249,12 @@ impl Filler {
         for level in (0..=geo.top).rev() {
             let (lw, lh) = geo.dims[level];
             combine(&mut sol, &vals[level], &self.wts[level]);
-            blur_gaussian(&mut sol, lw, lh, 1, GAUSS_RADIUS);
+            passes.gauss(&mut sol, lw, lh);
             if level == 0 {
                 combine(&mut sol, &vals[0], &self.wts[0]);
             } else {
                 let (nw, nh) = geo.dims[level - 1];
-                sol = resample1(&sol, lw, lh, nw, nh);
+                sol = passes.resample(&sol, lw, lh, nw, nh);
             }
         }
         plane.copy_from_slice(&sol);
@@ -253,7 +301,8 @@ fn store_u16(x: f32) -> u16 {
 }
 
 /// Hole fill of a single float channel plane in native units (the f32 core of the hole fill,
-/// without the depth conversions). `mask` has `w * h` entries.
+/// without the depth conversions). `mask` has `w * h` entries. `is360` selects the wrap-around
+/// passes (module header); `false` is the plain fill.
 pub fn fill_plane(plane: &mut [f32], w: usize, h: usize, mask: HoleMaskRef<'_>, is360: bool) -> Result<()> {
     if plane.len() != w * h {
         return Err(FxError::Mismatch("hole fill: plane length does not match its size".into()));
@@ -278,7 +327,10 @@ pub fn fill_holes(img: &mut Image, holes: &Coverage, is360: bool) -> Result<()> 
 }
 
 /// The hole fill of an engine image with a hole mask of u8, u16 or f32 type. Without a hole the
-/// image is returned unchanged (the fill is the identity then).
+/// image is returned unchanged (the fill is the identity then, with either flag). `is360` selects
+/// the wrap-around passes (module header): the image is periodic in x, so a hole on the left or
+/// right border is filled from both sides of the seam. A hole and a side of 1 pixel is
+/// `FxError::Unsupported` with either flag.
 pub fn fill_holes_masked(img: &mut Image, mask: HoleMaskRef<'_>, is360: bool) -> Result<()> {
     let (w, h) = (img.width, img.height);
     let Some(filler) = Filler::new(w, h, mask, is360)? else {
@@ -322,7 +374,7 @@ pub fn fill_holes_masked(img: &mut Image, mask: HoleMaskRef<'_>, is360: bool) ->
 
 /// The hole fill applied to a two channel float flow image (Vectors In: decode with
 /// `vectors::decode_vectors_with_holes`, fill, then `vectors::apply_vec_scale`). The mask has the
-/// size of the flow.
+/// size of the flow; `is360` as in [`fill_holes_masked`].
 pub fn fill_flow_holes(flow: &mut FlowField, mask: HoleMaskRef<'_>, is360: bool) -> Result<()> {
     let (w, h) = (flow.width, flow.height);
     if flow.data.len() != w * h * 2 {

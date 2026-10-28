@@ -1,0 +1,333 @@
+{
+ "generator": "tools/gen_docs.py",
+ "note": "Generated from docs/data/ and scans of the tree; do not edit. Each fact: value, the text a marker shows, and its source.",
+ "facts": {
+  "controls_total": {
+   "value": 176,
+   "text": "176",
+   "source": "docs/data/controls.tsv rows"
+  },
+  "controls_params": {
+   "value": 159,
+   "text": "159",
+   "source": "docs/data/controls.tsv rows whose kind is not layer"
+  },
+  "controls_layers": {
+   "value": 17,
+   "text": "17",
+   "source": "docs/data/controls.tsv rows of kind layer"
+  },
+  "effects_total": {
+   "value": 4,
+   "text": "4",
+   "source": "docs/data/controls.tsv distinct effect"
+  },
+  "gaps_open": {
+   "value": 13,
+   "text": "13",
+   "source": "docs/data/gaps.tsv rows"
+  },
+  "gap_controls": {
+   "value": 57,
+   "text": "57",
+   "source": "docs/data/gaps.tsv distinct (effect, control) pairs of effects x controls"
+  },
+  "gap_controls_pct": {
+   "value": 32.4,
+   "text": "32.4",
+   "source": "gap_controls over controls_total"
+  },
+  "family_cases": {
+   "value": 117,
+   "text": "117",
+   "source": "docs/data/references.tsv rows"
+  },
+  "families_total": {
+   "value": 14,
+   "text": "14",
+   "source": "docs/data/references.tsv distinct family"
+  },
+  "graded_cases": {
+   "value": 0,
+   "text": "0",
+   "source": "docs/data/references.tsv rows with result pass"
+  },
+  "graded_failed": {
+   "value": 0,
+   "text": "0",
+   "source": "docs/data/references.tsv rows with result fail"
+  },
+  "graded_missing": {
+   "value": 117,
+   "text": "117",
+   "source": "docs/data/references.tsv rows with result missing"
+  },
+  "graded_pct": {
+   "value": 0.0,
+   "text": "0.0",
+   "source": "graded_cases over family_cases"
+  },
+  "graded_controls": {
+   "value": 0,
+   "text": "0",
+   "source": "docs/data/references.tsv (effect, control) pairs set by a pass row and by no fail row, that docs/data/controls.tsv lists"
+  },
+  "unproven": {
+   "value": 176,
+   "text": "176",
+   "source": "controls_total minus graded_controls"
+  },
+  "unproven_pct": {
+   "value": 100.0,
+   "text": "100.0",
+   "source": "unproven over controls_total"
+  },
+  "fixtures_total": {
+   "value": 17,
+   "text": "17",
+   "source": "scan of crates/ and plugins/ for *.hex"
+  },
+  "model_fixtures": {
+   "value": 11,
+   "text": "11",
+   "source": "scan of crates/ and plugins/ for *.hex, kind model (a generator documents b\"MAGIC\", u32 ncases)"
+  },
+  "model_cases": {
+   "value": 794,
+   "text": "794",
+   "source": "scan of crates/ and plugins/ for *.hex, sum of the header case counts of the model fixtures"
+  },
+  "model_bytes": {
+   "value": 4322375,
+   "text": "4,322,375",
+   "source": "scan of crates/ and plugins/ for *.hex, decoded bytes of the model fixtures"
+  },
+  "differential_fixtures": {
+   "value": 6,
+   "text": "6",
+   "source": "scan of crates/ and plugins/ for *.hex, kind differential (the generator says not bit exact)"
+  },
+  "lock_ref": {
+   "value": "d74f402",
+   "text": "d74f402",
+   "source": "docs/data/lock.json baseline commit, 7 digits"
+  },
+  "lock_date": {
+   "value": "2026-10-28",
+   "text": "2026-10-28",
+   "source": "docs/data/lock.json date"
+  },
+  "lock_l1_total": {
+   "value": 1955,
+   "text": "1,955",
+   "source": "docs/data/lock.json corpora.L1.rendered_at_baseline"
+  },
+  "lock_l1_identical": {
+   "value": 1955,
+   "text": "1,955",
+   "source": "docs/data/lock.json corpora.L1.identical"
+  },
+  "lock_l1_refused": {
+   "value": 74,
+   "text": "74",
+   "source": "docs/data/lock.json corpora.L1.refused_at_baseline"
+  },
+  "lock_l1_refused_render": {
+   "value": 74,
+   "text": "74",
+   "source": "docs/data/lock.json corpora.L1.refused_now_render"
+  },
+  "lock_l2_total": {
+   "value": 6090,
+   "text": "6,090",
+   "source": "docs/data/lock.json corpora.L2.rendered_at_baseline"
+  },
+  "lock_l2_identical": {
+   "value": 6090,
+   "text": "6,090",
+   "source": "docs/data/lock.json corpora.L2.identical"
+  },
+  "lock_l2_refused": {
+   "value": 444,
+   "text": "444",
+   "source": "docs/data/lock.json corpora.L2.refused_at_baseline"
+  },
+  "lock_l2_refused_render": {
+   "value": 444,
+   "text": "444",
+   "source": "docs/data/lock.json corpora.L2.refused_now_render"
+  },
+  "lock_l3_total": {
+   "value": 5028,
+   "text": "5,028",
+   "source": "docs/data/lock.json corpora.L3.rendered_at_baseline"
+  },
+  "lock_l3_identical": {
+   "value": 5028,
+   "text": "5,028",
+   "source": "docs/data/lock.json corpora.L3.identical"
+  },
+  "lock_l3_refused": {
+   "value": 492,
+   "text": "492",
+   "source": "docs/data/lock.json corpora.L3.refused_at_baseline"
+  },
+  "lock_l3_refused_render": {
+   "value": 492,
+   "text": "492",
+   "source": "docs/data/lock.json corpora.L3.refused_now_render"
+  },
+  "lock_total": {
+   "value": 13073,
+   "text": "13,073",
+   "source": "docs/data/lock.json sum of rendered_at_baseline"
+  },
+  "lock_identical": {
+   "value": 13073,
+   "text": "13,073",
+   "source": "docs/data/lock.json sum of identical"
+  },
+  "lock_differ": {
+   "value": 0,
+   "text": "0",
+   "source": "docs/data/lock.json sum of differ"
+  },
+  "lock_pct": {
+   "value": 100.0,
+   "text": "100.0",
+   "source": "lock_identical over lock_total"
+  },
+  "lock_refused": {
+   "value": 1010,
+   "text": "1,010",
+   "source": "docs/data/lock.json sum of refused_at_baseline"
+  },
+  "lock_refused_render": {
+   "value": 1010,
+   "text": "1,010",
+   "source": "docs/data/lock.json sum of refused_now_render"
+  },
+  "tests_rust": {
+   "value": 1469,
+   "text": "1,469",
+   "source": "scan of `#[test]` lines in the .rs files of every crate"
+  },
+  "tests_rust_ignored": {
+   "value": 15,
+   "text": "15",
+   "source": "scan of `#[ignore` lines, every crate"
+  },
+  "tests_rust_fx_cli": {
+   "value": 133,
+   "text": "133",
+   "source": "scan of `#[test]` lines in the .rs files of fx-cli"
+  },
+  "tests_rust_fx_core": {
+   "value": 52,
+   "text": "52",
+   "source": "scan of `#[test]` lines in the .rs files of fx-core"
+  },
+  "tests_rust_fx_parity": {
+   "value": 170,
+   "text": "170",
+   "source": "scan of `#[test]` lines in the .rs files of fx-parity"
+  },
+  "tests_rust_create_vectors": {
+   "value": 91,
+   "text": "91",
+   "source": "scan of `#[test]` lines in the .rs files of create-vectors"
+  },
+  "tests_rust_retime": {
+   "value": 67,
+   "text": "67",
+   "source": "scan of `#[test]` lines in the .rs files of retime"
+  },
+  "tests_rust_retime_engine": {
+   "value": 755,
+   "text": "755",
+   "source": "scan of `#[test]` lines in the .rs files of retime-engine"
+  },
+  "tests_rust_retime_fgbg": {
+   "value": 101,
+   "text": "101",
+   "source": "scan of `#[test]` lines in the .rs files of retime-fgbg"
+  },
+  "tests_rust_vectors_in": {
+   "value": 100,
+   "text": "100",
+   "source": "scan of `#[test]` lines in the .rs files of vectors-in"
+  },
+  "tests_python": {
+   "value": 592,
+   "text": "592",
+   "source": "scan of `def test_` lines in tools/test_*.py"
+  },
+  "tests_py_apply": {
+   "value": 110,
+   "text": "110",
+   "source": "scan of `def test_` lines in tools/test_apply.py"
+  },
+  "tests_py_apply_geometry": {
+   "value": 22,
+   "text": "22",
+   "source": "scan of `def test_` lines in tools/test_apply_geometry.py"
+  },
+  "tests_py_apply_hdr": {
+   "value": 38,
+   "text": "38",
+   "source": "scan of `def test_` lines in tools/test_apply_hdr.py"
+  },
+  "tests_py_audio_map": {
+   "value": 26,
+   "text": "26",
+   "source": "scan of `def test_` lines in tools/test_audio_map.py"
+  },
+  "tests_py_conformance": {
+   "value": 47,
+   "text": "47",
+   "source": "scan of `def test_` lines in tools/test_conformance.py"
+  },
+  "tests_py_docgen": {
+   "value": 38,
+   "text": "38",
+   "source": "scan of `def test_` lines in tools/test_docgen.py"
+  },
+  "tests_py_ffstage": {
+   "value": 25,
+   "text": "25",
+   "source": "scan of `def test_` lines in tools/test_ffstage.py"
+  },
+  "tests_py_handoff": {
+   "value": 154,
+   "text": "154",
+   "source": "scan of `def test_` lines in tools/test_handoff.py"
+  },
+  "tests_py_parity_lock": {
+   "value": 21,
+   "text": "21",
+   "source": "scan of `def test_` lines in tools/test_parity_lock.py"
+  },
+  "tests_py_repeat_keys": {
+   "value": 9,
+   "text": "9",
+   "source": "scan of `def test_` lines in tools/test_repeat_keys.py"
+  },
+  "tests_py_speed_curve": {
+   "value": 32,
+   "text": "32",
+   "source": "scan of `def test_` lines in tools/test_speed_curve.py"
+  },
+  "tests_py_stages": {
+   "value": 70,
+   "text": "70",
+   "source": "scan of `def test_` lines in tools/test_stages.py"
+  }
+ },
+ "blocks": {
+  "gaps": "docs/data/gaps.tsv, graded cases from docs/data/references.tsv",
+  "families": "docs/data/references.tsv by family",
+  "fixtures": "scan of crates/ and plugins/ for *.hex",
+  "lock": "docs/data/lock.json corpora",
+  "tests": "scan of the .rs files of every crate and of tools/test_*.py"
+ }
+}

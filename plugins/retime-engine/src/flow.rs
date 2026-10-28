@@ -5,6 +5,18 @@
 //! The returned flow lives at the WORKING resolution of the estimator (`FlowSettings::geometry`),
 //! not at the output resolution: it has the size `(W >> R, H >> R)` and every warp resamples it
 //! bilinearly.
+//!
+//! The layered paths reach the same solver through [`extras::solve_pyramids_with`] (a layer's
+//! mask pyramids and its user displacement), and `FlowSettings::wrap` selects the
+//! wrap-around (360) variants of the kernels (rule G6) and of the filters that build the
+//! solver's input: the reduction to the working size, the band pass pyramid of [`build_pyramid`]
+//! and the mask pyramid are circular in x under the flag (G6, U; see [`build_pyramid`]). The
+//! plain kernels and the plain driver are those of the single layer path and are untouched:
+//! [`solve_pyramids`] with wrap off runs only them, so every setting without extras gives the
+//! bytes it gave before the variants existed. Each variant is the kernel it varies with its extra
+//! input applied; every one is single precision in the order written, with no fused multiply add,
+//! rows in parallel through rayon row chunks only, so its output does not depend on the thread
+//! count.
 
 use fx_core::FxError;
 use rayon::prelude::*;
@@ -13,9 +25,14 @@ use crate::image::Image;
 use crate::prep::{self, Plane};
 
 pub(crate) mod conv;
+pub mod extras;
 pub(crate) mod sample;
+#[cfg(test)]
+mod tests_extras;
+#[cfg(test)]
+mod tests_pyramid;
 
-use sample::{bilinear1, bilinear2, cvtt};
+use sample::{bilinear1, bilinear1_wrapx_at, bilinear2, bilinear2_wrapx, cvtt};
 
 /// A two channel f32 vector field, row major, interleaved `(dx, dy)` per pixel. Units are pixels
 /// of the image the field belongs to.
@@ -82,10 +99,18 @@ pub struct FlowSettings {
     pub video_range_luma: bool,
     /// Skips the block matching refinement. The engine always passes false.
     pub skip_refine: bool,
+    /// Wrap-around (360) solve (rule G6): the horizontal gradient, the B vector step and the
+    /// block matching take their columns modulo the width, the solver's Gaussians and the flow
+    /// upsample are periodic in x, and the range check tests y only (see
+    /// [`extras::solve_pyramids_with`]: rotating both inputs by `k` columns rotates the solved flow
+    /// by `k` columns, bit for bit, U). It also reaches the solver's input (G6, U): the
+    /// reduction to the working size, the band pass pyramid of [`build_pyramid`] and
+    /// [`extras::MaskPyramid::build`] use the circular horizontal passes. Default false.
+    pub wrap: bool,
 }
 
 impl FlowSettings {
-    /// The retime path: no prep, no alpha, normal luma, block matching on.
+    /// The retime path: no prep, no alpha, normal luma, block matching on, no wrap.
     pub fn new(quality: u8, hiq: bool, sensitivity: f32) -> FlowSettings {
         FlowSettings {
             quality,
@@ -96,6 +121,7 @@ impl FlowSettings {
             track_alpha: false,
             video_range_luma: false,
             skip_refine: false,
+            wrap: false,
         }
     }
 
@@ -200,26 +226,40 @@ fn subtract_in_place(a: &mut [f32], b: &[f32]) {
 /// Pyramid builder: luma, reduction to the working size, Delinearize then Contrast/Edge Enhance on
 /// level 0 (when enabled), then for every level `band_i = orig_i - blur5(orig_i)` with
 /// `orig_{i+1} = resample(blur5(orig_i))`.
+///
+/// With `settings.wrap` (rule G6, U: whether the original's pyramid filters wrap is not
+/// established; this project states that every horizontal blur and resample that builds the solver's
+/// input is circular under the flag) the same steps run with the circular horizontal passes:
+/// `prep::reduce_with`, `prep::edge_enhance_with`, `prep::blur5_with` and `prep::resample_with`
+/// with the flag (the `_wrapx` primitives: tap indices modulo the width, no border
+/// renormalisation, the resample keeps the period with `sx = sw / dw`); the vertical passes, the
+/// level sizes, Delinearize (per pixel) and the subtraction are unchanged. Without the flag each
+/// step is the plain function, bit for bit. When the frame width is divisible by `2^(R + L - 1)`
+/// (`R` halvings, `L` levels, so every resampled width is even) a circular rotation of the frame
+/// by a multiple of `2^(R + L - 1)` columns rotates every level `l` by that multiple divided by
+/// `2^(R + l)`, bit for bit; an odd width at some halving keeps the period but samples between
+/// columns there.
 pub fn build_pyramid(img: &Image, settings: &FlowSettings) -> Result<Pyramid, FxError> {
     let geometry = settings.geometry(img.width, img.height)?;
+    let wrap = settings.wrap;
     let luma = prep::luma(img, settings.track_alpha, settings.video_range_luma)?;
-    let mut level0 = prep::reduce(luma, geometry.reduction);
+    let mut level0 = prep::reduce_with(luma, geometry.reduction, wrap);
     debug_assert_eq!((level0.width, level0.height), (geometry.width, geometry.height));
     if settings.prep_delinearize {
         prep::delinearize(&mut level0);
     }
     if settings.prep_contrast_edge {
-        prep::edge_enhance(&mut level0);
+        prep::edge_enhance_with(&mut level0, wrap);
     }
     let n = geometry.levels;
     let mut orig = level0;
     let mut bands: Vec<Plane> = Vec::with_capacity(n);
     for i in 0..n {
         let mut tmp = orig.clone();
-        prep::blur5(&mut tmp);
+        prep::blur5_with(&mut tmp, wrap);
         let next = if i + 1 < n {
             let (nw, nh) = geometry.sizes[i + 1];
-            Some(prep::resample(&tmp, nw, nh))
+            Some(prep::resample_with(&tmp, nw, nh, wrap))
         } else {
             None
         };
@@ -276,7 +316,7 @@ pub(crate) fn calc_grad(img: &[f32], w: usize, h: usize) -> Vec<f32> {
 }
 
 /// Structure tensor: `(gx*gx, gx*gy, gy*gy)`, 3 channels.
-fn calc_a(grad: &[f32], w: usize, h: usize) -> Vec<f32> {
+pub(crate) fn calc_a(grad: &[f32], w: usize, h: usize) -> Vec<f32> {
     let mut a = vec![0.0f32; w * h * 3];
     a.par_chunks_mut(3).zip(grad.par_chunks(2)).for_each(|(o, g)| {
         let (gx, gy) = (g[0], g[1]);
@@ -291,7 +331,7 @@ fn calc_a(grad: &[f32], w: usize, h: usize) -> Vec<f32> {
 /// `(sx, sy) = (x - d.x, y - d.y)`; outside `[0, w-1] x [0, h-1]` the result is `(0, 0)`,
 /// else `r = bilinear(I0, sx, sy) - I1(x, y)` and `B = (r * gx, r * gy)`. The pixel
 /// coordinates are single precision values (exact for these sizes).
-fn calc_b(i1: &[f32], i0: &[f32], grad: &[f32], flow: &[f32], w: usize, h: usize) -> Vec<f32> {
+pub(crate) fn calc_b(i1: &[f32], i0: &[f32], grad: &[f32], flow: &[f32], w: usize, h: usize) -> Vec<f32> {
     let mut b = vec![0.0f32; w * h * 2];
     let fw = w as f32;
     let fh = h as f32;
@@ -318,7 +358,7 @@ fn calc_b(i1: &[f32], i0: &[f32], grad: &[f32], flow: &[f32], w: usize, h: usize
 
 /// New displacement: `t = b*b - dd*a`; if `|t| > 40.0`
 /// `d.x = (b*by - dd*bx) / t + d.x`, `d.y = (b*bx - a*by) / t + d.y`.
-fn new_disp(flow: &mut [f32], a: &[f32], b: &[f32]) {
+pub(crate) fn new_disp(flow: &mut [f32], a: &[f32], b: &[f32]) {
     flow.par_chunks_mut(2).zip(a.par_chunks(3)).zip(b.par_chunks(2)).for_each(|((d, t3), bb)| {
         let (aa, ab, ad) = (t3[0], t3[1], t3[2]);
         let (bx, by) = (bb[0], bb[1]);
@@ -333,7 +373,7 @@ fn new_disp(flow: &mut [f32], a: &[f32], b: &[f32]) {
 /// Upsampling of the flow to the next finer level: corner aligned,
 /// `sx = ((f32) dst_w - 1.0) / (f32)(src_w - 1)`, `rx = (f32)(1.0 / (f64) sx)`, the source
 /// position is `(x * rx, y * ry)`, the sampled vector is multiplied by `(sx, sy)`.
-fn upsample_flow(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
+pub(crate) fn upsample_flow(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
     let sx = (dw as f32 - 1.0f32) / ((sw as i32 - 1) as f32);
     let sy = (dh as f32 - 1.0f32) / ((sh as i32 - 1) as f32);
     let rx = (1.0f64 / (sx as f64)) as f32;
@@ -350,8 +390,33 @@ fn upsample_flow(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec
     dst
 }
 
+/// Upsampling of the flow of a wrap solve to the next finer level (rule G6, U, ours): periodic in
+/// x, the period keeping rule of the wrap pyramid's resample (`flow::build_pyramid`):
+/// `sx = (f32) dw / (f32) sw`, `rx = (f32) sw / (f32) dw`, the source column `x * rx` and the
+/// right neighbour of the last column column 0 ([`sample::bilinear2_wrapx`]); the rows corner
+/// aligned exactly as in [`upsample_flow`] (`sy`, `ry` and the row rule of [`bilinear2`]). The
+/// sampled vector is multiplied by `(sx, sy)`. When `dw = 2 sw`, `rx = 0.5` and every source
+/// column is exact, so rotating the coarse field by `k` columns rotates the fine one by `2 k`, bit
+/// for bit.
+pub(crate) fn upsample_flow_wrapx(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
+    let sx = dw as f32 / sw as f32;
+    let rx = sw as f32 / dw as f32;
+    let sy = (dh as f32 - 1.0f32) / ((sh as i32 - 1) as f32);
+    let ry = (1.0f64 / (sy as f64)) as f32;
+    let mut dst = vec![0.0f32; dw * dh * 2];
+    dst.par_chunks_mut(dw * 2).enumerate().for_each(|(y, row)| {
+        let fy = (y as i32 as f32) * ry;
+        for x in 0..dw {
+            let v = bilinear2_wrapx(src, sw, sh, (x as i32 as f32) * rx, fy);
+            row[x * 2] = v[0] * sx;
+            row[x * 2 + 1] = v[1] * sy;
+        }
+    });
+    dst
+}
+
 /// `p = f * p` for every value; `f == 1.0` leaves the data untouched.
-fn scale_values(data: &mut [f32], f: f32) {
+pub(crate) fn scale_values(data: &mut [f32], f: f32) {
     if f == 1.0 {
         return;
     }
@@ -359,7 +424,7 @@ fn scale_values(data: &mut [f32], f: f32) {
 }
 
 /// True when no pixel satisfies `0 <= x + u <= w-1 && 0 <= y + v <= h-1` (note the plus sign).
-fn all_flow_out_of_range(flow: &[f32], w: usize, h: usize) -> bool {
+pub(crate) fn all_flow_out_of_range(flow: &[f32], w: usize, h: usize) -> bool {
     let fw = (w - 1) as f32;
     let fh = (h - 1) as f32;
     let any = flow.par_chunks(w * 2).enumerate().any(|(y, row)| {
@@ -480,7 +545,7 @@ impl<'a> Block<'a> {
 /// The four sweeps of one level: left to right, right to left, top to bottom, bottom to top over
 /// the interior pixels, in place, each pixel compared with the already updated neighbour behind
 /// it. Rows (sweeps 1 and 2) and columns (3 and 4) are independent.
-fn block_match(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: usize) {
+pub(crate) fn block_match(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: usize) {
     if w < 3 || h < 3 {
         return;
     }
@@ -554,16 +619,481 @@ fn block_match(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: usize) {
 }
 
 // ---------------------------------------------------------------------------------------
+// Kernel variants of the layered and the wrap-around solves
+//
+// Each variant is the plain kernel above with its extra input applied, and the plain kernels
+// stay as they are: the plain driver calls only them. Claim tags: V established, I inferred,
+// U not established, the rule of this project (gaps G1b and G6 of the register).
+
+/// A level mask value counts as inside the layer when it is at least this: the matte is
+/// binarized with it, and the solver's "mask is 0" tests compare against it. The mask levels
+/// hold only 0.0 and 1.0, so "below 0.95" and "0" are the same test there.
+pub(crate) const MASK_ON: f32 = 0.95;
+
+/// The B vector step of a layered solve needs the warped mask of `Y` at its target to be at least
+/// this, else `B = (0, 0)`.
+const WARPED_MASK_MIN: f32 = 0.999;
+
+/// Upper bound, in widths, of the horizontal displacement a wrap solve still wraps: the bound of
+/// the inverse warp's 360 loops (`warp.rs`, 65536 additions or subtractions of the width).
+const WRAP_LIMIT: u32 = 1 << 16;
+
+/// The target column of the wrap solve (rule G6, U): pixel column `x` displaced by `-u` (the target `x - u` of the
+/// plain kernels), split exactly into a whole column and a fraction so that the target does not
+/// depend on how far from column 0 the pixel lies (the single precision `x - u` rounds with the
+/// size of `x`, so no rotation of the frame could reproduce its bits). With `d = -u`,
+/// `whole = floor(d)` and `f = d - whole` in single precision (when `f` rounds to 1.0 the column
+/// moves one to the right with `f = 0.0`), the column is `(x + whole) mod W` in integer
+/// arithmetic, the column the inverse warp's wrap loops reach for a whole coordinate. `None`
+/// when `d` is NaN or more than [`WRAP_LIMIT`] widths (an infinite flow too); the solver treats
+/// such a target as outside. A flow without a fraction (`x - u` exact) gives the column and the
+/// fraction of `x - u` wrapped into `[0, W)`.
+#[inline]
+pub(crate) fn wrap_target(x: usize, u: f32, w: usize) -> Option<(usize, f32)> {
+    let d = -u;
+    if !(d.abs() <= WRAP_LIMIT as f32 * w as f32) {
+        return None;
+    }
+    let whole = d.floor();
+    let mut f = d - whole;
+    let mut c = (x as i64 + whole as i64).rem_euclid(w as i64) as usize;
+    if f >= 1.0 {
+        c = if c + 1 == w { 0 } else { c + 1 };
+        f = 0.0;
+    }
+    Some((c, f))
+}
+
+/// Gradient of the wrap solve (central difference over 2; rule G6):
+/// [`calc_grad`]'s arithmetic and operation order with the column indices taken modulo the width,
+/// so both horizontal neighbours exist at every column: `gx = (((I(x) - I((x - 1) mod w)) + 0.0) +
+/// (I((x + 1) mod w) - I(x))) / 2.0` (the divisor the count of terms, 2), the seam columns reading
+/// across it; `gy` exactly as [`calc_grad`] (one sided at the top and bottom rows). Every column
+/// whose stencil lies inside the row (`1 <= x <= w - 2`) equals [`calc_grad`] bit for bit. A width
+/// of 2 reads the same column on both sides.
+pub(crate) fn calc_grad_wrap(img: &[f32], w: usize, h: usize) -> Vec<f32> {
+    let mut g = vec![0.0f32; w * h * 2];
+    if w == 0 || h == 0 {
+        return g;
+    }
+    g.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+        for x in 0..w {
+            let c = img[y * w + x];
+            let left = img[y * w + (x + w - 1) % w];
+            let right = img[y * w + (x + 1) % w];
+            let mut nx = (c - left) + 0.0f32;
+            let mut dx = 1.0f32;
+            let mut ny = 0.0f32;
+            let mut dy = 0.0f32;
+            if y >= 1 {
+                ny = (c - img[(y - 1) * w + x]) + 0.0f32;
+                dy = 1.0;
+            }
+            nx = nx + (right - c);
+            dx = dx + 1.0;
+            if y + 1 <= h - 1 {
+                ny = ny + (img[(y + 1) * w + x] - c);
+                dy = dy + 1.0;
+            }
+            row[x * 2] = nx / dx;
+            row[x * 2 + 1] = ny / dy;
+        }
+    });
+    g
+}
+
+/// Gradient masking of a layered solve: the 2 channel gradient is set to `(0, 0)` at every
+/// pixel where the level mask is below [`MASK_ON`] (it is 0) at the pixel itself or at one of its
+/// four neighbours that exist. With `wrap` the left and right neighbours are taken modulo the
+/// width, the columns the wrapped gradient reads (U). The structure tensor and the B vector step
+/// of the level both read the masked gradient.
+pub(crate) fn mask_gradient(grad: &mut [f32], mask: &[f32], w: usize, h: usize, wrap: bool) {
+    if w == 0 || h == 0 {
+        return;
+    }
+    grad.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+        let off = |xx: usize, yy: usize| mask[yy * w + xx] < MASK_ON;
+        for x in 0..w {
+            let mut out = off(x, y) || (y >= 1 && off(x, y - 1)) || (y + 1 < h && off(x, y + 1));
+            if wrap {
+                out = out || off((x + w - 1) % w, y) || off((x + 1) % w, y);
+            } else {
+                out = out || (x >= 1 && off(x - 1, y)) || (x + 1 < w && off(x + 1, y));
+            }
+            if out {
+                row[x * 2] = 0.0;
+                row[x * 2 + 1] = 0.0;
+            }
+        }
+    });
+}
+
+/// Right hand side of a layered or wrap solve: [`calc_b`] with
+/// - `mask_y`, the level mask of `Y`: its sample at the target, by the same sampler as the
+///   image, must be at least [`WARPED_MASK_MIN`], else `B = (0, 0)`; a NaN sample fails the test;
+/// - `wrap` (rule G6, U in detail): only `sy` is range checked (`sy < 0 || H - 1 < sy` gives
+///   `(0, 0)`, the comparisons of [`calc_b`]); the target column is [`wrap_target`] of the pixel's
+///   column and its flow (a target it cannot wrap gives `(0, 0)`), sampled with
+///   [`sample::bilinear1_wrapx_at`] (column 0 right of the last column).
+///
+/// Then `r = sample(I0) - I1(x, y)` and `B = (r * gx, r * gy)` as in [`calc_b`]. With neither
+/// input it equals [`calc_b`] bit for bit, and the driver calls [`calc_b`] itself then. With wrap
+/// a rotation of `I1`, `I0`, the gradient, the flow and the mask by `k` columns rotates `B` by `k`
+/// columns, bit for bit.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn calc_b_with(i1: &[f32], i0: &[f32], grad: &[f32], flow: &[f32], w: usize, h: usize, mask_y: Option<&[f32]>, wrap: bool) -> Vec<f32> {
+    let mut b = vec![0.0f32; w * h * 2];
+    let fw = w as f32;
+    let fh = h as f32;
+    if wrap {
+        b.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+            let fy = y as f32;
+            for x in 0..w {
+                let i = y * w + x;
+                let sy = fy - flow[i * 2 + 1];
+                let target = if sy < 0.0 || fh - 1.0 < sy { None } else { wrap_target(x, flow[i * 2], w) };
+                let pass = match target {
+                    None => None,
+                    Some((col, fx)) => {
+                        let sample = |img: &[f32]| bilinear1_wrapx_at(img, w, h, col, fx, sy);
+                        match mask_y {
+                            Some(m) if !(sample(m) >= WARPED_MASK_MIN) => None,
+                            _ => Some(sample(i0)),
+                        }
+                    }
+                };
+                match pass {
+                    None => {
+                        row[x * 2] = 0.0;
+                        row[x * 2 + 1] = 0.0;
+                    }
+                    Some(s) => {
+                        let r = s - i1[i];
+                        row[x * 2] = r * grad[i * 2];
+                        row[x * 2 + 1] = r * grad[i * 2 + 1];
+                    }
+                }
+            }
+        });
+        return b;
+    }
+    b.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+        let fy = y as f32;
+        for x in 0..w {
+            let fx = x as f32;
+            let i = y * w + x;
+            let sx = fx - flow[i * 2];
+            let sy = fy - flow[i * 2 + 1];
+            let inside = !(sx < 0.0 || fw - 1.0 < sx || sy < 0.0 || fh - 1.0 < sy);
+            let sample = |img: &[f32]| bilinear1(img, w, h, sx, sy);
+            let pass = inside
+                && match mask_y {
+                    Some(m) => sample(m) >= WARPED_MASK_MIN,
+                    None => true,
+                };
+            if !pass {
+                row[x * 2] = 0.0;
+                row[x * 2 + 1] = 0.0;
+            } else {
+                let s = sample(i0);
+                let r = s - i1[i];
+                row[x * 2] = r * grad[i * 2];
+                row[x * 2 + 1] = r * grad[i * 2 + 1];
+            }
+        }
+    });
+    b
+}
+
+/// True when no pixel satisfies `0 <= y + v <= h-1`/// True when no pixel satisfies `0 <= y + v <= h-1`: the range check of the wrap solve, which
+/// tests y only (rule G6: every column is in range when the columns wrap).
+pub(crate) fn all_flow_out_of_range_y(flow: &[f32], w: usize, h: usize) -> bool {
+    let fh = (h - 1) as f32;
+    let any = flow.par_chunks(w * 2).enumerate().any(|(y, row)| {
+        let fy = y as f32;
+        (0..w).any(|x| {
+            let py = fy + row[x * 2 + 1];
+            0.0 <= py && py <= fh
+        })
+    });
+    !any
+}
+
+impl<'a> Block<'a> {
+    /// The 3x3 patch of imgA around `(x, y)` of the wrap solve: [`Block::patch`] with the columns
+    /// `x - 1`, `x`, `x + 1` taken modulo the width (rule G6), so every column has one.
+    #[inline]
+    fn patch_wrap(&self, x: usize, y: usize) -> [f32; 9] {
+        let w = self.w;
+        let cols = [(x + w - 1) % w, x, (x + 1) % w];
+        let mut p = [0.0f32; 9];
+        for r in 0..3 {
+            let base = (y + r - 1) * w;
+            for c in 0..3 {
+                p[r * 3 + c] = self.a[base + cols[c]];
+            }
+        }
+        p
+    }
+
+    /// Block cost of the wrap solve (rule G6, U in detail) at the target
+    /// column `col` plus the fraction `fx` ([`wrap_target`]) and the row `y2`: the rows as in
+    /// [`Block::cost`] (`None` when `y2 > H - 2` or the cell row is below 1; `y2 == H - 2` takes
+    /// the cell above with `fy = 1`); the four window columns `col - 1 .. col + 2` are taken modulo
+    /// `W`, with no edge rule in x. The weights, the squares and the sum are those of
+    /// [`Block::cost`]; for `1 <= col` and `col + fx < W - 2` it equals [`Block::cost`] at
+    /// `col + fx`.
+    #[inline]
+    fn cost_wrap(&self, p: &[f32; 9], col: usize, fx: f32, y2: f32) -> Option<f32> {
+        let hm2 = (self.h as i32 - 2) as f32;
+        if y2 > hm2 {
+            return None;
+        }
+        let (iy, fy) = if y2 == hm2 {
+            (cvtt(hm2 - 1.0f32), 1.0f32)
+        } else {
+            let i = cvtt(y2);
+            (i, y2 - (i as f32))
+        };
+        if iy < 1 {
+            return None;
+        }
+        let iy = iy as usize;
+        let w = self.w;
+        let w11 = fy * fx;
+        let w10 = fx - w11;
+        let w01 = fy - w11;
+        let w00 = ((1.0f32 - fx) - fy) + w11;
+        // the window columns col - 1 .. col + 2 modulo the width, rows iy - 1 .. iy + 2
+        let cols = [(col + w - 1) % w, col, (col + 1) % w, (col + 2) % w];
+        let base = (iy - 1) * w;
+        let t = |i: usize, j: usize| self.b[base + j * w + cols[i]];
+        let mut sq = [0.0f32; 9];
+        let mut n = 0;
+        for b in 0..3usize {
+            for a in 0..3usize {
+                let q = ((w00 * t(a, b) + w10 * t(a + 1, b)) + w01 * t(a, b + 1)) + w11 * t(a + 1, b + 1);
+                let d = p[n] - q;
+                sq[n] = d * d;
+                n += 1;
+            }
+        }
+        let mut s = sq[0] + sq[1];
+        for k in 2..8 {
+            s = s + sq[k];
+        }
+        Some(sq[8] + s)
+    }
+
+    /// [`Block::step`] of the layered and wrap solves: with `wrap` the target range check tests y
+    /// only (`0 <= ty <= H - 1`, rule G6), the patch is [`Block::patch_wrap`] and both costs are
+    /// [`Block::cost_wrap`] at the [`wrap_target`] of the pixel's column and the vector (a vector
+    /// it cannot wrap gives no cost, U); without it this is [`Block::step`].
+    #[inline]
+    fn step_with(&self, x: usize, y: usize, cur: [f32; 2], n: [f32; 2], wrap: bool) -> Option<[f32; 2]> {
+        if !wrap {
+            return self.step(x, y, cur, n);
+        }
+        let ty = y as f32 - cur[1];
+        let h1 = (self.h - 1) as f32;
+        if 0.0 <= ty && ty <= h1 {
+            let patch = self.patch_wrap(x, y);
+            let cost = |v: [f32; 2], yy: f32| wrap_target(x, v[0], self.w).and_then(|(c, f)| self.cost_wrap(&patch, c, f, yy));
+            if let Some(c0) = cost(cur, ty) {
+                if let Some(c1) = cost(n, y as f32 - n[1]) {
+                    if c1 < c0 {
+                        return Some(n);
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
+/// The four sweeps of the wrap solve (rule G6, U, ours; the original's 360 sweeps are not known):
+/// the order of [`block_match`], with every row a ring and every column of it stepped, the seam
+/// columns included. Sweeps 1 and 2 (left neighbour, then right neighbour, modulo the width) read
+/// the neighbour's vector as it stood before the sweep, every pixel of a row at once: an in place
+/// sweep along a ring has to start at some column, and that start would not move with a rotation
+/// of the frame. Sweeps 3 and 4 run in place along every column as in [`block_match`] (rows
+/// `1 ..= h - 2`, the already updated neighbour above, then below). So rotating the inputs by `k`
+/// columns rotates the result by `k` columns, bit for bit; rows in parallel through row chunks,
+/// columns through the transposed field.
+fn sweeps_ring<S: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Sync>(flow: &mut [f32], w: usize, h: usize, step: S) {
+    // sweep 1: neighbour (x - 1 mod w, y) before the sweep; sweep 2: neighbour (x + 1 mod w, y)
+    for right in [false, true] {
+        flow.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+            if y >= 1 && y <= h - 2 {
+                let old = row.to_vec();
+                for x in 0..w {
+                    let nx = if right { (x + 1) % w } else { (x + w - 1) % w };
+                    let cur = [old[x * 2], old[x * 2 + 1]];
+                    let n = [old[nx * 2], old[nx * 2 + 1]];
+                    if let Some(v) = step(x, y, cur, n) {
+                        row[x * 2] = v[0];
+                        row[x * 2 + 1] = v[1];
+                    }
+                }
+            }
+        });
+    }
+    let mut ft = vec![0.0f32; flow.len()];
+    for y in 0..h {
+        for x in 0..w {
+            ft[(x * h + y) * 2] = flow[(y * w + x) * 2];
+            ft[(x * h + y) * 2 + 1] = flow[(y * w + x) * 2 + 1];
+        }
+    }
+    // sweep 3: y = 1..=h-2 increasing, neighbour (x, y-1); every column
+    ft.par_chunks_mut(h * 2).enumerate().for_each(|(x, col)| {
+        for y in 1..=(h - 2) {
+            let cur = [col[y * 2], col[y * 2 + 1]];
+            let n = [col[(y - 1) * 2], col[(y - 1) * 2 + 1]];
+            if let Some(v) = step(x, y, cur, n) {
+                col[y * 2] = v[0];
+                col[y * 2 + 1] = v[1];
+            }
+        }
+    });
+    // sweep 4: y = h-2 down to 1, neighbour (x, y+1); every column
+    ft.par_chunks_mut(h * 2).enumerate().for_each(|(x, col)| {
+        for y in (1..=(h - 2)).rev() {
+            let cur = [col[y * 2], col[y * 2 + 1]];
+            let n = [col[(y + 1) * 2], col[(y + 1) * 2 + 1]];
+            if let Some(v) = step(x, y, cur, n) {
+                col[y * 2] = v[0];
+                col[y * 2 + 1] = v[1];
+            }
+        }
+    });
+    for y in 0..h {
+        for x in 0..w {
+            flow[(y * w + x) * 2] = ft[(x * h + y) * 2];
+            flow[(y * w + x) * 2 + 1] = ft[(x * h + y) * 2 + 1];
+        }
+    }
+}
+
+/// The four sweeps of [`block_match`], in its order/// The four sweeps of [`block_match`], in its order, over its interior pixels, with its in place
+/// neighbour rule and transposes, where `step(x, y, cur, n)` decides each pixel.
+fn sweeps<S: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Sync>(flow: &mut [f32], w: usize, h: usize, step: S) {
+    // sweep 1: x = 1..=w-2 increasing, neighbour (x-1, y)
+    flow.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+        if y >= 1 && y <= h - 2 {
+            for x in 1..=(w - 2) {
+                let cur = [row[x * 2], row[x * 2 + 1]];
+                let n = [row[(x - 1) * 2], row[(x - 1) * 2 + 1]];
+                if let Some(v) = step(x, y, cur, n) {
+                    row[x * 2] = v[0];
+                    row[x * 2 + 1] = v[1];
+                }
+            }
+        }
+    });
+    // sweep 2: x = w-2 down to 1, neighbour (x+1, y)
+    flow.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+        if y >= 1 && y <= h - 2 {
+            for x in (1..=(w - 2)).rev() {
+                let cur = [row[x * 2], row[x * 2 + 1]];
+                let n = [row[(x + 1) * 2], row[(x + 1) * 2 + 1]];
+                if let Some(v) = step(x, y, cur, n) {
+                    row[x * 2] = v[0];
+                    row[x * 2 + 1] = v[1];
+                }
+            }
+        }
+    });
+    // sweeps 3 and 4 run on the transposed field so that a column is contiguous
+    let mut ft = vec![0.0f32; flow.len()];
+    for y in 0..h {
+        for x in 0..w {
+            ft[(x * h + y) * 2] = flow[(y * w + x) * 2];
+            ft[(x * h + y) * 2 + 1] = flow[(y * w + x) * 2 + 1];
+        }
+    }
+    // sweep 3: y = 1..=h-2 increasing, neighbour (x, y-1)
+    ft.par_chunks_mut(h * 2).enumerate().for_each(|(x, col)| {
+        if x >= 1 && x <= w - 2 {
+            for y in 1..=(h - 2) {
+                let cur = [col[y * 2], col[y * 2 + 1]];
+                let n = [col[(y - 1) * 2], col[(y - 1) * 2 + 1]];
+                if let Some(v) = step(x, y, cur, n) {
+                    col[y * 2] = v[0];
+                    col[y * 2 + 1] = v[1];
+                }
+            }
+        }
+    });
+    // sweep 4: y = h-2 down to 1, neighbour (x, y+1)
+    ft.par_chunks_mut(h * 2).enumerate().for_each(|(x, col)| {
+        if x >= 1 && x <= w - 2 {
+            for y in (1..=(h - 2)).rev() {
+                let cur = [col[y * 2], col[y * 2 + 1]];
+                let n = [col[(y + 1) * 2], col[(y + 1) * 2 + 1]];
+                if let Some(v) = step(x, y, cur, n) {
+                    col[y * 2] = v[0];
+                    col[y * 2 + 1] = v[1];
+                }
+            }
+        }
+    });
+    for y in 0..h {
+        for x in 0..w {
+            flow[(y * w + x) * 2] = ft[(x * h + y) * 2];
+            flow[(y * w + x) * 2 + 1] = ft[(x * h + y) * 2 + 1];
+        }
+    }
+}
+
+/// The block matching of a layered or wrap solve: the four sweeps of [`block_match`] (same order,
+/// interior pixels, in place neighbours) with
+/// - `gate`, the level mask of `X` (rule G1b, U): the step of a pixel whose mask is 0 (below
+///   [`MASK_ON`]) is skipped and the pixel keeps its vector; the block cost itself stays
+///   unmasked (it compares the patch of `X` with `Y` wherever the target lies);
+/// - `wrap`: the ring sweeps of [`sweeps_ring`] with [`Block::step_with`] with wrap (G6).
+///
+/// With neither it equals [`block_match`] bit for bit, and the driver calls [`block_match`]
+/// itself then. Records gap G1b where the gated sweeps run.
+pub(crate) fn block_match_with(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: usize, gate: Option<&[f32]>, wrap: bool) {
+    if w < 3 || h < 3 {
+        return;
+    }
+    if gate.is_some() {
+        fx_core::gaps::record(&crate::gaps::G1B);
+    }
+    let bm = Block { a, b, w, h };
+    let step = |x: usize, y: usize, cur: [f32; 2], n: [f32; 2]| {
+        if let Some(m) = gate {
+            if m[y * w + x] < MASK_ON {
+                return None;
+            }
+        }
+        bm.step_with(x, y, cur, n, wrap)
+    };
+    if wrap {
+        sweeps_ring(flow, w, h, step);
+    } else {
+        sweeps(flow, w, h, step);
+    }
+}
+
+// ---------------------------------------------------------------------------------------
 // Driver
 
 /// Solver driver (`X` is the pyramid `imgA`, `Y` the pyramid `imgB`): returns the flow of the
 /// finest level after the final negation, `X(p) ~ Y(p + out(p))`.
 ///
 /// Both pyramids must come from [`build_pyramid`] with settings that give the same
-/// geometry; `settings` supplies the sensitivity and `skip_refine`.
+/// geometry; `settings` supplies the sensitivity and `skip_refine`. With `settings.wrap` the
+/// solve is the wrap-around one of [`extras::solve_pyramids_with`] (no other extra input);
+/// with wrap off it is the plain driver below, the one the single layer path has always run.
 pub fn solve_pyramids(x: &Pyramid, y: &Pyramid, settings: &FlowSettings) -> Result<FlowField, FxError> {
     if x.geometry != y.geometry {
         return Err(FxError::Mismatch("optical flow: pyramids of different geometry".into()));
+    }
+    if settings.wrap {
+        return extras::solve_pyramids_with(x, y, settings, extras::SolveExtras::default());
     }
     let geo = &x.geometry;
     let levels = geo.levels;

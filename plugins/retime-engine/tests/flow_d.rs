@@ -312,9 +312,14 @@ fn bad_inputs_are_reported() {
     assert!(solve(&a, &a, &FlowSettings::new(6, true, 0.7)).is_err());
     assert!(solve(&a, &a, &FlowSettings::new(4, true, f32::NAN)).is_err());
     assert!(solve(&a, &a, &FlowSettings::new(4, true, -0.5)).is_err());
-    // 8x6 at quality 3 (High, quarter size) would be 2x1
+    // 8x6 at quality 3 (High, quarter size) would be 2x1: the reduction never halves below 2x2 (the tiny
+    // frames rule, parity gap G7), so it is searched at 4x3, one halving
     let t = gray_image(8, 6, Fmt::U8, 0.0, 0.0);
-    assert!(solve(&t, &t, &FlowSettings::new(3, true, 0.7)).is_err(), "working size below 2x2");
+    let f = solve(&t, &t, &FlowSettings::new(3, true, 0.7)).unwrap();
+    assert_eq!((f.width, f.height), (4, 3));
+    // a side of 1 has no search: the solver refuses it (the front-ends never call it for such a frame)
+    let line = gray_image(8, 1, Fmt::U8, 0.0, 0.0);
+    assert!(solve(&line, &line, &FlowSettings::new(5, true, 0.7)).is_err(), "a side of 1");
 }
 
 #[test]
@@ -354,16 +359,13 @@ fn odd_and_tiny_sizes_run_without_panics_and_give_finite_flows() {
                         assert!(f.data.iter().all(|v| v.is_finite()), "{w}x{h} {fmt:?} q{q}");
                         count += 1;
                     }
-                    Err(e) => {
-                        // only a working size below 2x2 may be refused
-                        let r = if q == 4 { 1 } else { 0 };
-                        assert!((w >> r) < 2 || (h >> r) < 2, "{w}x{h} q{q}: {e}");
-                    }
+                    // the reduction never halves below 2x2: every size here is searched
+                    Err(e) => panic!("{w}x{h} {fmt:?} q{q}: {e}"),
                 }
             }
         }
     }
-    assert!(count > 40, "{count}");
+    assert_eq!(count, 60);
 }
 
 #[test]

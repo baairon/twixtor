@@ -9,11 +9,15 @@ usage:
                 [--sweep-sources NAME,...|all] [--jobs N]
                 [--frames N] [--fps RATE,...] [--clip-sources NAME,...]
                 [--clip-sweep-sources NAME,...|all] [--max-cases-per-effect N]
+  fx-parity gen --out DIR --families ID,...|all [--vfx PATH] [--effects ID,...]
+                [--jobs N]
   fx-parity run --testset DIR --refs DIR [--effect ID] [--json] [--brief]
                 [--strict] [--vfx PATH] [--jobs N]
   fx-parity selfcheck --testset DIR [--effect ID] [--max-cases N]
                 [--threads N,...] [--json] [--vfx PATH] [--jobs N]
   fx-parity checklist --testset DIR [--out FILE] [--vfx PATH]
+  fx-parity devcheck --testset DIR [--testset DIR...] [--effect ID]
+                [--max-cases N] [--devices gpu=N,...] [--json] [--vfx PATH]
 
 gen renders the inputs with ffmpeg (FFMPEG, else PATH) and writes DIR/cases.json
 for every effect `vfx list --json` reports (a hidden self-test effect only when
@@ -37,6 +41,17 @@ each param's min and max always stay, then one per other setting, then a fixed
 pseudo random fill. cases.json records the kind, frames, fps, layers and the
 params as `vfx apply --param` takes them (keyframes included).
 
+gen --families writes a family test set instead of that matrix: the reference
+case families of the open parity gaps, the cases that settle each stated rule
+once they are rendered in the original plugin (gap-shrink, gap-maskbm,
+gap-order, gap-merge, gap-vecmatte, gap-blurflow, gap-groups, gap-points,
+gap-drawgeom, gap-debug, gap-tracker2, gap-wrap), plus gap-tiny (frames of 1x1
+to 5x5) and gap-keys (Bezier ease handles), which only observe. A family case
+has its own clips (a moving disc and its mattes, a texture that wraps across
+the width, and others), size, depth, 12 frames at 24 fps and settings, so the
+matrix flags do not apply; --effects keeps the families of those effects. Each
+case records its `family` in cases.json, and gen prints the cases per family.
+
 run applies each case through vfx and compares it with the frame or
 clip named by the case's `reference` in the references directory. 8 and 16 bpc
 must match exactly, 32 bpc within 1 ULP, clips frame by frame; a failing clip is
@@ -54,18 +69,28 @@ errors and the worst case, then the 10 worst cases. Cases without a reference ar
 checklist writes a markdown file, DIR/CHECKLIST.md unless --out names another, for a person
 who renders the references with any program. For every case it lists the size, bit depth,
 frames and rate, the input files, the settings by the names the interface shows (from
-`vfx list --json`, defaults left out, keyframes as `100 at frame 0, 50 at frame 24`), the
-extra layers and the reference file to produce. Each case has two ffmpeg commands: one turns
-the raw input into a file a program can open (PNG at 8 and 16 bpc, float EXR at 32 bpc when
-ffmpeg can write it, a clip as a numbered sequence), the other turns the program's export
-into the raw reference file with the right -pix_fmt (rgba, rgba64le or gbrapf32le). An EXR
-holds colour multiplied by alpha, so the 32 bpc export command divides it out again.
+`vfx list --json`, defaults left out, keyframes as `100 at frame 0, 50 at frame 24` and ease
+handles as their velocity per second and influence), the extra layers and the reference file
+to produce. Each case has two ffmpeg commands: one turns the raw input into a file a program
+can open (PNG at 8 and 16 bpc, float EXR at 32 bpc when ffmpeg can write it, a clip as a
+numbered sequence), the other turns the program's export into the raw reference file with
+the right -pix_fmt (rgba, rgba64le or gbrapf32le). An EXR holds colour multiplied by alpha,
+so the 32 bpc export command divides it out again.
 
 selfcheck needs no references. It runs a subset of the temporal cases (at most
 --max-cases, default 24, spread over the effects) again and again through vfx:
 twice with the default rayon thread count and once for each --threads value
 (default 1,3, through RAYON_NUM_THREADS). Every output must equal the first one
 byte for byte; any difference, or a failing run, exits 1.
+
+devcheck is the byte gate of the GPU backend. It runs the temporal cases of
+each --testset (all of them, or --max-cases per test set spread over the
+effects) through vfx with --device cpu and with every --devices value (default:
+each device `vfx devices` lists as ok), one device process at a time, and
+compares the output clips byte for byte, the exit codes and stderr (minus the
+device's own note lines). It prints per device the cases, identical, different,
+the cases and stages that fell back to the CPU and the device refusals; any
+difference exits 1.
 
 vfx is found via --vfx, VFX_PATH, next to this executable, then PATH.
 
@@ -78,6 +103,17 @@ pub enum Command {
     Run(RunArgs),
     Selfcheck(SelfcheckArgs),
     Checklist(ChecklistArgs),
+    Devcheck(DevcheckArgs),
+}
+
+#[derive(Debug, PartialEq)]
+pub struct DevcheckArgs {
+    pub testsets: Vec<PathBuf>,
+    pub effect: Option<String>,
+    pub max_cases: Option<usize>,
+    pub devices: Option<Vec<String>>,
+    pub json: bool,
+    pub vfx: Option<PathBuf>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -96,6 +132,8 @@ pub struct GenArgs {
     pub clip_sources: Option<Vec<String>>,
     pub clip_sweep_sources: Option<Vec<String>>,
     pub max_cases_per_effect: Option<usize>,
+    /// Family ids (`all` already expanded): a family test set instead of the matrix.
+    pub families: Option<Vec<String>>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -202,6 +240,7 @@ pub fn parse<I: IntoIterator<Item = String>>(args: I) -> Result<Command, String>
         "run" => parse_run(it),
         "selfcheck" => parse_selfcheck(it),
         "checklist" => parse_checklist(it),
+        "devcheck" => parse_devcheck(it),
         other => Err(format!("unknown command `{other}`, try `fx-parity --help`")),
     }
 }
@@ -222,14 +261,21 @@ fn parse_gen(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
         clip_sources: None,
         clip_sweep_sources: None,
         max_cases_per_effect: None,
+        families: None,
     };
     let mut out = None;
+    // the matrix flags given, which a family test set does not take
+    let mut matrix: Vec<String> = Vec::new();
     while let Some(arg) = it.next() {
         let (flag, inline) = split_flag(arg);
+        if !["-h", "--help", "--out", "--vfx", "--effects", "--jobs", "--families"].contains(&flag.as_str()) {
+            matrix.push(flag.clone());
+        }
         match flag.as_str() {
             "-h" | "--help" => return Ok(Command::Help),
             "--out" => out = Some(PathBuf::from(value(&flag, inline, &mut it)?)),
             "--vfx" => a.vfx = Some(PathBuf::from(value(&flag, inline, &mut it)?)),
+            "--families" => a.families = Some(crate::families::parse_ids(&value(&flag, inline, &mut it)?)?),
             "--effects" => a.effects = Some(list(&value(&flag, inline, &mut it)?, |s| Ok(s.to_string()))?),
             "--no-sweep" => a.no_sweep = true,
             "--sizes" => a.sizes = Some(list(&value(&flag, inline, &mut it)?, size)?),
@@ -260,6 +306,9 @@ fn parse_gen(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
         }
     }
     a.out = out.ok_or("gen needs --out DIR")?;
+    if let (Some(_), Some(flag)) = (&a.families, matrix.first()) {
+        return Err(format!("`--families` writes the families' own sizes, depths, clips and settings, so `{flag}` does not apply to it"));
+    }
     for (name, empty) in [
         ("--sizes", a.sizes.as_ref().is_some_and(Vec::is_empty)),
         ("--depths", a.depths.as_ref().is_some_and(Vec::is_empty)),
@@ -307,6 +356,34 @@ fn parse_run(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
     a.testset = testset.ok_or("run needs --testset DIR")?;
     a.refs = refs.ok_or("run needs --refs DIR")?;
     Ok(Command::Run(a))
+}
+
+fn parse_devcheck(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
+    let mut a = DevcheckArgs { testsets: Vec::new(), effect: None, max_cases: None, devices: None, json: false, vfx: None };
+    while let Some(arg) = it.next() {
+        let (flag, inline) = split_flag(arg);
+        match flag.as_str() {
+            "-h" | "--help" => return Ok(Command::Help),
+            "--testset" => a.testsets.push(PathBuf::from(value(&flag, inline, &mut it)?)),
+            "--effect" => a.effect = Some(value(&flag, inline, &mut it)?),
+            "--max-cases" => a.max_cases = Some(count(&flag, &value(&flag, inline, &mut it)?, 0)?),
+            "--devices" => {
+                let text = value(&flag, inline, &mut it)?;
+                let list: Vec<String> = text.split(',').map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect();
+                if list.is_empty() || !list.iter().all(|d| d.strip_prefix("gpu=").is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit()))) {
+                    return Err(format!("`--devices` expects gpu=N,..., got `{text}`"));
+                }
+                a.devices = Some(list);
+            }
+            "--vfx" => a.vfx = Some(PathBuf::from(value(&flag, inline, &mut it)?)),
+            "--json" => a.json = true,
+            other => return Err(format!("unexpected argument `{other}` for devcheck")),
+        }
+    }
+    if a.testsets.is_empty() {
+        return Err("devcheck needs --testset DIR".into());
+    }
+    Ok(Command::Devcheck(a))
 }
 
 fn parse_selfcheck(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
@@ -402,6 +479,46 @@ mod tests {
     }
 
     #[test]
+    fn gen_families_takes_ids_or_all_and_refuses_the_matrix_flags() {
+        let Command::Gen(a) = p(&["gen", "--out", "set", "--families", "gap-wrap,gap-shrink", "--effects", "retime-fgbg", "--jobs", "2", "--vfx", "v"]).unwrap() else {
+            panic!("not gen")
+        };
+        assert_eq!(a.families, Some(vec!["gap-wrap".to_string(), "gap-shrink".to_string()]));
+        assert_eq!((a.effects.as_deref(), a.jobs), (Some(&["retime-fgbg".to_string()][..]), Some(2)));
+        let Command::Gen(all) = p(&["gen", "--out", "set", "--families=all"]).unwrap() else { panic!("not gen") };
+        assert_eq!(all.families.unwrap().len(), crate::families::FAMILIES.len());
+        // no flag, no families: the matrix as before
+        let Command::Gen(plain) = p(&["gen", "--out", "set"]).unwrap() else { panic!("not gen") };
+        assert_eq!(plain.families, None);
+        for flag in [
+            &["--sizes", "4x4"][..],
+            &["--depths", "8"],
+            &["--sources", "noise"],
+            &["--no-sweep"],
+            &["--sweep-sources", "all"],
+            &["--frames", "3"],
+            &["--fps", "25"],
+            &["--clip-sources", "movegrad"],
+            &["--clip-sweep-sources", "all"],
+            &["--max-cases-per-effect", "0"],
+        ] {
+            let mut args = vec!["gen", "--out", "set", "--families", "all"];
+            args.extend_from_slice(flag);
+            let err = p(&args).unwrap_err();
+            assert!(err.contains("does not apply") && err.contains(flag[0]), "{flag:?}: {err}");
+            // the same flag before --families is refused too
+            let mut first = vec!["gen", "--out", "set"];
+            first.extend_from_slice(flag);
+            first.extend_from_slice(&["--families", "gap-tiny"]);
+            assert!(p(&first).is_err(), "{flag:?}");
+        }
+        assert!(p(&["gen", "--out", "set", "--families", "gap-nope"]).unwrap_err().contains("unknown family"));
+        assert!(p(&["gen", "--out", "set", "--families", ","]).is_err());
+        assert!(p(&["gen", "--out", "set", "--families"]).is_err());
+        assert!(USAGE.contains("--families ID,...|all") && USAGE.contains("gap-tiny"));
+    }
+
+    #[test]
     fn run_line() {
         let Command::Run(a) = p(&["run", "--testset", "t", "--refs", "r", "--effect", "retime", "--json", "--brief", "--strict", "--vfx", "v.exe"]).unwrap() else {
             panic!("not run")
@@ -410,6 +527,20 @@ mod tests {
         assert_eq!(a.effect.as_deref(), Some("retime"));
         assert!(a.json && a.brief && a.strict);
         assert_eq!(a.vfx, Some(PathBuf::from("v.exe")));
+    }
+
+    #[test]
+    fn devcheck_line() {
+        let Command::Devcheck(a) = p(&["devcheck", "--testset", "a", "--testset", "b", "--max-cases", "5", "--devices", "gpu=0,gpu=1", "--json", "--vfx", "v"]).unwrap() else {
+            panic!("not devcheck")
+        };
+        assert_eq!(a.testsets, vec![PathBuf::from("a"), PathBuf::from("b")]);
+        assert_eq!((a.max_cases, a.json, a.devices), (Some(5), true, Some(vec!["gpu=0".to_string(), "gpu=1".to_string()])));
+        let Command::Devcheck(plain) = p(&["devcheck", "--testset", "t"]).unwrap() else { panic!("not devcheck") };
+        assert_eq!((plain.devices, plain.max_cases, plain.effect), (None, None, None));
+        for bad in [&["devcheck"][..], &["devcheck", "--testset", "t", "--devices", "cpu"], &["devcheck", "--testset", "t", "--devices", "gpu="], &["devcheck", "--testset", "t", "--threads", "1"]] {
+            assert!(p(bad).is_err(), "{bad:?}");
+        }
     }
 
     #[test]

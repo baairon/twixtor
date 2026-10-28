@@ -43,8 +43,12 @@ impl Layer for Recorder {
     }
 }
 
-fn clip() -> Vec<Frame> {
-    random_clip(Depth::U8, 5, 4, 8, 7)
+/// The clip sizes: 5 x 4, and the tiny frames 1 x 4 (a side of 1: no search, the No Vectors render) and
+/// 2 x 2 (searched at its own size).
+const SIZES: [(usize, usize); 3] = [(5, 4), (1, 4), (2, 2)];
+
+fn clip(w: usize, h: usize) -> Vec<Frame> {
+    random_clip(Depth::U8, w, h, 8, 7)
 }
 
 /// Scenario parameter lists: speed or frame number, offsets, vectors, interpolation, display, fields, rates.
@@ -101,10 +105,10 @@ fn scenarios() -> Vec<Vec<(&'static str, &'static str)>> {
 }
 
 /// Asks the render and the dependencies for output frame `n` and compares them.
-fn check(params: &[(&str, &str)], with_alt: bool, with_b: bool, n: u64) -> Result<(), String> {
-    let input = Recorder::new(clip());
-    let alt = Recorder::new(clip());
-    let tracking = Recorder::new(clip());
+fn check(params: &[(&str, &str)], with_alt: bool, with_b: bool, n: u64, (w, h): (usize, usize)) -> Result<(), String> {
+    let input = Recorder::new(clip(w, h));
+    let alt = Recorder::new(clip(w, h));
+    let tracking = Recorder::new(clip(w, h));
     let mut layers = LayerSet::new();
     if with_alt {
         layers.insert("alt_source_a", alt.clone());
@@ -114,16 +118,11 @@ fn check(params: &[(&str, &str)], with_alt: bool, with_b: bool, n: u64) -> Resul
     }
     let curves = curves(params);
     let env = Env { params: &curves, input: &*input, layers: &layers };
-    let cx = fx_core::TemporalContext::new(5, 4, Depth::U8, time(), n, 12);
+    let cx = fx_core::TemporalContext::new(w, h, Depth::U8, time(), n, 12);
     let deps = RetimeFgBg.dependencies(&cx, &env).map_err(|e| format!("dependencies: {e}"))?;
-    let mut out = Frame::new(5, 4, Depth::U8);
-    match RetimeFgBg.render_temporal(&cx, &env, &mut out) {
-        Ok(()) => {}
-        // the vector path fetches the tracking layer and the retimed layer before the solver runs; a clip of 5 x 4
-        // pixels is below the solver's working size, so its fetches are recorded and the render then reports it
-        Err(FxError::Unsupported(m)) if m.contains("below 2x2") => {}
-        Err(e) => return Err(format!("render: {e}")),
-    }
+    let mut out = Frame::new(w, h, Depth::U8);
+    // every size renders: the search never halves below 2 x 2 and a side of 1 is not searched
+    RetimeFgBg.render_temporal(&cx, &env, &mut out).map_err(|e| format!("render: {e}"))?;
     for (name, rec, layer) in [("input", &input, None), ("alt_source_a", &alt, Some("alt_source_a")), ("alt_source_b", &tracking, Some("alt_source_b"))] {
         for t in rec.take() {
             let wanted = Checkout { layer, time: t };
@@ -141,15 +140,17 @@ fn every_fetch_of_the_render_was_announced_by_the_dependencies() {
     let mut cases = 0;
     for params in scenarios() {
         for (with_alt, with_b) in [(false, false), (true, false), (false, true), (true, true)] {
-            for n in 0..12 {
-                if let Err(e) = check(&params, with_alt, with_b, n) {
-                    panic!("{params:?} alt {with_alt} tracking {with_b} frame {n}: {e}");
+            for size in SIZES {
+                for n in 0..12 {
+                    if let Err(e) = check(&params, with_alt, with_b, n, size) {
+                        panic!("{params:?} alt {with_alt} tracking {with_b} {size:?} frame {n}: {e}");
+                    }
+                    cases += 1;
                 }
-                cases += 1;
             }
         }
     }
-    assert!(cases > 6_000, "{cases}");
+    assert!(cases > 18_000, "{cases}");
 }
 
 /// A clip with real motion, large enough for the solver, so that the vector path runs to the end.

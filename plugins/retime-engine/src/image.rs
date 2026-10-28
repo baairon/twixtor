@@ -200,7 +200,7 @@ fn cvtt_i64(x: f64) -> i64 {
 
 /// The rounding `q(x) = trunc((x as f64) + 0.5)`; callers keep the low byte or word of the
 /// result.
-fn q(x: f32) -> i64 {
+pub(crate) fn q(x: f32) -> i64 {
     cvtt_i64(x as f64 + 0.5)
 }
 

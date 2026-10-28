@@ -3,7 +3,9 @@
 //! Effects work on integer ticks (`time_scale` ticks per second, `time_step` ticks per frame) and
 //! truncate in several places, so time is passed as integers instead of seconds as `f64`.
 
-use crate::{Depth, FxError, Result};
+use crate::{Depth, DeviceRequest, FxError, Result};
+use std::any::Any;
+use std::sync::Arc;
 
 /// An exact frame rate.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -151,10 +153,19 @@ pub struct TemporalContext {
     pub fps: Rational,
     pub quality: Quality,
     pub field: FieldOrder,
+    /// The render device the host asks for (`vfx apply --device`), [`DeviceRequest::Cpu`] unless
+    /// the host sets it. The host has already refused what it cannot serve; an effect passes it on
+    /// to its engine, and no pixel depends on it.
+    pub device: DeviceRequest,
+    /// The host's device executor for the whole run, opaque here (`None` unless the host opened a
+    /// device for `device`). An engine downcasts it to the type it knows; fx-core never looks
+    /// inside, and no pixel depends on it: a device gives the CPU's bytes or is not used.
+    pub executor: Option<Arc<dyn Any + Send + Sync>>,
 }
 
 impl TemporalContext {
-    /// A progressive, full quality context for frame `frame_index` in a plain composition.
+    /// A progressive, full quality context on the CPU for frame `frame_index` in a plain
+    /// composition.
     pub fn new(width: usize, height: usize, depth: Depth, time: TimeBase, frame_index: u64, frame_count: u64) -> TemporalContext {
         TemporalContext {
             frame_index,
@@ -168,6 +179,8 @@ impl TemporalContext {
             fps: time.fps(),
             quality: Quality::High,
             field: FieldOrder::Progressive,
+            device: DeviceRequest::Cpu,
+            executor: None,
         }
     }
 
@@ -235,5 +248,14 @@ mod tests {
         assert_eq!(cx.local_time_step, 100);
         assert_eq!((cx.time_step(), cx.time_scale()), (100, 2500));
         assert_eq!(cx.fps, Rational { num: 25, den: 1 });
+    }
+
+    #[test]
+    fn a_new_context_asks_for_the_cpu() {
+        let base = TimeBase::default_for_rate(Rational::new(24, 1).unwrap());
+        let cx = TemporalContext::new(4, 4, Depth::F32, base, 0, 1);
+        assert_eq!(cx.device, DeviceRequest::Cpu);
+        assert!(cx.executor.is_none());
+        assert_eq!((cx.quality, cx.field), (Quality::High, FieldOrder::Progressive));
     }
 }

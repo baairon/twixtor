@@ -1,4 +1,4 @@
-//! The pre-render checkout list of plugin 04, for the single layer configuration.
+//! The pre-render checkout list of plugin 04, with or without FG matte layers.
 //!
 //! Layers: the input layer, `Source`, `Vectors: Prev`, `Vectors: Next` and the FG matte layers.
 //! Plugin 04 has no Alt Source A or B and no mask hooks.
@@ -14,20 +14,20 @@
 //!    * with `register_layers` set: the dummy registrations, per layer a pair `X + off` and `-X`, in the
 //!      order `Source`, `Vectors: Prev`, `Vectors: Next`, then the three FG matte slots whether
 //!      used or not;
-//!    * the entry's own checkouts: `Source` at `off`, then `Vectors: Prev` and `Vectors: Next` at
-//!      `off`.
+//!    * the entry's own checkouts: for a main entry `Source` at `off`, then `Vectors: Prev` and
+//!      `Vectors: Next` at `off`, the pair `nfg + 1` times (one load per layer; the order
+//!      of the repeats, a pair per layer, is U); for a kind 2 entry (FG matte `k`, after the main
+//!      entries, `planner::plan_layers`) the matte layer at `off`.
 //!
 //! `T(k) = trunc(dur * k + 0.5)` is the time map's `frame_time` ([`crate::timemap`]). Registrations
-//! that are not pixel inputs are not listed. With a FG matte layer and `Display != Source` the plan
-//! of the multi layer path is not known, so the list is an `FxError::Unsupported` instead of a
-//! guess.
+//! that are not pixel inputs are not listed.
 //!
 //! The retimed layer is the `source` layer when it is set and the input layer otherwise, so entries
 //! that name the source use `Some("source")` or `None` accordingly ([`PreRender04::src_layer`]);
 //! the probe of the layer parameter itself always names `Some("source")`.
 
 use fx_core::{Checkout, Result};
-use retime_engine::planner::{plan, EntryKind};
+use retime_engine::planner::{plan_layers, EntryKind};
 use retime_engine::timeline::{frame_positions, TimeMap};
 
 /// Layer id of `Source`.
@@ -41,6 +41,11 @@ pub const LAYER_FG_MATTE: [&str; 3] = ["fg1_matte", "fg2_matte", "fg3_matte"];
 
 /// The vectors quality constant plugin 04 passes to the planner and the core. Only its being non
 /// zero matters (the segment override of `timeline::select` can lower it to 0).
+///
+/// Tiny frames (U, ours, parity gap G7): the render passes 0 instead for a frame with a side of 1
+/// (`retime_engine::prep::searched_quality`), which takes the fast path. The checkout list keeps
+/// this constant: without layer B the plan entries do not depend on the quality, so the list of
+/// such a frame is the one of a frame whose segment marker turns the vectors off.
 pub const VECTORS_QUALITY: i32 = 4;
 
 /// What the pre-render of one output frame reads before it registers checkouts.
@@ -92,7 +97,7 @@ pub fn probes(req: &PreRender04) -> Vec<Checkout> {
 }
 
 /// The complete list of registrations of one output frame, in issue order (module documentation).
-pub fn checkouts(req: &PreRender04, map: &dyn TimeMap, multi_layer_message: &str) -> Result<Vec<Checkout>> {
+pub fn checkouts(req: &PreRender04, map: &dyn TimeMap) -> Result<Vec<Checkout>> {
     let mut out = probes(req);
     let cur = req.current_time;
     let src = req.src_layer();
@@ -100,11 +105,8 @@ pub fn checkouts(req: &PreRender04, map: &dyn TimeMap, multi_layer_message: &str
         out.push(co(src, cur));
         return Ok(out);
     }
-    if req.fg_count > 0 {
-        return Err(fx_core::FxError::Unsupported(multi_layer_message.to_string()));
-    }
     let (t0, t1) = frame_positions(cur, req.time_step, req.local_time_step);
-    let p = plan(map, t0, t1, VECTORS_QUALITY, req.interp, req.blur, true)?;
+    let p = plan_layers(map, t0, t1, VECTORS_QUALITY, req.interp, req.blur, true, req.fg_count)?;
     let dummies: [Option<&'static str>; 6] = [
         src,
         Some(LAYER_VECTORS_PREV),
@@ -124,12 +126,16 @@ pub fn checkouts(req: &PreRender04, map: &dyn TimeMap, multi_layer_message: &str
         match entry.kind {
             EntryKind::Main => {
                 out.push(co(src, off));
-                // `nfg + 1` times with nfg = 0 here
-                out.push(co(Some(LAYER_VECTORS_PREV), off));
-                out.push(co(Some(LAYER_VECTORS_NEXT), off));
+                // the two vector layers once per layer: nfg + 1 times
+                for _ in 0..=req.fg_count {
+                    out.push(co(Some(LAYER_VECTORS_PREV), off));
+                    out.push(co(Some(LAYER_VECTORS_NEXT), off));
+                }
             }
             // no layer B in plugin 04 (`noB` = 1): the planner emits no such entry
             EntryKind::LayerB => out.push(co(None, off)),
+            // plan_layers gives at most three mattes
+            EntryKind::Matte(k) => out.push(co(Some(LAYER_FG_MATTE[k]), off)),
         }
     }
     Ok(out)

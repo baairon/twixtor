@@ -4,8 +4,10 @@
 //! The effect is temporal: it reads the source (the input layer or `Alt Src`) at the frame pair of
 //! `Track Frame`, runs the optical flow solver of the shared engine and OUTPUTS the vector field as
 //! an encoded RGBA image (`retime_engine::vectors`: red `dx`, green `dy`, centred and scaled by
-//! `Max Displace`, blue 0, alpha opaque), the frame plugins 03 and 04 read as a vector layer. See
-//! `glue.rs` for what is refused.
+//! `Max Displace`, blue 0, alpha opaque), the frame plugins 03 and 04 read as a vector layer. With
+//! FG matte layers every layer gets its own flow and `Layers Output` picks the layers merged into
+//! the image; tracking points, the second tracker, the Debug views and the Draw Geom overlay are
+//! in `glue.rs`.
 
 use fx_core::{
     Checkout, Effect, EffectKind, Env, Frame, LayerSpec, ParamKind, ParamSpec, Params, RenderContext, Result,
@@ -293,9 +295,8 @@ impl Effect for CreateVectors {
     }
 
     /// The four optional layers: `Alt Src` replaces the input as the source (the role of plugin
-    /// 01's Alt Source A, so the same id) and the three FG matte layers belong to the multi layer
-    /// path, which is not supported (a set matte layer gives `FxError::Unsupported`, the matte
-    /// sizes are still probed for the error fills).
+    /// 01's Alt Source A, so the same id) and the three FG matte layers of the multi layer path
+    /// (FG1 first; the matte sizes are probed for the error fills).
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
             LayerSpec { id: LAYER_ALT_SRC, name: "Alt Src", optional: true },
@@ -305,14 +306,20 @@ impl Effect for CreateVectors {
         ]
     }
 
+    /// The open parity gaps of the layer flows, their merge, the points, the overlay, the Debug
+    /// views and the second tracker (`retime_engine::gaps`).
+    fn gaps(&self) -> &'static [&'static fx_core::OpenGap] {
+        retime_engine::gaps::CREATE_VECTORS
+    }
+
     /// The checkouts of output frame `cx.frame_index`, in issue order.
     fn dependencies(&self, cx: &TemporalContext, env: &Env<'_>) -> Result<Vec<Checkout>> {
         glue::dependencies(cx, env)
     }
 
-    /// Display Source (a copy of the source) and Display Vectors (the encoded vector image of the single layer
-    /// case, Vector Resolution Normal and Full, Prep, Track RGB+A, Max Displace). Debug views, FG matte layers,
-    /// `Main_BG: Track` off, user tracking points and the Draw Geom overlay return `FxError::Unsupported`.
+    /// Display Source (a copy of the source with the Draw Geom overlay), Display Vectors (the encoded vector
+    /// image: one flow per layer with the FG matte layers, merged over `Layers Output`, tracking points, the
+    /// second tracker of a layer whose Track is off) and Display Debug (the five debug views).
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
         glue::render_temporal(cx, env, output)
     }

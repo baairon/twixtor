@@ -31,9 +31,11 @@
 //! finish is `combine` (per byte max), invert (`255 - b`) and the hole fill
 //! ([`crate::holefill::fill_holes`]) on the composited output.
 //!
-//! The `is360` flag is `false` in every real render; the warps and the hole fill take it when a
-//! caller asks for it (a hole fill with the flag and at least one hole is
-//! `FxError::Unsupported`).
+//! The `is360` flag (the engine's wrap-around flag) reaches the warps and the hole
+//! fill. With it the inverse warps wrap and leave their coverage at 255, so the combined holes
+//! mask is empty and the hole fill is the identity: a 360 Smart Blend is the 360 warps and the
+//! composite. [`smart_finish`] with the flag and a holes mask that does have holes runs the
+//! wrap-around hole fill ([`crate::holefill`], parity gap G6).
 //!
 //! The weighted compositions use the plain composite (never the binary alpha variant) and the
 //! hole fill with the flag `false`, and their warps run with `is360 = false`, so they ignore
@@ -61,9 +63,9 @@ pub struct SmartOpts {
     /// ([`smart_blend_binary`]) instead of [`smart_blend`] in Blend code 1. Ignored by Nearest and
     /// by the weighted variants.
     pub binary_alpha: bool,
-    /// The `is360` argument of the warps and the flag of the hole fill (`false` in every real
-    /// render). A hole fill with `true` and at least one hole is `Unsupported`. Ignored by the
-    /// weighted variants.
+    /// The `is360` argument of the warps and the flag of the hole fill: wrap-around (360) warps,
+    /// and the wrap-around hole fill wherever a holes mask has holes. Ignored by the weighted
+    /// variants.
     pub is360: bool,
 }
 
@@ -75,7 +77,7 @@ pub struct SmartOpts {
 /// that went through the main path (`+ 0.0f` for f32, `+ 0.5f` and saturation for the integers),
 /// `store_raw` the store of the "alpha is 0" fallback colour (f32 as is, integers the plain
 /// truncation of the 64 bit conversion, low byte or word).
-trait Px: Copy + Send + Sync {
+pub(crate) trait Px: Copy + Send + Sync {
     const WHITE: f32;
     fn load(self) -> f32;
     fn store_plain(x: f32) -> Self;
@@ -148,7 +150,7 @@ impl Px for f32 {
 /// blocks of the kernels. The compares are exact equality tests (a NaN alpha is neither 0 nor
 /// `white`).
 #[inline(always)]
-fn over(a: [f32; 4], b: [f32; 4], white: f32) -> [f32; 4] {
+pub(crate) fn over(a: [f32; 4], b: [f32; 4], white: f32) -> [f32; 4] {
     if a[0] == 0.0 {
         return b;
     }

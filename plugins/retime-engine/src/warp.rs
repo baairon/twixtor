@@ -18,7 +18,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 mod tests;
 
 mod blurcomp;
-pub use blurcomp::{blur_amount, blur_compensation};
+pub use blurcomp::{blur_amount, blur_compensation, blur_compensation_wrap};
+#[cfg(test)]
+pub(crate) use blurcomp::{clear_rgb_where_transparent, motion_blur};
 
 // ---------------------------------------------------------------------------------------
 // Public types
