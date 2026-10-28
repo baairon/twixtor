@@ -208,6 +208,7 @@ python -I tools/gen_docs.py
 - **Threads.** The bytes do not depend on the thread count: `fx-parity selfcheck --threads` and the `threads` tests of every plugin check it. The lock runs at the default thread count.
 - **16 bit range.** At 16 bpc the effects work on 0 to 32768, so a sample of a frame shown unchanged can come back 1 off in 65535 ([raw frame format](../README.md#raw-frame-format)). A graded 16 bpc case compares that output as it is; there is no tolerance at 16 bpc.
 - **32 bit float.** At 32 bpc a sample passes within one unit in the last place, so a graded 32 bpc case is within one ULP of the original, not bit for bit.
+- **NaN bits.** Where a NaN comes from NaN inputs (a NaN weight, or a NaN sample in 32 bpc footage), IEEE 754 does not fix its sign and payload: the CPU picks one operand's, and the compiler may swap the operands of an add or a multiply. Those bits are therefore fixed per platform and build, not across them. A graded 32 bpc case and the lock compare them as bits, so such a case is graded on the platform that rendered it.
 - **GPU.** Every figure is of the CPU path. A device backend counts only where a byte comparison gate shows it identical to the CPU path (`fx-parity devcheck`, [engine: device](engine.md#device)), and adds no figure of its own.
 
 ## Terms

@@ -55,29 +55,40 @@ jobs:
       # The release profile is the one the tests run in: the optical flow
       # and thread invariance suites are far too slow unoptimised.
       - run: cargo build --release -p fx-cli
+        id: build
 
       # Without --no-fail-fast cargo stops at the first failing test binary,
-      # which hid every later suite on macOS.
+      # which hid every later suite on macOS. Likewise every test step runs
+      # once the build passed, even after an earlier test step failed, so one
+      # run shows every failing suite; the job still fails.
       - run: cargo test --workspace --release --no-fail-fast
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       # The tools pick the vfx binary up from target/release. The macOS and
       # Windows runs are on GitHub.
       - run: python3 tools/test_speed_curve.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 tools/test_apply.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 tools/test_repeat_keys.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       # The stage contract of apply.py (--pre-stage, --post-stage, frames/2)
       # and the ffmpeg-filter stage.
       - run: python3 tools/test_stages.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 tools/test_ffstage.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       # The handoff control plane and the conformance suite (docs/handoff.md).
       - run: python3 -I tools/test_handoff.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 -I tools/test_conformance.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       # sapphire is not checked out here (no token, no secret). test_handoff.py
       # above names the absent peer as the reason for each real-repository
@@ -87,24 +98,32 @@ jobs:
       # parts through: anything else that does not run, and every failed
       # check, still fails the job.
       - run: python3 -I tools/conformance.py --quick --allow-absent-peer
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       # The parity record (docs/parity.md): every generated figure equals a
       # fresh generation from docs/data/ and the tree, the documentation
       # checks pass (the flag tables need VFX_PATH and are skipped here), and
       # the generator and the regression lock tool pass their tests.
       - run: python3 -I tools/gen_docs.py --check
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 -I tools/check_docs.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 -I tools/test_docgen.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 tools/test_parity_lock.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       # The retimed audio map (no tools needed), then the HDR and odd size
       # encodes and the --size and --fps runs of apply.py (ffmpeg, ffprobe
       # and vfx; the HDR cases skip without a 10 bit libx265).
       - run: python3 tools/test_audio_map.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 tools/test_apply_hdr.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
 
       - run: python3 tools/test_apply_geometry.py
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}

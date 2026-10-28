@@ -377,9 +377,12 @@ fn blend_transcriptions_equal_blend_in_every_order() {
             sim::launch_1d(n, seed, |i| starter::blend_f32_item(i, &a, &b, &mut out, w, n as u32));
             out.into_vec().iter().map(|v| v.to_bits()).collect::<Vec<u32>>()
         });
-        let want: Vec<u32> =
-            selfcheck::cpu_blend(&a, &b, w, selfcheck::f32_samples, selfcheck::samples_f32).iter().map(|v| v.to_bits()).collect();
-        assert_eq!(selfcheck::first_difference(&want, &got), None, "f32 w={}", w.show());
+        let got: Vec<f32> = got.into_iter().map(f32::from_bits).collect();
+        let want = selfcheck::cpu_blend(&a, &b, w, selfcheck::f32_samples, selfcheck::samples_f32);
+        // as in the device gate (`selfcheck::check_blend_f32`): NaN must land where the CPU has one, but with two NaN
+        // operands the compiler may commute the multiply and keep the other NaN's sign and payload
+        let (diff, _) = selfcheck::compare_floats(&want, &got);
+        assert_eq!(diff, None, "f32 w={}: differs beyond NaN payloads", w.show());
     }
 }
 
