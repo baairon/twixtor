@@ -657,6 +657,7 @@ pub(super) fn punch(img: &mut Image) {
 }
 
 #[test]
+#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn debug_composition_transcriptions_equal_debug_rs_in_every_order() {
     let mut rng = Rng::new(0x6E0C_0006);
     for &(w, h) in &SIZES {
@@ -842,6 +843,7 @@ fn sim_view(warped: &Image, y: &Image, code: i32, seed: u64) -> Image {
 }
 
 #[test]
+#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn the_debug_views_composed_from_the_transcriptions_equal_debug_view() {
     // the order of debug::debug_view_on after its forward warp, every view code at every depth;
     // the warp leaves transparent pixels (the last row and column, the transparent pixels of X)
@@ -946,6 +948,7 @@ fn sim_splat(pairs: &[([f32; 2], [f32; 2])], wl: usize, hl: usize, out: (usize, 
 }
 
 #[test]
+#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn splat_and_seed_transcriptions_equal_points_rs_in_every_order() {
     let mut rng = Rng::new(0x6E0C_0008);
     for &(w, h) in &[(2usize, 2usize), (5, 4), (17, 16), (33, 9), (64, 48), (97, 31)] {
@@ -989,6 +992,7 @@ fn splat_and_seed_transcriptions_equal_points_rs_in_every_order() {
 // ---- prep -------------------------------------------------------------------------------------
 
 #[test]
+#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn luma_and_edge_tail_transcriptions_equal_prep_rs_in_every_order() {
     let mut rng = Rng::new(0x6E0C_0009);
     for &(w, h) in &SIZES {

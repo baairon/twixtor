@@ -10,7 +10,7 @@
 //!   busy device on the calling thread) reruns that stage with the CPU function, so the result is
 //!   the CPU's either way;
 //! * a stage the table keeps on the CPU, and every engine function that is not behind the seam,
-//!   is the CPU function itself;
+//!   is the CPU function itself (a call of such a stage counts as a CPU call, not as a fallback);
 //! * after [`Exec::refuse`] every stage is the CPU function for the rest of the run.
 //!
 //! The gates: a device is opened only after it passes `selfcheck::selfcheck` ([`open`]); the
@@ -18,21 +18,22 @@
 //! byte ([`cross_checked`]); any difference refuses the device for the rest of the run with one
 //! note, never silently.
 //!
-//! Stage placement (decided by the timing study, 1080p, both GPUs of the development machine):
+//! Stage placement (the default [`Placement`]; the device rows were decided by the timing study,
+//! 1080p, both GPUs of the development machine):
 //!
 //! | stage | runs on | why |
 //! |---|---|---|
-//! | `flow::solve`, `flow::solve_pair` (pyramids built on the device, kept resident in the frame cache) | device | the largest part of a vector frame (the measured per call times are in docs/engine.md, Device) |
-//! | `flow::extras::solve_pyramids_with` (masks, user displacement, wrap; host pyramids uploaded) | device | the solve dominates its upload |
-//! | `forward::forward_warp_with` (codes 2 and 3, the flow inversion, the Warp debug view; the mesh and its mip levels on the host) | device, except the Gouraud variant (`pyramid = false`) | 4 to 7 times faster than the single threaded CPU rasteriser; the Gouraud variant has no kernel |
-//! | `compose::compose_vectors` (the warps, Blend, Weighted Blend, Smart Blend, the hole fill and the blur compensation of one vector frame) as one resident chain ([`chain`]) | device, except with the wrap-around (360) flag | the frames and flows go up once and only the finished frame comes back |
+//! | `flow::solve`, `flow::solve_pair` (pyramids built on the device, kept resident in the frame cache) | CPU until the solver kernels are ported | the kernels follow the rules before the parity work (the 360 wrap, the vertical tap order of the pyramid filters); on the device the solve is the largest part of a vector frame (the measured per call times are in docs/engine.md, Device) |
+//! | `flow::extras::solve_pyramids_with` (masks, user displacement, wrap; host pyramids uploaded) | CPU until the solver kernels are ported | the same kernels; on the device the solve dominates its upload |
+//! | `forward::forward_warp_with` (codes 2 and 3, the flow inversion, the Warp debug view; the mesh and its mip levels on the host) | device, except the Gouraud variant (`pyramid = false`), which every effect that warps forward uses | 4 to 7 times faster than the single threaded CPU rasteriser; the Gouraud variant has no kernel |
+//! | `compose::compose_vectors` (the warps, Blend, Weighted Blend, Smart Blend, the hole fill and the blur compensation of one vector frame) as one resident chain ([`chain`]) | device, except with the wrap-around (360) flag; no effect calls it (`stages::AboveFirstTaps` and `stages::GouraudForward` compose on the CPU) | the frames and flows go up once and only the finished frame comes back |
 //! | the layered compositions of `retime-fgbg` with mattes, vector coding, mattes, overlays | CPU | proven exact on the device, but alone each costs more in transfers than it saves |
 //! | `delinearize`, the f64 `powf` / `ln` scalars, `matte::effective` with shrink | CPU | not on the device |
 //!
 //! No global state: the executor travels in `TemporalContext::executor` (a `stages::StageSet`)
-//! and from there in `EngineSettings::stages`. Bytes equal the CPU's by construction (every
-//! device stage is a bit exact port, proven by the stage modules' tests on both GPUs) and by the
-//! two gates above.
+//! and from there in `EngineSettings::stages`. Bytes equal the CPU's by construction (every stage
+//! the placement puts on the device is a bit exact port, proven by the stage modules' tests on
+//! both GPUs) and by the two gates above.
 
 pub mod backend;
 pub mod cache;
@@ -103,10 +104,20 @@ pub struct Placement {
     pub on_device: [bool; STAGES],
 }
 
+/// The stages whose kernels follow the rules before the parity work (docs/engine.md, Device): the
+/// default placement keeps them on the CPU, and a port takes its stage out of this list.
+const NOT_PORTED: &[Stage] = &[Stage::Solve, Stage::SolvePair, Stage::SolvePyramidsWith];
+
 impl Default for Placement {
-    /// Every stage on the device (the table of the module documentation).
+    /// The table of the module documentation: the solver stages (`Solve`, `SolvePair`,
+    /// `SolvePyramidsWith`) on the CPU until their kernels are ported, the forward warp and the
+    /// compose chain on the device.
     fn default() -> Placement {
-        Placement { on_device: [true; STAGES] }
+        let mut p = Placement::all_on_device();
+        for &s in NOT_PORTED {
+            p.on_device[s.slot()] = false;
+        }
+        p
     }
 }
 
@@ -114,6 +125,12 @@ impl Placement {
     /// Every stage on the CPU (the executor then only counts).
     pub fn cpu_only() -> Placement {
         Placement { on_device: [false; STAGES] }
+    }
+
+    /// Every stage on the device, the stages the default keeps on the CPU included (the dispatch
+    /// tests, and device runs of kernels that are not ported yet).
+    pub fn all_on_device() -> Placement {
+        Placement { on_device: [true; STAGES] }
     }
 
     pub fn device(self, stage: Stage) -> bool {

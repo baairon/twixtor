@@ -96,8 +96,11 @@ impl Backend for Fake {
 /// The stages the fake serves.
 const SOLVES: [Stage; 3] = [Stage::Solve, Stage::SolvePair, Stage::SolvePyramidsWith];
 
+/// The executor of the dispatch tests: the fake with every stage on the device (the default
+/// placement keeps the solver on the CPU, see
+/// `the_default_placement_serves_the_solver_on_the_cpu_and_the_textured_forward_warp_on_the_device`).
 fn exec(mode: Mode) -> Arc<Exec<Fake>> {
-    Arc::new(Exec::new(Fake::new(mode), "gpu=9 (fake)", Placement::default()))
+    Arc::new(Exec::new(Fake::new(mode), "gpu=9 (fake)", Placement::all_on_device()))
 }
 
 /// A smooth moving texture at 8, 16 or 32 bpc: frame `t` is the pattern shifted by `t` pixels.
@@ -204,6 +207,46 @@ fn the_cpu_placement_and_a_refused_device_never_call_the_device() {
     assert_eq!(e.refusal().as_deref(), Some("test"));
     assert_eq!(e.solve_pair(&a, &b, &fs()).unwrap(), Cpu.solve_pair(&a, &b, &fs()).unwrap());
     assert_eq!(e.backend().calls.load(Ordering::SeqCst), 0);
+}
+
+#[test]
+fn the_default_placement_serves_the_solver_on_the_cpu_and_the_textured_forward_warp_on_the_device() {
+    // the solver kernels follow the rules before the parity work (docs/engine.md, Device): the
+    // default serves the three solver stages with the CPU functions, counted as CPU calls, not as
+    // fallbacks, and never calls the device for them, not even one that answers wrongly
+    let p = Placement::default();
+    assert_eq!(SOLVES.map(|s| p.device(s)), [false; 3]);
+    assert!(p.device(Stage::ForwardWarp) && p.device(Stage::Compose));
+    let e = Exec::new(Fake::new(Mode::Wrong), "gpu=9 (fake)", p);
+    let (a, b) = (frame(33, 17, Fmt::U16, 0.0), frame(33, 17, Fmt::U16, 1.5));
+    assert_eq!(e.solve(&a, &b, &fs()).unwrap(), Cpu.solve(&a, &b, &fs()).unwrap());
+    assert_eq!(e.solve_pair(&a, &b, &fs()).unwrap(), Cpu.solve_pair(&a, &b, &fs()).unwrap());
+    let (pa, pb) = (flow::build_pyramid(&a, &fs()).unwrap(), flow::build_pyramid(&b, &fs()).unwrap());
+    assert_eq!(
+        e.solve_pyramids_with(&pa, &pb, &fs(), SolveExtras::default()).unwrap(),
+        Cpu.solve_pyramids_with(&pa, &pb, &fs(), SolveExtras::default()).unwrap()
+    );
+    assert_eq!(e.backend().calls.load(Ordering::SeqCst), 0);
+    for s in SOLVES {
+        let r = e.report(s);
+        assert_eq!((r.device, r.fallbacks(), r.cpu), (0, 0, 1), "{s:?}");
+    }
+    assert_eq!(e.device_attempts(), 0);
+    // the device report names them as CPU calls
+    let summary = e.summary();
+    assert!(summary.contains("solve device 0 (0 ms) fallback 0 [cl 0 nan 0 unsupported 0] (0 ms) cpu 1 ("), "{summary}");
+    // the textured forward warp still goes to the device
+    let src = frame(24, 16, Fmt::U8, 0.0);
+    let mut flow = FlowField::new(24, 16);
+    flow.data.iter_mut().for_each(|v| *v = 1.0);
+    let mut want = Image::new(24, 16, Fmt::U8);
+    crate::forward::forward_warp(&mut want, &src, &flow, 0.5).unwrap();
+    let e = Exec::new(Textured, "gpu=9 (fake)", Placement::default());
+    let mut got = Image::new(24, 16, Fmt::U8);
+    e.forward_warp(&mut got, &src, &flow, 0.5).unwrap();
+    assert_eq!(got, want);
+    let r = e.report(Stage::ForwardWarp);
+    assert_eq!((r.device, r.fallbacks(), r.cpu), (1, 0, 0));
 }
 
 /// One "frame" of a run: a create vectors render on the device set, or on the CPU for `None`.
@@ -431,7 +474,7 @@ fn the_forward_warp_is_placed_on_the_device_and_a_refusal_reruns_it_on_the_cpu()
     let want_cov = forward_warp_coverage(&mut want, &src, &flow, 0.5).unwrap();
     // the default placement: on a device without the stage the refusal reruns it on the CPU
     // from the caller's image
-    let e = exec(Mode::Exact);
+    let e = Exec::new(Fake::new(Mode::Exact), "gpu=9 (fake)", Placement::default());
     let mut got = Image::new(24, 16, Fmt::U16);
     assert_eq!(e.forward_warp_coverage(&mut got, &src, &flow, 0.5).unwrap(), want_cov);
     assert_eq!(got, want);
@@ -690,7 +733,7 @@ fn reversed_motion_rows_reach_the_device_bottom_row_first_and_the_frame_equals_t
     // retime-flow fix 03 (`EngineSettings::motion_rows_reversed`, plugin 01): the vector path turns
     // the frames upside down above the stage seam, so the device stages (the solve and the compose
     // chain) receive the reversed frames and the host turns the output back; the device needs no
-    // change of its own
+    // change of its own (every stage on the device here, the solver included)
     let (w, h) = (40, 24);
     let (f0, f1) = (frame(w, h, Fmt::U8, 0.0), frame(w, h, Fmt::U8, 1.5));
     let mut s = crate::host::test_support::settings(w, h, Fmt::U8);
@@ -702,7 +745,7 @@ fn reversed_motion_rows_reach_the_device_bottom_row_first_and_the_frame_equals_t
         s.motion_rows_reversed = true;
         let (sel, cpu) = render_frame(&[&f0, &f1], &s);
         assert_eq!((sel.a, sel.b, sel.wa, sel.exact, sel.vectors_quality), (0, 1, 0.5, false, 4), "interp {interp}: the vector path between frames 0 and 1");
-        let rec = Arc::new(Exec::new(Recorder::default(), "gpu=9 (fake)", Placement::default()));
+        let rec = Arc::new(Exec::new(Recorder::default(), "gpu=9 (fake)", Placement::all_on_device()));
         let mut on_device = s.clone();
         on_device.stages = StageSet::new(rec.clone());
         assert_eq!(render_frame(&[&f0, &f1], &on_device).1, cpu, "interp {interp}");

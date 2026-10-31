@@ -117,7 +117,7 @@ The generator applies the rule to the numbers and counts a check with nothing in
   - seven `retime-flow` frames the original stops on that the tiny-frame rule does not reach: a side of 1 with the other side above 5 (1x6, 7x1), and a 7x9 frame at draft quality;
   - `fgbg-core` cases that crashed in the emulator for reasons not shown to be the original's;
   - two 6000-frame `retime-time` cases. The original rebuilds its speed curve from the first frame at every call, so a full run costs about seven hours each. 26 selected frames of each are identical.
-- **The GPU path.** Only the CPU path is compared. The GPU (OpenCL) kernels were written for the earlier rules, and several no longer match the CPU path. A `vfx --device gpu` render is not covered until they are ported.
+- **The GPU path.** Only the CPU path is compared. Several GPU (OpenCL) kernels were written for the earlier rules and no longer match the CPU path. Until they are ported, the stages they serve run on the CPU, so a `vfx --device gpu` render gives the CPU's bytes ([engine: device](engine.md#device)).
 
 ### Out of contract
 
@@ -316,10 +316,10 @@ A scan of the source files: a `#[test]` line is one test of `cargo test`, a `def
 |---|---|---|
 | `fx-cli` | `#[test]` | 134 |
 | `fx-core` | `#[test]` | 52 |
-| `fx-parity` | `#[test]` | 175 |
+| `fx-parity` | `#[test]` | 175 (1 ignored) |
 | `create-vectors` | `#[test]` | 91 |
 | `retime` | `#[test]` | 70 (2 ignored) |
-| `retime-engine` | `#[test]` | 843 (36 ignored) |
+| `retime-engine` | `#[test]` | 844 (76 ignored) |
 | `retime-fgbg` | `#[test]` | 104 (1 ignored) |
 | `vectors-in` | `#[test]` | 104 |
 | `tools/test_apply.py` | `def test_` | 110 |

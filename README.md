@@ -56,7 +56,7 @@ What the results do not show:
 
 - **The grid is a sample.** It covers chosen inputs, not every input.
 - **The reference is the original in the emulator,** not After Effects on real hardware. Where the original depends on the host, both sides use a labelled stand-in ([below](#assumptions-and-stand-ins)).
-- **Only the CPU path is compared.** The GPU path does not follow the latest rules yet.
+- **Only the CPU path is compared.** `--device gpu` gives the CPU's bytes: stages whose kernels follow older rules run on the CPU.
 
 Each module is checked three ways:
 

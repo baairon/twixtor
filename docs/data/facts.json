@@ -158,13 +158,13 @@
    "source": "docs/data/lock.json sum of refused_now_render"
   },
   "tests_rust": {
-   "value": 1573,
-   "text": "1,573",
+   "value": 1574,
+   "text": "1,574",
    "source": "scan of `#[test]` lines in the .rs files of every crate"
   },
   "tests_rust_ignored": {
-   "value": 39,
-   "text": "39",
+   "value": 80,
+   "text": "80",
    "source": "scan of `#[ignore` lines, every crate"
   },
   "tests_rust_fx_cli": {
@@ -193,8 +193,8 @@
    "source": "scan of `#[test]` lines in the .rs files of retime"
   },
   "tests_rust_retime_engine": {
-   "value": 843,
-   "text": "843",
+   "value": 844,
+   "text": "844",
    "source": "scan of `#[test]` lines in the .rs files of retime-engine"
   },
   "tests_rust_retime_fgbg": {
