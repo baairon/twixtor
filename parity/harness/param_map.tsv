@@ -1,0 +1,781 @@
+plugin	effect	ae_index	ae_name	ae_type	ae_min	ae_max	ae_slider_min	ae_slider_max	ae_default	ae_choices	ae_flags	vfx_kind	vfx_id	vfx_name	vfx_default	vfx_choices	match	ae_kind	pairing_status
+TwixtorPro_64	retime-fgbg	1	Activation	BUTTON							0x40						unmatched	button	host-side
+TwixtorPro_64	retime-fgbg	2	forcererender	FLOAT_SLIDER	0.0	5000000.0	0.0	5000000.0	0.0		0x2						unmatched	float	host-side
+TwixtorPro_64	retime-fgbg	3	Display	POPUP					1	Twixtored Output|Source|FG1 Twixtored|FG2 Twixtored|FG3 Twixtored|Background Twixtored	0x40	popup	display	Display	1	Output|Source|FG1|FG2|FG3|Background	exact	popup	
+TwixtorPro_64	retime-fgbg	4	GPU Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	5	Use GPU	POPUP					1	OFF|ON	0x0						unmatched	popup	host-side
+TwixtorPro_64	retime-fgbg	6	Less GPU Mem	CHECKBOX					1		0x0						unmatched	bool	host-side
+TwixtorPro_64	retime-fgbg	7		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	8	Use GPU	POPUP					1	OFF|ON|ON if GPU supported, CPU otherwise	0x0						unmatched	popup	host-side
+TwixtorPro_64	retime-fgbg	9	SavedInPremiere	CHECKBOX					1		0x40						unmatched	bool	host-side
+TwixtorPro_64	retime-fgbg	10	Draw Geom	POPUP					2	None|All|FG1|FG2|FG3|Main_BG	0x40	popup	draw_geom	Draw Geom	2	None|All|FG1|FG2|FG3|Main_BG	exact	popup	
+TwixtorPro_64	retime-fgbg	11	Source Control	GROUP_START							0x0						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	12	360 Video	CHECKBOX					0		0x42	checkbox	video_360	360 Video	False		exact	bool	
+TwixtorPro_64	retime-fgbg	13	Alt Color Source	LAYER					0		0x40	layer	alt_source_a	Alt Source A			override	layer	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	14	Alt Motion Source	LAYER					0		0x60	layer	alt_source_b	Alt Source B			override	layer	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	15	Src: Mark Segments	POPUP					1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	0x40	popup	src_mark_segments	Src: Mark Segments	1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	exact	popup	
+TwixtorPro_64	retime-fgbg	16	Input: Fields	POPUP					1	None|Upper Field First|Lower Field First	0x40	popup	input_fields	Input: Fields	1	None|Upper Field First|Lower Field First	exact	popup	
+TwixtorPro_64	retime-fgbg	17	In FPS is Out FPS	CHECKBOX					1		0x42	checkbox	in_fps_is_out_fps	In FPS is Out FPS	True		exact	bool	
+TwixtorPro_64	retime-fgbg	18	Input: Frame Rate	FLOAT_SLIDER	0.1	1000.0	0.1	1000.0	29.969999		0x60	float	input_frame_rate	Input: Frame Rate	29.969999		exact	float	
+TwixtorPro_64	retime-fgbg	19		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	20	Track Control	GROUP_START							0x0						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	21	Motion Vectors	POPUP					5	No Motion Vectors|Sloppy|Medium|High|Best	0x40	popup	vectors	Vectors	5	No Vectors|Sloppy|Medium|High|Best	override	popup	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	22	Image Prep	POPUP					1	None|Contrast/Edge Enhance|Delinearize	0x40	popup	prep	Prep	1	None|Contrast/Edge Enhance|Delinearize	override	popup	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	23	Track RGB+A	CHECKBOX					0		0x40	checkbox	track_rgb_a	Track RGB+A	False		exact	bool	
+TwixtorPro_64	retime-fgbg	24	Plenty Memory?	CHECKBOX					1		0x40	checkbox	plenty_memory	Plenty Memory?	True		exact	bool	
+TwixtorPro_64	retime-fgbg	25		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	26	Output Control	GROUP_START							0x0						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	27	Time Remap Mode	POPUP					1	Speed|Frame Number	0x40	popup	time_remap_mode	Time Remap Mode	1	Speed|Frame Number	exact	popup	
+TwixtorPro_64	retime-fgbg	28	Speed %	FIX_SLIDER	-10000.0	10000.0	-1000.0	1000.0	100.0		0x60	float	speed_percent	Speed %	100.0		exact	float	
+TwixtorPro_64	retime-fgbg	29	Frame Num	FLOAT_SLIDER	-200000.0	200000.0	0.0	2000.0	0.0		0x60	float	frame_num	Frame Num	0.0		exact	float	
+TwixtorPro_64	retime-fgbg	30	Frame Interp	POPUP					2	Nearest|Blend|Motion Weighted Blend	0x40	popup	frame_interp	Frame Interp	2	Nearest|Blend|Weighted Blend	exact	popup	
+TwixtorPro_64	retime-fgbg	31	Warping	POPUP					1	Inverse|Inverse w/ Smart Blend|Forward|Forward, no Smart Blend	0x40	popup	warping	Warping	1	Inverse|Inverse w/ Smart Blend|Forward|Forward, no Smart Blend	exact	popup	
+TwixtorPro_64	retime-fgbg	32	Motion Blur Compensation	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	blur_compensation	Blur Compensation	0.0		override	float	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	33		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	34	Main_BG Layer Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	35	Main_BG Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	main_bg_sensitivity	Main_BG Sensitivity	70.0		exact	float	
+TwixtorPro_64	retime-fgbg	36	First Mask for BG	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	37	Last Mask for BG	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	38		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	39	FG1 Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	40	FG1 Matte	LAYER					0		0x60	layer	fg1_matte	FG1 Matte			exact	layer	
+TwixtorPro_64	retime-fgbg	41	FG1 Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg1_matte_chan	FG1 Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+TwixtorPro_64	retime-fgbg	42	FG1 Motion Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg1_sensitivity	FG1 Sensitivity	70.0		override	float	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	43	FG1 Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg1_inv_matte_shrink	FG1 Inv Matte Shrink	0.0		exact	float	
+TwixtorPro_64	retime-fgbg	44	FG1: First Mask	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	45	FG1: Last Mask	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	46		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	47	FG2 Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	48	FG2 Matte	LAYER					0		0x60	layer	fg2_matte	FG2 Matte			exact	layer	
+TwixtorPro_64	retime-fgbg	49	FG2 Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg2_matte_chan	FG2 Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+TwixtorPro_64	retime-fgbg	50	FG2 Motion Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg2_sensitivity	FG2 Sensitivity	70.0		override	float	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	51	FG2 Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg2_inv_matte_shrink	FG2 Inv Matte Shrink	0.0		exact	float	
+TwixtorPro_64	retime-fgbg	52	FG2: First Mask	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	53	FG2: Last Mask	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	54		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	55	FG3 Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	56	FG3 Matte	LAYER					0		0x60	layer	fg3_matte	FG3 Matte			exact	layer	
+TwixtorPro_64	retime-fgbg	57	FG3 Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg3_matte_chan	FG3 Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+TwixtorPro_64	retime-fgbg	58	FG3 Motion Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg3_sensitivity	FG3 Sensitivity	70.0		override	float	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	59	FG3 Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg3_inv_matte_shrink	FG3 Inv Matte Shrink	0.0		exact	float	
+TwixtorPro_64	retime-fgbg	60	FG3: First Mask	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	61	FG3: Last Mask	PATH							0x40						unmatched	path	plugin-only
+TwixtorPro_64	retime-fgbg	62		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	63	Track Points	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorPro_64	retime-fgbg	64	Pt 1: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt1_use	Pt 1: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	65	Pt 1: Pos	POINT					-5.0,-5.0		0x40	point	pt1_pos	Pt 1: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	66	Pt 1: Color	COLOR					255,0,255,0		0x40	color	pt1_color	Pt 1:	0,255,0		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	67	Pt 2: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt2_use	Pt 2: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	68	Pt 2: Pos	POINT					-5.0,-5.0		0x40	point	pt2_pos	Pt 2: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	69	Pt 2: Color	COLOR					255,0,0,255		0x40	color	pt2_color	Pt 2:	0,0,255		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	70	Pt 3: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt3_use	Pt 3: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	71	Pt 3: Pos	POINT					-5.0,-5.0		0x40	point	pt3_pos	Pt 3: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	72	Pt 3: Color	COLOR					255,255,255,255		0x40	color	pt3_color	Pt 3:	255,255,255		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	73	Pt 4: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt4_use	Pt 4: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	74	Pt 4: Pos	POINT					-5.0,-5.0		0x40	point	pt4_pos	Pt 4: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	75	Pt 4: Color	COLOR					255,255,255,0		0x40	color	pt4_color	Pt 4:	255,255,0		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	76	Pt 5: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt5_use	Pt 5: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	77	Pt 5: Pos	POINT					-5.0,-5.0		0x40	point	pt5_pos	Pt 5: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	78	Pt 5: Color	COLOR					255,255,0,255		0x40	color	pt5_color	Pt 5:	255,0,255		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	79	Pt 6: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt6_use	Pt 6: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	80	Pt 6: Pos	POINT					-5.0,-5.0		0x40	point	pt6_pos	Pt 6: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	81	Pt 6: Color	COLOR					255,0,255,255		0x40	color	pt6_color	Pt 6:	0,255,255		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	82	Pt 7: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt7_use	Pt 7: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	83	Pt 7: Pos	POINT					-5.0,-5.0		0x40	point	pt7_pos	Pt 7: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	84	Pt 7: Color	COLOR					255,255,128,128		0x40	color	pt7_color	Pt 7:	255,128,128		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	85	Pt 8: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt8_use	Pt 8: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	86	Pt 8: Pos	POINT					-5.0,-5.0		0x40	point	pt8_pos	Pt 8: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	87	Pt 8: Color	COLOR					255,128,255,128		0x40	color	pt8_color	Pt 8:	128,255,128		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	88	Pt 9: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt9_use	Pt 9: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	89	Pt 9: Pos	POINT					-5.0,-5.0		0x40	point	pt9_pos	Pt 9: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	90	Pt 9: Color	COLOR					255,128,128,255		0x40	color	pt9_color	Pt 9:	128,128,255		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	91	Pt 10: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt10_use	Pt 10: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	92	Pt 10: Pos	POINT					-5.0,-5.0		0x40	point	pt10_pos	Pt 10: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	93	Pt 10: Color	COLOR					255,255,128,64		0x40	color	pt10_color	Pt 10:	255,128,64		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	94	Pt 11: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt11_use	Pt 11: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	95	Pt 11: Pos	POINT					-5.0,-5.0		0x40	point	pt11_pos	Pt 11: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	96	Pt 11: Color	COLOR					255,128,255,64		0x40	color	pt11_color	Pt 11:	128,255,64		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	97	Pt 12: Use	POPUP					1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	0x40	popup	pt12_use	Pt 12: Use	1	Don't Use|FG 1|FG 2|FG3|Main_BG Layer	exact	popup	
+TwixtorPro_64	retime-fgbg	98	Pt 12: Pos	POINT					-5.0,-5.0		0x40	point	pt12_pos	Pt 12: Pos	-5.0,-5.0		exact	point	
+TwixtorPro_64	retime-fgbg	99	Pt 12: Color	COLOR					255,128,64,255		0x40	color	pt12_color	Pt 12:	128,64,255		override	color	by-name-and-evidence
+TwixtorPro_64	retime-fgbg	100		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorPro_64	retime-fgbg	101	Hide Mask 0	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	102	Hide Mask 1	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	103	Hide Mask 2	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	104	Hide Mask 3	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	105	Hide Mask 4	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	106	Hide Mask 5	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	107	Hide Mask 6	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	108	Hide Mask 7	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	109	Hide Mask 8	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	110	Hide Mask 9	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	111	Hide Mask 10	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	112	Hide Mask 11	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	113	Hide Mask 12	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	114	Hide Mask 13	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	115	Hide Mask 14	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	116	Hide Mask 15	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	117	Hide Mask 16	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	118	Hide Mask 17	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	119	Hide Mask 18	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	120	Hide Mask 19	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	121	Hide Mask 20	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	122	Hide Mask 21	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	123	Hide Mask 22	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	124	Hide Mask 23	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	125	Hide Mask 24	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	126	Hide Mask 25	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	127	Hide Mask 26	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	128	Hide Mask 27	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	129	Hide Mask 28	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	130	Hide Mask 29	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	131	Hide Mask 30	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	132	Hide Mask 31	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	133	Hide Mask 32	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	134	Hide Mask 33	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	135	Hide Mask 34	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	136	Hide Mask 35	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	137	Hide Mask 36	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	138	Hide Mask 37	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	139	Hide Mask 38	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	140	Hide Mask 39	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	141	Hide Mask 40	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	142	Hide Mask 41	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	143	Hide Mask 42	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	144	Hide Mask 43	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	145	Hide Mask 44	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	146	Hide Mask 45	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	147	Hide Mask 46	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	148	Hide Mask 47	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	149	Hide Mask 48	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	150	Hide Mask 49	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	151	Hide Mask 50	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	152	Hide Mask 51	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	153	Hide Mask 52	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	154	Hide Mask 53	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	155	Hide Mask 54	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	156	Hide Mask 55	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	157	Hide Mask 56	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	158	Hide Mask 57	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	159	Hide Mask 58	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	160	Hide Mask 59	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	161	Hide Mask 60	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	162	Hide Mask 61	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	163	Hide Mask 62	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	164	Hide Mask 63	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	165	Hide Mask 64	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	166	Hide Mask 65	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	167	Hide Mask 66	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	168	Hide Mask 67	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	169	Hide Mask 68	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	170	Hide Mask 69	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	171	Hide Mask 70	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	172	Hide Mask 71	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	173	Hide Mask 72	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	174	Hide Mask 73	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	175	Hide Mask 74	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	176	Hide Mask 75	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	177	Hide Mask 76	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	178	Hide Mask 77	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	179	Hide Mask 78	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	180	Hide Mask 79	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	181	Hide Mask 80	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	182	Hide Mask 81	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	183	Hide Mask 82	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	184	Hide Mask 83	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	185	Hide Mask 84	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	186	Hide Mask 85	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	187	Hide Mask 86	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	188	Hide Mask 87	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	189	Hide Mask 88	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	190	Hide Mask 89	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	191	Hide Mask 90	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	192	Hide Mask 91	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	193	Hide Mask 92	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	194	Hide Mask 93	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	195	Hide Mask 94	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	196	Hide Mask 95	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	197	Hide Mask 96	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	198	Hide Mask 97	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	199	Hide Mask 98	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	200	Hide Mask 99	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	201	Hide Mask 100	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	202	Hide Mask 101	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	203	Hide Mask 102	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	204	Hide Mask 103	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	205	Hide Mask 104	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	206	Hide Mask 105	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	207	Hide Mask 106	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	208	Hide Mask 107	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	209	Hide Mask 108	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	210	Hide Mask 109	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	211	Hide Mask 110	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	212	Hide Mask 111	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	213	Hide Mask 112	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	214	Hide Mask 113	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	215	Hide Mask 114	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	216	Hide Mask 115	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	217	Hide Mask 116	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	218	Hide Mask 117	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	219	Hide Mask 118	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	220	Hide Mask 119	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	221	Hide Mask 120	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	222	Hide Mask 121	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	223	Hide Mask 122	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	224	Hide Mask 123	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	225	Hide Mask 124	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	226	Hide Mask 125	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	227	Hide Mask 126	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	228	Hide Mask 127	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	229	Hide Mask 128	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	230	Hide Mask 129	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	231	Hide Mask 130	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	232	Hide Mask 131	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	233	Hide Mask 132	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	234	Hide Mask 133	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	235	Hide Mask 134	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	236	Hide Mask 135	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	237	Hide Mask 136	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	238	Hide Mask 137	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	239	Hide Mask 138	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	240	Hide Mask 139	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	241	Hide Mask 140	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	242	Hide Mask 141	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	243	Hide Mask 142	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	244	Hide Mask 143	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	245	Hide Mask 144	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	246	Hide Mask 145	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	247	Hide Mask 146	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	248	Hide Mask 147	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	249	Hide Mask 148	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	250	Hide Mask 149	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	251	Hide Mask 150	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	252	Hide Mask 151	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	253	Hide Mask 152	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	254	Hide Mask 153	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	255	Hide Mask 154	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	256	Hide Mask 155	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	257	Hide Mask 156	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	258	Hide Mask 157	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	259	Hide Mask 158	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	260	Hide Mask 159	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	261	Hide Mask 160	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	262	Hide Mask 161	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	263	Hide Mask 162	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	264	Hide Mask 163	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	265	Hide Mask 164	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	266	Hide Mask 165	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	267	Hide Mask 166	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	268	Hide Mask 167	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	269	Hide Mask 168	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	270	Hide Mask 169	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	271	Hide Mask 170	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	272	Hide Mask 171	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	273	Hide Mask 172	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	274	Hide Mask 173	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	275	Hide Mask 174	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	276	Hide Mask 175	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	277	Hide Mask 176	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	278	Hide Mask 177	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	279	Hide Mask 178	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	280	Hide Mask 179	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	281	Hide Mask 180	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	282	Hide Mask 181	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	283	Hide Mask 182	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	284	Hide Mask 183	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	285	Hide Mask 184	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	286	Hide Mask 185	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	287	Hide Mask 186	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	288	Hide Mask 187	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	289	Hide Mask 188	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	290	Hide Mask 189	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	291	Hide Mask 190	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	292	Hide Mask 191	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	293	Hide Mask 192	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	294	Hide Mask 193	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	295	Hide Mask 194	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	296	Hide Mask 195	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	297	Hide Mask 196	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	298	Hide Mask 197	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	299	Hide Mask 198	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	300	Hide Mask 199	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	301	Hide Mask 200	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	302	Hide Mask 201	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	303	Hide Mask 202	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	304	Hide Mask 203	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	305	Hide Mask 204	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	306	Hide Mask 205	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	307	Hide Mask 206	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	308	Hide Mask 207	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	309	Hide Mask 208	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	310	Hide Mask 209	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	311	Hide Mask 210	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	312	Hide Mask 211	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	313	Hide Mask 212	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	314	Hide Mask 213	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	315	Hide Mask 214	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	316	Hide Mask 215	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	317	Hide Mask 216	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	318	Hide Mask 217	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	319	Hide Mask 218	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	320	Hide Mask 219	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	321	Hide Mask 220	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	322	Hide Mask 221	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	323	Hide Mask 222	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	324	Hide Mask 223	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	325	Hide Mask 224	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	326	Hide Mask 225	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	327	Hide Mask 226	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	328	Hide Mask 227	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	329	Hide Mask 228	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	330	Hide Mask 229	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	331	Hide Mask 230	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	332	Hide Mask 231	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	333	Hide Mask 232	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	334	Hide Mask 233	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	335	Hide Mask 234	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	336	Hide Mask 235	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	337	Hide Mask 236	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	338	Hide Mask 237	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	339	Hide Mask 238	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	340	Hide Mask 239	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	341	Hide Mask 240	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	342	Hide Mask 241	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	343	Hide Mask 242	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	344	Hide Mask 243	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	345	Hide Mask 244	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	346	Hide Mask 245	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	347	Hide Mask 246	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	348	Hide Mask 247	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	349	Hide Mask 248	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	350	Hide Mask 249	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	351	Hide Mask 250	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	352	Hide Mask 251	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	353	Hide Mask 252	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	354	Hide Mask 253	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	355	Hide Mask 254	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorPro_64	retime-fgbg	356	Hide Mask 255	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	1	Activation	BUTTON							0x40						unmatched	button	host-side
+CreateMotionVectors_64	create-vectors	2	forcererender	FLOAT_SLIDER	0.0	5000000.0	0.0	5000000.0	0.0		0x2						unmatched	float	host-side
+CreateMotionVectors_64	create-vectors	3	Display	POPUP					2	Source|Motion Vectors|Debug	0x40	popup	display	Display	2	Source|Vectors|Debug	exact	popup	
+CreateMotionVectors_64	create-vectors	4	GPU Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	5	Use GPU	POPUP					1	OFF|ON	0x0						unmatched	popup	host-side
+CreateMotionVectors_64	create-vectors	6	Less GPU Mem	CHECKBOX					1		0x0						unmatched	bool	host-side
+CreateMotionVectors_64	create-vectors	7		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	8	Use GPU	POPUP					1	OFF|ON|ON if GPU supported, CPU otherwise	0x0						unmatched	popup	host-side
+CreateMotionVectors_64	create-vectors	9	SavedInPremiere	CHECKBOX					1		0x40						unmatched	bool	host-side
+CreateMotionVectors_64	create-vectors	10	Vector Resolution	POPUP					1	Normal (half res)|Full res	0x40	popup	vector_resolution	Vector Resolution	1	Normal (half res)|Full res	exact	popup	
+CreateMotionVectors_64	create-vectors	11	Alt Motion Src	LAYER					0		0x60	layer	alt_source_a	Alt Src			override	layer	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	12	Debug View Method	POPUP					2	Warp|Blend|Diff|Detail Compare|Edge Compare	0x40	popup	debug_view_method	Debug View Method	2	Warp|Blend|Diff|Detail Compare|Edge Compare	exact	popup	
+CreateMotionVectors_64	create-vectors	13	Draw Geom	POPUP					2	None|All|FG1|FG2|FG3|Main_BG	0x40	popup	draw_geom	Draw Geom	2	None|All|FG1|FG2|FG3|Main_BG	exact	popup	
+CreateMotionVectors_64	create-vectors	14	Track and Output Control	GROUP_START							0x0						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	15	Max Displace	FIX_SLIDER	1.0	8192.0	1.0	8192.0	2048.0		0x60	float	max_displace	Max Displace	2048.0		exact	float	
+CreateMotionVectors_64	create-vectors	16	Track Frame	POPUP					1	Previous|Next	0x40	popup	track_frame	Track Frame	1	Previous|Next	exact	popup	
+CreateMotionVectors_64	create-vectors	17	Image Prep	POPUP					1	None|Contrast/Edge Enhance|Delinearize	0x40	popup	prep	Prep	1	None|Contrast/Edge Enhance|Delinearize	override	popup	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	18	Track RGB+A	CHECKBOX					0		0x40	checkbox	track_rgb_a	Track RGB+A	False		exact	bool	
+CreateMotionVectors_64	create-vectors	19	Layers Output	POPUP					1	All|FG1|FG2|FG3|MAIN_BG	0x40	popup	layers_output	Layers Output	1	All|FG1|FG2|FG3|MAIN_BG	exact	popup	
+CreateMotionVectors_64	create-vectors	20		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	21	Main_BG Settings	GROUP_START							0x0						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	22	Main_BG: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	main_bg_sensitivity	Main_BG: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	23	Main_BG: Image Track	CHECKBOX					1		0x40	checkbox	main_bg_track	Main_BG: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	24	Main_BG: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	25	Main_BG: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	26		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	27	FG1: Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	28	FG1: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg1_sensitivity	FG1: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	29	FG1: Image Track	CHECKBOX					1		0x40	checkbox	fg1_track	FG1: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	30	FG1: Matte	LAYER					0		0x60	layer	fg1_matte	FG1: Matte			exact	layer	
+CreateMotionVectors_64	create-vectors	31	FG1: Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg1_matte_chan	FG1: Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+CreateMotionVectors_64	create-vectors	32	FG1: Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg1_inv_matte_shrink	FG1: Inv Matte Shrink	0.0		exact	float	
+CreateMotionVectors_64	create-vectors	33	FG1: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	34	FG1:: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	35		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	36	FG2: Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	37	FG2: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg2_sensitivity	FG2: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	38	FG2: Image Track	CHECKBOX					1		0x40	checkbox	fg2_track	FG2: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	39	FG2: Matte	LAYER					0		0x60	layer	fg2_matte	FG2: Matte			exact	layer	
+CreateMotionVectors_64	create-vectors	40	FG2: Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg2_matte_chan	FG2: Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+CreateMotionVectors_64	create-vectors	41	FG2: Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg2_inv_matte_shrink	FG2: Inv Matte Shrink	0.0		exact	float	
+CreateMotionVectors_64	create-vectors	42	FG2: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	43	FG2:: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	44		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	45	FG3: Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	46	FG3: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg3_sensitivity	FG3: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	47	FG3: Image Track	CHECKBOX					1		0x40	checkbox	fg3_track	FG3: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	48	FG3: Matte	LAYER					0		0x60	layer	fg3_matte	FG3: Matte			exact	layer	
+CreateMotionVectors_64	create-vectors	49	FG3: Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg3_matte_chan	FG3: Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+CreateMotionVectors_64	create-vectors	50	FG3: Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg3_inv_matte_shrink	FG3: Inv Matte Shrink	0.0		exact	float	
+CreateMotionVectors_64	create-vectors	51	FG3: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	52	FG3:: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	53		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	54	Track Points	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	55	Pt 1: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt1_use	Pt 1: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	56	Pt 1: Pos	POINT					-5.0,-5.0		0x40	point	pt1_pos	Pt 1: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	57	Pt 1: Color	COLOR					255,0,255,0		0x40	color	pt1_color	Pt 1:	0,255,0		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	58	Pt 2: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt2_use	Pt 2: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	59	Pt 2: Pos	POINT					-5.0,-5.0		0x40	point	pt2_pos	Pt 2: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	60	Pt 2: Color	COLOR					255,0,0,255		0x40	color	pt2_color	Pt 2:	0,0,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	61	Pt 3: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt3_use	Pt 3: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	62	Pt 3: Pos	POINT					-5.0,-5.0		0x40	point	pt3_pos	Pt 3: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	63	Pt 3: Color	COLOR					255,255,255,255		0x40	color	pt3_color	Pt 3:	255,255,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	64	Pt 4: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt4_use	Pt 4: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	65	Pt 4: Pos	POINT					-5.0,-5.0		0x40	point	pt4_pos	Pt 4: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	66	Pt 4: Color	COLOR					255,255,255,0		0x40	color	pt4_color	Pt 4:	255,255,0		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	67	Pt 5: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt5_use	Pt 5: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	68	Pt 5: Pos	POINT					-5.0,-5.0		0x40	point	pt5_pos	Pt 5: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	69	Pt 5: Color	COLOR					255,255,0,255		0x40	color	pt5_color	Pt 5:	255,0,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	70	Pt 6: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt6_use	Pt 6: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	71	Pt 6: Pos	POINT					-5.0,-5.0		0x40	point	pt6_pos	Pt 6: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	72	Pt 6: Color	COLOR					255,0,255,255		0x40	color	pt6_color	Pt 6:	0,255,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	73	Pt 7: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt7_use	Pt 7: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	74	Pt 7: Pos	POINT					-5.0,-5.0		0x40	point	pt7_pos	Pt 7: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	75	Pt 7: Color	COLOR					255,255,128,128		0x40	color	pt7_color	Pt 7:	255,128,128		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	76	Pt 8: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt8_use	Pt 8: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	77	Pt 8: Pos	POINT					-5.0,-5.0		0x40	point	pt8_pos	Pt 8: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	78	Pt 8: Color	COLOR					255,128,255,128		0x40	color	pt8_color	Pt 8:	128,255,128		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	79	Pt 9: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt9_use	Pt 9: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	80	Pt 9: Pos	POINT					-5.0,-5.0		0x40	point	pt9_pos	Pt 9: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	81	Pt 9: Color	COLOR					255,128,128,255		0x40	color	pt9_color	Pt 9:	128,128,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	82	Pt 10: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt10_use	Pt 10: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	83	Pt 10: Pos	POINT					-5.0,-5.0		0x40	point	pt10_pos	Pt 10: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	84	Pt 10: Color	COLOR					255,255,128,64		0x40	color	pt10_color	Pt 10:	255,128,64		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	85	Pt 11: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt11_use	Pt 11: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	86	Pt 11: Pos	POINT					-5.0,-5.0		0x40	point	pt11_pos	Pt 11: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	87	Pt 11: Color	COLOR					255,128,255,64		0x40	color	pt11_color	Pt 11:	128,255,64		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	88	Pt 12: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt12_use	Pt 12: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	89	Pt 12: Pos	POINT					-5.0,-5.0		0x40	point	pt12_pos	Pt 12: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	90	Pt 12: Color	COLOR					255,128,64,255		0x40	color	pt12_color	Pt 12:	128,64,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	91		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	92	Hide Mask 0	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	93	Hide Mask 1	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	94	Hide Mask 2	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	95	Hide Mask 3	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	96	Hide Mask 4	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	97	Hide Mask 5	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	98	Hide Mask 6	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	99	Hide Mask 7	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	100	Hide Mask 8	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	101	Hide Mask 9	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	102	Hide Mask 10	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	103	Hide Mask 11	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	104	Hide Mask 12	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	105	Hide Mask 13	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	106	Hide Mask 14	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	107	Hide Mask 15	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	108	Hide Mask 16	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	109	Hide Mask 17	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	110	Hide Mask 18	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	111	Hide Mask 19	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	112	Hide Mask 20	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	113	Hide Mask 21	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	114	Hide Mask 22	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	115	Hide Mask 23	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	116	Hide Mask 24	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	117	Hide Mask 25	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	118	Hide Mask 26	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	119	Hide Mask 27	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	120	Hide Mask 28	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	121	Hide Mask 29	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	122	Hide Mask 30	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	123	Hide Mask 31	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	124	Hide Mask 32	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	125	Hide Mask 33	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	126	Hide Mask 34	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	127	Hide Mask 35	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	128	Hide Mask 36	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	129	Hide Mask 37	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	130	Hide Mask 38	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	131	Hide Mask 39	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	132	Hide Mask 40	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	133	Hide Mask 41	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	134	Hide Mask 42	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	135	Hide Mask 43	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	136	Hide Mask 44	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	137	Hide Mask 45	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	138	Hide Mask 46	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	139	Hide Mask 47	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	140	Hide Mask 48	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	141	Hide Mask 49	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	142	Hide Mask 50	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	143	Hide Mask 51	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	144	Hide Mask 52	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	145	Hide Mask 53	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	146	Hide Mask 54	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	147	Hide Mask 55	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	148	Hide Mask 56	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	149	Hide Mask 57	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	150	Hide Mask 58	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	151	Hide Mask 59	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	152	Hide Mask 60	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	153	Hide Mask 61	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	154	Hide Mask 62	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	155	Hide Mask 63	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	156	Hide Mask 64	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	157	Hide Mask 65	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	158	Hide Mask 66	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	159	Hide Mask 67	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	160	Hide Mask 68	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	161	Hide Mask 69	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	162	Hide Mask 70	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	163	Hide Mask 71	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	164	Hide Mask 72	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	165	Hide Mask 73	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	166	Hide Mask 74	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	167	Hide Mask 75	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	168	Hide Mask 76	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	169	Hide Mask 77	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	170	Hide Mask 78	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	171	Hide Mask 79	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	172	Hide Mask 80	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	173	Hide Mask 81	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	174	Hide Mask 82	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	175	Hide Mask 83	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	176	Hide Mask 84	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	177	Hide Mask 85	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	178	Hide Mask 86	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	179	Hide Mask 87	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	180	Hide Mask 88	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	181	Hide Mask 89	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	182	Hide Mask 90	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	183	Hide Mask 91	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	184	Hide Mask 92	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	185	Hide Mask 93	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	186	Hide Mask 94	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	187	Hide Mask 95	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	188	Hide Mask 96	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	189	Hide Mask 97	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	190	Hide Mask 98	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	191	Hide Mask 99	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	192	Hide Mask 100	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	193	Hide Mask 101	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	194	Hide Mask 102	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	195	Hide Mask 103	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	196	Hide Mask 104	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	197	Hide Mask 105	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	198	Hide Mask 106	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	199	Hide Mask 107	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	200	Hide Mask 108	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	201	Hide Mask 109	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	202	Hide Mask 110	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	203	Hide Mask 111	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	204	Hide Mask 112	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	205	Hide Mask 113	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	206	Hide Mask 114	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	207	Hide Mask 115	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	208	Hide Mask 116	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	209	Hide Mask 117	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	210	Hide Mask 118	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	211	Hide Mask 119	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	212	Hide Mask 120	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	213	Hide Mask 121	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	214	Hide Mask 122	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	215	Hide Mask 123	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	216	Hide Mask 124	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	217	Hide Mask 125	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	218	Hide Mask 126	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	219	Hide Mask 127	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	220	Hide Mask 128	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	221	Hide Mask 129	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	222	Hide Mask 130	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	223	Hide Mask 131	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	224	Hide Mask 132	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	225	Hide Mask 133	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	226	Hide Mask 134	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	227	Hide Mask 135	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	228	Hide Mask 136	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	229	Hide Mask 137	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	230	Hide Mask 138	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	231	Hide Mask 139	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	232	Hide Mask 140	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	233	Hide Mask 141	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	234	Hide Mask 142	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	235	Hide Mask 143	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	236	Hide Mask 144	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	237	Hide Mask 145	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	238	Hide Mask 146	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	239	Hide Mask 147	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	240	Hide Mask 148	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	241	Hide Mask 149	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	242	Hide Mask 150	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	243	Hide Mask 151	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	244	Hide Mask 152	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	245	Hide Mask 153	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	246	Hide Mask 154	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	247	Hide Mask 155	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	248	Hide Mask 156	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	249	Hide Mask 157	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	250	Hide Mask 158	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	251	Hide Mask 159	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	252	Hide Mask 160	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	253	Hide Mask 161	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	254	Hide Mask 162	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	255	Hide Mask 163	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	256	Hide Mask 164	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	257	Hide Mask 165	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	258	Hide Mask 166	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	259	Hide Mask 167	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	260	Hide Mask 168	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	261	Hide Mask 169	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	262	Hide Mask 170	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	263	Hide Mask 171	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	264	Hide Mask 172	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	265	Hide Mask 173	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	266	Hide Mask 174	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	267	Hide Mask 175	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	268	Hide Mask 176	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	269	Hide Mask 177	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	270	Hide Mask 178	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	271	Hide Mask 179	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	272	Hide Mask 180	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	273	Hide Mask 181	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	274	Hide Mask 182	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	275	Hide Mask 183	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	276	Hide Mask 184	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	277	Hide Mask 185	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	278	Hide Mask 186	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	279	Hide Mask 187	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	280	Hide Mask 188	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	281	Hide Mask 189	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	282	Hide Mask 190	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	283	Hide Mask 191	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	284	Hide Mask 192	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	285	Hide Mask 193	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	286	Hide Mask 194	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	287	Hide Mask 195	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	288	Hide Mask 196	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	289	Hide Mask 197	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	290	Hide Mask 198	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	291	Hide Mask 199	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	292	Hide Mask 200	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	293	Hide Mask 201	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	294	Hide Mask 202	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	295	Hide Mask 203	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	296	Hide Mask 204	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	297	Hide Mask 205	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	298	Hide Mask 206	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	299	Hide Mask 207	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	300	Hide Mask 208	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	301	Hide Mask 209	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	302	Hide Mask 210	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	303	Hide Mask 211	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	304	Hide Mask 212	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	305	Hide Mask 213	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	306	Hide Mask 214	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	307	Hide Mask 215	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	308	Hide Mask 216	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	309	Hide Mask 217	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	310	Hide Mask 218	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	311	Hide Mask 219	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	312	Hide Mask 220	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	313	Hide Mask 221	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	314	Hide Mask 222	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	315	Hide Mask 223	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	316	Hide Mask 224	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	317	Hide Mask 225	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	318	Hide Mask 226	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	319	Hide Mask 227	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	320	Hide Mask 228	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	321	Hide Mask 229	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	322	Hide Mask 230	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	323	Hide Mask 231	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	324	Hide Mask 232	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	325	Hide Mask 233	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	326	Hide Mask 234	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	327	Hide Mask 235	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	328	Hide Mask 236	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	329	Hide Mask 237	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	330	Hide Mask 238	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	331	Hide Mask 239	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	332	Hide Mask 240	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	333	Hide Mask 241	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	334	Hide Mask 242	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	335	Hide Mask 243	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	336	Hide Mask 244	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	337	Hide Mask 245	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	338	Hide Mask 246	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	339	Hide Mask 247	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	340	Hide Mask 248	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	341	Hide Mask 249	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	342	Hide Mask 250	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	343	Hide Mask 251	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	344	Hide Mask 252	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	345	Hide Mask 253	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	346	Hide Mask 254	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	347	Hide Mask 255	PATH							0x40						unmatched	path	hide-mask-path
+TwixtorProVectorsIn_64	vectors-in	1	Activation	BUTTON							0x40						unmatched	button	host-side
+TwixtorProVectorsIn_64	vectors-in	2	forcererender	FLOAT_SLIDER	0.0	5000000.0	0.0	5000000.0	0.0		0x2						unmatched	float	host-side
+TwixtorProVectorsIn_64	vectors-in	3	Display	POPUP					1	Twixtored Output|Source|FG1 Twixtored|FG2 Twixtored|FG3 Twixtored|Background Twixtored	0x40	popup	display	Display	1	Output|Source|FG1|FG2|FG3|Background	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	4	GPU Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorProVectorsIn_64	vectors-in	5	Use GPU	POPUP					1	OFF|ON	0x0						unmatched	popup	host-side
+TwixtorProVectorsIn_64	vectors-in	6	Less GPU Mem	CHECKBOX					1		0x0						unmatched	bool	host-side
+TwixtorProVectorsIn_64	vectors-in	7		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorProVectorsIn_64	vectors-in	8	Use GPU	POPUP					1	OFF|ON|ON if GPU supported, CPU otherwise	0x0						unmatched	popup	host-side
+TwixtorProVectorsIn_64	vectors-in	9	SavedInPremiere	CHECKBOX					1		0x40						unmatched	bool	host-side
+TwixtorProVectorsIn_64	vectors-in	10	Source Control	GROUP_START							0x0						unmatched	group_start	group-marker
+TwixtorProVectorsIn_64	vectors-in	11	Color Source	LAYER					-1		0x40	layer	source	Source			override	layer	by-name-and-evidence
+TwixtorProVectorsIn_64	vectors-in	12	Src: Mark Segments	POPUP					1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	0x40	popup	src_mark_segments	Src: Mark Segments	1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	13	Vectors: Prev	LAYER					0		0x60	layer	vectors_prev	Vectors: Prev			exact	layer	
+TwixtorProVectorsIn_64	vectors-in	14	Vectors: Next	LAYER					0		0x60	layer	vectors_next	Vectors: Next			exact	layer	
+TwixtorProVectorsIn_64	vectors-in	15	Vectors: Max Displace	FIX_SLIDER	0.0	10000.0	0.0	10000.0	2048.0		0x60	float	vectors_max_displace	Vectors: Max Displace	2048.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	16	Vec Scale X	FIX_SLIDER	-10.0	10.0	-10.0	10.0	1.0		0x40	float	vec_scale_x	Vec Scale X	1.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	17	Vec Scale Y	FIX_SLIDER	-10.0	10.0	-10.0	10.0	1.0		0x40	float	vec_scale_y	Vec Scale Y	1.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	18	In FPS is Out FPS	CHECKBOX					1		0x40	checkbox	in_fps_is_out_fps	In FPS is Out FPS	True		exact	bool	
+TwixtorProVectorsIn_64	vectors-in	19	Input: Frame Rate	FLOAT_SLIDER	0.1	1000.0	0.1	1000.0	29.969999		0x60	float	input_frame_rate	Input: Frame Rate	29.969999		exact	float	
+TwixtorProVectorsIn_64	vectors-in	20		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorProVectorsIn_64	vectors-in	21	Output Control	GROUP_START							0x0						unmatched	group_start	group-marker
+TwixtorProVectorsIn_64	vectors-in	22	Time Remap Mode	POPUP					1	Speed|Frame Number	0x40	popup	time_remap_mode	Time Remap Mode	1	Speed|Frame Number	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	23	Speed %	FIX_SLIDER	-10000.0	10000.0	-1000.0	1000.0	100.0		0x60	float	speed_percent	Speed %	100.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	24	Frame Num	FLOAT_SLIDER	-200000.0	200000.0	0.0	2000.0	0.0		0x60	float	frame_num	Frame Num	0.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	25	Frame Interp	POPUP					2	Nearest|Blend|Motion Weighted Blend	0x40	popup	frame_interp	Frame Interp	2	Nearest|Blend|Weighted Blend	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	26	Warping	POPUP					2	Inverse|Forward	0x40	popup	warping	Warping	2	Inverse|Forward	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	27	Motion Blur Compensation	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	blur_compensation	Blur Compensation	0.0		override	float	by-name-and-evidence
+TwixtorProVectorsIn_64	vectors-in	28		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorProVectorsIn_64	vectors-in	29	FG1 Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorProVectorsIn_64	vectors-in	30	FG1 Matte	LAYER					0		0x60	layer	fg1_matte	FG1 Matte			exact	layer	
+TwixtorProVectorsIn_64	vectors-in	31	FG1 Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg1_matte_chan	FG1 Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	32	FG1 Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg1_inv_matte_shrink	FG1 Inv Matte Shrink	0.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	33		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorProVectorsIn_64	vectors-in	34	FG2 Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorProVectorsIn_64	vectors-in	35	FG2 Matte	LAYER					0		0x60	layer	fg2_matte	FG2 Matte			exact	layer	
+TwixtorProVectorsIn_64	vectors-in	36	FG2 Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg2_matte_chan	FG2 Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	37	FG2 Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg2_inv_matte_shrink	FG2 Inv Matte Shrink	0.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	38		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorProVectorsIn_64	vectors-in	39	FG3 Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+TwixtorProVectorsIn_64	vectors-in	40	FG3 Matte	LAYER					0		0x60	layer	fg3_matte	FG3 Matte			exact	layer	
+TwixtorProVectorsIn_64	vectors-in	41	FG3 Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg3_matte_chan	FG3 Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+TwixtorProVectorsIn_64	vectors-in	42	FG3 Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg3_inv_matte_shrink	FG3 Inv Matte Shrink	0.0		exact	float	
+TwixtorProVectorsIn_64	vectors-in	43		GROUP_END							0x0						unmatched	group_end	group-marker
+TwixtorProVectorsIn_64	vectors-in											float	output_frame_rate	Output: Frame Rate	29.969999		unmatched		
+Twixtor_64	retime	1	Activation	BUTTON							0x40						unmatched	button	plugin-only
+Twixtor_64	retime	2	forcererender	FLOAT_SLIDER	0.0	5000000.0	0.0	5000000.0	0.0		0x2						unmatched	float	plugin-only
+Twixtor_64	retime	3	Display	POPUP					1	Twixtored Output|Source	0x40	popup	display	Display	1	Output|Source	exact	popup	
+Twixtor_64	retime	4	GPU Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+Twixtor_64	retime	5	Use GPU	POPUP					1	OFF|ON	0x0						unmatched	popup	plugin-only
+Twixtor_64	retime	6	Less GPU Mem	CHECKBOX					1		0x0						unmatched	bool	plugin-only
+Twixtor_64	retime	7		GROUP_END							0x0						unmatched	group_end	group-marker
+Twixtor_64	retime	8	Use GPU	POPUP					1	OFF|ON|ON if GPU supported, CPU otherwise	0x0						unmatched	popup	plugin-only
+Twixtor_64	retime	9	SavedInPremiere	CHECKBOX					1		0x40						unmatched	bool	plugin-only
+Twixtor_64	retime	10	Source Control	GROUP_START							0x0						unmatched	group_start	group-marker
+Twixtor_64	retime	11	360 Video	CHECKBOX					0		0x42	checkbox	video_360	360 Video	False		exact	bool	
+Twixtor_64	retime	12	Alt Color Source	LAYER					0		0x40	layer	alt_source_a	Alt Source A			override	layer	by-name-and-evidence
+Twixtor_64	retime	13	Alt Motion Source	LAYER					0		0x40	layer	alt_source_b	Alt Source B			override	layer	by-name-and-evidence
+Twixtor_64	retime	14	Src: Mark Segments	POPUP					1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	0x40	popup	src_mark_segments	Src: Mark Segments	1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	exact	popup	
+Twixtor_64	retime	15	Input: Fields	POPUP					1	None|Upper Field First|Lower Field First	0x40	popup	input_fields	Input: Fields	1	None|Upper Field First|Lower Field First	exact	popup	
+Twixtor_64	retime	16	In FPS is Out FPS	CHECKBOX					1		0x42	checkbox	in_fps_is_out_fps	In FPS is Out FPS	True		exact	bool	
+Twixtor_64	retime	17	Input: Frame Rate	FLOAT_SLIDER	0.1	1000.0	0.1	1000.0	29.969999		0x60	float	input_frame_rate	Input: Frame Rate	29.969999		exact	float	
+Twixtor_64	retime	18	Src Time Offset	FIX_SLIDER	0.0	30000.0	0.0	30000.0	0.0		0x20	float	src_time_offset	Src Time Offset	0.0		exact	float	
+Twixtor_64	retime	19		GROUP_END							0x0						unmatched	group_end	group-marker
+Twixtor_64	retime	20	Track Control	GROUP_START							0x0						unmatched	group_start	group-marker
+Twixtor_64	retime	21	Motion Vectors	POPUP					5	No Motion Vectors|Sloppy|Medium|High|Best	0x40	popup	vectors	Vectors	5	No Vectors|Sloppy|Medium|High|Best	override	popup	by-name-and-evidence
+Twixtor_64	retime	22	Image Prep	POPUP					1	None|Contrast/Edge Enhance|Delinearize	0x40	popup	prep	Prep	1	None|Contrast/Edge Enhance|Delinearize	override	popup	by-name-and-evidence
+Twixtor_64	retime	23	Motion Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	sensitivity	Sensitivity	70.0		override	float	by-name-and-evidence
+Twixtor_64	retime	24	Plenty Memory?	CHECKBOX					1		0x40	checkbox	plenty_memory	Plenty Memory?	True		exact	bool	
+Twixtor_64	retime	25		GROUP_END							0x0						unmatched	group_end	group-marker
+Twixtor_64	retime	26	Output Control	GROUP_START							0x0						unmatched	group_start	group-marker
+Twixtor_64	retime	27	Time Remap Mode	POPUP					1	Speed|Frame Number	0x40	popup	time_remap_mode	Time Remap Mode	1	Speed|Frame Number	exact	popup	
+Twixtor_64	retime	28	Speed %	FIX_SLIDER	-10000.0	10000.0	-1000.0	1000.0	100.0		0x60	float	speed_percent	Speed %	100.0		exact	float	
+Twixtor_64	retime	29	Frame Num	FLOAT_SLIDER	-200000.0	200000.0	0.0	2000.0	0.0		0x60	float	frame_num	Frame Num	0.0		exact	float	
+Twixtor_64	retime	30	Frame Interp	POPUP					2	Nearest|Blend|Motion Weighted Blend	0x40	popup	frame_interp	Frame Interp	2	Nearest|Blend|Weighted Blend	exact	popup	
+Twixtor_64	retime	31	Smart Blend	CHECKBOX					0		0x40	checkbox	smart_blend	Smart Blend	False		exact	bool	
+Twixtor_64	retime	32	Motion Blur Compensation	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	blur_compensation	Blur Compensation	0.0		override	float	by-name-and-evidence
+Twixtor_64	retime	33		GROUP_END							0x0						unmatched	group_end	group-marker

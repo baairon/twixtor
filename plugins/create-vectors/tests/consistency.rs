@@ -1,6 +1,6 @@
 //! The render only fetches what `Effect::dependencies` announced: every `(layer, time)` the render
 //! asks the layers for is in the dependency list of the same output frame. Run with recording
-//! layers over Display, Track Frame, Alt Src, FG mattes, Vector Resolution, Prep, the first and
+//! layers over Display, Track Frame, Alt Motion Src, FG mattes, Vector Resolution, Prep, the first and
 //! last frames and two time bases. Beyond the subset relation the exact fetches are pinned: the
 //! vector display fetches the source at `t_a` then `t_b`, nothing else; the Source display the
 //! source at `current_time`, nothing else.
@@ -141,7 +141,10 @@ fn the_vector_display_fetches_the_source_at_t_a_then_t_b_and_nothing_else() {
             let (deps, fetched, ok) = run(&[("track_frame", track), ("max_displace", "16")], with_alt, 0, 4, base);
             assert!(ok);
             let src = with_alt.then_some("alt_source_a");
-            assert_eq!(fetched, vec![(src, 400), (src, 400 + 100 * other)], "track {track} alt {with_alt}");
+            // the probe read of layer 0 at the current time comes first (fetches are listed per layer, layer 0 first)
+            let mut want = vec![(None, 400)];
+            want.extend([(src, 400), (src, 400 + 100 * other)]);
+            assert_eq!(fetched, want, "track {track} alt {with_alt}");
             // the same two entries close the dependencies
             let n = deps.len();
             assert_eq!(&deps[n - 2..], &[Checkout { layer: src, time: 400 }, Checkout { layer: src, time: 400 + 100 * other }]);
@@ -156,15 +159,17 @@ fn the_source_display_fetches_the_source_at_the_current_time_only() {
         let (deps, fetched, ok) = run(&[("display", "1")], with_alt, 0, 6, base);
         assert!(ok);
         let src = with_alt.then_some("alt_source_a");
-        assert_eq!(fetched, vec![(src, 600)]);
+        // the probe read of layer 0 at the current time, then the source
+        assert_eq!(fetched, vec![(None, 600), (src, 600)]);
         assert_eq!(deps.last(), Some(&Checkout { layer: src, time: 600 }));
     }
 }
 
 #[test]
 fn layered_debug_and_tracker_renders_fetch_the_pair_then_the_mattes() {
-    // FG mattes, Debug and Track off render (they were refused before any fetch): the source at t_a
-    // then t_b, then every active matte at t_a and t_b, FG1 first, all announced
+    // FG mattes, Debug and Track off render (they were refused before any fetch): the probe read at the
+    // current time, the source at t_a then t_b, then every active matte at the current time (its probe), t_a and
+    // t_b, FG1 first, all announced
     let base = TimeBase::default_for_rate(Rational::new(30, 1).unwrap());
     let cases: [(Vec<(&str, &str)>, usize, (i64, i64)); 5] = [
         (vec![("max_displace", "16")], 1, (400, 300)),
@@ -176,8 +181,9 @@ fn layered_debug_and_tracker_renders_fetch_the_pair_then_the_mattes() {
     for (params, fg, (ta, tb)) in cases {
         let (deps, fetched, ok) = run(&params, false, fg, 4, base);
         assert!(ok, "{params:?}");
-        let mut want = vec![(None, ta), (None, tb)];
+        let mut want = vec![(None, 400), (None, ta), (None, tb)];
         for id in ["fg1_matte", "fg2_matte", "fg3_matte"].iter().take(fg) {
+            want.push((Some(*id), 400));
             want.push((Some(*id), ta));
             want.push((Some(*id), tb));
         }

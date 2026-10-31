@@ -24,8 +24,15 @@
 //!    64 bits, the low byte or word stored, no saturation).
 //!
 //! Textures are read in the native units of the depth (0..255, 0..65535, 0..1) and the sums are
-//! float, so the integer depths round once at the very end. The Gouraud variant
-//! (`pyramid = false`) and a supersampled path are not supported.
+//! float, so the integer depths round once at the very end. A supersampled path is not supported.
+//!
+//! The Gouraud variant (`pyramid = false`, [`gouraud`]) keeps the mesh, the scan converter, the
+//! running mean, the conversion and the coverage, but every vertex carries the colour of its own
+//! source pixel and the triangles interpolate the colours instead of sampling a texture. MEASURED
+//! against `TwixtorProVectorsIn_64` under the emulator: an impulse moved half a pixel along a
+//! diagonal lands on two pixels of that diagonal at
+//! half value (the textured variant spreads it over four pixels at a quarter), and with every
+//! forward warp of that plugin taken as this variant 270 more of its grid cases are bit identical.
 
 pub(crate) mod mesh;
 pub(crate) mod pyramid;
@@ -35,8 +42,9 @@ pub(crate) mod raster;
 mod tests;
 
 use crate::blend::copy;
+use crate::nanrule as nr;
 use crate::flow::FlowField;
-use crate::holefill::fill_holes;
+use crate::holefill::fill_holes_with;
 use crate::image::{Image, Samples, CHANNELS};
 use crate::smartblend::{blend_tail, weighted_tail, SmartOpts};
 use crate::warp::Coverage;
@@ -46,9 +54,9 @@ use raster::{Sink, Vtx};
 /// Options of the forward warp.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ForwardOpts {
-    /// Build a mip pyramid of the source and rasterise textured triangles. The compositor always
-    /// sets it; `false` selects the Gouraud rasteriser, which is not supported
-    /// ([`FxError::Unsupported`]).
+    /// Build a mip pyramid of the source and rasterise textured triangles (the default); `false`
+    /// selects the Gouraud variant (`stages::GouraudForward` gives it to every forward warp of a
+    /// render).
     pub pyramid: bool,
 }
 
@@ -91,6 +99,34 @@ struct Accum<'a> {
     outside: bool,
 }
 
+/// Folds the colour `c` of the covered pixel `i` into the running mean with the u8 hit counter.
+#[inline]
+fn fold(acc: &mut [f32], cnt: &mut [u8], i: usize, c: [f32; 4]) {
+    let n = cnt[i];
+    let a = &mut acc[i * CHANNELS..i * CHANNELS + CHANNELS];
+    if n == 0 {
+        for k in 0..CHANNELS {
+            a[k] = c[k] + 0.0f32;
+        }
+        cnt[i] = 1;
+    } else if n == 0xff {
+        for k in 0..CHANNELS {
+            let plain = (a[k] * 255.0f32 + c[k]) * 0.00390625f32 + 0.0f32;
+            // a NaN: the same steps with the NaN rule (`crate::nanrule`); numbers are the same bits
+            a[k] = if plain.is_nan() { nr::add(nr::mul(nr::add(nr::mul(a[k], 255.0f32), c[k]), 0.00390625f32), 0.0f32) } else { plain };
+        }
+    } else {
+        let nf = n as f32;
+        // the reciprocal is a double precision division narrowed to single
+        let r = (1.0f64 / ((nf as f64) + 1.0f64)) as f32;
+        for k in 0..CHANNELS {
+            let plain = (nf * a[k] + c[k]) * r + 0.0f32;
+            a[k] = if plain.is_nan() { nr::add(nr::mul(nr::add(nr::mul(nf, a[k]), c[k]), r), 0.0f32) } else { plain };
+        }
+        cnt[i] = n + 1;
+    }
+}
+
 impl Sink for Accum<'_> {
     #[inline]
     fn hit(&mut self, x: usize, y: usize, u: f32, v: f32, d: f32) {
@@ -101,30 +137,42 @@ impl Sink for Accum<'_> {
             pyramid::tap(src, u, v)
         };
         let i = y * self.w + x;
-        let n = self.cnt[i];
-        let a = &mut self.acc[i * CHANNELS..i * CHANNELS + CHANNELS];
-        if n == 0 {
-            for k in 0..CHANNELS {
-                a[k] = c[k] + 0.0f32;
-            }
-            self.cnt[i] = 1;
-        } else if n == 0xff {
-            for k in 0..CHANNELS {
-                a[k] = (a[k] * 255.0f32 + c[k]) * 0.00390625f32 + 0.0f32;
-            }
-        } else {
-            let nf = n as f32;
-            // the reciprocal is a double precision division narrowed to single
-            let r = (1.0f64 / ((nf as f64) + 1.0f64)) as f32;
-            for k in 0..CHANNELS {
-                a[k] = (nf * a[k] + c[k]) * r + 0.0f32;
-            }
-            self.cnt[i] = n + 1;
-        }
+        fold(&mut self.acc, &mut self.cnt, i, c);
     }
 
     fn outside(&mut self) {
         self.outside = true;
+    }
+}
+
+/// The hits of one scan conversion in their order: the Gouraud variant runs the scan converter
+/// twice per triangle, first with three colour channels as the payload `(u, v, d)`, then with the
+/// fourth, and the two passes cover the same pixels in the same order.
+#[derive(Default)]
+struct Collect {
+    hits: Vec<(usize, usize, f32, f32, f32)>,
+    outside: bool,
+}
+
+impl Sink for Collect {
+    #[inline]
+    fn hit(&mut self, x: usize, y: usize, u: f32, v: f32, d: f32) {
+        self.hits.push((x, y, u, v, d));
+    }
+
+    fn outside(&mut self) {
+        self.outside = true;
+    }
+}
+
+/// The colour of the source pixel `(c, r)` in the native units of the depth.
+#[inline]
+fn texel(src: &Image, c: usize, r: usize) -> [f32; 4] {
+    let i = (r * src.width + c) * CHANNELS;
+    match &src.samples {
+        Samples::U8(d) => [d[i] as f32, d[i + 1] as f32, d[i + 2] as f32, d[i + 3] as f32],
+        Samples::U16(d) => [d[i] as f32, d[i + 1] as f32, d[i + 2] as f32, d[i + 3] as f32],
+        Samples::F32(d) => [d[i], d[i + 1], d[i + 2], d[i + 3]],
     }
 }
 
@@ -176,9 +224,8 @@ pub(crate) fn flow_is_zero(flow: &FlowField) -> bool {
 /// Full control over the optional arguments; `want_coverage` returns `Some(coverage)`.
 ///
 /// `out` and `src` must have one size (at least 2x2) and format (`FxError::Mismatch` otherwise),
-/// `flow` at least 2x2. Errors: `Unsupported` for `opts.pyramid == false` (the Gouraud rasteriser
-/// is not implemented) and for the one geometry that would write outside the image (the
-/// degenerate last row pass with a sub pixel span right of the image).
+/// `flow` at least 2x2. Errors: `Unsupported` for the one geometry that would write outside the
+/// image (the degenerate last row pass with a sub pixel span right of the image).
 pub fn forward_warp_with(
     out: &mut Image,
     src: &Image,
@@ -214,15 +261,11 @@ pub fn forward_warp_with(
         copy(out, src);
         return Ok(want_coverage.then(|| Coverage::new(w, h, 0xff)));
     }
-    if !opts.pyramid {
-        return Err(FxError::Unsupported(
-            "forward warp without a pyramid (the Gouraud rasteriser) is not implemented; \
-             every call of the compositor builds the pyramid"
-                .into(),
-        ));
-    }
     let grid = mesh::Grid::new(w, h, flow, amount);
     let pos = mesh::positions(&grid, flow);
+    if !opts.pyramid {
+        return gouraud(out, src, &pos, want_coverage);
+    }
     let levels = pyramid::level_count(w, h);
     let mips = if levels > 1 { Some(mesh::mip_levels(&grid, flow)) } else { None };
     let mut sink = Accum {
@@ -276,6 +319,59 @@ pub fn forward_warp_with(
     }))
 }
 
+/// The Gouraud variant (`ForwardOpts { pyramid: false }`): every vertex of the displaced grid
+/// carries the colour of its own source pixel and the triangles interpolate the colours with the
+/// scan converter of the textured variant (the colours take the place of `u`, `v`, `d`, three
+/// channels in a first pass and the fourth in a second pass over the same pixels), then the same
+/// running mean, conversion and coverage. No pyramid and no mip level.
+fn gouraud(out: &mut Image, src: &Image, pos: &[[f32; 2]], want_coverage: bool) -> Result<Option<Coverage>> {
+    let (w, h) = (src.width, src.height);
+    let mut acc = vec![0.0f32; w * h * CHANNELS];
+    let mut cnt = vec![0u8; w * h];
+    let (w1, h1) = (w as i32 - 1, h as i32 - 1);
+    let vtx3 = |r: usize, c: usize| -> Vtx {
+        let p = pos[r * w + c];
+        let t = texel(src, c, r);
+        Vtx { x: p[0], y: p[1], u: t[0], v: t[1], d: t[2] }
+    };
+    let vtx1 = |r: usize, c: usize| -> Vtx {
+        let p = pos[r * w + c];
+        let t = texel(src, c, r);
+        Vtx { x: p[0], y: p[1], u: t[3], v: 0.0, d: 0.0 }
+    };
+    let mut outside = false;
+    // rows 0..h-1 and columns 0..w-1, ascending; per cell T1 = (v00, v01, v10), T2 = (v11, v01, v10)
+    for r in 0..h - 1 {
+        for c in 0..w - 1 {
+            for t in [[(r, c), (r, c + 1), (r + 1, c)], [(r + 1, c + 1), (r, c + 1), (r + 1, c)]] {
+                let mut a = Collect::default();
+                let mut b = Collect::default();
+                raster::triangle(&[vtx3(t[0].0, t[0].1), vtx3(t[1].0, t[1].1), vtx3(t[2].0, t[2].1)], w1, h1, &mut a);
+                raster::triangle(&[vtx1(t[0].0, t[0].1), vtx1(t[1].0, t[1].1), vtx1(t[2].0, t[2].1)], w1, h1, &mut b);
+                outside |= a.outside || b.outside;
+                for (ha, hb) in a.hits.iter().zip(&b.hits) {
+                    fold(&mut acc, &mut cnt, ha.1 * w + ha.0, [ha.2, ha.3, ha.4, hb.2]);
+                }
+            }
+        }
+    }
+    if outside {
+        return Err(FxError::Unsupported(
+            "forward warp: the degenerate last row pass of the rasteriser would write outside the \
+             image, which is not supported"
+                .into(),
+        ));
+    }
+    convert(out, &acc);
+    Ok(want_coverage.then(|| {
+        let mut cov = Coverage::new(w, h, 0);
+        for (c, &n) in cov.data.iter_mut().zip(&cnt) {
+            *c = if n != 0 { 0xff } else { 0 };
+        }
+        cov
+    }))
+}
+
 // ------------------------------------------------------------------------------------------------
 // warp codes 2 and 3 of ENGINE-timeline 14.2
 // ------------------------------------------------------------------------------------------------
@@ -302,7 +398,8 @@ out: &mut Image, a: &Image, b: &Image, flow: &FlowField, wa: f32) -> Result<()> 
 }
 
 /// Nearest, warp code 2: as [`nearest_forward`] with a coverage image, then `invert` and the
-/// hole fill ([`fill_holes`]) with the flag `opts.is360`.
+/// hole fill ([`crate::holefill::fill_holes`]) with the flag `opts.is360` and the tap order
+/// `opts.taps`.
 pub fn nearest_forward_fill(
     out: &mut Image,
     a: &Image,
@@ -332,7 +429,7 @@ pub fn nearest_forward_fill_on(
         stages.forward_warp_coverage(out, b, flow, wa)?
     };
     cov.invert();
-    fill_holes(out, &cov, opts.is360)
+    fill_holes_with(out, &cov, opts.is360, opts.taps)
 }
 
 /// Blend, warp code 3: `tA = FW(A, F_AB, frac)`, `tB = FW(B, F_BA, wa)`,
@@ -406,7 +503,7 @@ pub fn blend_forward_fill_on(
 
 /// Weighted Blend, warp code 3 (without coverage images): `A' = FW(A, F_AB, frac)`,
 /// `B' = FW(B, F_BA, wa)`, then [`weighted_tail`] without coverage (sharpening and
-/// `blend(A', B', frac)`).
+/// `blend(A', B', frac)`); the sharpening blurs take the vertical tap order of the stage set (`weighted_forward_on`).
 pub fn weighted_forward(
     out: &mut Image,
     a: &Image,
@@ -434,7 +531,9 @@ pub fn weighted_forward_on(
     stages.forward_warp(&mut ta, a, f_ab, frac)?;
     let mut tb = Image::new(b.width, b.height, b.fmt());
     stages.forward_warp(&mut tb, b, f_ba, wa)?;
-    weighted_tail(out, &mut ta, a, &mut tb, b, wa, None, SmartOpts::default())
+    // the sharpening blurs run the stage set's vertical tap order, as the other weighted compositions do (the plugin's
+    // Weighted Blend blur is the shared separable routine for every warping code)
+    weighted_tail(out, &mut ta, a, &mut tb, b, wa, None, SmartOpts { taps: stages.vertical_taps(), ..SmartOpts::default() })
 }
 
 /// Weighted Blend, warp code 2 (with `cov1`, `cov2`): the same two warps with coverage, then

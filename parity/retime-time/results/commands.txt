@@ -1,0 +1,5 @@
+cp -a ~/twixtor-parity/src/base ~/twixtor-parity/retime-time/src   (inside stage1.sh)
+bash ~/twixtor-parity/retime-time/stage1.sh   (gen_grid.py testset; render_grid.py --check-only; check_oob.py; fx-parity checklist; fx-parity run with no references; render_grid.py --keep base-out --jobs 2)
+bash ~/twixtor-parity/retime-time/mutants_run.sh   (25 mutants plus m00_control built in mut-src with opt-level 1 and no LTO, each rendered with render_grid.py; analyze.py mutants)
+python3 control_check.py --testset testset --base results/base.tsv --control results/mut/m00_control.tsv --base-out base-out --vfx mutbin/m00_control.vfx --out results/control_vs_base.tsv
+python3 analyze.py summary --testset results --mutants-json results/mutants_vs_base.json --plugin-sha-file results/plugin_sha256.txt --commands-file results/commands.txt --out results/summary.json

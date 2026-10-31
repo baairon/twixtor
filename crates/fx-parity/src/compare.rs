@@ -4,7 +4,7 @@ use fx_core::{Depth, Frame, Pixels};
 use serde_json::{json, Value};
 use std::fmt;
 
-/// Largest accepted distance, in representable floats, at 32 bpc.
+/// Largest accepted distance, in representable floats, at 32 bpc, unless a run asks for another.
 pub const F32_MAX_ULP: u64 = 1;
 /// How many differing pixels a report lists.
 pub const MAX_LISTED: usize = 10;
@@ -28,8 +28,17 @@ pub fn ulp_distance(a: f32, b: f32) -> Option<u64> {
 
 /// The pass rule for one 32 bpc channel. NaN only matches a NaN with the same bits.
 pub fn f32_matches(expected: f32, actual: f32) -> bool {
+    f32_matches_within(expected, actual, F32_MAX_ULP)
+}
+
+/// The pass rule with `max_ulp` as the accepted distance. 0 means bit for bit: -0.0 against
+/// 0.0 and NaNs with other bits differ.
+pub fn f32_matches_within(expected: f32, actual: f32, max_ulp: u64) -> bool {
+    if max_ulp == 0 {
+        return expected.to_bits() == actual.to_bits();
+    }
     match ulp_distance(expected, actual) {
-        Some(d) => d <= F32_MAX_ULP,
+        Some(d) => d <= max_ulp,
         None => expected.to_bits() == actual.to_bits(),
     }
 }
@@ -234,6 +243,11 @@ fn int_channel(e: i64, a: i64) -> Channel {
 
 /// Compares `actual` against `expected`; `input` is only carried into the report.
 pub fn compare(input: &Frame, expected: &Frame, actual: &Frame) -> Result<Comparison, String> {
+    compare_within(input, expected, actual, F32_MAX_ULP)
+}
+
+/// [`compare`] with `max_ulp` as the accepted distance at 32 bpc; 8 and 16 bpc stay exact.
+pub fn compare_within(input: &Frame, expected: &Frame, actual: &Frame, max_ulp: u64) -> Result<Comparison, String> {
     let shape = |f: &Frame| (f.width, f.height, f.depth());
     if shape(input) != shape(expected) || shape(input) != shape(actual) {
         return Err(format!(
@@ -260,7 +274,7 @@ pub fn compare(input: &Frame, expected: &Frame, actual: &Frame) -> Result<Compar
             |e, a| {
                 let abs = f32_abs_diff(e, a);
                 Channel {
-                    differs: !f32_matches(e, a),
+                    differs: !f32_matches_within(e, a, max_ulp),
                     abs,
                     ulp: Some(ulp_distance(e, a).unwrap_or(if e.to_bits() == a.to_bits() { 0 } else { u64::MAX })),
                     err: if abs.is_finite() { abs } else { 1.0 },
@@ -278,6 +292,8 @@ pub struct ClipComparison {
     pub frames: usize,
     /// Frames with at least one pixel outside the accepted tolerance.
     pub failing_frames: usize,
+    /// Pixels outside the accepted tolerance, over all frames.
+    pub differing_pixels: usize,
     /// The first such frame and what differs in it.
     pub first: Option<(usize, Comparison)>,
     /// Largest per channel absolute difference over the whole clip, tolerated or not.
@@ -302,11 +318,23 @@ impl ClipComparison {
 /// `input` is the clip fed to the effect; its frame at the same index is carried into the
 /// report of each differing pixel.
 pub fn compare_clip(
+    shape: (usize, usize, Depth),
+    frames: usize,
+    input: &[u8],
+    expected: &[u8],
+    actual: &[u8],
+) -> Result<ClipComparison, String> {
+    compare_clip_within(shape, frames, input, expected, actual, F32_MAX_ULP)
+}
+
+/// [`compare_clip`] with `max_ulp` as the accepted distance at 32 bpc.
+pub fn compare_clip_within(
     (width, height, depth): (usize, usize, Depth),
     frames: usize,
     input: &[u8],
     expected: &[u8],
     actual: &[u8],
+    max_ulp: u64,
 ) -> Result<ClipComparison, String> {
     let len = width * height * depth.bytes_per_pixel();
     for (what, bytes) in [("input", input), ("expected", expected), ("actual", actual)] {
@@ -322,7 +350,8 @@ pub fn compare_clip(
             continue;
         }
         let frame = |bytes: &[u8]| Frame::from_bytes(width, height, depth, bytes);
-        let cmp = compare(&frame(&input[f * len..(f + 1) * len]), &frame(e), &frame(a))?;
+        let cmp = compare_within(&frame(&input[f * len..(f + 1) * len]), &frame(e), &frame(a), max_ulp)?;
+        out.differing_pixels += cmp.differing_pixels;
         out.max_abs_diff = out.max_abs_diff.max(cmp.max_abs_diff);
         total += cmp.mean_abs_diff;
         if cmp.mean_abs_diff > out.worst_frame.map_or(0.0, |(_, m)| m) {
@@ -386,6 +415,51 @@ mod tests {
         // negative values order the other way
         let n = -1.0f32;
         assert_eq!(ulp_distance(n, f32::from_bits(n.to_bits() + 1)), Some(1));
+    }
+
+    #[test]
+    fn ulp_zero_is_bit_for_bit() {
+        let tiny = f32::from_bits(1);
+        assert!(f32_matches_within(1.0, 1.0, 0));
+        assert!(!f32_matches_within(1.0, next(1.0), 0));
+        assert!(f32_matches_within(1.0, next(1.0), 1));
+        // signed zeros and NaN payloads are different bits
+        assert!(!f32_matches_within(0.0, -0.0, 0));
+        assert!(!f32_matches_within(-0.0, 0.0, 0));
+        assert!(f32_matches_within(0.0, -0.0, 1));
+        let nan = f32::from_bits(0x7fc0_0000);
+        assert!(f32_matches_within(nan, nan, 0));
+        assert!(!f32_matches_within(nan, f32::from_bits(0x7fc0_0001), 0));
+        assert!(!f32_matches_within(nan, f32::from_bits(0xffc0_0000), 0));
+        assert!(f32_matches_within(0.0, tiny, 1) && !f32_matches_within(0.0, tiny, 0));
+        // a wider window accepts what 1 refuses
+        assert!(f32_matches_within(1.0, next(next(1.0)), 2));
+        assert!(!f32_matches_within(1.0, next(next(1.0)), 1));
+    }
+
+    #[test]
+    fn frames_and_clips_honour_the_window() {
+        let input = f32_frame(&[[0.0; 4]; 2], 2);
+        let expected = f32_frame(&[[0.0, 1.0, 1.0, 1.0], [0.5; 4]], 2);
+        let mut zero = expected.clone();
+        let Pixels::F32(px) = &mut zero.pixels else { unreachable!() };
+        px[0][0] = -0.0;
+        px[1][2] = next(0.5);
+        assert!(compare(&input, &expected, &zero).unwrap().is_match(), "the default window is 1");
+        let strict = compare_within(&input, &expected, &zero, 0).unwrap();
+        assert_eq!(strict.differing_pixels, 2);
+        assert_eq!(strict.max_ulp, Some(1));
+        assert_eq!(compare_within(&input, &expected, &zero, 1).unwrap().differing_pixels, 0);
+        let bytes = |f: &Frame| -> Vec<u8> {
+            let Pixels::F32(px) = &f.pixels else { unreachable!() };
+            // planar G B R A
+            [1usize, 2, 0, 3].iter().flat_map(|&c| px.iter().flat_map(move |p| p[c].to_le_bytes())).collect()
+        };
+        let (i, e, a) = (bytes(&input), bytes(&expected), bytes(&zero));
+        let loose = compare_clip((2, 1, Depth::F32), 1, &i, &e, &a).unwrap();
+        assert!(loose.is_match() && loose.differing_pixels == 0);
+        let tight = compare_clip_within((2, 1, Depth::F32), 1, &i, &e, &a, 0).unwrap();
+        assert_eq!((tight.failing_frames, tight.differing_pixels), (1, 2));
     }
 
     #[test]

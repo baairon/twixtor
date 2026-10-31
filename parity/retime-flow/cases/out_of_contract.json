@@ -1,0 +1,189 @@
+[
+ {
+  "id": "ooc.0",
+  "label": "vectors=0",
+  "why": "popup below 1",
+  "params": [
+   "vectors=0"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.1",
+  "label": "vectors=6",
+  "why": "popup above 5",
+  "params": [
+   "vectors=6"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.2",
+  "label": "frame_interp=0",
+  "why": "popup below 1",
+  "params": [
+   "frame_interp=0"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.3",
+  "label": "frame_interp=4",
+  "why": "popup above 3",
+  "params": [
+   "frame_interp=4"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.4",
+  "label": "smart_blend=2",
+  "why": "checkbox not 0 or 1",
+  "params": [
+   "smart_blend=2"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.5",
+  "label": "video_360=2",
+  "why": "checkbox not 0 or 1",
+  "params": [
+   "video_360=2"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.6",
+  "label": "prep=0",
+  "why": "popup below 1",
+  "params": [
+   "prep=0"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.7",
+  "label": "prep=4",
+  "why": "popup above 3",
+  "params": [
+   "prep=4"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.8",
+  "label": "sensitivity=100.01",
+  "why": "float above 100",
+  "params": [
+   "sensitivity=100.01"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.9",
+  "label": "sensitivity=-0.01",
+  "why": "float below 0",
+  "params": [
+   "sensitivity=-0.01"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.10",
+  "label": "sensitivity=nan",
+  "why": "float NaN",
+  "params": [
+   "sensitivity=nan"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.11",
+  "label": "blur_compensation=10.01",
+  "why": "float above 10",
+  "params": [
+   "blur_compensation=10.01"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.12",
+  "label": "blur_compensation=-0.01",
+  "why": "float below 0",
+  "params": [
+   "blur_compensation=-0.01"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.13",
+  "label": "speed_percent=10001",
+  "why": "float above 10000",
+  "params": [
+   "speed_percent=10001"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.14",
+  "label": "speed_percent=-10001",
+  "why": "float below -10000",
+  "params": [
+   "speed_percent=-10001"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.15",
+  "label": "vectors=Best",
+  "why": "popup given by name",
+  "params": [
+   "vectors=Best"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ },
+ {
+  "id": "ooc.16",
+  "label": "speed_percent=50@",
+  "why": "key without a frame",
+  "params": [
+   "speed_percent=50@"
+  ],
+  "width": 16,
+  "height": 16,
+  "depth": 8
+ }
+]

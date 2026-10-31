@@ -144,7 +144,7 @@ struct Set {
 
 impl Set {
     fn options(&self) -> RunOptions {
-        RunOptions { testset: self.dir.clone(), refs: self.refs.clone(), effect: None, vfx: Some(vfx().path.clone()), jobs: JOBS }
+        RunOptions { testset: self.dir.clone(), refs: self.refs.clone(), effect: None, vfx: Some(vfx().path.clone()), jobs: JOBS, max_ulp: 1 }
     }
 
     fn input(&self, c: &Case) -> Vec<u8> {
@@ -368,6 +368,58 @@ fn float_references_tolerate_one_ulp_and_flag_two() {
     assert_eq!(cmp.differing_pixels, 1);
     assert_eq!(cmp.max_ulp, Some(2));
     assert_eq!((cmp.first[0].x, cmp.first[0].y), (beyond % 5, beyond / 5));
+}
+
+#[test]
+fn max_ulp_zero_is_bit_for_bit_and_wider_windows_widen() {
+    let set = base().fork("ulp0");
+    let c = set.find("all-default", 32, (5, 4)).clone();
+    let check = |max_ulp| run::run_case_within(vfx(), &set.dir, &set.refs, &c, max_ulp);
+    assert_eq!(check(0).status, Status::Pass, "an exact reference is bit for bit");
+    let mut bytes = std::fs::read(set.ref_path(&c)).unwrap();
+    let pixel = bump_a_value(&mut bytes, 5 * 4, 1, None);
+    std::fs::write(set.ref_path(&c), &bytes).unwrap();
+    assert_eq!(check(1).status, Status::Pass);
+    let r = check(0);
+    assert_eq!(r.status, Status::Fail, "one ULP is not bit for bit");
+    let cmp = r.comparison.unwrap();
+    assert_eq!((cmp.differing_pixels, cmp.max_ulp), (1, Some(1)));
+    assert_eq!((cmp.first[0].x, cmp.first[0].y), (pixel % 5, pixel / 5));
+    bump_a_value(&mut bytes, 5 * 4, 2, Some(pixel));
+    std::fs::write(set.ref_path(&c), &bytes).unwrap();
+    assert_eq!(check(1).status, Status::Fail, "a value 2 ULP away is outside 1");
+    assert_eq!(check(2).status, Status::Pass);
+
+    // a signed zero is the same value at any window but different bits at 0
+    let zero = base().fork("ulp0zero");
+    let mut bytes = std::fs::read(zero.ref_path(&c)).unwrap();
+    let n = 5 * 4;
+    let at = (0..n * 4).find(|i| bytes[i * 4..i * 4 + 4] == 0f32.to_le_bytes()).map(|i| i * 4);
+    if let Some(o) = at {
+        bytes[o..o + 4].copy_from_slice(&(-0.0f32).to_le_bytes());
+        std::fs::write(zero.ref_path(&c), &bytes).unwrap();
+        let strict = run::run_case_within(vfx(), &zero.dir, &zero.refs, &c, 0);
+        assert_eq!(strict.status, Status::Fail, "-0.0 against 0.0 differs bit for bit");
+        assert_eq!(strict.comparison.unwrap().differing_pixels, 1);
+        assert_eq!(zero.check(&c).status, Status::Pass, "and passes within 1 ULP");
+    }
+}
+
+#[test]
+fn max_ulp_zero_counts_clip_pixels_over_all_frames() {
+    let set = clips().fork("tulp0");
+    let c = integrate_case(&set, 32);
+    let len = c.frame_len();
+    let mut bytes = std::fs::read(set.ref_path(&c)).unwrap();
+    bump_a_value(&mut bytes[len..2 * len], 5 * 4, 1, None);
+    bump_a_value(&mut bytes[3 * len..4 * len], 5 * 4, 1, None);
+    std::fs::write(set.ref_path(&c), &bytes).unwrap();
+    assert_eq!(set.check(&c).status, Status::Pass);
+    let r = run::run_case_within(vfx(), &set.dir, &set.refs, &c, 0);
+    assert_eq!((r.status, r.frame, r.failing_frames, r.differing_pixels), (Status::Fail, Some(1), 2, 2));
+    let json = run::to_json(&[r], false);
+    assert_eq!(json["cases"][0]["clip_differing_pixels"].as_u64(), Some(2));
+    assert_eq!(json["cases"][0]["max_ulp"].as_u64(), Some(1));
 }
 
 #[test]

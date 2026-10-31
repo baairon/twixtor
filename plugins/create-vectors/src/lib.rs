@@ -1,7 +1,7 @@
 //! create-vectors: the vector creation effect ("Create Vectors"). `params()` lists every parameter
 //! whose kind `fx-core` can express and `layers()` lists its optional layers.
 //!
-//! The effect is temporal: it reads the source (the input layer or `Alt Src`) at the frame pair of
+//! The effect is temporal: it reads the source (the input layer or `Alt Motion Src`) at the frame pair of
 //! `Track Frame`, runs the optical flow solver of the shared engine and OUTPUTS the vector field as
 //! an encoded RGBA image (`retime_engine::vectors`: red `dx`, green `dy`, centred and scaled by
 //! `Max Displace`, blue 0, alpha opaque), the frame plugins 03 and 04 read as a vector layer. With
@@ -28,9 +28,9 @@ const FG_SENSITIVITY: [(&str, &str); 3] = [
     ("fg3_sensitivity", "FG3: Sensitivity"),
 ];
 const FG_TRACK: [(&str, &str); 3] = [
-    ("fg1_track", "FG1: Track"),
-    ("fg2_track", "FG2: Track"),
-    ("fg3_track", "FG3: Track"),
+    ("fg1_track", "FG1: Image Track"),
+    ("fg2_track", "FG2: Image Track"),
+    ("fg3_track", "FG3: Image Track"),
 ];
 const FG_MATTE_CHAN: [(&str, &str); 3] = [
     ("fg1_matte_chan", "FG1: Matte Chan"),
@@ -72,20 +72,20 @@ const PT_POS: [(&str, &str); 12] = [
     ("pt11_pos", "Pt 11: Pos"),
     ("pt12_pos", "Pt 12: Pos"),
 ];
-/// The name of a track point color parameter is only "Pt N:"; its id carries the type (color).
+/// The color of track point N is named "Pt N: Color", as the plugin registers it.
 const PT_COLOR: [(&str, &str); 12] = [
-    ("pt1_color", "Pt 1:"),
-    ("pt2_color", "Pt 2:"),
-    ("pt3_color", "Pt 3:"),
-    ("pt4_color", "Pt 4:"),
-    ("pt5_color", "Pt 5:"),
-    ("pt6_color", "Pt 6:"),
-    ("pt7_color", "Pt 7:"),
-    ("pt8_color", "Pt 8:"),
-    ("pt9_color", "Pt 9:"),
-    ("pt10_color", "Pt 10:"),
-    ("pt11_color", "Pt 11:"),
-    ("pt12_color", "Pt 12:"),
+    ("pt1_color", "Pt 1: Color"),
+    ("pt2_color", "Pt 2: Color"),
+    ("pt3_color", "Pt 3: Color"),
+    ("pt4_color", "Pt 4: Color"),
+    ("pt5_color", "Pt 5: Color"),
+    ("pt6_color", "Pt 6: Color"),
+    ("pt7_color", "Pt 7: Color"),
+    ("pt8_color", "Pt 8: Color"),
+    ("pt9_color", "Pt 9: Color"),
+    ("pt10_color", "Pt 10: Color"),
+    ("pt11_color", "Pt 11: Color"),
+    ("pt12_color", "Pt 12: Color"),
 ];
 
 /// Default point colors (R, G, B).
@@ -164,7 +164,7 @@ impl Effect for CreateVectors {
         p.push(popup(
             "display",
             "Display",
-            &["Source", "Vectors", "Debug"],
+            &["Source", "Motion Vectors", "Debug"],
             2,
         ));
         // Index 10.
@@ -206,7 +206,7 @@ impl Effect for CreateVectors {
         // Index 17.
         p.push(popup(
             "prep",
-            "Prep",
+            "Image Prep",
             &["None", "Contrast/Edge Enhance", "Delinearize"],
             1,
         ));
@@ -227,7 +227,7 @@ impl Effect for CreateVectors {
             100.0,
             70.0,
         ));
-        p.push(checkbox("main_bg_track", "Main_BG: Track", true));
+        p.push(checkbox("main_bg_track", "Main_BG: Image Track", true));
         // Indices 28 to 32, 37 to 41 and 46 to 50, inside the FG groups.
         for i in 0..3 {
             p.push(fixed_slider(
@@ -294,12 +294,12 @@ impl Effect for CreateVectors {
         EffectKind::Temporal
     }
 
-    /// The four optional layers: `Alt Src` replaces the input as the source (the role of plugin
+    /// The four optional layers: `Alt Motion Src` replaces the input as the source (the role of plugin
     /// 01's Alt Source A, so the same id) and the three FG matte layers of the multi layer path
     /// (FG1 first; the matte sizes are probed for the error fills).
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
-            LayerSpec { id: LAYER_ALT_SRC, name: "Alt Src", optional: true },
+            LayerSpec { id: LAYER_ALT_SRC, name: "Alt Motion Src", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[0], name: "FG1: Matte", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[1], name: "FG2: Matte", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[2], name: "FG3: Matte", optional: true },
@@ -317,7 +317,7 @@ impl Effect for CreateVectors {
         glue::dependencies(cx, env)
     }
 
-    /// Display Source (a copy of the source with the Draw Geom overlay), Display Vectors (the encoded vector
+    /// Display Source (a copy of the source with the Draw Geom overlay), Display Motion Vectors (the encoded vector
     /// image: one flow per layer with the FG matte layers, merged over `Layers Output`, tracking points, the
     /// second tracker of a layer whose Track is off) and Display Debug (the five debug views).
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
@@ -394,7 +394,7 @@ mod tests {
         assert_eq!(
             find("display").kind,
             ParamKind::Popup {
-                choices: vec!["Source".into(), "Vectors".into(), "Debug".into()],
+                choices: vec!["Source".into(), "Motion Vectors".into(), "Debug".into()],
                 default: 2
             }
         );

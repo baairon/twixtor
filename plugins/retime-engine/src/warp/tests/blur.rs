@@ -455,6 +455,13 @@ fn wrap_blur_model_fixtures_are_reproduced_bit_for_bit() {
     let mut hiq_cases = 0;
     for (i, c) in crate::holefill::tests::load_wrap_cases().iter().enumerate() {
         let crate::holefill::tests::WrapCase::Blur { src, flow, amount, shutter, hiq, out } = c else { continue };
+        n += 1;
+        hiq_cases += usize::from(*hiq);
+        if *hiq {
+            // the bilinear 360 taps are READ now (`sphere_tap`): the G6 model of these
+            // fixtures dropped the taps whose y left the frame, so only the nearest cases are still checked here
+            continue;
+        }
         let mut got = zeros_like(src);
         motion_blur(&mut got, src, flow, *amount, *hiq, *shutter, true).unwrap();
         if let Some(pos) = same_samples_nan_ok(&got, out) {
@@ -467,8 +474,6 @@ fn wrap_blur_model_fixtures_are_reproduced_bit_for_bit() {
                 flow.height
             );
         }
-        n += 1;
-        hiq_cases += usize::from(*hiq);
     }
     assert_eq!((n, hiq_cases), (42, 21));
 }
@@ -513,7 +518,8 @@ fn wrap_blur_equals_the_plain_blur_where_the_taps_stay_inside() {
                 let mut differs = 0;
                 for y in 0..h {
                     for x in 0..w {
-                        let inside = x >= m && x + m < w && y + m < h;
+                        // the bilinear taps that leave through the first row are put on the sphere (`sphere_tap`)
+                        let inside = x >= m && x + m < w && y + m < h && (!hiq || y >= m);
                         if inside {
                             assert_eq!(pixel_bits(&wrap, x, y), pixel_bits(&plain, x, y), "depth {depth} hiq {hiq} shutter {shutter} ({x}, {y})");
                         } else if pixel_bits(&wrap, x, y) != pixel_bits(&plain, x, y) {
@@ -549,7 +555,9 @@ fn wrap_blur_across_the_seam_equals_the_plain_blur_of_the_rotated_image() {
                 // rows whose taps reach the last row use the pole row of the 360 sampler, so they
                 // are left out
                 let mut seam = 0;
-                for y in 0..h - 3 {
+                // rows whose bilinear taps reach below the first row are put on the sphere, so they are left out as well
+                let y0 = if hiq { 4 } else { 0 };
+                for y in y0..h - 3 {
                     for x in 0..w {
                         let xr = (x + w / 2) % w;
                         if !(4..=27).contains(&xr) {
@@ -561,7 +569,7 @@ fn wrap_blur_across_the_seam_equals_the_plain_blur_of_the_rotated_image() {
                         }
                     }
                 }
-                assert!(seam >= 8 * (h - 3));
+                assert!(seam >= 8 * (h - 3 - y0));
             }
         }
     }
@@ -580,12 +588,46 @@ fn wrap_blur_wraps_the_taps_but_not_the_rows() {
         motion_blur(&mut plain, &src, &flow, 1.0, hiq, 0.5, false).unwrap();
         let mut wrap = zeros_like(&src);
         motion_blur(&mut wrap, &src, &flow, 1.0, hiq, 0.5, true).unwrap();
-        for y in 0..h - 4 {
+        // the bilinear backward taps of the first rows go below the first row: on the sphere they count (half a turn
+        // away, reflected), so those rows differ; the nearest taps keep the plain row test
+        let y0 = if hiq { 3 } else { 0 };
+        for y in y0..h - 4 {
             for x in 0..w - 1 {
                 assert_eq!(pixel_bits(&wrap, x, y), pixel_bits(&plain, x, y), "hiq {hiq} ({x}, {y})");
             }
         }
+        if hiq {
+            assert!((0..w - 1).any(|x| pixel_bits(&wrap, x, 0) != pixel_bits(&plain, x, 0)));
+        }
     }
+}
+
+/// READ (the float 360 leaf of TwixtorPro_64's blur compensation; TRACED on `mix08.movebox-31x21.d32`, whose
+/// first row differed in every pixel before): a tap's y is brought into the frame by
+/// whole heights; after an odd number of steps its x moves half a turn and a y other than 0 is reflected (`H - y`).
+#[test]
+fn a_bilinear_360_tap_outside_the_rows_goes_over_the_pole() {
+    use crate::warp::blurcomp::sphere_tap;
+    let (wf, hf) = (31.0f32, 21.0f32);
+    assert_eq!(sphere_tap(1.25, -0.25, wf, hf), Some((16.75, 0.25)));
+    assert_eq!(sphere_tap(20.25, -0.25, wf, hf), Some((4.75, 0.25)), "half a turn past the last column comes back");
+    assert_eq!(sphere_tap(3.0, 21.5, wf, hf), Some((18.5, 20.5)), "over the top pole");
+    assert_eq!(sphere_tap(3.0, -21.5, wf, hf), Some((3.0, 20.5)), "two steps: no turn, no reflection");
+    assert_eq!(sphere_tap(3.0, -21.0, wf, hf), Some((18.5, 0.0)), "one step onto row 0: the turn but no reflection");
+    assert_eq!(sphere_tap(3.0, 7.5, wf, hf), Some((3.0, 7.5)), "inside: unchanged");
+    // the blur of a pixel of the first row whose backward tap leaves it: (x, 0) with the vector (0, 1) at amount 1 has
+    // the taps (x, 0), (x, 0.5) forward and (x + W/2, 0.5) backward, all counted
+    let (w, h) = (8usize, 6usize);
+    let src = img_f32(w, h, |x, y, c| (x * 3 + y * 17 + c) as f32 * 0.01);
+    let flow = const_flow(w, h, 0.0, 1.0);
+    let mut out = zeros_like(&src);
+    motion_blur(&mut out, &src, &flow, 1.0, true, 0.5, true).unwrap();
+    let Samples::F32(sv) = &src.samples else { unreachable!() };
+    let at = |x: f32, y: f32| bilerp360(sv, w, w as i32 - 1, h as i32 - 1, x, y);
+    let want: Vec<f32> = (0..4).map(|c| (1.0f32 / 3.0) * ((at(1.0, 0.0)[c] + at(1.0, 0.5)[c]) + at(5.0, 0.5)[c])).collect();
+    let Samples::F32(v) = &out.samples else { unreachable!() };
+    // pixel (1, 0): samples 4..8
+    assert_eq!(&v[4..8], &want[..]);
 }
 
 #[test]

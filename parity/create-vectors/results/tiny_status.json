@@ -1,0 +1,298 @@
+{
+ "testset": "~/twixtor-parity/re/f7-close-cv/tinyset",
+ "refs": "~/twixtor-parity/re/f7-close-cv/tinyrun2/refs",
+ "seconds": 422.2,
+ "jobs": 1,
+ "cases": [
+  {
+   "event": "done",
+   "id": "create-vectors.default.shift-1x1.d8.6015f989",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x7ab40c",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab40c",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab40c"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.default.shift-2x3.d16.260da5e2",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x85eb1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085eb1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x5001fba20",
+     "size": 4,
+     "pc": "0x180085eb1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.tiny-debug.shift-2x2.d8.515bda93",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x85eb1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085eb1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x5001fb858",
+     "size": 4,
+     "pc": "0x180085eb1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.tiny-debug.shift-3x3.d16.e0614b79",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x85eb1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085eb1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x7001fbb28",
+     "size": 4,
+     "pc": "0x180085eb1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.tiny-source.shift-1x1.d32.17b5adf3",
+   "effect": "create-vectors",
+   "frames": 3,
+   "frame_seconds": [
+    0.076,
+    0.097,
+    0.117
+   ],
+   "status": "rendered",
+   "seconds": 0.121,
+   "seconds_per_frame": 0.04,
+   "reference": "~/twixtor-parity/re/f7-close-cv/tinyrun2/refs/create-vectors.tiny-source.shift-1x1.d32.17b5adf3.gbrapf32le",
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.tiny-track-next.shift-4x1.d8.a707418c",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x7ab40c",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab40c",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab40c"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.tiny-vr2-md1.shift-2x3.d8.c0de457c",
+   "effect": "create-vectors",
+   "frames": 3,
+   "frame_seconds": [
+    0.195,
+    0.263,
+    0.331
+   ],
+   "status": "rendered",
+   "seconds": 0.339,
+   "seconds_per_frame": 0.113,
+   "reference": "~/twixtor-parity/re/f7-close-cv/tinyrun2/refs/create-vectors.tiny-vr2-md1.shift-2x3.d8.c0de457c.rgba",
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.fg1-tiny.shift-3x3.d8.c124c7ed",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x85eb1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085eb1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70023b728",
+     "size": 4,
+     "pc": "0x180085eb1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.fg1-tiny.shift-1x4.d8.8696bc70",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x7ab40c",
+   "last_api": "utils.host_dispose_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab40c",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab40c"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "create-vectors.fg1-tiny-dbg.shift-2x2.d16.def57d61",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at CreateMotionVectors_64.aex+0x85eb1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085eb1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x5001fc018",
+     "size": 4,
+     "pc": "0x180085eb1"
+    }
+   ],
+   "messages": []
+  }
+ ],
+ "boots": [
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 50.9,
+   "load_seconds": 37.6,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 51.6,
+   "load_seconds": 38.1,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 52.7,
+   "load_seconds": 38.6,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 49.0,
+   "load_seconds": 35.2,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 51.5,
+   "load_seconds": 36.1,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 53.1,
+   "load_seconds": 37.5,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 53.1,
+   "load_seconds": 37.7,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "CreateMotionVectors_64",
+   "seconds": 51.8,
+   "load_seconds": 37.1,
+   "entry": "mainB",
+   "params": 347,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xba1489",
+   "init_errors": [],
+   "messages": []
+  }
+ ]
+}

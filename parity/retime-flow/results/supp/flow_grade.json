@@ -1,0 +1,84 @@
+{
+ "measured_at": "2026-10-31",
+ "testset": "~/twixtor-parity/re/f7-supp/supp/flow",
+ "refs": "~/twixtor-parity/re/f7-supp/refs/flow",
+ "command": "~/twixtor-parity/re/f7-supp/state/fx-parity run --testset ~/twixtor-parity/re/f7-supp/supp/flow --refs ~/twixtor-parity/re/f7-supp/refs/flow --max-ulp 0 --json --vfx ~/twixtor-parity/re/f7-supp/state/vfx --jobs 1",
+ "fx_parity_summary": {
+  "fail": 0,
+  "no_reference": 0,
+  "pass": 2,
+  "total": 2
+ },
+ "totals": {
+  "cases": 2,
+  "compared": 2,
+  "identical": 2,
+  "differing": 0,
+  "no_reference": 0,
+  "bytes_compared": 38400,
+  "floats_compared": 0,
+  "differing_values": 0,
+  "max_ulp": null,
+  "nan_mismatch_values": 0
+ },
+ "cases": [
+  {
+   "id": "retime.supp-exact-tol-s99.disc-40x30.d8",
+   "status": "pass",
+   "tags": {
+    "group": "",
+    "class": "value",
+    "depth": 8,
+    "size": "40x30",
+    "frames": 4,
+    "fps": "24",
+    "source": "disc"
+   },
+   "logic_parity": false,
+   "params": [
+    "speed_percent=99"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "frames": 4,
+   "bytes_compared": 19200,
+   "floats_compared": 0,
+   "differing_values": 0,
+   "max_ulp": null,
+   "nan_mismatch_values": 0,
+   "first_failing_frame": null,
+   "failing_frames": 0,
+   "error": null
+  },
+  {
+   "id": "retime.supp-exact-tol-s101.disc-40x30.d8",
+   "status": "pass",
+   "tags": {
+    "group": "",
+    "class": "value",
+    "depth": 8,
+    "size": "40x30",
+    "frames": 4,
+    "fps": "24",
+    "source": "disc"
+   },
+   "logic_parity": false,
+   "params": [
+    "speed_percent=101"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "frames": 4,
+   "bytes_compared": 19200,
+   "floats_compared": 0,
+   "differing_values": 0,
+   "max_ulp": null,
+   "nan_mismatch_values": 0,
+   "first_failing_frame": null,
+   "failing_frames": 0,
+   "error": null
+  }
+ ]
+}

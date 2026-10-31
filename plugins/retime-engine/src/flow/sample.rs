@@ -6,7 +6,12 @@
 //! horizontal resample keeps the period (`sx = sw / dw` instead of the corner aligned
 //! `(sw - 1) / (dw - 1)`). The vertical axis keeps the rules of the plain samplers. Precision: the
 //! lerp chain of [`bilinear1`], single precision, no fused multiply add; resample rows run through
-//! rayon row chunks.
+//! rayon row chunks. The 1 channel lerps are written over a set of arithmetic operations
+//! (`crate::nanrule::Arith`, `(b - a) * f + a` as `nanrule::lerp_g`): the samplers use the
+//! processor's own; [`resample1_with`] and [`resample1_wrapx_with`] take any set (the hole fill
+//! repeats a plane with the NaN rule).
+
+use crate::nanrule::{lerp_g, Arith, Plain};
 
 /// Truncation toward zero to `i32`; NaN and values out of range give `i32::MIN`.
 #[inline(always)]
@@ -40,6 +45,12 @@ pub(crate) fn cell(x: f32, len: usize) -> (usize, f32) {
 /// `(bot - top) * fy + top`, all single precision with no fused multiply add. `w, h >= 2`.
 #[inline]
 pub(crate) fn bilinear1(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> f32 {
+    bilinear1_with::<Plain>(img, w, h, x, y)
+}
+
+/// [`bilinear1`] with the arithmetic `A` (`crate::nanrule`; numbers are the same with any set).
+#[inline(always)]
+fn bilinear1_with<A: Arith>(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> f32 {
     let (ix, fx) = cell(x, w);
     let (iy, fy) = cell(y, h);
     let i = iy * w + ix;
@@ -47,9 +58,9 @@ pub(crate) fn bilinear1(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> f32 
     let p10 = img[i + 1];
     let p01 = img[i + w];
     let p11 = img[i + w + 1];
-    let top = (p10 - p00) * fx + p00;
-    let bot = (p11 - p01) * fx + p01;
-    (bot - top) * fy + top
+    let top = lerp_g::<A>(p00, p10, fx);
+    let bot = lerp_g::<A>(p01, p11, fx);
+    lerp_g::<A>(top, bot, fy)
 }
 
 /// 2 channel bilinear sampler: the arithmetic of `bilinear1` on both lanes, `img` interleaved
@@ -78,6 +89,12 @@ pub(crate) fn bilinear2(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> [f32
 /// and the same for `sy`; the product `x * sx` is a single precision multiply of the converted
 /// integer.
 pub(crate) fn resample1(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
+    resample1_with::<Plain>(src, sw, sh, dw, dh)
+}
+
+/// [`resample1`] with the arithmetic `A` of its lerps (`crate::nanrule`): `Plain` is
+/// [`resample1`], `Rule` the same numbers with the NaN rule (the hole fill's pull and push).
+pub(crate) fn resample1_with<A: Arith>(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
     use rayon::prelude::*;
     let sx = (sw as f32 - 1.0) / ((dw as i32 - 1) as f32);
     let sy = (sh as f32 - 1.0) / ((dh as i32 - 1) as f32);
@@ -88,7 +105,7 @@ pub(crate) fn resample1(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize)
     dst.par_chunks_mut(dw).enumerate().for_each(|(y, row)| {
         let fy = (y as i32 as f32) * sy;
         for (x, v) in row.iter_mut().enumerate() {
-            *v = bilinear1(src, sw, sh, (x as i32 as f32) * sx, fy);
+            *v = bilinear1_with::<A>(src, sw, sh, (x as i32 as f32) * sx, fy);
         }
     });
     dst
@@ -186,20 +203,86 @@ pub(crate) fn bilinear2_wrapx(img: &[f32], w: usize, h: usize, x: f32, y: f32) -
 /// are single precision multiplies of the converted integers. Rows in parallel; the result does
 /// not depend on the thread count.
 pub(crate) fn resample1_wrapx(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
+    resample1_wrapx_with::<Plain>(src, sw, sh, dw, dh)
+}
+
+/// [`resample1_wrapx`] with the arithmetic `A` of its lerps (`crate::nanrule`).
+pub(crate) fn resample1_wrapx_with<A: Arith>(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
     use rayon::prelude::*;
     let mut dst = vec![0.0f32; dw * dh];
     if dw == 0 || dh == 0 {
         return dst;
     }
+    // READ (mode 6 of the resample of TwixtorPro_64): the steps are `sw / dw` and `sh / dh`
+    // (no corner alignment) and the sampler is the equirectangular one ([`bilinear1_sphere`])
     let sx = (sw as i32 as f32) / (dw as i32 as f32);
-    let sy = (sh as f32 - 1.0) / ((dh as i32 - 1) as f32);
+    let sy = (sh as i32 as f32) / (dh as i32 as f32);
     dst.par_chunks_mut(dw).enumerate().for_each(|(y, row)| {
         let fy = (y as i32 as f32) * sy;
         for (x, v) in row.iter_mut().enumerate() {
-            *v = bilinear1_wrapx(src, sw, sh, (x as i32 as f32) * sx, fy);
+            *v = bilinear1_sphere_with::<A>(src, sw, sh, (x as i32 as f32) * sx, fy);
         }
     });
     dst
+}
+
+/// [`bilinear1_sphere`] on a 2 channel image (`(dx, dy)` pairs; READ in `TwixtorPro_64`).
+#[inline]
+pub(crate) fn bilinear2_sphere(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> [f32; 2] {
+    let (w1, h1) = (w as i32 - 1, h as i32 - 1);
+    let ix = cvtt(x).clamp(0, w1);
+    let iy = cvtt(y).clamp(0, h1);
+    let fx = x - (cvtt(x) as f32);
+    let fy = y - (cvtt(y) as f32);
+    let x1 = if ix + 1 > w1 { 0 } else { ix + 1 };
+    let (xc, xd, yc) = if iy + 1 > h1 {
+        let half = (w as i32) / 2;
+        ((half + ix) % w as i32, (half + x1) % w as i32, h1)
+    } else {
+        (ix, x1, iy + 1)
+    };
+    let at = |xx: i32, yy: i32, c: usize| img[(yy as usize * w + xx as usize) * 2 + c];
+    let mut out = [0.0f32; 2];
+    for c in 0..2 {
+        let (p00, p10, p01, p11) = (at(ix, iy, c), at(x1, iy, c), at(xc, yc, c), at(xd, yc, c));
+        let top = (p10 - p00) * fx + p00;
+        let bot = (p11 - p01) * fx + p01;
+        out[c] = (bot - top) * fy + top;
+    }
+    out
+}
+
+/// The 1 channel bilinear sampler of the 360 mode (READ in `TwixtorPro_64`, the sampler of
+/// `warp::bilerp360`): `ix = trunc(x)`, `iy = trunc(y)`, the fractions `x - ix`, `y - iy`; the right neighbour wraps
+/// to column 0 past the last column; when `iy + 1` passes the last row both lower taps are the last row at the
+/// columns half a turn away (`(w / 2 + ix) % w`, `(w / 2 + x1) % w`); then `top = (p10 - p00) * fx + p00`,
+/// `bot = (p11 - p01) * fx + p01`, `(bot - top) * fy + top`. Coordinates outside the image are clamped into it to
+/// stay memory safe (the callers pass coordinates inside).
+#[inline]
+pub(crate) fn bilinear1_sphere(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> f32 {
+    bilinear1_sphere_with::<Plain>(img, w, h, x, y)
+}
+
+/// [`bilinear1_sphere`] with the arithmetic `A` (`crate::nanrule`; numbers are the same with any set).
+#[inline(always)]
+fn bilinear1_sphere_with<A: Arith>(img: &[f32], w: usize, h: usize, x: f32, y: f32) -> f32 {
+    let (w1, h1) = (w as i32 - 1, h as i32 - 1);
+    let ix = cvtt(x).clamp(0, w1);
+    let iy = cvtt(y).clamp(0, h1);
+    let fx = x - (cvtt(x) as f32);
+    let fy = y - (cvtt(y) as f32);
+    let x1 = if ix + 1 > w1 { 0 } else { ix + 1 };
+    let (xc, xd, yc) = if iy + 1 > h1 {
+        let half = (w as i32) / 2;
+        ((half + ix) % w as i32, (half + x1) % w as i32, h1)
+    } else {
+        (ix, x1, iy + 1)
+    };
+    let at = |xx: i32, yy: i32| img[yy as usize * w + xx as usize];
+    let (p00, p10, p01, p11) = (at(ix, iy), at(x1, iy), at(xc, yc), at(xd, yc));
+    let top = lerp_g::<A>(p00, p10, fx);
+    let bot = lerp_g::<A>(p01, p11, fx);
+    lerp_g::<A>(top, bot, fy)
 }
 
 #[cfg(test)]
@@ -294,6 +377,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
     fn periodic_resample_model_fixtures_are_reproduced_bit_for_bit() {
         let mut n = 0;
         for c in crate::holefill::tests::load_wrap_cases() {
@@ -305,5 +389,56 @@ mod tests {
             n += 1;
         }
         assert!(n >= 10, "{n} resample cases");
+    }
+}
+
+#[cfg(test)]
+mod sphere_tests {
+    use super::*;
+
+    #[test]
+    fn the_sphere_samplers_wrap_the_right_column_and_turn_below_the_last_row() {
+        // 4 x 3: at (3.5, 2.25) the right neighbour is column 0 and the lower taps the last row half a turn away
+        let img: Vec<f32> = (0..12).map(|i| (i * i) as f32 * 0.5).collect();
+        let at = |x: usize, y: usize| img[y * 4 + x];
+        let (p00, p10, p01, p11) = (at(3, 2), at(0, 2), at(1, 2), at(2, 2));
+        let top = (p10 - p00) * 0.5 + p00;
+        let bot = (p11 - p01) * 0.5 + p01;
+        assert_eq!(bilinear1_sphere(&img, 4, 3, 3.5, 2.25).to_bits(), ((bot - top) * 0.25 + top).to_bits());
+        // inside the frame it is the plain lerp chain
+        let (q00, q10, q01, q11) = (at(1, 0), at(2, 0), at(1, 1), at(2, 1));
+        let t = (q10 - q00) * 0.75 + q00;
+        let b = (q11 - q01) * 0.75 + q01;
+        assert_eq!(bilinear1_sphere(&img, 4, 3, 1.75, 0.5).to_bits(), ((b - t) * 0.5 + t).to_bits());
+        // the 2 channel sampler is the 1 channel one per channel
+        let two: Vec<f32> = img.iter().flat_map(|&v| [v, -v * 3.0]).collect();
+        let minus: Vec<f32> = img.iter().map(|&v| -v * 3.0).collect();
+        for (x, y) in [(3.5f32, 2.25f32), (0.2, 1.9), (2.0, 0.0)] {
+            let v = bilinear2_sphere(&two, 4, 3, x, y);
+            assert_eq!(v[0].to_bits(), bilinear1_sphere(&img, 4, 3, x, y).to_bits());
+            assert_eq!(v[1].to_bits(), bilinear1_sphere(&minus, 4, 3, x, y).to_bits());
+        }
+    }
+
+    #[test]
+    fn the_wrap_resample_steps_by_whole_ratios() {
+        // 8 x 6 to 4 x 3: the steps are 2 and 2, so every sample is a source pixel
+        let src: Vec<f32> = (0..48).map(|i| i as f32).collect();
+        let dst = resample1_wrapx(&src, 8, 6, 4, 3);
+        for y in 0..3 {
+            for x in 0..4 {
+                assert_eq!(dst[y * 4 + x], src[(2 * y) * 8 + 2 * x]);
+            }
+        }
+    }
+
+    #[test]
+    fn the_resamples_with_the_nan_rule_give_the_plain_numbers() {
+        let bits = |v: &[f32]| v.iter().map(|x| x.to_bits()).collect::<Vec<u32>>();
+        let src: Vec<f32> = (0..15 * 11).map(|i| ((i * 53 % 97) as f32) * 0.311 - 9.0).collect();
+        for (dw, dh) in [(7usize, 5usize), (8, 6), (30, 22), (2, 2)] {
+            assert_eq!(bits(&resample1_with::<crate::nanrule::Rule>(&src, 15, 11, dw, dh)), bits(&resample1(&src, 15, 11, dw, dh)));
+            assert_eq!(bits(&resample1_wrapx_with::<crate::nanrule::Rule>(&src, 15, 11, dw, dh)), bits(&resample1_wrapx(&src, 15, 11, dw, dh)));
+        }
     }
 }

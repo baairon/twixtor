@@ -1,0 +1,7383 @@
+{
+ "format": 1,
+ "ffmpeg": "none (raw frames written by gen.py)",
+ "inputs": [
+  {
+   "file": "inputs/adisc-32x24.d16.f4.rgba64le",
+   "source": "adisc",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/adisc-32x24.d32.f4.gbrapf32le",
+   "source": "adisc",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/adisc-32x24.d8.f4.rgba",
+   "source": "adisc",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-17x13.d32.f4.gbrapf32le",
+   "source": "alpha",
+   "width": 17,
+   "height": 13,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-1x1.d32.f4.gbrapf32le",
+   "source": "alpha",
+   "width": 1,
+   "height": 1,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-1x6.d16.f4.rgba64le",
+   "source": "alpha",
+   "width": 1,
+   "height": 6,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-23x37.d16.f4.rgba64le",
+   "source": "alpha",
+   "width": 23,
+   "height": 37,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-32x24.d16.f4.rgba64le",
+   "source": "alpha",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-32x24.d32.f4.gbrapf32le",
+   "source": "alpha",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-32x24.d8.f4.rgba",
+   "source": "alpha",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-3x3.d32.f4.gbrapf32le",
+   "source": "alpha",
+   "width": 3,
+   "height": 3,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-48x32.d32.f4.gbrapf32le",
+   "source": "alpha",
+   "width": 48,
+   "height": 32,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-5x4.d16.f4.rgba64le",
+   "source": "alpha",
+   "width": 5,
+   "height": 4,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-64x48.d16.f4.rgba64le",
+   "source": "alpha",
+   "width": 64,
+   "height": 48,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-7x1.d8.f4.rgba",
+   "source": "alpha",
+   "width": 7,
+   "height": 1,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/alpha-7x9.d8.f4.rgba",
+   "source": "alpha",
+   "width": 7,
+   "height": 9,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/bigshift-32x24.d16.f4.rgba64le",
+   "source": "bigshift",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/bigshift-32x24.d32.f4.gbrapf32le",
+   "source": "bigshift",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/bigshift-32x24.d8.f4.rgba",
+   "source": "bigshift",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/bigshift-40x30.d8.f4.rgba",
+   "source": "bigshift",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-16x16.d32.f4.gbrapf32le",
+   "source": "disc",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-17x13.d16.f4.rgba64le",
+   "source": "disc",
+   "width": 17,
+   "height": 13,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-1x1.d16.f4.rgba64le",
+   "source": "disc",
+   "width": 1,
+   "height": 1,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-1x6.d8.f4.rgba",
+   "source": "disc",
+   "width": 1,
+   "height": 6,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-23x37.d8.f4.rgba",
+   "source": "disc",
+   "width": 23,
+   "height": 37,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-2x2.d32.f4.gbrapf32le",
+   "source": "disc",
+   "width": 2,
+   "height": 2,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-33x31.d32.f4.gbrapf32le",
+   "source": "disc",
+   "width": 33,
+   "height": 31,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-3x3.d16.f4.rgba64le",
+   "source": "disc",
+   "width": 3,
+   "height": 3,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-40x30.d16.f4.rgba64le",
+   "source": "disc",
+   "width": 40,
+   "height": 30,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-40x30.d8.f4.rgba",
+   "source": "disc",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-40x30.d8.f6.rgba",
+   "source": "disc",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 6
+  },
+  {
+   "file": "inputs/disc-48x32.d16.f4.rgba64le",
+   "source": "disc",
+   "width": 48,
+   "height": 32,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-48x32.d32.f4.gbrapf32le",
+   "source": "disc",
+   "width": 48,
+   "height": 32,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-5x4.d8.f4.rgba",
+   "source": "disc",
+   "width": 5,
+   "height": 4,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-64x48.d8.f4.rgba",
+   "source": "disc",
+   "width": 64,
+   "height": 48,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-96x72.d32.f4.gbrapf32le",
+   "source": "disc",
+   "width": 96,
+   "height": 72,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/ext-hi-16x16.d16.f4.rgba64le",
+   "source": "ext-hi",
+   "width": 16,
+   "height": 16,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/ext-hi-16x16.d8.f4.rgba",
+   "source": "ext-hi",
+   "width": 16,
+   "height": 16,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/ext-lo-16x16.d16.f4.rgba64le",
+   "source": "ext-lo",
+   "width": 16,
+   "height": 16,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/ext-lo-16x16.d8.f4.rgba",
+   "source": "ext-lo",
+   "width": 16,
+   "height": 16,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/flat-40x30.d8.f4.rgba",
+   "source": "flat",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/hdr-24x20.d32.f4.gbrapf32le",
+   "source": "hdr",
+   "width": 24,
+   "height": 20,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/hdr-32x24.d32.f4.gbrapf32le",
+   "source": "hdr",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-16x16.d8.f4.rgba",
+   "source": "noise",
+   "width": 16,
+   "height": 16,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-1x6.d32.f4.gbrapf32le",
+   "source": "noise",
+   "width": 1,
+   "height": 6,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-23x37.d32.f4.gbrapf32le",
+   "source": "noise",
+   "width": 23,
+   "height": 37,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-2x2.d8.f4.rgba",
+   "source": "noise",
+   "width": 2,
+   "height": 2,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-32x24.d16.f4.rgba64le",
+   "source": "noise",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-32x24.d8.f4.rgba",
+   "source": "noise",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-33x31.d8.f4.rgba",
+   "source": "noise",
+   "width": 33,
+   "height": 31,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-40x30.d8.f4.rgba",
+   "source": "noise",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-5x4.d32.f4.gbrapf32le",
+   "source": "noise",
+   "width": 5,
+   "height": 4,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-64x48.d16.f4.rgba64le",
+   "source": "noise",
+   "width": 64,
+   "height": 48,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-64x48.d32.f4.gbrapf32le",
+   "source": "noise",
+   "width": 64,
+   "height": 48,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-7x1.d16.f4.rgba64le",
+   "source": "noise",
+   "width": 7,
+   "height": 1,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-7x9.d16.f4.rgba64le",
+   "source": "noise",
+   "width": 7,
+   "height": 9,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/noise-96x72.d32.f4.gbrapf32le",
+   "source": "noise",
+   "width": 96,
+   "height": 72,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-16x16.d16.f4.rgba64le",
+   "source": "shift",
+   "width": 16,
+   "height": 16,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-17x13.d8.f4.rgba",
+   "source": "shift",
+   "width": 17,
+   "height": 13,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-1x1.d8.f4.rgba",
+   "source": "shift",
+   "width": 1,
+   "height": 1,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-24x20.d16.f4.rgba64le",
+   "source": "shift",
+   "width": 24,
+   "height": 20,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-24x20.d16.f6.rgba64le",
+   "source": "shift",
+   "width": 24,
+   "height": 20,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 6
+  },
+  {
+   "file": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "source": "shift",
+   "width": 24,
+   "height": 20,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "source": "shift",
+   "width": 24,
+   "height": 20,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 6
+  },
+  {
+   "file": "inputs/shift-2x2.d16.f4.rgba64le",
+   "source": "shift",
+   "width": 2,
+   "height": 2,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-32x24.d32.f4.gbrapf32le",
+   "source": "shift",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-33x31.d16.f4.rgba64le",
+   "source": "shift",
+   "width": 33,
+   "height": 31,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-3x3.d32.f4.gbrapf32le",
+   "source": "shift",
+   "width": 3,
+   "height": 3,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-3x3.d8.f4.rgba",
+   "source": "shift",
+   "width": 3,
+   "height": 3,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-40x30.d8.f4.rgba",
+   "source": "shift",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-48x32.d8.f4.rgba",
+   "source": "shift",
+   "width": 48,
+   "height": 32,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-5x4.d8.f4.rgba",
+   "source": "shift",
+   "width": 5,
+   "height": 4,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-7x1.d32.f4.gbrapf32le",
+   "source": "shift",
+   "width": 7,
+   "height": 1,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-7x9.d32.f4.gbrapf32le",
+   "source": "shift",
+   "width": 7,
+   "height": 9,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-above1-16x16.d32.f4.gbrapf32le",
+   "source": "spec-above1",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "source": "spec-all",
+   "width": 24,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-fltmax-16x16.d32.f4.gbrapf32le",
+   "source": "spec-fltmax",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-fltmax-16x16.d32.f6.gbrapf32le",
+   "source": "spec-fltmax",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 6
+  },
+  {
+   "file": "inputs/spec-fltmin-16x16.d32.f4.gbrapf32le",
+   "source": "spec-fltmin",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-maxdenorm-16x16.d32.f4.gbrapf32le",
+   "source": "spec-maxdenorm",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-mindenorm-16x16.d32.f4.gbrapf32le",
+   "source": "spec-mindenorm",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-nan-16x16.d32.f4.gbrapf32le",
+   "source": "spec-nan",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-nan-16x16.d32.f6.gbrapf32le",
+   "source": "spec-nan",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 6
+  },
+  {
+   "file": "inputs/spec-neginf-16x16.d32.f4.gbrapf32le",
+   "source": "spec-neginf",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-negzero-16x16.d32.f4.gbrapf32le",
+   "source": "spec-negzero",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-one-16x16.d32.f4.gbrapf32le",
+   "source": "spec-one",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-posinf-16x16.d32.f4.gbrapf32le",
+   "source": "spec-posinf",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spec-posinf-16x16.d32.f6.gbrapf32le",
+   "source": "spec-posinf",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 6
+  },
+  {
+   "file": "inputs/spec-zero-16x16.d32.f4.gbrapf32le",
+   "source": "spec-zero",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-above1-16x16.d32.f4.gbrapf32le",
+   "source": "specA-above1",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-fltmax-16x16.d32.f4.gbrapf32le",
+   "source": "specA-fltmax",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-mindenorm-16x16.d32.f4.gbrapf32le",
+   "source": "specA-mindenorm",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-nan-16x16.d32.f4.gbrapf32le",
+   "source": "specA-nan",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-negzero-16x16.d32.f4.gbrapf32le",
+   "source": "specA-negzero",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-one-16x16.d32.f4.gbrapf32le",
+   "source": "specA-one",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-posinf-16x16.d32.f4.gbrapf32le",
+   "source": "specA-posinf",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/specA-zero-16x16.d32.f4.gbrapf32le",
+   "source": "specA-zero",
+   "width": 16,
+   "height": 16,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spin-32x24.d16.f4.rgba64le",
+   "source": "spin",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spin-32x24.d32.f4.gbrapf32le",
+   "source": "spin",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spin-40x30.d8.f4.rgba",
+   "source": "spin",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/spin-48x32.d8.f4.rgba",
+   "source": "spin",
+   "width": 48,
+   "height": 32,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/static-40x30.d8.f4.rgba",
+   "source": "static",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/subpix-40x30.d8.f4.rgba",
+   "source": "subpix",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/zoom-32x24.d16.f4.rgba64le",
+   "source": "zoom",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/zoom-32x24.d32.f4.gbrapf32le",
+   "source": "zoom",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/zoom-40x30.d8.f4.rgba",
+   "source": "zoom",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  }
+ ],
+ "cases": [
+  {
+   "id": "retime.size-default.shift-1x1.d8.5c606309",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 1,
+   "height": 1,
+   "source": "shift",
+   "input": "inputs/shift-1x1.d8.f4.rgba",
+   "reference": "retime.size-default.shift-1x1.d8.5c606309.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-1x1.d16.2f5f3554",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 16,
+   "width": 1,
+   "height": 1,
+   "source": "disc",
+   "input": "inputs/disc-1x1.d16.f4.rgba64le",
+   "reference": "retime.size-default.disc-1x1.d16.2f5f3554.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-1x1.d32.621a333c",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 32,
+   "width": 1,
+   "height": 1,
+   "source": "alpha",
+   "input": "inputs/alpha-1x1.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.alpha-1x1.d32.621a333c.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-1x6.d8.094c98d0",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 8,
+   "width": 1,
+   "height": 6,
+   "source": "disc",
+   "input": "inputs/disc-1x6.d8.f4.rgba",
+   "reference": "retime.size-default.disc-1x6.d8.094c98d0.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-1x6.d16.542de920",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 16,
+   "width": 1,
+   "height": 6,
+   "source": "alpha",
+   "input": "inputs/alpha-1x6.d16.f4.rgba64le",
+   "reference": "retime.size-default.alpha-1x6.d16.542de920.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-1x6.d32.2a45baca",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "width": 1,
+   "height": 6,
+   "source": "noise",
+   "input": "inputs/noise-1x6.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.noise-1x6.d32.2a45baca.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-7x1.d8.f33838df",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 7,
+   "height": 1,
+   "source": "alpha",
+   "input": "inputs/alpha-7x1.d8.f4.rgba",
+   "reference": "retime.size-default.alpha-7x1.d8.f33838df.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-7x1.d16.3cefe003",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 16,
+   "width": 7,
+   "height": 1,
+   "source": "noise",
+   "input": "inputs/noise-7x1.d16.f4.rgba64le",
+   "reference": "retime.size-default.noise-7x1.d16.3cefe003.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-7x1.d32.276ca9c6",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 7,
+   "height": 1,
+   "source": "shift",
+   "input": "inputs/shift-7x1.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.shift-7x1.d32.276ca9c6.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-2x2.d8.427ca099",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 8,
+   "width": 2,
+   "height": 2,
+   "source": "noise",
+   "input": "inputs/noise-2x2.d8.f4.rgba",
+   "reference": "retime.size-default.noise-2x2.d8.427ca099.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-2x2.d16.748f806a",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 16,
+   "width": 2,
+   "height": 2,
+   "source": "shift",
+   "input": "inputs/shift-2x2.d16.f4.rgba64le",
+   "reference": "retime.size-default.shift-2x2.d16.748f806a.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-2x2.d32.01cccd59",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "width": 2,
+   "height": 2,
+   "source": "disc",
+   "input": "inputs/disc-2x2.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.disc-2x2.d32.01cccd59.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-3x3.d8.3a6b6ea5",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 8,
+   "width": 3,
+   "height": 3,
+   "source": "shift",
+   "input": "inputs/shift-3x3.d8.f4.rgba",
+   "reference": "retime.size-default.shift-3x3.d8.3a6b6ea5.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-3x3.d16.0d9c36b4",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 16,
+   "width": 3,
+   "height": 3,
+   "source": "disc",
+   "input": "inputs/disc-3x3.d16.f4.rgba64le",
+   "reference": "retime.size-default.disc-3x3.d16.0d9c36b4.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-3x3.d32.3f275f95",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 3,
+   "height": 3,
+   "source": "alpha",
+   "input": "inputs/alpha-3x3.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.alpha-3x3.d32.3f275f95.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-5x4.d8.24f30725",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 8,
+   "width": 5,
+   "height": 4,
+   "source": "disc",
+   "input": "inputs/disc-5x4.d8.f4.rgba",
+   "reference": "retime.size-default.disc-5x4.d8.24f30725.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-5x4.d16.3e8d4007",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 16,
+   "width": 5,
+   "height": 4,
+   "source": "alpha",
+   "input": "inputs/alpha-5x4.d16.f4.rgba64le",
+   "reference": "retime.size-default.alpha-5x4.d16.3e8d4007.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-5x4.d32.161c7936",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 32,
+   "width": 5,
+   "height": 4,
+   "source": "noise",
+   "input": "inputs/noise-5x4.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.noise-5x4.d32.161c7936.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-7x9.d8.abd681f9",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 8,
+   "width": 7,
+   "height": 9,
+   "source": "alpha",
+   "input": "inputs/alpha-7x9.d8.f4.rgba",
+   "reference": "retime.size-default.alpha-7x9.d8.abd681f9.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-7x9.d16.52b165bf",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 16,
+   "width": 7,
+   "height": 9,
+   "source": "noise",
+   "input": "inputs/noise-7x9.d16.f4.rgba64le",
+   "reference": "retime.size-default.noise-7x9.d16.52b165bf.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-7x9.d32.a22305e5",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 32,
+   "width": 7,
+   "height": 9,
+   "source": "shift",
+   "input": "inputs/shift-7x9.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.shift-7x9.d32.a22305e5.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-16x16.d8.f7bea5a2",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 16,
+   "source": "noise",
+   "input": "inputs/noise-16x16.d8.f4.rgba",
+   "reference": "retime.size-default.noise-16x16.d8.f7bea5a2.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-16x16.d16.e8c91931",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 16,
+   "source": "shift",
+   "input": "inputs/shift-16x16.d16.f4.rgba64le",
+   "reference": "retime.size-default.shift-16x16.d16.e8c91931.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-16x16.d32.f78301ce",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "disc",
+   "input": "inputs/disc-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.disc-16x16.d32.f78301ce.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-17x13.d8.0a0cf0ab",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 17,
+   "height": 13,
+   "source": "shift",
+   "input": "inputs/shift-17x13.d8.f4.rgba",
+   "reference": "retime.size-default.shift-17x13.d8.0a0cf0ab.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-17x13.d16.ad231fe7",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 16,
+   "width": 17,
+   "height": 13,
+   "source": "disc",
+   "input": "inputs/disc-17x13.d16.f4.rgba64le",
+   "reference": "retime.size-default.disc-17x13.d16.ad231fe7.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-17x13.d32.1a0686df",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 32,
+   "width": 17,
+   "height": 13,
+   "source": "alpha",
+   "input": "inputs/alpha-17x13.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.alpha-17x13.d32.1a0686df.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-23x37.d8.d736d1df",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 8,
+   "width": 23,
+   "height": 37,
+   "source": "disc",
+   "input": "inputs/disc-23x37.d8.f4.rgba",
+   "reference": "retime.size-default.disc-23x37.d8.d736d1df.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-23x37.d16.27c98412",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 16,
+   "width": 23,
+   "height": 37,
+   "source": "alpha",
+   "input": "inputs/alpha-23x37.d16.f4.rgba64le",
+   "reference": "retime.size-default.alpha-23x37.d16.27c98412.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-23x37.d32.3d75adae",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "width": 23,
+   "height": 37,
+   "source": "noise",
+   "input": "inputs/noise-23x37.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.noise-23x37.d32.3d75adae.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-32x24.d8.a70298ac",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.size-default.alpha-32x24.d8.a70298ac.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-32x24.d16.24ccefb3",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "noise",
+   "input": "inputs/noise-32x24.d16.f4.rgba64le",
+   "reference": "retime.size-default.noise-32x24.d16.24ccefb3.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-32x24.d32.5689b7f1",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "shift",
+   "input": "inputs/shift-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.shift-32x24.d32.5689b7f1.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-33x31.d8.c685265f",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 8,
+   "width": 33,
+   "height": 31,
+   "source": "noise",
+   "input": "inputs/noise-33x31.d8.f4.rgba",
+   "reference": "retime.size-default.noise-33x31.d8.c685265f.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-33x31.d16.68c3fb47",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 16,
+   "width": 33,
+   "height": 31,
+   "source": "shift",
+   "input": "inputs/shift-33x31.d16.f4.rgba64le",
+   "reference": "retime.size-default.shift-33x31.d16.68c3fb47.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-33x31.d32.c0155524",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "width": 33,
+   "height": 31,
+   "source": "disc",
+   "input": "inputs/disc-33x31.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.disc-33x31.d32.c0155524.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.shift-48x32.d8.0fab53ce",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 8,
+   "width": 48,
+   "height": 32,
+   "source": "shift",
+   "input": "inputs/shift-48x32.d8.f4.rgba",
+   "reference": "retime.size-default.shift-48x32.d8.0fab53ce.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-48x32.d16.88311732",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 16,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d16.f4.rgba64le",
+   "reference": "retime.size-default.disc-48x32.d16.88311732.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-48x32.d32.6f661d3f",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 48,
+   "height": 32,
+   "source": "alpha",
+   "input": "inputs/alpha-48x32.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.alpha-48x32.d32.6f661d3f.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.disc-64x48.d8.6c08d379",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.size-default.disc-64x48.d8.6c08d379.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.alpha-64x48.d16.9357ad3e",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 16,
+   "width": 64,
+   "height": 48,
+   "source": "alpha",
+   "input": "inputs/alpha-64x48.d16.f4.rgba64le",
+   "reference": "retime.size-default.alpha-64x48.d16.9357ad3e.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "size"
+  },
+  {
+   "id": "retime.size-default.noise-64x48.d32.f5504a93",
+   "effect": "retime",
+   "label": "size-default",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 32,
+   "width": 64,
+   "height": 48,
+   "source": "noise",
+   "input": "inputs/noise-64x48.d32.f4.gbrapf32le",
+   "reference": "retime.size-default.noise-64x48.d32.f5504a93.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "size"
+  },
+  {
+   "id": "retime.vec-v1-i1.disc-40x30.d8.e76ef585",
+   "effect": "retime",
+   "label": "vec-v1-i1",
+   "params": [
+    "speed_percent=75",
+    "vectors=1",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v1-i1.disc-40x30.d8.e76ef585.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v1-i2.disc-40x30.d8.e3e73e8d",
+   "effect": "retime",
+   "label": "vec-v1-i2",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=1",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v1-i2.disc-40x30.d8.e3e73e8d.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v1-i3.disc-40x30.d8.56f239ab",
+   "effect": "retime",
+   "label": "vec-v1-i3",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=1",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v1-i3.disc-40x30.d8.56f239ab.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i1.disc-40x30.d8.aef88bff",
+   "effect": "retime",
+   "label": "vec-v2-i1",
+   "params": [
+    "speed_percent=40",
+    "vectors=2",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v2-i1.disc-40x30.d8.aef88bff.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i2.disc-40x30.d8.73e57145",
+   "effect": "retime",
+   "label": "vec-v2-i2",
+   "params": [
+    "speed_percent=50",
+    "vectors=2",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v2-i2.disc-40x30.d8.73e57145.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i3.disc-40x30.d8.024e9e33",
+   "effect": "retime",
+   "label": "vec-v2-i3",
+   "params": [
+    "speed_percent=20",
+    "vectors=2",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v2-i3.disc-40x30.d8.024e9e33.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i1.disc-40x30.d8.9ee0f9cb",
+   "effect": "retime",
+   "label": "vec-v3-i1",
+   "params": [
+    "speed_percent=50",
+    "vectors=3",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v3-i1.disc-40x30.d8.9ee0f9cb.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i2.disc-40x30.d8.506d0b91",
+   "effect": "retime",
+   "label": "vec-v3-i2",
+   "params": [
+    "speed_percent=25",
+    "vectors=3",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v3-i2.disc-40x30.d8.506d0b91.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i3.disc-40x30.d8.3f9d8948",
+   "effect": "retime",
+   "label": "vec-v3-i3",
+   "params": [
+    "speed_percent=75",
+    "vectors=3",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v3-i3.disc-40x30.d8.3f9d8948.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i1.disc-40x30.d8.950ca24f",
+   "effect": "retime",
+   "label": "vec-v4-i1",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=4",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v4-i1.disc-40x30.d8.950ca24f.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i2.disc-40x30.d8.d530e409",
+   "effect": "retime",
+   "label": "vec-v4-i2",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=4",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v4-i2.disc-40x30.d8.d530e409.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i3.disc-40x30.d8.74487ed9",
+   "effect": "retime",
+   "label": "vec-v4-i3",
+   "params": [
+    "speed_percent=40",
+    "vectors=4",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v4-i3.disc-40x30.d8.74487ed9.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i1.disc-40x30.d8.5ce4aeef",
+   "effect": "retime",
+   "label": "vec-v5-i1",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v5-i1.disc-40x30.d8.5ce4aeef.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i2.disc-40x30.d8.7ad1eabc",
+   "effect": "retime",
+   "label": "vec-v5-i2",
+   "params": [
+    "speed_percent=20",
+    "vectors=5",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v5-i2.disc-40x30.d8.7ad1eabc.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i3.disc-40x30.d8.f5e1143e",
+   "effect": "retime",
+   "label": "vec-v5-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.vec-v5-i3.disc-40x30.d8.f5e1143e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i1.shift-24x20.d16.f142145d",
+   "effect": "retime",
+   "label": "vec-v2-i1",
+   "params": [
+    "speed_percent=25",
+    "vectors=2",
+    "frame_interp=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v2-i1.shift-24x20.d16.f142145d.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i3.shift-24x20.d16.d17ad4ea",
+   "effect": "retime",
+   "label": "vec-v2-i3",
+   "params": [
+    "speed_percent=75",
+    "vectors=2",
+    "frame_interp=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v2-i3.shift-24x20.d16.d17ad4ea.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i1.shift-24x20.d16.18722e6b",
+   "effect": "retime",
+   "label": "vec-v3-i1",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=3",
+    "frame_interp=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v3-i1.shift-24x20.d16.18722e6b.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i3.shift-24x20.d16.995c77d5",
+   "effect": "retime",
+   "label": "vec-v3-i3",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=3",
+    "frame_interp=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v3-i3.shift-24x20.d16.995c77d5.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i1.shift-24x20.d16.e909da6d",
+   "effect": "retime",
+   "label": "vec-v4-i1",
+   "params": [
+    "speed_percent=40",
+    "vectors=4",
+    "frame_interp=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v4-i1.shift-24x20.d16.e909da6d.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i3.shift-24x20.d16.0c13e6a7",
+   "effect": "retime",
+   "label": "vec-v4-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=4",
+    "frame_interp=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v4-i3.shift-24x20.d16.0c13e6a7.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i1.shift-24x20.d16.48f6a7e5",
+   "effect": "retime",
+   "label": "vec-v5-i1",
+   "params": [
+    "speed_percent=20",
+    "vectors=5",
+    "frame_interp=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v5-i1.shift-24x20.d16.48f6a7e5.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i3.shift-24x20.d16.b91b6db4",
+   "effect": "retime",
+   "label": "vec-v5-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.vec-v5-i3.shift-24x20.d16.b91b6db4.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i1.shift-24x20.d32.2d5bd5f1",
+   "effect": "retime",
+   "label": "vec-v2-i1",
+   "params": [
+    "speed_percent=25",
+    "vectors=2",
+    "frame_interp=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v2-i1.shift-24x20.d32.2d5bd5f1.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i2.shift-24x20.d32.9bba7a19",
+   "effect": "retime",
+   "label": "vec-v2-i2",
+   "params": [
+    "speed_percent=75",
+    "vectors=2",
+    "frame_interp=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v2-i2.shift-24x20.d32.9bba7a19.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v2-i3.shift-24x20.d32.e981767a",
+   "effect": "retime",
+   "label": "vec-v2-i3",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=2",
+    "frame_interp=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v2-i3.shift-24x20.d32.e981767a.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i1.shift-24x20.d32.fe7f3964",
+   "effect": "retime",
+   "label": "vec-v3-i1",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=3",
+    "frame_interp=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v3-i1.shift-24x20.d32.fe7f3964.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i2.shift-24x20.d32.9146368f",
+   "effect": "retime",
+   "label": "vec-v3-i2",
+   "params": [
+    "speed_percent=40",
+    "vectors=3",
+    "frame_interp=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v3-i2.shift-24x20.d32.9146368f.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v3-i3.shift-24x20.d32.c620a6bd",
+   "effect": "retime",
+   "label": "vec-v3-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=3",
+    "frame_interp=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v3-i3.shift-24x20.d32.c620a6bd.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i1.shift-24x20.d32.001fb82c",
+   "effect": "retime",
+   "label": "vec-v4-i1",
+   "params": [
+    "speed_percent=20",
+    "vectors=4",
+    "frame_interp=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v4-i1.shift-24x20.d32.001fb82c.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i2.shift-24x20.d32.19e5405a",
+   "effect": "retime",
+   "label": "vec-v4-i2",
+   "params": [
+    "speed_percent=50",
+    "vectors=4",
+    "frame_interp=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v4-i2.shift-24x20.d32.19e5405a.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v4-i3.shift-24x20.d32.de83fcc9",
+   "effect": "retime",
+   "label": "vec-v4-i3",
+   "params": [
+    "speed_percent=25",
+    "vectors=4",
+    "frame_interp=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v4-i3.shift-24x20.d32.de83fcc9.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i1.shift-24x20.d32.05bc6ce1",
+   "effect": "retime",
+   "label": "vec-v5-i1",
+   "params": [
+    "speed_percent=75",
+    "vectors=5",
+    "frame_interp=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v5-i1.shift-24x20.d32.05bc6ce1.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i2.shift-24x20.d32.5ee479af",
+   "effect": "retime",
+   "label": "vec-v5-i2",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=5",
+    "frame_interp=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v5-i2.shift-24x20.d32.5ee479af.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.vec-v5-i3.shift-24x20.d32.a4116228",
+   "effect": "retime",
+   "label": "vec-v5-i3",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=5",
+    "frame_interp=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.vec-v5-i3.shift-24x20.d32.a4116228.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "vec"
+  },
+  {
+   "id": "retime.sb-v3-i1.disc-40x30.d8.40ca8c9a",
+   "effect": "retime",
+   "label": "sb-v3-i1",
+   "params": [
+    "speed_percent=40",
+    "vectors=3",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sb-v3-i1.disc-40x30.d8.40ca8c9a.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v3-i2.disc-40x30.d8.95a6dfae",
+   "effect": "retime",
+   "label": "sb-v3-i2",
+   "params": [
+    "speed_percent=50",
+    "vectors=3",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sb-v3-i2.disc-40x30.d8.95a6dfae.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v3-i3.disc-40x30.d8.4a4c8a52",
+   "effect": "retime",
+   "label": "sb-v3-i3",
+   "params": [
+    "speed_percent=20",
+    "vectors=3",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sb-v3-i3.disc-40x30.d8.4a4c8a52.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i1.disc-40x30.d8.178b26b3",
+   "effect": "retime",
+   "label": "sb-v5-i1",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sb-v5-i1.disc-40x30.d8.178b26b3.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i2.disc-40x30.d8.b7962730",
+   "effect": "retime",
+   "label": "sb-v5-i2",
+   "params": [
+    "speed_percent=25",
+    "vectors=5",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sb-v5-i2.disc-40x30.d8.b7962730.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i3.disc-40x30.d8.5c2f4710",
+   "effect": "retime",
+   "label": "sb-v5-i3",
+   "params": [
+    "speed_percent=75",
+    "vectors=5",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sb-v5-i3.disc-40x30.d8.5c2f4710.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v3-i1.shift-24x20.d16.2973538b",
+   "effect": "retime",
+   "label": "sb-v3-i1",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=3",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.sb-v3-i1.shift-24x20.d16.2973538b.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v3-i2.shift-24x20.d16.68a78f41",
+   "effect": "retime",
+   "label": "sb-v3-i2",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=3",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.sb-v3-i2.shift-24x20.d16.68a78f41.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v3-i3.shift-24x20.d16.0828e3e0",
+   "effect": "retime",
+   "label": "sb-v3-i3",
+   "params": [
+    "speed_percent=40",
+    "vectors=3",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.sb-v3-i3.shift-24x20.d16.0828e3e0.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i1.shift-24x20.d16.82592634",
+   "effect": "retime",
+   "label": "sb-v5-i1",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.sb-v5-i1.shift-24x20.d16.82592634.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i2.shift-24x20.d16.fb7ae115",
+   "effect": "retime",
+   "label": "sb-v5-i2",
+   "params": [
+    "speed_percent=20",
+    "vectors=5",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.sb-v5-i2.shift-24x20.d16.fb7ae115.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i3.shift-24x20.d16.f6232536",
+   "effect": "retime",
+   "label": "sb-v5-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.sb-v5-i3.shift-24x20.d16.f6232536.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v4-i1.shift-24x20.d32.b9cdb10b",
+   "effect": "retime",
+   "label": "sb-v4-i1",
+   "params": [
+    "speed_percent=25",
+    "vectors=4",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.sb-v4-i1.shift-24x20.d32.b9cdb10b.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v4-i2.shift-24x20.d32.12865d55",
+   "effect": "retime",
+   "label": "sb-v4-i2",
+   "params": [
+    "speed_percent=75",
+    "vectors=4",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.sb-v4-i2.shift-24x20.d32.12865d55.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v4-i3.shift-24x20.d32.869edd27",
+   "effect": "retime",
+   "label": "sb-v4-i3",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=4",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.sb-v4-i3.shift-24x20.d32.869edd27.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i1.shift-24x20.d32.700454e7",
+   "effect": "retime",
+   "label": "sb-v5-i1",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=5",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.sb-v5-i1.shift-24x20.d32.700454e7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i2.shift-24x20.d32.f5331c96",
+   "effect": "retime",
+   "label": "sb-v5-i2",
+   "params": [
+    "speed_percent=40",
+    "vectors=5",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.sb-v5-i2.shift-24x20.d32.f5331c96.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-v5-i3.shift-24x20.d32.0f05df37",
+   "effect": "retime",
+   "label": "sb-v5-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=5",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.sb-v5-i3.shift-24x20.d32.0f05df37.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-alpha-i2.alpha-32x24.d8.96a44d80",
+   "effect": "retime",
+   "label": "sb-alpha-i2",
+   "params": [
+    "speed_percent=20",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.sb-alpha-i2.alpha-32x24.d8.96a44d80.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-alpha-i2.alpha-32x24.d16.711d6453",
+   "effect": "retime",
+   "label": "sb-alpha-i2",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d16.f4.rgba64le",
+   "reference": "retime.sb-alpha-i2.alpha-32x24.d16.711d6453.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-alpha-i2.alpha-32x24.d32.2e6d5886",
+   "effect": "retime",
+   "label": "sb-alpha-i2",
+   "params": [
+    "speed_percent=25",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.sb-alpha-i2.alpha-32x24.d32.2e6d5886.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-big-i1.bigshift-32x24.d8.c1ef9366",
+   "effect": "retime",
+   "label": "sb-big-i1",
+   "params": [
+    "speed_percent=75",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "bigshift",
+   "input": "inputs/bigshift-32x24.d8.f4.rgba",
+   "reference": "retime.sb-big-i1.bigshift-32x24.d8.c1ef9366.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-big-i2.bigshift-32x24.d8.77944ce9",
+   "effect": "retime",
+   "label": "sb-big-i2",
+   "params": [
+    "speed_percent=33.3333",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "bigshift",
+   "input": "inputs/bigshift-32x24.d8.f4.rgba",
+   "reference": "retime.sb-big-i2.bigshift-32x24.d8.77944ce9.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-big-i3.bigshift-32x24.d8.fc1f6b87",
+   "effect": "retime",
+   "label": "sb-big-i3",
+   "params": [
+    "speed_percent=62.5",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "bigshift",
+   "input": "inputs/bigshift-32x24.d8.f4.rgba",
+   "reference": "retime.sb-big-i3.bigshift-32x24.d8.fc1f6b87.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-big-i2.bigshift-32x24.d32.4a6a80ff",
+   "effect": "retime",
+   "label": "sb-big-i2",
+   "params": [
+    "speed_percent=40",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "bigshift",
+   "input": "inputs/bigshift-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.sb-big-i2.bigshift-32x24.d32.4a6a80ff.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-disc-25.disc-40x30.d16.0a5eacb0",
+   "effect": "retime",
+   "label": "sb-disc-25",
+   "params": [
+    "speed_percent=25",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d16.f4.rgba64le",
+   "reference": "retime.sb-disc-25.disc-40x30.d16.0a5eacb0.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-tiny.shift-5x4.d8.d85a7ed4",
+   "effect": "retime",
+   "label": "sb-tiny",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 5,
+   "height": 4,
+   "source": "shift",
+   "input": "inputs/shift-5x4.d8.f4.rgba",
+   "reference": "retime.sb-tiny.shift-5x4.d8.d85a7ed4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.sb-tiny.shift-3x3.d32.3d6b8ec8",
+   "effect": "retime",
+   "label": "sb-tiny",
+   "params": [
+    "speed_percent=20",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 3,
+   "height": 3,
+   "source": "shift",
+   "input": "inputs/shift-3x3.d32.f4.gbrapf32le",
+   "reference": "retime.sb-tiny.shift-3x3.d32.3d6b8ec8.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sb"
+  },
+  {
+   "id": "retime.v360-sb0-i1.disc-40x30.d8.db0f1b16",
+   "effect": "retime",
+   "label": "v360-sb0-i1",
+   "params": [
+    "speed_percent=50",
+    "video_360=1",
+    "smart_blend=0",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb0-i1.disc-40x30.d8.db0f1b16.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-i2.disc-40x30.d8.0ccfe533",
+   "effect": "retime",
+   "label": "v360-sb0-i2",
+   "params": [
+    "speed_percent=25",
+    "video_360=1",
+    "smart_blend=0",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb0-i2.disc-40x30.d8.0ccfe533.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-i3.disc-40x30.d8.235fb3ed",
+   "effect": "retime",
+   "label": "v360-sb0-i3",
+   "params": [
+    "speed_percent=75",
+    "video_360=1",
+    "smart_blend=0",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb0-i3.disc-40x30.d8.235fb3ed.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i1.disc-40x30.d8.8fb81efc",
+   "effect": "retime",
+   "label": "v360-sb1-i1",
+   "params": [
+    "speed_percent=33.3333",
+    "video_360=1",
+    "smart_blend=1",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb1-i1.disc-40x30.d8.8fb81efc.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i2.disc-40x30.d8.71e7a3a4",
+   "effect": "retime",
+   "label": "v360-sb1-i2",
+   "params": [
+    "speed_percent=62.5",
+    "video_360=1",
+    "smart_blend=1",
+    "frame_interp=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb1-i2.disc-40x30.d8.71e7a3a4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i3.disc-40x30.d8.d92667b3",
+   "effect": "retime",
+   "label": "v360-sb1-i3",
+   "params": [
+    "speed_percent=40",
+    "video_360=1",
+    "smart_blend=1",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb1-i3.disc-40x30.d8.d92667b3.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-i2.shift-24x20.d16.536bc57c",
+   "effect": "retime",
+   "label": "v360-sb0-i2",
+   "params": [
+    "speed_percent=50",
+    "video_360=1",
+    "smart_blend=0"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.v360-sb0-i2.shift-24x20.d16.536bc57c.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i2.shift-24x20.d16.6b1e7874",
+   "effect": "retime",
+   "label": "v360-sb1-i2",
+   "params": [
+    "speed_percent=20",
+    "video_360=1",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.v360-sb1-i2.shift-24x20.d16.6b1e7874.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-i1.shift-24x20.d32.125a8505",
+   "effect": "retime",
+   "label": "v360-sb0-i1",
+   "params": [
+    "speed_percent=50",
+    "video_360=1",
+    "smart_blend=0",
+    "frame_interp=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb0-i1.shift-24x20.d32.125a8505.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-i2.shift-24x20.d32.a0bb0882",
+   "effect": "retime",
+   "label": "v360-sb0-i2",
+   "params": [
+    "speed_percent=25",
+    "video_360=1",
+    "smart_blend=0",
+    "frame_interp=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb0-i2.shift-24x20.d32.a0bb0882.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-i3.shift-24x20.d32.70683877",
+   "effect": "retime",
+   "label": "v360-sb0-i3",
+   "params": [
+    "speed_percent=75",
+    "video_360=1",
+    "smart_blend=0",
+    "frame_interp=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb0-i3.shift-24x20.d32.70683877.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i1.shift-24x20.d32.8985f1ca",
+   "effect": "retime",
+   "label": "v360-sb1-i1",
+   "params": [
+    "speed_percent=33.3333",
+    "video_360=1",
+    "smart_blend=1",
+    "frame_interp=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb1-i1.shift-24x20.d32.8985f1ca.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i2.shift-24x20.d32.88f959ac",
+   "effect": "retime",
+   "label": "v360-sb1-i2",
+   "params": [
+    "speed_percent=62.5",
+    "video_360=1",
+    "smart_blend=1",
+    "frame_interp=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb1-i2.shift-24x20.d32.88f959ac.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-i3.shift-24x20.d32.a1a91ccf",
+   "effect": "retime",
+   "label": "v360-sb1-i3",
+   "params": [
+    "speed_percent=40",
+    "video_360=1",
+    "smart_blend=1",
+    "frame_interp=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb1-i3.shift-24x20.d32.a1a91ccf.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb0-v3.disc-40x30.d8.dc23ada2",
+   "effect": "retime",
+   "label": "v360-sb0-v3",
+   "params": [
+    "speed_percent=50",
+    "video_360=1",
+    "smart_blend=0",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb0-v3.disc-40x30.d8.dc23ada2.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-v3.disc-40x30.d8.477b0c0e",
+   "effect": "retime",
+   "label": "v360-sb1-v3",
+   "params": [
+    "speed_percent=20",
+    "video_360=1",
+    "smart_blend=1",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.v360-sb1-v3.disc-40x30.d8.477b0c0e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-alpha.alpha-32x24.d8.a9960c44",
+   "effect": "retime",
+   "label": "v360-sb1-alpha",
+   "params": [
+    "speed_percent=50",
+    "video_360=1",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.v360-sb1-alpha.alpha-32x24.d8.a9960c44.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.v360-sb1-adisc.adisc-32x24.d32.06d5102c",
+   "effect": "retime",
+   "label": "v360-sb1-adisc",
+   "params": [
+    "speed_percent=25",
+    "video_360=1",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.v360-sb1-adisc.adisc-32x24.d32.06d5102c.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "v360"
+  },
+  {
+   "id": "retime.blur-s50-b0.disc-40x30.d8.7e8524fd",
+   "effect": "retime",
+   "label": "blur-s50-b0",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=0"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b0.disc-40x30.d8.7e8524fd.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b-0.disc-40x30.d8.add144ab",
+   "effect": "retime",
+   "label": "blur-s50-b-0",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=-0"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b-0.disc-40x30.d8.add144ab.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b0.01.disc-40x30.d8.711757dc",
+   "effect": "retime",
+   "label": "blur-s50-b0.01",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=0.01"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b0.01.disc-40x30.d8.711757dc.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b0.5.disc-40x30.d8.1fd0f237",
+   "effect": "retime",
+   "label": "blur-s50-b0.5",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=0.5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b0.5.disc-40x30.d8.1fd0f237.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b1.disc-40x30.d8.1b28e7c6",
+   "effect": "retime",
+   "label": "blur-s50-b1",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b1.disc-40x30.d8.1b28e7c6.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b5.disc-40x30.d8.dddc6b08",
+   "effect": "retime",
+   "label": "blur-s50-b5",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b5.disc-40x30.d8.dddc6b08.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b10.disc-40x30.d8.f8b1f64c",
+   "effect": "retime",
+   "label": "blur-s50-b10",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b10.disc-40x30.d8.f8b1f64c.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s25-b1.disc-40x30.d8.1f0cb21a",
+   "effect": "retime",
+   "label": "blur-s25-b1",
+   "params": [
+    "speed_percent=25",
+    "blur_compensation=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s25-b1.disc-40x30.d8.1f0cb21a.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s25-b10.disc-40x30.d8.faea279c",
+   "effect": "retime",
+   "label": "blur-s25-b10",
+   "params": [
+    "speed_percent=25",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s25-b10.disc-40x30.d8.faea279c.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s150-b0.5.disc-40x30.d8.0ee0da96",
+   "effect": "retime",
+   "label": "blur-s150-b0.5",
+   "params": [
+    "speed_percent=150",
+    "blur_compensation=0.5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s150-b0.5.disc-40x30.d8.0ee0da96.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s150-b5.disc-40x30.d8.3d7a75e4",
+   "effect": "retime",
+   "label": "blur-s150-b5",
+   "params": [
+    "speed_percent=150",
+    "blur_compensation=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s150-b5.disc-40x30.d8.3d7a75e4.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s150-b10.disc-40x30.d8.8eae6fad",
+   "effect": "retime",
+   "label": "blur-s150-b10",
+   "params": [
+    "speed_percent=150",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s150-b10.disc-40x30.d8.8eae6fad.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b0.5.disc-40x30.d8.b2219f22",
+   "effect": "retime",
+   "label": "blur-s200-b0.5",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=0.5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b0.5.disc-40x30.d8.b2219f22.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b5.disc-40x30.d8.6fe88c0f",
+   "effect": "retime",
+   "label": "blur-s200-b5",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b5.disc-40x30.d8.6fe88c0f.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b10.disc-40x30.d8.0c250ed0",
+   "effect": "retime",
+   "label": "blur-s200-b10",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b10.disc-40x30.d8.0c250ed0.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s400-b0.5.disc-40x30.d8.e3939201",
+   "effect": "retime",
+   "label": "blur-s400-b0.5",
+   "params": [
+    "speed_percent=400",
+    "blur_compensation=0.5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s400-b0.5.disc-40x30.d8.e3939201.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s400-b5.disc-40x30.d8.a1fd9fce",
+   "effect": "retime",
+   "label": "blur-s400-b5",
+   "params": [
+    "speed_percent=400",
+    "blur_compensation=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s400-b5.disc-40x30.d8.a1fd9fce.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s400-b10.disc-40x30.d8.42ba292e",
+   "effect": "retime",
+   "label": "blur-s400-b10",
+   "params": [
+    "speed_percent=400",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s400-b10.disc-40x30.d8.42ba292e.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s100-b5.disc-40x30.d8.0fd52123",
+   "effect": "retime",
+   "label": "blur-s100-b5",
+   "params": [
+    "speed_percent=100",
+    "blur_compensation=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s100-b5.disc-40x30.d8.0fd52123.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b3.shift-24x20.d16.e890479f",
+   "effect": "retime",
+   "label": "blur-s50-b3",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.blur-s50-b3.shift-24x20.d16.e890479f.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s200-b3.shift-24x20.d16.93c5ed17",
+   "effect": "retime",
+   "label": "blur-s200-b3",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s200-b3.shift-24x20.d16.93c5ed17.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s50-b3.shift-24x20.d32.836d1fb8",
+   "effect": "retime",
+   "label": "blur-s50-b3",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.blur-s50-b3.shift-24x20.d32.836d1fb8.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s200-b3.shift-24x20.d32.55b97a6f",
+   "effect": "retime",
+   "label": "blur-s200-b3",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s200-b3.shift-24x20.d32.55b97a6f.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b2-i1.disc-40x30.d8.5fed91c8",
+   "effect": "retime",
+   "label": "blur-s200-b2-i1",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=2",
+    "frame_interp=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b2-i1.disc-40x30.d8.5fed91c8.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b2-i3.disc-40x30.d8.f05599ba",
+   "effect": "retime",
+   "label": "blur-s200-b2-i3",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=2",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b2-i3.disc-40x30.d8.f05599ba.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b2-v3.disc-40x30.d8.c026a377",
+   "effect": "retime",
+   "label": "blur-s200-b2-v3",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=2",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b2-v3.disc-40x30.d8.c026a377.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s200-b2-sb.disc-40x30.d8.4064b11d",
+   "effect": "retime",
+   "label": "blur-s200-b2-sb",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=2",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s200-b2-sb.disc-40x30.d8.4064b11d.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s50-b2-sb.disc-40x30.d8.8ceb369b",
+   "effect": "retime",
+   "label": "blur-s50-b2-sb",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=2",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b2-sb.disc-40x30.d8.8ceb369b.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b2-v360.disc-40x30.d8.9bf8981f",
+   "effect": "retime",
+   "label": "blur-s50-b2-v360",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=2",
+    "video_360=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b2-v360.disc-40x30.d8.9bf8981f.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b2-v1.disc-40x30.d8.9e41296e",
+   "effect": "retime",
+   "label": "blur-s50-b2-v1",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=2",
+    "vectors=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.blur-s50-b2-v1.disc-40x30.d8.9e41296e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s50-b10-alpha.alpha-32x24.d8.01ed1563",
+   "effect": "retime",
+   "label": "blur-s50-b10-alpha",
+   "params": [
+    "speed_percent=50",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.blur-s50-b10-alpha.alpha-32x24.d8.01ed1563.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s33.3333-b0.7.disc-40x30.d8.9efe7d67",
+   "effect": "retime",
+   "label": "blur-s33.3333-b0.7",
+   "params": [
+    "speed_percent=33.3333",
+    "blur_compensation=0.7"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s33.3333-b0.7.disc-40x30.d8.9efe7d67.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s33.3333-b3.3.disc-40x30.d8.6ba33db0",
+   "effect": "retime",
+   "label": "blur-s33.3333-b3.3",
+   "params": [
+    "speed_percent=33.3333",
+    "blur_compensation=3.3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s33.3333-b3.3.disc-40x30.d8.6ba33db0.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s70-b0.7.disc-40x30.d8.893c46e7",
+   "effect": "retime",
+   "label": "blur-s70-b0.7",
+   "params": [
+    "speed_percent=70",
+    "blur_compensation=0.7"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s70-b0.7.disc-40x30.d8.893c46e7.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s70-b3.3.disc-40x30.d8.b820c950",
+   "effect": "retime",
+   "label": "blur-s70-b3.3",
+   "params": [
+    "speed_percent=70",
+    "blur_compensation=3.3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s70-b3.3.disc-40x30.d8.b820c950.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s120-b0.7.disc-40x30.d8.955727f2",
+   "effect": "retime",
+   "label": "blur-s120-b0.7",
+   "params": [
+    "speed_percent=120",
+    "blur_compensation=0.7"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s120-b0.7.disc-40x30.d8.955727f2.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s120-b3.3.disc-40x30.d8.f598c682",
+   "effect": "retime",
+   "label": "blur-s120-b3.3",
+   "params": [
+    "speed_percent=120",
+    "blur_compensation=3.3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s120-b3.3.disc-40x30.d8.f598c682.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s175-b0.7.disc-40x30.d8.01570e21",
+   "effect": "retime",
+   "label": "blur-s175-b0.7",
+   "params": [
+    "speed_percent=175",
+    "blur_compensation=0.7"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s175-b0.7.disc-40x30.d8.01570e21.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s175-b3.3.disc-40x30.d8.edbc7fce",
+   "effect": "retime",
+   "label": "blur-s175-b3.3",
+   "params": [
+    "speed_percent=175",
+    "blur_compensation=3.3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s175-b3.3.disc-40x30.d8.edbc7fce.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s400-b10.shift-24x20.d16.6833e34e",
+   "effect": "retime",
+   "label": "blur-s400-b10",
+   "params": [
+    "speed_percent=400",
+    "blur_compensation=10"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s400-b10.shift-24x20.d16.6833e34e.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s400-b10.shift-24x20.d32.d1beefe0",
+   "effect": "retime",
+   "label": "blur-s400-b10",
+   "params": [
+    "speed_percent=400",
+    "blur_compensation=10"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s400-b10.shift-24x20.d32.d1beefe0.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s33.3333-b0.7.shift-24x20.d16.e76193fb",
+   "effect": "retime",
+   "label": "blur-s33.3333-b0.7",
+   "params": [
+    "speed_percent=33.3333",
+    "blur_compensation=0.7"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s33.3333-b0.7.shift-24x20.d16.e76193fb.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s33.3333-b3.3.shift-24x20.d16.3eb4cb45",
+   "effect": "retime",
+   "label": "blur-s33.3333-b3.3",
+   "params": [
+    "speed_percent=33.3333",
+    "blur_compensation=3.3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s33.3333-b3.3.shift-24x20.d16.3eb4cb45.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s70-b0.7.shift-24x20.d16.08f64f77",
+   "effect": "retime",
+   "label": "blur-s70-b0.7",
+   "params": [
+    "speed_percent=70",
+    "blur_compensation=0.7"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s70-b0.7.shift-24x20.d16.08f64f77.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s70-b3.3.shift-24x20.d16.7439dc6a",
+   "effect": "retime",
+   "label": "blur-s70-b3.3",
+   "params": [
+    "speed_percent=70",
+    "blur_compensation=3.3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s70-b3.3.shift-24x20.d16.7439dc6a.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s120-b0.7.shift-24x20.d16.234d12c4",
+   "effect": "retime",
+   "label": "blur-s120-b0.7",
+   "params": [
+    "speed_percent=120",
+    "blur_compensation=0.7"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s120-b0.7.shift-24x20.d16.234d12c4.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s120-b3.3.shift-24x20.d16.1a45c9f0",
+   "effect": "retime",
+   "label": "blur-s120-b3.3",
+   "params": [
+    "speed_percent=120",
+    "blur_compensation=3.3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f6.rgba64le",
+   "reference": "retime.blur-s120-b3.3.shift-24x20.d16.1a45c9f0.rgba64le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s33.3333-b0.7.shift-24x20.d32.be98017e",
+   "effect": "retime",
+   "label": "blur-s33.3333-b0.7",
+   "params": [
+    "speed_percent=33.3333",
+    "blur_compensation=0.7"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s33.3333-b0.7.shift-24x20.d32.be98017e.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s33.3333-b3.3.shift-24x20.d32.c4ba7a0b",
+   "effect": "retime",
+   "label": "blur-s33.3333-b3.3",
+   "params": [
+    "speed_percent=33.3333",
+    "blur_compensation=3.3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s33.3333-b3.3.shift-24x20.d32.c4ba7a0b.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s70-b0.7.shift-24x20.d32.11910474",
+   "effect": "retime",
+   "label": "blur-s70-b0.7",
+   "params": [
+    "speed_percent=70",
+    "blur_compensation=0.7"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s70-b0.7.shift-24x20.d32.11910474.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s70-b3.3.shift-24x20.d32.e49b7f46",
+   "effect": "retime",
+   "label": "blur-s70-b3.3",
+   "params": [
+    "speed_percent=70",
+    "blur_compensation=3.3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s70-b3.3.shift-24x20.d32.e49b7f46.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur"
+  },
+  {
+   "id": "retime.blur-s120-b0.7.shift-24x20.d32.b154237a",
+   "effect": "retime",
+   "label": "blur-s120-b0.7",
+   "params": [
+    "speed_percent=120",
+    "blur_compensation=0.7"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s120-b0.7.shift-24x20.d32.b154237a.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s120-b3.3.shift-24x20.d32.f2ff378f",
+   "effect": "retime",
+   "label": "blur-s120-b3.3",
+   "params": [
+    "speed_percent=120",
+    "blur_compensation=3.3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.blur-s120-b3.3.shift-24x20.d32.f2ff378f.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.blur-s300-b10.disc-40x30.d8.29e47281",
+   "effect": "retime",
+   "label": "blur-s300-b10",
+   "params": [
+    "speed_percent=300",
+    "blur_compensation=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.blur-s300-b10.disc-40x30.d8.29e47281.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "blur",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.sens-s0.disc-64x48.d8.c0d4dbea",
+   "effect": "retime",
+   "label": "sens-s0",
+   "params": [
+    "speed_percent=75",
+    "sensitivity=0"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s0.disc-64x48.d8.c0d4dbea.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s-0.disc-64x48.d8.e5e83718",
+   "effect": "retime",
+   "label": "sens-s-0",
+   "params": [
+    "speed_percent=33.3333",
+    "sensitivity=-0"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s-0.disc-64x48.d8.e5e83718.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s0.01.disc-64x48.d8.1841cf7a",
+   "effect": "retime",
+   "label": "sens-s0.01",
+   "params": [
+    "speed_percent=62.5",
+    "sensitivity=0.01"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s0.01.disc-64x48.d8.1841cf7a.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s1.disc-64x48.d8.ff7c0260",
+   "effect": "retime",
+   "label": "sens-s1",
+   "params": [
+    "speed_percent=40",
+    "sensitivity=1"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s1.disc-64x48.d8.ff7c0260.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s10.disc-64x48.d8.4fa50190",
+   "effect": "retime",
+   "label": "sens-s10",
+   "params": [
+    "speed_percent=50",
+    "sensitivity=10"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s10.disc-64x48.d8.4fa50190.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s25.disc-64x48.d8.9a67b1e0",
+   "effect": "retime",
+   "label": "sens-s25",
+   "params": [
+    "speed_percent=20",
+    "sensitivity=25"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s25.disc-64x48.d8.9a67b1e0.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s33.33333.disc-64x48.d8.e0dfe03d",
+   "effect": "retime",
+   "label": "sens-s33.33333",
+   "params": [
+    "speed_percent=50",
+    "sensitivity=33.33333"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s33.33333.disc-64x48.d8.e0dfe03d.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s50.disc-64x48.d8.968774f3",
+   "effect": "retime",
+   "label": "sens-s50",
+   "params": [
+    "speed_percent=25",
+    "sensitivity=50"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s50.disc-64x48.d8.968774f3.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s69.99.disc-64x48.d8.c95ca091",
+   "effect": "retime",
+   "label": "sens-s69.99",
+   "params": [
+    "speed_percent=75",
+    "sensitivity=69.99"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s69.99.disc-64x48.d8.c95ca091.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s70.disc-64x48.d8.4dd41109",
+   "effect": "retime",
+   "label": "sens-s70",
+   "params": [
+    "speed_percent=33.3333",
+    "sensitivity=70"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s70.disc-64x48.d8.4dd41109.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s99.99.disc-64x48.d8.32e0fe48",
+   "effect": "retime",
+   "label": "sens-s99.99",
+   "params": [
+    "speed_percent=62.5",
+    "sensitivity=99.99"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s99.99.disc-64x48.d8.32e0fe48.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s100.disc-64x48.d8.a53496bd",
+   "effect": "retime",
+   "label": "sens-s100",
+   "params": [
+    "speed_percent=40",
+    "sensitivity=100"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s100.disc-64x48.d8.a53496bd.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s0.disc-48x32.d16.a0a6642f",
+   "effect": "retime",
+   "label": "sens-s0",
+   "params": [
+    "speed_percent=50",
+    "sensitivity=0"
+   ],
+   "depth": 16,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d16.f4.rgba64le",
+   "reference": "retime.sens-s0.disc-48x32.d16.a0a6642f.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s25.disc-48x32.d16.512201bf",
+   "effect": "retime",
+   "label": "sens-s25",
+   "params": [
+    "speed_percent=20",
+    "sensitivity=25"
+   ],
+   "depth": 16,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d16.f4.rgba64le",
+   "reference": "retime.sens-s25.disc-48x32.d16.512201bf.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s100.disc-48x32.d16.dd83eeb8",
+   "effect": "retime",
+   "label": "sens-s100",
+   "params": [
+    "speed_percent=50",
+    "sensitivity=100"
+   ],
+   "depth": 16,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d16.f4.rgba64le",
+   "reference": "retime.sens-s100.disc-48x32.d16.dd83eeb8.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s0.disc-48x32.d32.629ebd5c",
+   "effect": "retime",
+   "label": "sens-s0",
+   "params": [
+    "speed_percent=25",
+    "sensitivity=0"
+   ],
+   "depth": 32,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d32.f4.gbrapf32le",
+   "reference": "retime.sens-s0.disc-48x32.d32.629ebd5c.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s25.disc-48x32.d32.0e39e2f7",
+   "effect": "retime",
+   "label": "sens-s25",
+   "params": [
+    "speed_percent=75",
+    "sensitivity=25"
+   ],
+   "depth": 32,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d32.f4.gbrapf32le",
+   "reference": "retime.sens-s25.disc-48x32.d32.0e39e2f7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s100.disc-48x32.d32.5dce9be4",
+   "effect": "retime",
+   "label": "sens-s100",
+   "params": [
+    "speed_percent=33.3333",
+    "sensitivity=100"
+   ],
+   "depth": 32,
+   "width": 48,
+   "height": 32,
+   "source": "disc",
+   "input": "inputs/disc-48x32.d32.f4.gbrapf32le",
+   "reference": "retime.sens-s100.disc-48x32.d32.5dce9be4.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s25-v3.disc-64x48.d8.9ae9264e",
+   "effect": "retime",
+   "label": "sens-s25-v3",
+   "params": [
+    "speed_percent=62.5",
+    "sensitivity=25",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s25-v3.disc-64x48.d8.9ae9264e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s25-v4.disc-64x48.d8.b1ac9218",
+   "effect": "retime",
+   "label": "sens-s25-v4",
+   "params": [
+    "speed_percent=40",
+    "sensitivity=25",
+    "vectors=4"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.sens-s25-v4.disc-64x48.d8.b1ac9218.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s10-noise.noise-32x24.d8.835342b2",
+   "effect": "retime",
+   "label": "sens-s10-noise",
+   "params": [
+    "speed_percent=50",
+    "sensitivity=10"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "noise",
+   "input": "inputs/noise-32x24.d8.f4.rgba",
+   "reference": "retime.sens-s10-noise.noise-32x24.d8.835342b2.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s0.3.disc-40x30.d8.9d52c8a8",
+   "effect": "retime",
+   "label": "sens-s0.3",
+   "params": [
+    "speed_percent=20",
+    "sensitivity=0.3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sens-s0.3.disc-40x30.d8.9d52c8a8.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s7.77.disc-40x30.d8.0c322701",
+   "effect": "retime",
+   "label": "sens-s7.77",
+   "params": [
+    "speed_percent=50",
+    "sensitivity=7.77"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sens-s7.77.disc-40x30.d8.0c322701.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s15.5.disc-40x30.d8.dc9bcb27",
+   "effect": "retime",
+   "label": "sens-s15.5",
+   "params": [
+    "speed_percent=25",
+    "sensitivity=15.5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sens-s15.5.disc-40x30.d8.dc9bcb27.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s42.42.disc-40x30.d8.b3b8ca5d",
+   "effect": "retime",
+   "label": "sens-s42.42",
+   "params": [
+    "speed_percent=75",
+    "sensitivity=42.42"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sens-s42.42.disc-40x30.d8.b3b8ca5d.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s87.654.disc-40x30.d8.6b8ac411",
+   "effect": "retime",
+   "label": "sens-s87.654",
+   "params": [
+    "speed_percent=33.3333",
+    "sensitivity=87.654"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sens-s87.654.disc-40x30.d8.6b8ac411.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s0-v1.disc-40x30.d8.a35f5f38",
+   "effect": "retime",
+   "label": "sens-s0-v1",
+   "params": [
+    "speed_percent=62.5",
+    "sensitivity=0",
+    "vectors=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.sens-s0-v1.disc-40x30.d8.a35f5f38.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.sens-s100-spin.spin-48x32.d8.4a1613dc",
+   "effect": "retime",
+   "label": "sens-s100-spin",
+   "params": [
+    "speed_percent=40",
+    "sensitivity=100"
+   ],
+   "depth": 8,
+   "width": 48,
+   "height": 32,
+   "source": "spin",
+   "input": "inputs/spin-48x32.d8.f4.rgba",
+   "reference": "retime.sens-s100-spin.spin-48x32.d8.4a1613dc.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "sens"
+  },
+  {
+   "id": "retime.prep-p1.disc-40x30.d8.895db095",
+   "effect": "retime",
+   "label": "prep-p1",
+   "params": [
+    "speed_percent=50",
+    "prep=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p1.disc-40x30.d8.895db095.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2.disc-40x30.d8.edad712e",
+   "effect": "retime",
+   "label": "prep-p2",
+   "params": [
+    "speed_percent=20",
+    "prep=2"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p2.disc-40x30.d8.edad712e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3.disc-40x30.d8.b75e584e",
+   "effect": "retime",
+   "label": "prep-p3",
+   "params": [
+    "speed_percent=50",
+    "prep=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p3.disc-40x30.d8.b75e584e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2.shift-24x20.d16.1b0cbec9",
+   "effect": "retime",
+   "label": "prep-p2",
+   "params": [
+    "speed_percent=25",
+    "prep=2"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.prep-p2.shift-24x20.d16.1b0cbec9.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3.shift-24x20.d16.abcfe6db",
+   "effect": "retime",
+   "label": "prep-p3",
+   "params": [
+    "speed_percent=75",
+    "prep=3"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.prep-p3.shift-24x20.d16.abcfe6db.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2.shift-24x20.d32.e6691a42",
+   "effect": "retime",
+   "label": "prep-p2",
+   "params": [
+    "speed_percent=33.3333",
+    "prep=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.prep-p2.shift-24x20.d32.e6691a42.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3.shift-24x20.d32.dd755629",
+   "effect": "retime",
+   "label": "prep-p3",
+   "params": [
+    "speed_percent=62.5",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.prep-p3.shift-24x20.d32.dd755629.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2-noise.noise-32x24.d8.bb790e33",
+   "effect": "retime",
+   "label": "prep-p2-noise",
+   "params": [
+    "speed_percent=40",
+    "prep=2"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "noise",
+   "input": "inputs/noise-32x24.d8.f4.rgba",
+   "reference": "retime.prep-p2-noise.noise-32x24.d8.bb790e33.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2-s25.disc-40x30.d8.26f3b561",
+   "effect": "retime",
+   "label": "prep-p2-s25",
+   "params": [
+    "speed_percent=50",
+    "prep=2",
+    "sensitivity=25"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p2-s25.disc-40x30.d8.26f3b561.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2-alpha.alpha-32x24.d8.d5c25583",
+   "effect": "retime",
+   "label": "prep-p2-alpha",
+   "params": [
+    "speed_percent=20",
+    "prep=2"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.prep-p2-alpha.alpha-32x24.d8.d5c25583.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2-v360.disc-40x30.d8.f23fb817",
+   "effect": "retime",
+   "label": "prep-p2-v360",
+   "params": [
+    "speed_percent=50",
+    "prep=2",
+    "video_360=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p2-v360.disc-40x30.d8.f23fb817.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-noise.noise-32x24.d8.08cf9ad4",
+   "effect": "retime",
+   "label": "prep-p3-noise",
+   "params": [
+    "speed_percent=25",
+    "prep=3"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "noise",
+   "input": "inputs/noise-32x24.d8.f4.rgba",
+   "reference": "retime.prep-p3-noise.noise-32x24.d8.08cf9ad4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-s25.disc-40x30.d8.765dc610",
+   "effect": "retime",
+   "label": "prep-p3-s25",
+   "params": [
+    "speed_percent=75",
+    "prep=3",
+    "sensitivity=25"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p3-s25.disc-40x30.d8.765dc610.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-alpha.alpha-32x24.d8.f1590976",
+   "effect": "retime",
+   "label": "prep-p3-alpha",
+   "params": [
+    "speed_percent=33.3333",
+    "prep=3"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.prep-p3-alpha.alpha-32x24.d8.f1590976.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-v360.disc-40x30.d8.100e3e54",
+   "effect": "retime",
+   "label": "prep-p3-v360",
+   "params": [
+    "speed_percent=62.5",
+    "prep=3",
+    "video_360=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.prep-p3-v360.disc-40x30.d8.100e3e54.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-big.noise-96x72.d32.e70dcad4",
+   "effect": "retime",
+   "label": "prep-p3-big",
+   "params": [
+    "speed_percent=40",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 96,
+   "height": 72,
+   "source": "noise",
+   "input": "inputs/noise-96x72.d32.f4.gbrapf32le",
+   "reference": "retime.prep-p3-big.noise-96x72.d32.e70dcad4.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-big.noise-64x48.d16.6e4087de",
+   "effect": "retime",
+   "label": "prep-p3-big",
+   "params": [
+    "speed_percent=50",
+    "prep=3"
+   ],
+   "depth": 16,
+   "width": 64,
+   "height": 48,
+   "source": "noise",
+   "input": "inputs/noise-64x48.d16.f4.rgba64le",
+   "reference": "retime.prep-p3-big.noise-64x48.d16.6e4087de.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-big.disc-96x72.d32.130b8303",
+   "effect": "retime",
+   "label": "prep-p3-big",
+   "params": [
+    "speed_percent=20",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 96,
+   "height": 72,
+   "source": "disc",
+   "input": "inputs/disc-96x72.d32.f4.gbrapf32le",
+   "reference": "retime.prep-p3-big.disc-96x72.d32.130b8303.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p3-hdr.hdr-24x20.d32.71e1bd88",
+   "effect": "retime",
+   "label": "prep-p3-hdr",
+   "params": [
+    "speed_percent=50",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "hdr",
+   "input": "inputs/hdr-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.prep-p3-hdr.hdr-24x20.d32.71e1bd88.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.prep-p2-hdr.hdr-24x20.d32.71f3f9f7",
+   "effect": "retime",
+   "label": "prep-p2-hdr",
+   "params": [
+    "speed_percent=25",
+    "prep=2"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "hdr",
+   "input": "inputs/hdr-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.prep-p2-hdr.hdr-24x20.d32.71f3f9f7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "prep"
+  },
+  {
+   "id": "retime.speed-s75.disc-40x30.d8.57eb734e",
+   "effect": "retime",
+   "label": "speed-s75",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-s75.disc-40x30.d8.57eb734e.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-s33.3333.disc-40x30.d8.e31e31ca",
+   "effect": "retime",
+   "label": "speed-s33.3333",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-s33.3333.disc-40x30.d8.e31e31ca.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-s10.disc-40x30.d8.c92b8793",
+   "effect": "retime",
+   "label": "speed-s10",
+   "params": [
+    "speed_percent=10"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-s10.disc-40x30.d8.c92b8793.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-s150.disc-40x30.d8.fbf3837e",
+   "effect": "retime",
+   "label": "speed-s150",
+   "params": [
+    "speed_percent=150"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-s150.disc-40x30.d8.fbf3837e.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.speed-s200.disc-40x30.d8.cf172776",
+   "effect": "retime",
+   "label": "speed-s200",
+   "params": [
+    "speed_percent=200"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-s200.disc-40x30.d8.cf172776.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.speed-s-50.disc-40x30.d8.1dcb220c",
+   "effect": "retime",
+   "label": "speed-s-50",
+   "params": [
+    "speed_percent=-50"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-s-50.disc-40x30.d8.1dcb220c.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed",
+   "flags": [
+    "reads_before_start"
+   ]
+  },
+  {
+   "id": "retime.speed-s0.disc-40x30.d8.1e148560",
+   "effect": "retime",
+   "label": "speed-s0",
+   "params": [
+    "speed_percent=0"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.speed-s0.disc-40x30.d8.1e148560.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-s-0.disc-40x30.d8.725c4801",
+   "effect": "retime",
+   "label": "speed-s-0",
+   "params": [
+    "speed_percent=-0"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.speed-s-0.disc-40x30.d8.725c4801.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-ramp.disc-40x30.d8.72d373e8",
+   "effect": "retime",
+   "label": "speed-ramp",
+   "params": [
+    "speed_percent=100@0;40@5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-ramp.disc-40x30.d8.72d373e8.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed",
+   "stand_in": "keyframe_interpolation"
+  },
+  {
+   "id": "retime.speed-ramp-ease.disc-40x30.d8.a35ca086",
+   "effect": "retime",
+   "label": "speed-ramp-ease",
+   "params": [
+    "speed_percent=60@0e;30@5e"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f6.rgba",
+   "reference": "retime.speed-ramp-ease.disc-40x30.d8.a35ca086.rgba",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed",
+   "stand_in": "keyframe_interpolation"
+  },
+  {
+   "id": "retime.speed-ramp-d32.shift-24x20.d32.691164ad",
+   "effect": "retime",
+   "label": "speed-ramp-d32",
+   "params": [
+    "speed_percent=100@0;40@5"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f6.gbrapf32le",
+   "reference": "retime.speed-ramp-d32.shift-24x20.d32.691164ad.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "speed",
+   "stand_in": "keyframe_interpolation"
+  },
+  {
+   "id": "retime.speed-fps2997.shift-24x20.d16.b198a8c9",
+   "effect": "retime",
+   "label": "speed-fps2997",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 16,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d16.f4.rgba64le",
+   "reference": "retime.speed-fps2997.shift-24x20.d16.b198a8c9.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-fps2997.shift-24x20.d32.ba9e3c7b",
+   "effect": "retime",
+   "label": "speed-fps2997",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 20,
+   "source": "shift",
+   "input": "inputs/shift-24x20.d32.f4.gbrapf32le",
+   "reference": "retime.speed-fps2997.shift-24x20.d32.ba9e3c7b.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "30000/1001",
+   "group": "speed"
+  },
+  {
+   "id": "retime.speed-s50-fps60.disc-40x30.d8.31787c29",
+   "effect": "retime",
+   "label": "speed-s50-fps60",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.speed-s50-fps60.disc-40x30.d8.31787c29.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "60",
+   "group": "speed"
+  },
+  {
+   "id": "retime.alpha-adisc-sb0.adisc-32x24.d8.96cef6e6",
+   "effect": "retime",
+   "label": "alpha-adisc-sb0",
+   "params": [
+    "speed_percent=75",
+    "smart_blend=0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d8.f4.rgba",
+   "reference": "retime.alpha-adisc-sb0.adisc-32x24.d8.96cef6e6.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-ramp-sb0.alpha-32x24.d8.d0f9596a",
+   "effect": "retime",
+   "label": "alpha-ramp-sb0",
+   "params": [
+    "speed_percent=33.3333",
+    "smart_blend=0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.alpha-ramp-sb0.alpha-32x24.d8.d0f9596a.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-sb1.adisc-32x24.d8.257d4c40",
+   "effect": "retime",
+   "label": "alpha-adisc-sb1",
+   "params": [
+    "speed_percent=62.5",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d8.f4.rgba",
+   "reference": "retime.alpha-adisc-sb1.adisc-32x24.d8.257d4c40.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-ramp-sb1.alpha-32x24.d8.6add5de4",
+   "effect": "retime",
+   "label": "alpha-ramp-sb1",
+   "params": [
+    "speed_percent=40",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d8.f4.rgba",
+   "reference": "retime.alpha-ramp-sb1.alpha-32x24.d8.6add5de4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-sb0.adisc-32x24.d16.5e300fab",
+   "effect": "retime",
+   "label": "alpha-adisc-sb0",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=0"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d16.f4.rgba64le",
+   "reference": "retime.alpha-adisc-sb0.adisc-32x24.d16.5e300fab.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-ramp-sb0.alpha-32x24.d16.768ad539",
+   "effect": "retime",
+   "label": "alpha-ramp-sb0",
+   "params": [
+    "speed_percent=20",
+    "smart_blend=0"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d16.f4.rgba64le",
+   "reference": "retime.alpha-ramp-sb0.alpha-32x24.d16.768ad539.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-sb1.adisc-32x24.d16.6df5b5c0",
+   "effect": "retime",
+   "label": "alpha-adisc-sb1",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d16.f4.rgba64le",
+   "reference": "retime.alpha-adisc-sb1.adisc-32x24.d16.6df5b5c0.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-ramp-sb1.alpha-32x24.d16.0325ee88",
+   "effect": "retime",
+   "label": "alpha-ramp-sb1",
+   "params": [
+    "speed_percent=25",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d16.f4.rgba64le",
+   "reference": "retime.alpha-ramp-sb1.alpha-32x24.d16.0325ee88.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-sb0.adisc-32x24.d32.7f59b477",
+   "effect": "retime",
+   "label": "alpha-adisc-sb0",
+   "params": [
+    "speed_percent=75",
+    "smart_blend=0"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.alpha-adisc-sb0.adisc-32x24.d32.7f59b477.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-ramp-sb0.alpha-32x24.d32.88394193",
+   "effect": "retime",
+   "label": "alpha-ramp-sb0",
+   "params": [
+    "speed_percent=33.3333",
+    "smart_blend=0"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.alpha-ramp-sb0.alpha-32x24.d32.88394193.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-sb1.adisc-32x24.d32.244543e0",
+   "effect": "retime",
+   "label": "alpha-adisc-sb1",
+   "params": [
+    "speed_percent=62.5",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.alpha-adisc-sb1.adisc-32x24.d32.244543e0.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-ramp-sb1.alpha-32x24.d32.4576cd89",
+   "effect": "retime",
+   "label": "alpha-ramp-sb1",
+   "params": [
+    "speed_percent=40",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "alpha",
+   "input": "inputs/alpha-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.alpha-ramp-sb1.alpha-32x24.d32.4576cd89.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-v3-i3.adisc-32x24.d8.da7a8e79",
+   "effect": "retime",
+   "label": "alpha-adisc-v3-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=3",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d8.f4.rgba",
+   "reference": "retime.alpha-adisc-v3-i3.adisc-32x24.d8.da7a8e79.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-v3-i3.adisc-32x24.d16.346583ea",
+   "effect": "retime",
+   "label": "alpha-adisc-v3-i3",
+   "params": [
+    "speed_percent=20",
+    "vectors=3",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d16.f4.rgba64le",
+   "reference": "retime.alpha-adisc-v3-i3.adisc-32x24.d16.346583ea.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.alpha-adisc-v3-i3.adisc-32x24.d32.edd8f4b5",
+   "effect": "retime",
+   "label": "alpha-adisc-v3-i3",
+   "params": [
+    "speed_percent=50",
+    "vectors=3",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "adisc",
+   "input": "inputs/adisc-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.alpha-adisc-v3-i3.adisc-32x24.d32.edd8f4b5.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "alpha"
+  },
+  {
+   "id": "retime.motion-v3.static-40x30.d8.7adf87de",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=25",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "static",
+   "input": "inputs/static-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.static-40x30.d8.7adf87de.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.static-40x30.d8.6cedb97c",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=75",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "static",
+   "input": "inputs/static-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.static-40x30.d8.6cedb97c.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.flat-40x30.d8.e4b359ed",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "flat",
+   "input": "inputs/flat-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.flat-40x30.d8.e4b359ed.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.flat-40x30.d8.c35f469e",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "flat",
+   "input": "inputs/flat-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.flat-40x30.d8.c35f469e.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.subpix-40x30.d8.b3c35741",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=40",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "subpix",
+   "input": "inputs/subpix-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.subpix-40x30.d8.b3c35741.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.subpix-40x30.d8.9a0b04a0",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=50",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "subpix",
+   "input": "inputs/subpix-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.subpix-40x30.d8.9a0b04a0.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.shift-40x30.d8.955567ce",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=20",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "shift",
+   "input": "inputs/shift-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.shift-40x30.d8.955567ce.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.shift-40x30.d8.2d14687c",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=50",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "shift",
+   "input": "inputs/shift-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.shift-40x30.d8.2d14687c.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.bigshift-40x30.d8.2238ae44",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=25",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "bigshift",
+   "input": "inputs/bigshift-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.bigshift-40x30.d8.2238ae44.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.bigshift-40x30.d8.1c56c6af",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=75",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "bigshift",
+   "input": "inputs/bigshift-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.bigshift-40x30.d8.1c56c6af.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.noise-40x30.d8.e5e54998",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "noise",
+   "input": "inputs/noise-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.noise-40x30.d8.e5e54998.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.noise-40x30.d8.4db63a98",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "noise",
+   "input": "inputs/noise-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.noise-40x30.d8.4db63a98.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.spin-40x30.d8.e0931885",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=40",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "spin",
+   "input": "inputs/spin-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.spin-40x30.d8.e0931885.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.spin-40x30.d8.7e2920f7",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=50",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "spin",
+   "input": "inputs/spin-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.spin-40x30.d8.7e2920f7.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v3.zoom-40x30.d8.b95a9184",
+   "effect": "retime",
+   "label": "motion-v3",
+   "params": [
+    "speed_percent=20",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "zoom",
+   "input": "inputs/zoom-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v3.zoom-40x30.d8.b95a9184.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.zoom-40x30.d8.a919b9b1",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=50",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "zoom",
+   "input": "inputs/zoom-40x30.d8.f4.rgba",
+   "reference": "retime.motion-v5.zoom-40x30.d8.a919b9b1.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.spin-32x24.d16.7c40de61",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "spin",
+   "input": "inputs/spin-32x24.d16.f4.rgba64le",
+   "reference": "retime.motion-v5.spin-32x24.d16.7c40de61.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.spin-32x24.d32.3ed42882",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "spin",
+   "input": "inputs/spin-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.motion-v5.spin-32x24.d32.3ed42882.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.zoom-32x24.d16.aeddc720",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "zoom",
+   "input": "inputs/zoom-32x24.d16.f4.rgba64le",
+   "reference": "retime.motion-v5.zoom-32x24.d16.aeddc720.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.zoom-32x24.d32.76311419",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "zoom",
+   "input": "inputs/zoom-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.motion-v5.zoom-32x24.d32.76311419.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.bigshift-32x24.d16.a15ba6a9",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "bigshift",
+   "input": "inputs/bigshift-32x24.d16.f4.rgba64le",
+   "reference": "retime.motion-v5.bigshift-32x24.d16.a15ba6a9.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-v5.bigshift-32x24.d32.eb102ea2",
+   "effect": "retime",
+   "label": "motion-v5",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "bigshift",
+   "input": "inputs/bigshift-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.motion-v5.bigshift-32x24.d32.eb102ea2.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-hdr.hdr-32x24.d32.fba5fc46",
+   "effect": "retime",
+   "label": "motion-hdr",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "hdr",
+   "input": "inputs/hdr-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.motion-hdr.hdr-32x24.d32.fba5fc46.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.motion-hdr-sb.hdr-32x24.d32.badcb41d",
+   "effect": "retime",
+   "label": "motion-hdr-sb",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "hdr",
+   "input": "inputs/hdr-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.motion-hdr-sb.hdr-32x24.d32.badcb41d.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "motion"
+  },
+  {
+   "id": "retime.spec-zero.spec-zero-16x16.d32.58f4f6ac",
+   "effect": "retime",
+   "label": "spec-zero",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-zero",
+   "input": "inputs/spec-zero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-zero.spec-zero-16x16.d32.58f4f6ac.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-zero-sb.spec-zero-16x16.d32.672c1281",
+   "effect": "retime",
+   "label": "spec-zero-sb",
+   "params": [
+    "speed_percent=75",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-zero",
+   "input": "inputs/spec-zero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-zero-sb.spec-zero-16x16.d32.672c1281.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-negzero.spec-negzero-16x16.d32.626152c7",
+   "effect": "retime",
+   "label": "spec-negzero",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-negzero",
+   "input": "inputs/spec-negzero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-negzero.spec-negzero-16x16.d32.626152c7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-negzero-sb.spec-negzero-16x16.d32.4632834e",
+   "effect": "retime",
+   "label": "spec-negzero-sb",
+   "params": [
+    "speed_percent=62.5",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-negzero",
+   "input": "inputs/spec-negzero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-negzero-sb.spec-negzero-16x16.d32.4632834e.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-mindenorm.spec-mindenorm-16x16.d32.632b6421",
+   "effect": "retime",
+   "label": "spec-mindenorm",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-mindenorm",
+   "input": "inputs/spec-mindenorm-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-mindenorm.spec-mindenorm-16x16.d32.632b6421.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-mindenorm-sb.spec-mindenorm-16x16.d32.adb28430",
+   "effect": "retime",
+   "label": "spec-mindenorm-sb",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-mindenorm",
+   "input": "inputs/spec-mindenorm-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-mindenorm-sb.spec-mindenorm-16x16.d32.adb28430.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-maxdenorm.spec-maxdenorm-16x16.d32.8c9e2923",
+   "effect": "retime",
+   "label": "spec-maxdenorm",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-maxdenorm",
+   "input": "inputs/spec-maxdenorm-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-maxdenorm.spec-maxdenorm-16x16.d32.8c9e2923.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-maxdenorm-sb.spec-maxdenorm-16x16.d32.3176a4cf",
+   "effect": "retime",
+   "label": "spec-maxdenorm-sb",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-maxdenorm",
+   "input": "inputs/spec-maxdenorm-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-maxdenorm-sb.spec-maxdenorm-16x16.d32.3176a4cf.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-fltmin.spec-fltmin-16x16.d32.c924a8ab",
+   "effect": "retime",
+   "label": "spec-fltmin",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-fltmin",
+   "input": "inputs/spec-fltmin-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-fltmin.spec-fltmin-16x16.d32.c924a8ab.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-fltmin-sb.spec-fltmin-16x16.d32.6fb9a79b",
+   "effect": "retime",
+   "label": "spec-fltmin-sb",
+   "params": [
+    "speed_percent=75",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-fltmin",
+   "input": "inputs/spec-fltmin-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-fltmin-sb.spec-fltmin-16x16.d32.6fb9a79b.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-one.spec-one-16x16.d32.dc8977b5",
+   "effect": "retime",
+   "label": "spec-one",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-one",
+   "input": "inputs/spec-one-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-one.spec-one-16x16.d32.dc8977b5.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-one-sb.spec-one-16x16.d32.5b449b06",
+   "effect": "retime",
+   "label": "spec-one-sb",
+   "params": [
+    "speed_percent=62.5",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-one",
+   "input": "inputs/spec-one-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-one-sb.spec-one-16x16.d32.5b449b06.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-above1.spec-above1-16x16.d32.5304d5db",
+   "effect": "retime",
+   "label": "spec-above1",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-above1",
+   "input": "inputs/spec-above1-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-above1.spec-above1-16x16.d32.5304d5db.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-above1-sb.spec-above1-16x16.d32.69da2726",
+   "effect": "retime",
+   "label": "spec-above1-sb",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-above1",
+   "input": "inputs/spec-above1-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-above1-sb.spec-above1-16x16.d32.69da2726.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-fltmax.spec-fltmax-16x16.d32.b3970c4a",
+   "effect": "retime",
+   "label": "spec-fltmax",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-fltmax",
+   "input": "inputs/spec-fltmax-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-fltmax.spec-fltmax-16x16.d32.b3970c4a.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-fltmax-sb.spec-fltmax-16x16.d32.a572b1bb",
+   "effect": "retime",
+   "label": "spec-fltmax-sb",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-fltmax",
+   "input": "inputs/spec-fltmax-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-fltmax-sb.spec-fltmax-16x16.d32.a572b1bb.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-posinf.spec-posinf-16x16.d32.d9094698",
+   "effect": "retime",
+   "label": "spec-posinf",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-posinf",
+   "input": "inputs/spec-posinf-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-posinf.spec-posinf-16x16.d32.d9094698.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-posinf-sb.spec-posinf-16x16.d32.0aeebd95",
+   "effect": "retime",
+   "label": "spec-posinf-sb",
+   "params": [
+    "speed_percent=75",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-posinf",
+   "input": "inputs/spec-posinf-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-posinf-sb.spec-posinf-16x16.d32.0aeebd95.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-neginf.spec-neginf-16x16.d32.6d990016",
+   "effect": "retime",
+   "label": "spec-neginf",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-neginf",
+   "input": "inputs/spec-neginf-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-neginf.spec-neginf-16x16.d32.6d990016.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-neginf-sb.spec-neginf-16x16.d32.85a02d57",
+   "effect": "retime",
+   "label": "spec-neginf-sb",
+   "params": [
+    "speed_percent=62.5",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-neginf",
+   "input": "inputs/spec-neginf-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-neginf-sb.spec-neginf-16x16.d32.85a02d57.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-nan.spec-nan-16x16.d32.08c65353",
+   "effect": "retime",
+   "label": "spec-nan",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-nan",
+   "input": "inputs/spec-nan-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-nan.spec-nan-16x16.d32.08c65353.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-nan-sb.spec-nan-16x16.d32.5afe2085",
+   "effect": "retime",
+   "label": "spec-nan-sb",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-nan",
+   "input": "inputs/spec-nan-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-nan-sb.spec-nan-16x16.d32.5afe2085.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-zero.specA-zero-16x16.d32.455533f3",
+   "effect": "retime",
+   "label": "spec-alpha-zero",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-zero",
+   "input": "inputs/specA-zero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-zero.specA-zero-16x16.d32.455533f3.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-negzero.specA-negzero-16x16.d32.fe439b9e",
+   "effect": "retime",
+   "label": "spec-alpha-negzero",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-negzero",
+   "input": "inputs/specA-negzero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-negzero.specA-negzero-16x16.d32.fe439b9e.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-mindenorm.specA-mindenorm-16x16.d32.eb24d037",
+   "effect": "retime",
+   "label": "spec-alpha-mindenorm",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-mindenorm",
+   "input": "inputs/specA-mindenorm-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-mindenorm.specA-mindenorm-16x16.d32.eb24d037.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-one.specA-one-16x16.d32.1829d2c7",
+   "effect": "retime",
+   "label": "spec-alpha-one",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-one",
+   "input": "inputs/specA-one-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-one.specA-one-16x16.d32.1829d2c7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-above1.specA-above1-16x16.d32.f1a9017c",
+   "effect": "retime",
+   "label": "spec-alpha-above1",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-above1",
+   "input": "inputs/specA-above1-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-above1.specA-above1-16x16.d32.f1a9017c.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-fltmax.specA-fltmax-16x16.d32.a2caebca",
+   "effect": "retime",
+   "label": "spec-alpha-fltmax",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-fltmax",
+   "input": "inputs/specA-fltmax-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-fltmax.specA-fltmax-16x16.d32.a2caebca.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-posinf.specA-posinf-16x16.d32.c2b79e09",
+   "effect": "retime",
+   "label": "spec-alpha-posinf",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-posinf",
+   "input": "inputs/specA-posinf-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-posinf.specA-posinf-16x16.d32.c2b79e09.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-alpha-nan.specA-nan-16x16.d32.e661f31d",
+   "effect": "retime",
+   "label": "spec-alpha-nan",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "specA-nan",
+   "input": "inputs/specA-nan-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-alpha-nan.specA-nan-16x16.d32.e661f31d.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-all-i1-sb0.spec-all-24x24.d32.206f4a82",
+   "effect": "retime",
+   "label": "spec-all-i1-sb0",
+   "params": [
+    "speed_percent=20",
+    "frame_interp=1",
+    "smart_blend=0"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 24,
+   "source": "spec-all",
+   "input": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "reference": "retime.spec-all-i1-sb0.spec-all-24x24.d32.206f4a82.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-all-i1-sb1.spec-all-24x24.d32.c78769a6",
+   "effect": "retime",
+   "label": "spec-all-i1-sb1",
+   "params": [
+    "speed_percent=50",
+    "frame_interp=1",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 24,
+   "source": "spec-all",
+   "input": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "reference": "retime.spec-all-i1-sb1.spec-all-24x24.d32.c78769a6.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-all-i2-sb0.spec-all-24x24.d32.c434808c",
+   "effect": "retime",
+   "label": "spec-all-i2-sb0",
+   "params": [
+    "speed_percent=25",
+    "frame_interp=2",
+    "smart_blend=0"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 24,
+   "source": "spec-all",
+   "input": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "reference": "retime.spec-all-i2-sb0.spec-all-24x24.d32.c434808c.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-all-i2-sb1.spec-all-24x24.d32.a7383b8f",
+   "effect": "retime",
+   "label": "spec-all-i2-sb1",
+   "params": [
+    "speed_percent=75",
+    "frame_interp=2",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 24,
+   "source": "spec-all",
+   "input": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "reference": "retime.spec-all-i2-sb1.spec-all-24x24.d32.a7383b8f.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-all-i3-sb0.spec-all-24x24.d32.ff54dfb4",
+   "effect": "retime",
+   "label": "spec-all-i3-sb0",
+   "params": [
+    "speed_percent=33.3333",
+    "frame_interp=3",
+    "smart_blend=0"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 24,
+   "source": "spec-all",
+   "input": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "reference": "retime.spec-all-i3-sb0.spec-all-24x24.d32.ff54dfb4.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-all-i3-sb1.spec-all-24x24.d32.20e9a0b7",
+   "effect": "retime",
+   "label": "spec-all-i3-sb1",
+   "params": [
+    "speed_percent=62.5",
+    "frame_interp=3",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 24,
+   "height": 24,
+   "source": "spec-all",
+   "input": "inputs/spec-all-24x24.d32.f4.gbrapf32le",
+   "reference": "retime.spec-all-i3-sb1.spec-all-24x24.d32.20e9a0b7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-nan-blur.spec-nan-16x16.d32.6170fcda",
+   "effect": "retime",
+   "label": "spec-nan-blur",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=5"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-nan",
+   "input": "inputs/spec-nan-16x16.d32.f6.gbrapf32le",
+   "reference": "retime.spec-nan-blur.spec-nan-16x16.d32.6170fcda.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "spec",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.spec-nan-prep3.spec-nan-16x16.d32.fee257a2",
+   "effect": "retime",
+   "label": "spec-nan-prep3",
+   "params": [
+    "speed_percent=40",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-nan",
+   "input": "inputs/spec-nan-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-nan-prep3.spec-nan-16x16.d32.fee257a2.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-posinf-blur.spec-posinf-16x16.d32.9bf0023b",
+   "effect": "retime",
+   "label": "spec-posinf-blur",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=5"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-posinf",
+   "input": "inputs/spec-posinf-16x16.d32.f6.gbrapf32le",
+   "reference": "retime.spec-posinf-blur.spec-posinf-16x16.d32.9bf0023b.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "spec",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.spec-posinf-prep3.spec-posinf-16x16.d32.619a62f2",
+   "effect": "retime",
+   "label": "spec-posinf-prep3",
+   "params": [
+    "speed_percent=50",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-posinf",
+   "input": "inputs/spec-posinf-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-posinf-prep3.spec-posinf-16x16.d32.619a62f2.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-fltmax-blur.spec-fltmax-16x16.d32.9c7f7f48",
+   "effect": "retime",
+   "label": "spec-fltmax-blur",
+   "params": [
+    "speed_percent=200",
+    "blur_compensation=5"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-fltmax",
+   "input": "inputs/spec-fltmax-16x16.d32.f6.gbrapf32le",
+   "reference": "retime.spec-fltmax-blur.spec-fltmax-16x16.d32.9c7f7f48.gbrapf32le",
+   "kind": "temporal",
+   "frames": 6,
+   "fps": "24",
+   "group": "spec",
+   "flags": [
+    "reads_past_end"
+   ]
+  },
+  {
+   "id": "retime.spec-fltmax-prep3.spec-fltmax-16x16.d32.444ec4bd",
+   "effect": "retime",
+   "label": "spec-fltmax-prep3",
+   "params": [
+    "speed_percent=20",
+    "prep=3"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-fltmax",
+   "input": "inputs/spec-fltmax-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-fltmax-prep3.spec-fltmax-16x16.d32.444ec4bd.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-nan-v360.spec-nan-16x16.d32.4091e754",
+   "effect": "retime",
+   "label": "spec-nan-v360",
+   "params": [
+    "speed_percent=50",
+    "video_360=1",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-nan",
+   "input": "inputs/spec-nan-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-nan-v360.spec-nan-16x16.d32.4091e754.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-negzero-v360.spec-negzero-16x16.d32.c930cfc7",
+   "effect": "retime",
+   "label": "spec-negzero-v360",
+   "params": [
+    "speed_percent=25",
+    "video_360=1",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 16,
+   "source": "spec-negzero",
+   "input": "inputs/spec-negzero-16x16.d32.f4.gbrapf32le",
+   "reference": "retime.spec-negzero-v360.spec-negzero-16x16.d32.c930cfc7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-lo-sb0.ext-lo-16x16.d8.8d82b005",
+   "effect": "retime",
+   "label": "spec-ext-lo-sb0",
+   "params": [
+    "speed_percent=75",
+    "smart_blend=0"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 16,
+   "source": "ext-lo",
+   "input": "inputs/ext-lo-16x16.d8.f4.rgba",
+   "reference": "retime.spec-ext-lo-sb0.ext-lo-16x16.d8.8d82b005.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-lo-sb1.ext-lo-16x16.d8.e37d10c9",
+   "effect": "retime",
+   "label": "spec-ext-lo-sb1",
+   "params": [
+    "speed_percent=33.3333",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 16,
+   "source": "ext-lo",
+   "input": "inputs/ext-lo-16x16.d8.f4.rgba",
+   "reference": "retime.spec-ext-lo-sb1.ext-lo-16x16.d8.e37d10c9.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-lo-sb0.ext-lo-16x16.d16.b8676135",
+   "effect": "retime",
+   "label": "spec-ext-lo-sb0",
+   "params": [
+    "speed_percent=62.5",
+    "smart_blend=0"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 16,
+   "source": "ext-lo",
+   "input": "inputs/ext-lo-16x16.d16.f4.rgba64le",
+   "reference": "retime.spec-ext-lo-sb0.ext-lo-16x16.d16.b8676135.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-lo-sb1.ext-lo-16x16.d16.1f7c54f9",
+   "effect": "retime",
+   "label": "spec-ext-lo-sb1",
+   "params": [
+    "speed_percent=40",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 16,
+   "source": "ext-lo",
+   "input": "inputs/ext-lo-16x16.d16.f4.rgba64le",
+   "reference": "retime.spec-ext-lo-sb1.ext-lo-16x16.d16.1f7c54f9.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-hi-sb0.ext-hi-16x16.d8.95aadb13",
+   "effect": "retime",
+   "label": "spec-ext-hi-sb0",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=0"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 16,
+   "source": "ext-hi",
+   "input": "inputs/ext-hi-16x16.d8.f4.rgba",
+   "reference": "retime.spec-ext-hi-sb0.ext-hi-16x16.d8.95aadb13.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-hi-sb1.ext-hi-16x16.d8.0f83f94f",
+   "effect": "retime",
+   "label": "spec-ext-hi-sb1",
+   "params": [
+    "speed_percent=20",
+    "smart_blend=1"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 16,
+   "source": "ext-hi",
+   "input": "inputs/ext-hi-16x16.d8.f4.rgba",
+   "reference": "retime.spec-ext-hi-sb1.ext-hi-16x16.d8.0f83f94f.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-hi-sb0.ext-hi-16x16.d16.709636b3",
+   "effect": "retime",
+   "label": "spec-ext-hi-sb0",
+   "params": [
+    "speed_percent=50",
+    "smart_blend=0"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 16,
+   "source": "ext-hi",
+   "input": "inputs/ext-hi-16x16.d16.f4.rgba64le",
+   "reference": "retime.spec-ext-hi-sb0.ext-hi-16x16.d16.709636b3.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  },
+  {
+   "id": "retime.spec-ext-hi-sb1.ext-hi-16x16.d16.6d210203",
+   "effect": "retime",
+   "label": "spec-ext-hi-sb1",
+   "params": [
+    "speed_percent=25",
+    "smart_blend=1"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 16,
+   "source": "ext-hi",
+   "input": "inputs/ext-hi-16x16.d16.f4.rgba64le",
+   "reference": "retime.spec-ext-hi-sb1.ext-hi-16x16.d16.6d210203.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "spec"
+  }
+ ]
+}

@@ -1,0 +1,4438 @@
+{
+ "module": "fgbg-layers",
+ "measured_at": "2026-10-31",
+ "ordered": false,
+ "plugin_records": "~/twixtor-parity/fix-pro/runs/g1layers/rec",
+ "rewrite_records": "~/twixtor-parity/re/f7-close-pro/rw/layers-m14",
+ "compared": 359,
+ "matching": 359,
+ "mismatching": [],
+ "skipped": [
+  {
+   "id": "retime-fgbg.edge-all12.box3-32x24.d16.664ffcc3",
+   "reason": "plugin record incomplete (case status error, 0 frames)"
+  },
+  {
+   "id": "retime-fgbg.edge4.box1-32x24.d32.d1c8f48c",
+   "reason": "plugin record incomplete (case status error, 0 frames)"
+  },
+  {
+   "id": "retime-fgbg.edge4.box1-32x24.d8.d59a3f0f",
+   "reason": "plugin record incomplete (case status error, 0 frames)"
+  },
+  {
+   "id": "retime-fgbg.edge8.box1-32x24.d32.6b6a9426",
+   "reason": "plugin record incomplete (case status error, 0 frames)"
+  },
+  {
+   "id": "retime-fgbg.edge8.box1-32x24.d8.e1ca4338",
+   "reason": "plugin record incomplete (case status error, 0 frames)"
+  },
+  {
+   "id": "retime-fgbg.pt-tiny.box1-3x3.d8.764d4b6c",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n1-w1.box1-2x3.d32.a162c242",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n1-w2.box1-1x5.d16.12e1d483",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n1-w2.box1-5x1.d8.bc07258e",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n1-w3.box1-2x2.d16.6439bbd1",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n1-w3.box1-2x3.d8.b944a37c",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n1-w4.box1-5x1.d32.fd6b1067",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w1.box2-1x1.d8.e55ad6e5",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w1.box2-3x3.d32.ab10ecbd",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w2.box2-3x2.d32.4de773b5",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w3.box2-1x1.d32.9f6d185a",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w3.box2-3x3.d8.1853d35f",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w3.box2-5x1.d16.4a294f1b",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w4.box2-2x3.d16.2992e55a",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n2-w4.box2-3x2.d8.4eee0156",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w1.box3-1x5.d8.ed56215a",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w1.box3-3x2.d16.38695831",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w2.box3-1x1.d16.3c565e8a",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w2.box3-2x2.d8.4fc6df20",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w3.box3-1x5.d32.d2c05e5a",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w4.box3-2x2.d32.d489fb0b",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  },
+  {
+   "id": "retime-fgbg.size-n3-w4.box3-3x3.d16.62e16375",
+   "reason": "plugin record incomplete (case status None, 2 frames)"
+  }
+ ],
+ "only_plugin": [],
+ "only_rewrite": [],
+ "definition": "per output frame, the sets of layer reads (layer, clip frame index or none outside the clip, time in seconds): plugin side the SMART_RENDER pixel checkouts resolved through their pre-render checkout (pre-render checkouts when a record has no pixel checkout), rewrite side the VFX_CALL_RECORD read lines; layers the case does not set are left out (the harness answers them with size 0, they have no pixels)",
+ "limits": [
+  "parameter sample times are not recorded on the rewrite side: plugin param reads are counted, not compared",
+  "a classic (non smart) render path has its layers handed over in params[]; those reads are added as implicit reads at each frame time"
+ ],
+ "command": "python3 phase_b.py calls --plugin-records ~/twixtor-parity/fix-pro/runs/g1layers/rec --rewrite-records ~/twixtor-parity/re/f7-close-pro/rw/layers-m14",
+ "cases": [
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.allsens100.box3f-32x24.d16.da8a150f",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.allsens35-d32.box3f-32x24.d32.05582f96",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.alpha-n2-w1.box2a-24x16.d8.5770d595",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.alpha-n2-w3.box2a-24x16.d8.1389fa79",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.alpha-src-d16.box1a-16x12.d16.701bdabf",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.alpha-src.box1a-16x12.d8.96e71169",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.bigmotion.box2f-48x32.d8.c5076af9",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur-neg0.box2-24x16.d8.83955489",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur0.01-d1.box2-24x16.d8.8a894e4e",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur0.01-d3.box2-24x16.d8.e3b0d8e4",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur0.01-d6.box2-24x16.d8.85db7c61",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur1-d1.box2-24x16.d8.687bd49f",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur1-d3.box2-24x16.d8.aa920040",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur1-d6.box2-24x16.d8.0810fb46",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur10-d1.box2-24x16.d8.6db051f5",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur10-d3.box2-24x16.d8.2cef04e2",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur10-d6.box2-24x16.d8.a505e44d",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur2-d32.box2-24x16.d32.1d525c2d",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur2.5-d1.box2-24x16.d8.026d7dea",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur2.5-d3.box2-24x16.d8.3e79b4e2",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur2.5-d6.box2-24x16.d8.e3de6341",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur3-w1.box2-24x16.d8.28b7a82b",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur3-w2.box2-24x16.d8.cfa6f1f4",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.blur3-w4.box2-24x16.d8.7ededbf8",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan1-alpha.box1-24x16.d8.0d513d6d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan1-chan.box1-24x16.d8.d6d73fa3",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan2-alpha.box1-24x16.d8.4cce1ae7",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan2-chan.box1-24x16.d16.e2c72ea5",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan2-chan.box1-24x16.d8.cf4f1785",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan3-alpha.box1-24x16.d8.52bb808f",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan3-chan.box1-24x16.d32.aaf78cd9",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan3-chan.box1-24x16.d8.a92de7b6",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan4-alpha.box1-24x16.d8.b317dff7",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan4-chan.box1-24x16.d16.1ed6ac92",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan4-chan.box1-24x16.d32.de9e3f16",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.chan4-chan.box1-24x16.d8.9f68dc24",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg1-n2.box2-32x24.d8.908307e8",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg2-n0.box1-32x24.d8.1c587374",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg2-n2.box2-32x24.d16.65d71ac1",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg2-n2.box2-32x24.d32.b1f7d1e6",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg2-n2.box2-32x24.d8.6f0e7e21",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg2-n3.box3-32x24.d8.11feb1cc",
+   "plugin_param_reads": 126,
+   "plugin_notes": {
+    "unset_layer_checkouts": 12,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg3-n0.box1-32x24.d8.77cd3e3a",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg3-n2.box2-32x24.d8.918d0612",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg4-n2.box2-32x24.d16.fbc6b190",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg4-n2.box2-32x24.d32.d018122e",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg4-n2.box2-32x24.d8.e6b66c97",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg5-n2.box2-32x24.d8.a652258f",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg5-n3.box3-32x24.d8.e822d5df",
+   "plugin_param_reads": 126,
+   "plugin_notes": {
+    "unset_layer_checkouts": 12,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg6-n0.box1-32x24.d8.8f631508",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg6-n2.box2-32x24.d16.dd9e6296",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg6-n2.box2-32x24.d32.6d54b178",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.dg6-n2.box2-32x24.d8.28d3528b",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disc-1x1.box1-1x1.d8.cf0daf4a",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disc-subpix-d32.specall-16x12.d32.20fa15c8",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disc-subpix.flat-16x12.d8.fec3b664",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disc-tiny.box1-2x2.d8.91605ca1",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp1-n1.box1-24x16.d8.eef066d5",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp1-n2.box2-24x16.d8.a6033c72",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp1-n3.box3-24x16.d8.b689706a",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp1-no-draw.box1-32x24.d8.39a25a0c",
+   "plugin_param_reads": 216,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp2-n1.box1-24x16.d8.09d5e94f",
+   "plugin_param_reads": 78,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp2-n2.box2-24x16.d8.e1fbbfbd",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp2-n3.box3-24x16.d8.767dfd84",
+   "plugin_param_reads": 126,
+   "plugin_notes": {
+    "unset_layer_checkouts": 12,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp3-n1.box1-24x16.d8.42bc1c1b",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp3-n2.box2-24x16.d16.2d911911",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp3-n2.box2-24x16.d8.b2687b75",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp3-n3-w2.box3-24x16.d8.3aa60716",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp3-n3.box3-24x16.d32.d994c591",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp3-n3.box3-24x16.d8.201e97e9",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp4-n1.box1-24x16.d8.3a9a6955",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp4-n2.box2-24x16.d16.d7a691e0",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp4-n2.box2-24x16.d8.19ef0698",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp4-n3.box3-24x16.d8.ea8166d7",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp5-n1.box1-24x16.d8.fbbe6ed5",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp5-n2.box2-24x16.d8.4a468aff",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp5-n3.box3-24x16.d32.c0f4a9d6",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp5-n3.box3-24x16.d8.fc1a8011",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp6-n1.box1-24x16.d8.9b0ea5fc",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp6-n2.box2-24x16.d16.f29b5d31",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp6-n2.box2-24x16.d8.746b8d03",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp6-n3-w4.box3-24x16.d8.0d3f2d1b",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.disp6-n3.box3-24x16.d8.c51b3704",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.edge-n2-d16.edge-16x12.d16.c34bfebf",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.edge-n2-d8.edge-16x12.d8.53b90c87",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.edge0.box1-32x24.d32.26a025a3",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.edge0.box1-32x24.d8.0d6fe00e",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-d1.box2-24x16.d8.a6fa5ac1",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-d3-d16.box2-24x16.d16.367a015f",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-d3.box2-24x16.d8.cfc12a8d",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-d4.box2-24x16.d8.f74b500c",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-d6-d32.box2-24x16.d32.9775f0f8",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-d6.box2-24x16.d8.1ec9dacc",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.exact-soft.box2-24x16.d8.1a92c0ff",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg1fg2-d32.box3-24x16.d32.d3c54a25",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg1fg3-d6.box3-24x16.d8.07f65770",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 84,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg1fg3.box3-24x16.d8.dde39766",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 60,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg1sens-0.box2f-32x24.d8.912261ea",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg1sens0.box2f-32x24.d8.9ed83130",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg1sens100.box2f-32x24.d8.280a26dc",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg2fg3.box3-24x16.d8.88620e65",
+   "plugin_param_reads": 215,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg2only.box3-24x16.d8.b63c82ce",
+   "plugin_param_reads": 215,
+   "plugin_notes": {
+    "unset_layer_checkouts": 60,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg2sens0.box3f-32x24.d8.56fb8876",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg2sens100.box3f-32x24.d8.d524eb9b",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg3only.box3-24x16.d8.97ef02eb",
+   "plugin_param_reads": 215,
+   "plugin_notes": {
+    "unset_layer_checkouts": 60,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg3sens0.box3f-32x24.d8.bcab4c98",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.fg3sens100.box3f-32x24.d8.06e3cbaa",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.flat-n1.flat-24x16.d8.fbae843a",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp1-n1.box1-24x16.d8.1e10dd7d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp1-w1.box2-24x16.d8.2f33a5b0",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp1-w2.box2-24x16.d8.57236bcf",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp1-w3.box2-24x16.d32.5b1a5aff",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp1-w3.box2-24x16.d8.cc72b14b",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp1-w4.box2-24x16.d8.33316164",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp2-w1.box2-24x16.d8.12c290a0",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp2-w2.box2-24x16.d8.e05b15df",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp2-w3.box2-24x16.d8.6fe215e6",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp2-w4.box2-24x16.d8.f005e2e6",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp3-w1.box2-24x16.d8.282b7ec9",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp3-w2.box2-24x16.d8.f507523f",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp3-w3.box2-24x16.d32.f405317d",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp3-w3.box2-24x16.d8.8312855b",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.interp3-w4.box2-24x16.d8.fcfe75c6",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.keyed-pos-n2.box2-32x24.d8.02ca9942",
+   "plugin_param_reads": 102,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.keyed-pos.box1-32x24.d8.26be5967",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-denall-n2-bg.box2-16x12.d32.7f56e9c7",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-denall.box1-16x12.d32.254b9d67",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-empty-all3.box3-24x16.d8.f1fd6bb3",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-empty-first.box2-24x16.d8.dee18236",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-empty-n2.box2-24x16.d8.aaf7a6e4",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-empty.box1-24x16.d16.510959d3",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-empty.box1-24x16.d32.a02e649c",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-empty.box1-24x16.d8.e4eafca5",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-emptya.box1-24x16.d32.b2dd3bfb",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-emptya.box1-24x16.d8.eb7a7a25",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-fltmin.box1-16x12.d32.cee1998b",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-full-n3.box3-24x16.d8.802a698c",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-full.box1-24x16.d32.4763fd38",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-full.box1-24x16.d8.96ef67ce",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-grey-bg.box1-24x16.d8.79e42307",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-grey.box1-24x16.d16.36d93562",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-grey.box1-24x16.d32.770f16b4",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-grey.box1-24x16.d8.4c58db7b",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-infall-n2-bg.box2-16x12.d32.bd8cec31",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-infall.box1-16x12.d32.d6a37879",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-maxall.box1-16x12.d32.ea745f10",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-maxden.box1-16x12.d32.886829ec",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-nanall-n2-bg.box2-16x12.d32.301bec7f",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-nanall.box1-16x12.d32.bd554737",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-nanbox.box1-16x12.d32.b3f9e7c3",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-negnanall.box1-16x12.d32.353236df",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-negzero-n2-bg.box2-16x12.d32.989e65c8",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-negzero-out.box2-16x12.d32.51cf18c0",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-negzero.box1-16x12.d32.20894ab8",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-ninfall.box1-16x12.d32.eb33ea40",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-noise.box1-24x16.d16.fcbc7cd0",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-noise.box1-24x16.d32.d81f42c9",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-noise.box1-24x16.d8.e4d4537e",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-over1-n2-bg.box2-16x12.d32.0c1c4d6b",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-over1.box1-16x12.d32.57373ebe",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-ramp-d6.box2-24x16.d16.509a66a0",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-ramp.box1-24x16.d16.e242f4aa",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-ramp.box1-24x16.d32.05ccd16a",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-ramp.box1-24x16.d8.2d3b735d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-soft.box1-24x16.d32.6de1baed",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-soft.box1-24x16.d8.decd7a59",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thr-n2-d32.box2-24x16.d32.7d65daf3",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thr-n2.box2-24x16.d8.54851bc7",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thrA.box1-24x16.d16.759285cf",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thrA.box1-24x16.d32.4c6e1a3b",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thrA.box1-24x16.d8.656442b8",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thrB.box1-24x16.d16.54ef68b3",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thrB.box1-24x16.d32.c2b1090d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.m-thrB.box1-24x16.d8.add5ee17",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mark4-d1.box2-24x16.d8.6af0edeb",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mark4-d3.box2-24x16.d8.920e0712",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mark5-d1.box2-24x16.d8.f291f96d",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mark5-d3.box2-24x16.d8.cf637ae2",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mbsens0.box2f-32x24.d8.55228790",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mbsens100.box2f-32x24.d8.1b315781",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix00.box2a-12x20.d8.ae846040",
+   "plugin_param_reads": 380,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix01.box3f-31x21.d16.460aca23",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix02.box1-17x13.d8.015669cc",
+   "plugin_param_reads": 308,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix03.box2-31x21.d8.2df6213a",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix04.box2-24x16.d8.b8267e62",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix05.box1f-31x21.d16.84c40ba8",
+   "plugin_param_reads": 319,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix06.box2f-31x21.d16.af442d8d",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix07.box3-17x13.d16.c8f68750",
+   "plugin_param_reads": 487,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix08.box3-17x13.d8.d7e029a9",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix09.box2-24x16.d8.913923e3",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix10.box3a-17x13.d16.f08eb61a",
+   "plugin_param_reads": 487,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix11.box3a-12x20.d16.5550c056",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix12.box3-16x12.d8.1447dd90",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.mix13.box1a-31x21.d8.51efdedb",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n1-w1.box1-24x16.d8.97eae5c3",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n1-w2.box1-24x16.d8.5a34ec49",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n1-w3.box1-24x16.d8.938583d0",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n1-w4.box1-24x16.d8.b944509d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w1.box2-24x16.d32.23677bf6",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w1.box2-24x16.d8.6660d3dd",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w2.box2-24x16.d16.d02a21b6",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w2.box2-24x16.d8.9229d5f4",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w3.box2-24x16.d32.4c3ca3e8",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w3.box2-24x16.d8.587c3a75",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w4.box2-24x16.d16.b3d1c681",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n2-w4.box2-24x16.d8.a7091f86",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w1.box3-24x16.d32.df1b9f8d",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w1.box3-24x16.d8.b12ce2a0",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w2.box3-24x16.d16.f2704987",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w2.box3-24x16.d8.90aa7334",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w3.box3-24x16.d32.e92c2d32",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w3.box3-24x16.d8.fbfa8c76",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w4.box3-24x16.d16.e7262c19",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.n3-w4.box3-24x16.d8.6c3a6749",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.noise-n2.noise-24x16.d8.9cd8603c",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.novec-d1.box2-24x16.d8.b27fae4e",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.novec-d3.box2-24x16.d8.e2779780",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.novec-d6.box2-24x16.d8.3050517a",
+   "plugin_param_reads": 378,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.novec-n3-w1.box3-24x16.d8.405ae61d",
+   "plugin_param_reads": 423,
+   "plugin_notes": {
+    "unset_layer_checkouts": 33,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-d16.box3-24x16.d16.82d37f66",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-fullfirst-d4.box3-24x16.d8.69066ed0",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-fullfirst-d5.box3-24x16.d8.9b24f0d3",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-fullfirst-d6.box3-24x16.d8.a6a32cbf",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-fullfirst.box2-24x16.d8.e3168990",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-same-box.box2-24x16.d8.733e1f37",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order-soft-overlap.box3-24x16.d8.6d9f6967",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order012.box3-24x16.d8.9fed0992",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order10.box2-24x16.d8.5e58471c",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order120.box3-24x16.d8.6e8611f0",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order201.box3-24x16.d8.b50408cf",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.order210.box3-24x16.d8.7a0abf06",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.overlap-order-d32.box1-16x12.d32.f8b7331d",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.overlap-order.box1-16x12.d8.b9bdecf9",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.overlap-reverse.box1-16x12.d8.71e3db01",
+   "plugin_param_reads": 54,
+   "plugin_notes": {
+    "unset_layer_checkouts": 15,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pan-n1.pan-24x16.d8.0c2a7709",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.perm123.box3-24x16.d8.2dbda95d",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.perm213.box3-24x16.d8.5015fe8b",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.perm222.box3-24x16.d8.750b50cb",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.perm321-alpha.box3-24x16.d8.b2796002",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.perm321.box3-24x16.d8.784a3fce",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.perm444.box3-24x16.d8.4efe0959",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-all12.box3-32x24.d8.850939f0",
+   "plugin_param_reads": 1717,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-bg-view.box2-32x24.d8.9f197306",
+   "plugin_param_reads": 448,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-default-pos.box2-32x24.d8.c47dbdf6",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-fast.box2-32x24.d8.781c0d53",
+   "plugin_param_reads": 366,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-interp1.box2-32x24.d8.3abd5699",
+   "plugin_param_reads": 438,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-interp3.box2-32x24.d8.2e5d5afd",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-key.box2-32x24.d16.45fb7af1",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-key.box2-32x24.d32.68be32dc",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-neg0.box2-32x24.d8.8c5c37ec",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-outside-to.box2-32x24.d8.f86a8801",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-outside.box2-32x24.d8.32cb7b89",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-same-pixel.box2-32x24.d8.3be809c5",
+   "plugin_param_reads": 551,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still-edge.pan-32x24.d8.1f033d31",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still-edge.pan-32x24.d8.30e3e8d6",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still-edge.pan-32x24.d8.33f29f51",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still-edge.pan-32x24.d8.8ecc2ae9",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still-edge.pan-32x24.d8.a2d4583a",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still-edge.pan-32x24.d8.e6af5dc0",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-still.box2-32x24.d8.749b2a76",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-subpixel.box1-32x24.d8.a65728f0",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-tall.box1-12x40.d8.859728dd",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use-keyed.box2-32x24.d8.988de7fb",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use-keyed2.box2-32x24.d8.b0c56146",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use1-n2.box2-32x24.d8.1b761699",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use2-n0.box1-32x24.d8.c820ffca",
+   "plugin_param_reads": 278,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use2-n2.box2-32x24.d8.bf2b4ded",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use3-n0.box1-32x24.d8.9b6aa786",
+   "plugin_param_reads": 278,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use3-n2.box2-32x24.d8.a7977aec",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use3-n3.box3-32x24.d8.7c9d5e13",
+   "plugin_param_reads": 805,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use4-n0.box1-32x24.d8.b5c0e76e",
+   "plugin_param_reads": 278,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use4-n2.box2-32x24.d8.7f6cc61e",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use5-n0.box1-32x24.d8.f519144c",
+   "plugin_param_reads": 278,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-use5-n2.box2-32x24.d8.35548c28",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-w1.box2-32x24.d8.1d740969",
+   "plugin_param_reads": 494,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-w2-n3.box3-32x24.d8.a2edb883",
+   "plugin_param_reads": 657,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt-wide.box1-40x12.d8.eb0e963a",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.pt12-only.box2-32x24.d8.14a7edd6",
+   "plugin_param_reads": 516,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-0-bg.box2-36x24.d8.6f1b4d1c",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-all3.box3-36x24.d8.6694a905",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-fg2-fg2view.box3-36x24.d8.88fbd0ea",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-fg2.box3-36x24.d8.ca669aca",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-fg3.box3-36x24.d8.a6f0afde",
+   "plugin_param_reads": 451,
+   "plugin_notes": {
+    "unset_layer_checkouts": 105,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-n1-d6.box1-36x24.d8.ee236db6",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-nan32.box2-24x16.d32.054ca5b7",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-soft.box2-36x24.d8.9b186b81",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink-thin.box2-12x9.d8.8bb3abf4",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink0-bg.box2-36x24.d8.9466382b",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink0.01-bg.box2-36x24.d8.d7dfdf0c",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink0.5-bg.box2-36x24.d16.8d66dad6",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink0.5-bg.box2-36x24.d32.79ee2ad5",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink0.5-bg.box2-36x24.d8.0b01903a",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink0.5-pan.pan-36x24.d8.d55d1e71",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink1-bg.box2-36x24.d8.81dd6098",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink1-out.box2-36x24.d8.1a0d09b9",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink1-pan.pan-36x24.d8.fe61e274",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink1.5-bg.box2-36x24.d8.0cef07ce",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink10-bg.box2-36x24.d8.958c1342",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink10-out.box2-36x24.d8.4419b25b",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink2-bg.box2-36x24.d8.3aa99f69",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink2.5-out.box2-36x24.d8.0198ffc5",
+   "plugin_param_reads": 403,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink2.5-pan.pan-36x24.d8.da69ac69",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink2.99-bg.box2-36x24.d8.379fac06",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink3-bg.box2-36x24.d16.bdec8461",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink3-bg.box2-36x24.d32.47f32eaa",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink3-bg.box2-36x24.d8.47e4f6ec",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink4.25-bg.box2-36x24.d8.75e08a9a",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink6-bg.box2-36x24.d8.4a9e2a80",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink6-pan.pan-36x24.d8.00255e9a",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink7.25-bg.box2-36x24.d8.b3c3b436",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.shrink9.99-bg.box2-36x24.d8.36ef5467",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-64x48.box2-64x48.d8.e3739839",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-defaults.box1-17x13.d8.539b0e9a",
+   "plugin_param_reads": 291,
+   "plugin_notes": {
+    "unset_layer_checkouts": 60,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-defaults.box1-1x1.d8.14ea6838",
+   "plugin_param_reads": 291,
+   "plugin_notes": {
+    "unset_layer_checkouts": 60,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-defaults.box1-5x5.d8.3ce545f4",
+   "plugin_param_reads": 291,
+   "plugin_notes": {
+    "unset_layer_checkouts": 60,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w1.box1-37x23.d32.9e81c51e",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w1.box1-4x4.d16.419164f6",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w1.box1-5x5.d8.73b679d3",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w2.box1-16x12.d32.ac0a7b26",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w3.box1-23x31.d16.cea7b1c8",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w3.box1-5x5.d32.02458390",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w4.box1-16x12.d8.4977ab66",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n1-w4.box1-9x7.d16.b66ef7d9",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n2-w1.box2-16x12.d16.2ec6114b",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n2-w1.box2-17x13.d8.2d0b1e84",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n2-w2.box2-5x5.d16.26d82af7",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n2-w2.box2-7x9.d8.39ec04e5",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n3-w2.box3-4x4.d32.2e77441f",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.size-n3-w4.box3-4x4.d8.ff91b5c3",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specall-w1.specall-16x12.d32.9a81f276",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specall-w3.specall-16x12.d32.a531ee90",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox-bg.box2-16x12.d32.b48b1389",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox1-w1.specbox1-16x12.d32.154c73a4",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox2-w1.specbox2-16x12.d32.74e1c7bf",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox2-w2.specbox2-16x12.d32.0771a904",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox2-w3.specbox2-16x12.d32.27976dd1",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox2-w4.specbox2-16x12.d32.3a92a83b",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox2a-w3.specbox2a-16x12.d32.c3bbdbce",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specbox3-w3.specbox3-16x12.d32.94d441e5",
+   "plugin_param_reads": 445,
+   "plugin_notes": {
+    "unset_layer_checkouts": 57,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-bg-shrink.box2-16x12.d32.c20e0a24",
+   "plugin_param_reads": 379,
+   "plugin_notes": {
+    "unset_layer_checkouts": 120,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-chan1.box1-16x12.d32.3a405ed7",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-chan2.box1-16x12.d32.526699e0",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-chan3.box1-16x12.d32.aeb06458",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-chan4.box1-16x12.d32.1d870515",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-exact.box2-16x12.d32.6fb9a4a8",
+   "plugin_param_reads": 357,
+   "plugin_notes": {
+    "unset_layer_checkouts": 48,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-n2-w4.box2-16x12.d32.60f01149",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.specm-n2.box2-16x12.d32.f5dd9d21",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-bg.wrapcol-24x16.d8.23f2a4fa",
+   "plugin_param_reads": 307,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-blur.wrapcol-24x16.d8.3bd7b9ae",
+   "plugin_param_reads": 319,
+   "plugin_notes": {
+    "unset_layer_checkouts": 108,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-box-w3.box2-24x16.d8.074b689c",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-d16.wrapcol-24x16.d16.eaca713d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-d32.wrapcol-24x16.d32.c3a6a5ce",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-n2.wrapcol-24x16.d8.f93e5de6",
+   "plugin_param_reads": 373,
+   "plugin_notes": {
+    "unset_layer_checkouts": 72,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-off.wrapcol-24x16.d8.86ead36d",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-pt.wrapcol-24x16.d8.a102ddde",
+   "plugin_param_reads": 393,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-w1.wrapcol-24x16.d8.e13afa31",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-w2.wrapcol-24x16.d8.c8fd7863",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-w3.wrapcol-24x16.d8.4a9ecfae",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  },
+  {
+   "status": "match",
+   "frames_compared": 3,
+   "id": "retime-fgbg.wrap-w4.wrapcol-24x16.d8.6391ee84",
+   "plugin_param_reads": 301,
+   "plugin_notes": {
+    "unset_layer_checkouts": 76,
+    "unset_layer_pixel_reads": 3
+   },
+   "plugin_read_source": "pixel checkouts",
+   "unreadable_lines": 0
+  }
+ ]
+}

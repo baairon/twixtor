@@ -8,6 +8,8 @@
 //! does not depend on the thread count.
 
 use crate::blend::{cvtt, lerp};
+use crate::holefill::VerticalTaps;
+use crate::nanrule as nr;
 use crate::image::{Fmt, Image, Samples, CHANNELS};
 use fx_core::par_rows;
 
@@ -99,6 +101,8 @@ trait Sample: Copy + Send + Sync {
     /// tap counts as outside the image when its lane equals it. It is -1.0 in all lanes for every
     /// sample type and only matters for pixel values that are exactly the sentinel.
     const SENTINEL: [f32; 4] = [-1.0; 4];
+    /// True for the float type: only its lanes can hold a NaN (`crate::nanrule`).
+    const FLOAT: bool;
     fn load(self) -> f32;
     fn store(v: f32) -> Self;
 }
@@ -115,6 +119,7 @@ fn store_int(v: f32, max: f32) -> i32 {
 }
 
 impl Sample for u8 {
+    const FLOAT: bool = false;
     fn load(self) -> f32 {
         self as f32
     }
@@ -124,6 +129,7 @@ impl Sample for u8 {
 }
 
 impl Sample for u16 {
+    const FLOAT: bool = false;
     fn load(self) -> f32 {
         self as f32
     }
@@ -133,6 +139,7 @@ impl Sample for u16 {
 }
 
 impl Sample for f32 {
+    const FLOAT: bool = true;
     fn load(self) -> f32 {
         self
     }
@@ -159,21 +166,36 @@ fn load4<T: Sample>(px: &[T]) -> [f32; 4] {
 ///   taps that lie inside the image (taps outside hold the sentinel `S`);
 /// * the pixels in between use the plain formula `acc = c * w0`, then for `k = count - 1` down to 1
 ///   `acc = acc + (right + left) * w[k]`, no division.
+///
+/// With `left_first` the edge formula takes the two taps of each distance the other way round
+/// (`left` in the place of `right` and back: `wsum` adds the left weight first and
+/// `acc = (acc + lt) + rt`); the plain formula is the same either way.
 #[inline]
-fn conv_pixel(i: usize, n: usize, taps: &[f32], s: [f32; 4], get: impl Fn(usize) -> [f32; 4]) -> [f32; 4] {
+fn conv_pixel(i: usize, n: usize, taps: &[f32], s: [f32; 4], get: impl Fn(usize) -> [f32; 4], left_first: bool, float: bool) -> [f32; 4] {
+    let v = conv_pixel_with::<nr::Plain>(i, n, taps, s, &get, left_first);
+    // a NaN in the result (float images only): the same arithmetic again with the NaN rule (`crate::nanrule`); numbers are the same bits
+    if float && nr::any_nan(&v) {
+        conv_pixel_with::<nr::Rule>(i, n, taps, s, &get, left_first)
+    } else {
+        v
+    }
+}
+
+#[inline(always)]
+fn conv_pixel_with<A: nr::Arith>(i: usize, n: usize, taps: &[f32], s: [f32; 4], get: &impl Fn(usize) -> [f32; 4], left_first: bool) -> [f32; 4] {
     let count = taps.len();
     let left = n.min(count);
     let mid = n.saturating_sub(2 * count);
     let c = get(i);
     let w0 = taps[0];
-    let mut acc = [c[0] * w0, c[1] * w0, c[2] * w0, c[3] * w0];
+    let mut acc = [A::mul(c[0], w0), A::mul(c[1], w0), A::mul(c[2], w0), A::mul(c[3], w0)];
     if i >= left && i < left + mid {
         for k in (1..count).rev() {
             let r = get(i + k);
             let l = get(i - k);
             let wk = taps[k];
             for lane in 0..4 {
-                acc[lane] = acc[lane] + (r[lane] + l[lane]) * wk;
+                acc[lane] = A::add(acc[lane], A::mul(A::add(r[lane], l[lane]), wk));
             }
         }
         return acc;
@@ -182,24 +204,27 @@ fn conv_pixel(i: usize, n: usize, taps: &[f32], s: [f32; 4], get: impl Fn(usize)
     for k in (1..count).rev() {
         let r = if i + k < n { get(i + k) } else { s };
         let l = if i >= k { get(i - k) } else { s };
+        let (r, l) = if left_first { (l, r) } else { (r, l) };
         let wk = taps[k];
         for lane in 0..4 {
             let wr = (if r[lane] != s[lane] { 1.0f32 } else { 0.0f32 }) * wk;
             wsum[lane] = wsum[lane] + wr;
-            let rt = wr * r[lane];
+            let rt = A::mul(wr, r[lane]);
             let wl = (if l[lane] != s[lane] { 1.0f32 } else { 0.0f32 }) * wk;
-            let lt = l[lane] * wl;
+            let lt = A::mul(l[lane], wl);
             wsum[lane] = wsum[lane] + wl;
-            acc[lane] = (acc[lane] + rt) + lt;
+            acc[lane] = A::add(A::add(acc[lane], rt), lt);
         }
     }
     for lane in 0..4 {
-        acc[lane] = acc[lane] / wsum[lane];
+        acc[lane] = A::div(acc[lane], wsum[lane]);
     }
     acc
 }
 
-fn blur_plane<T: Sample>(data: &mut [T], width: usize, height: usize, taps: &[f32]) {
+/// The separable blur of one image: rows, then columns; `vtaps` is the tap order of the edge rows
+/// of the column pass ([`blur_with`]).
+fn blur_plane<T: Sample>(data: &mut [T], width: usize, height: usize, taps: &[f32], vtaps: VerticalTaps) {
     if width == 0 || height == 0 {
         return;
     }
@@ -208,17 +233,18 @@ fn blur_plane<T: Sample>(data: &mut [T], width: usize, height: usize, taps: &[f3
     par_rows(data, rl, |_, row| {
         let line: Vec<[f32; 4]> = row.chunks_exact(CHANNELS).map(load4::<T>).collect();
         for x in 0..width {
-            let v = conv_pixel(x, width, taps, T::SENTINEL, |j| line[j]);
+            let v = conv_pixel(x, width, taps, T::SENTINEL, |j| line[j], false, T::FLOAT);
             for lane in 0..4 {
                 row[x * CHANNELS + lane] = T::store(v[lane]);
             }
         }
     });
     // Pass 2, along the columns, on the result of pass 1.
+    let above_first = vtaps == VerticalTaps::AboveFirst;
     let snap: Vec<T> = data.to_vec();
     par_rows(data, rl, |y, row| {
         for x in 0..width {
-            let v = conv_pixel(y, height, taps, T::SENTINEL, |j| load4::<T>(&snap[j * rl + x * CHANNELS..]));
+            let v = conv_pixel(y, height, taps, T::SENTINEL, |j| load4::<T>(&snap[j * rl + x * CHANNELS..]), above_first, T::FLOAT);
             for lane in 0..4 {
                 row[x * CHANNELS + lane] = T::store(v[lane]);
             }
@@ -233,15 +259,23 @@ fn blur_plane<T: Sample>(data: &mut [T], width: usize, height: usize, taps: &[f3
 /// images are stored as computed. `radius < 0` does nothing (0.0 is an assumed cutoff, it only
 /// matters for radii below 1e-153). The engine only uses 3.0.
 pub fn blur(img: &mut Image, radius: f32) {
+    blur_with(img, radius, VerticalTaps::BelowFirst)
+}
+
+/// [`blur`] with the tap order of the edge rows of the column pass: with
+/// [`VerticalTaps::AboveFirst`] an edge row takes the row above (`y - k`) before the row below,
+/// as `TwixtorProVectorsIn_64` does (MEASURED under the emulator); the row pass and the plain formula are
+/// unchanged.
+pub fn blur_with(img: &mut Image, radius: f32, vtaps: VerticalTaps) {
     if 0.0 > f64::from(radius) {
         return;
     }
     let taps = blur_taps(radius);
     let (w, h) = (img.width, img.height);
     match &mut img.samples {
-        Samples::U8(d) => blur_plane(d, w, h, &taps),
-        Samples::U16(d) => blur_plane(d, w, h, &taps),
-        Samples::F32(d) => blur_plane(d, w, h, &taps),
+        Samples::U8(d) => blur_plane(d, w, h, &taps, vtaps),
+        Samples::U16(d) => blur_plane(d, w, h, &taps, vtaps),
+        Samples::F32(d) => blur_plane(d, w, h, &taps, vtaps),
     }
 }
 
@@ -558,7 +592,12 @@ pub fn composite_masked(dest: &mut Image, src: &Image, mask: &Mask) {
                         row[i] = sr[i];
                     } else {
                         let (f, g) = mask_weights(m);
-                        row[i] = (g * sr[i] + f * row[i]) + 0.0f32;
+                        let plain = (g * sr[i] + f * row[i]) + 0.0f32;
+                        row[i] = if plain.is_nan() {
+                            nr::add(nr::add(nr::mul(g, sr[i]), nr::mul(f, row[i])), 0.0f32)
+                        } else {
+                            plain
+                        };
                     }
                 }
             }
@@ -602,9 +641,15 @@ pub fn sharpen_weight(t: f32) -> f32 {
 /// 5. `composite_masked(frame, sharp, mask)`: `frame` keeps its value where the inverted mask
 ///    is 255 (no change by the warp) and takes the sharpened value where it is 0.
 pub fn sharpen_step(frame: &mut Image, original: &Image, t: f32) {
+    sharpen_step_with(frame, original, t, VerticalTaps::BelowFirst)
+}
+
+/// [`sharpen_step`] whose blur takes the edge rows of its column pass in the order `vtaps`
+/// ([`blur_with`]).
+pub fn sharpen_step_with(frame: &mut Image, original: &Image, t: f32, vtaps: VerticalTaps) {
     let mut mask = change_mask(frame, original);
     let mut sharp = frame.clone();
-    blur(&mut sharp, BLUR_RADIUS);
+    blur_with(&mut sharp, BLUR_RADIUS, vtaps);
     let base = frame.clone();
     lerp(&mut sharp, &base, sharpen_weight(t));
     invert_mask(&mut mask);
@@ -675,6 +720,78 @@ mod tests {
     }
 
     // ------------------------------------------------------------------- taps
+
+    #[test]
+    fn above_first_changes_only_the_edge_rows_of_the_column_pass() {
+        let mut rng = Rng(0x0005_beef);
+        for fmt in [Fmt::F32, Fmt::U16, Fmt::U8] {
+            let (w, h) = (13usize, 11usize);
+            let img = random_image(fmt, w, h, &mut rng);
+            let (mut a, mut b) = (img.clone(), img.clone());
+            blur(&mut a, 3.0);
+            blur_with(&mut b, 3.0, VerticalTaps::AboveFirst);
+            let count = blur_taps(3.0).len();
+            // the interior rows (every tap inside the column) agree bit for bit
+            let rl = w * CHANNELS;
+            let same_row = |y: usize| match (&a.samples, &b.samples) {
+                (Samples::F32(p), Samples::F32(q)) => p[y * rl..(y + 1) * rl].iter().zip(&q[y * rl..(y + 1) * rl]).all(|(u, v)| u.to_bits() == v.to_bits()),
+                (Samples::U16(p), Samples::U16(q)) => p[y * rl..(y + 1) * rl] == q[y * rl..(y + 1) * rl],
+                (Samples::U8(p), Samples::U8(q)) => p[y * rl..(y + 1) * rl] == q[y * rl..(y + 1) * rl],
+                _ => false,
+            };
+            for y in count..h - count {
+                assert!(same_row(y), "{fmt:?} interior row {y}");
+            }
+            if fmt == Fmt::F32 {
+                // an edge row is the edge formula with the two taps of each distance swapped
+                let mut rows = img.clone();
+                let taps = blur_taps(3.0);
+                if let Samples::F32(d) = &mut rows.samples {
+                    let src = d.clone();
+                    for y in 0..h {
+                        let line: Vec<[f32; 4]> = src[y * rl..(y + 1) * rl].chunks_exact(4).map(|p| [p[0], p[1], p[2], p[3]]).collect();
+                        for x in 0..w {
+                            let v = conv_pixel(x, w, &taps, [-1.0; 4], |j| line[j], false, false);
+                            d[y * rl + x * 4..y * rl + x * 4 + 4].copy_from_slice(&v);
+                        }
+                    }
+                }
+                let snap = f32s(&rows).to_vec();
+                for y in (0..count).chain(h - count..h) {
+                    for x in 0..w {
+                        let col = |j: usize| [snap[j * rl + x * 4], snap[j * rl + x * 4 + 1], snap[j * rl + x * 4 + 2], snap[j * rl + x * 4 + 3]];
+                        let c = col(y);
+                        let w0 = taps[0];
+                        for lane in 0..4 {
+                            let mut acc = c[lane] * w0;
+                            let mut wsum = w0;
+                            for k in (1..count).rev() {
+                                let up = if y >= k { col(y - k)[lane] } else { -1.0 };
+                                let down = if y + k < h { col(y + k)[lane] } else { -1.0 };
+                                let wu = (if up != -1.0 { 1.0f32 } else { 0.0 }) * taps[k];
+                                wsum = wsum + wu;
+                                let ut = wu * up;
+                                let wd = (if down != -1.0 { 1.0f32 } else { 0.0 }) * taps[k];
+                                let dt = down * wd;
+                                wsum = wsum + wd;
+                                acc = (acc + ut) + dt;
+                            }
+                            assert_eq!(f32s(&b)[y * rl + x * 4 + lane].to_bits(), (acc / wsum).to_bits(), "edge row {y} col {x} lane {lane}");
+                        }
+                    }
+                }
+                assert_ne!(bits(&a), bits(&b), "the two orders differ somewhere in the edge rows");
+            }
+        }
+        // sharpen_step is sharpen_step_with the engine's order
+        let mut rng = Rng(77);
+        let orig = random_image(Fmt::F32, 9, 8, &mut rng);
+        let warped = random_image(Fmt::F32, 9, 8, &mut rng);
+        let (mut p, mut q) = (warped.clone(), warped.clone());
+        sharpen_step(&mut p, &orig, 0.3);
+        sharpen_step_with(&mut q, &orig, 0.3, VerticalTaps::BelowFirst);
+        assert_eq!(bits(&p), bits(&q));
+    }
 
     #[test]
     fn blur_taps_for_radius_three_are_exact() {
@@ -886,6 +1003,25 @@ mod tests {
         for fmt in [Fmt::U8, Fmt::U16, Fmt::F32] {
             let mut e = Image::new(0, 0, fmt);
             blur(&mut e, 3.0);
+        }
+    }
+
+    /// Two NaNs of the other sign meet in the taps of one pixel: the reference keeps the positive one (`nanrule`),
+    /// whichever side it comes from. Finite lanes beside them stay finite.
+    #[cfg(feature = "emulator-nan")]
+    #[test]
+    fn blur_f32_nan_pair_keeps_the_positive_nan() {
+        let pos = f32::from_bits(0x7fc0_0000);
+        let neg = f32::from_bits(0xffc0_0000);
+        for (left, right) in [(pos, neg), (neg, pos)] {
+            let mut d = vec![0.5f32; 12 * 4];
+            d[3 * 4 + 1] = left;
+            d[5 * 4 + 1] = right;
+            let mut img = f32_image(12, 1, d);
+            blur(&mut img, BLUR_RADIUS);
+            let b = bits(&img);
+            assert_eq!(b[4 * 4 + 1], 0x7fc0_0000, "R lane between the two NaNs");
+            assert!(f32s(&img)[4 * 4 + 2].is_finite(), "G lane untouched by the NaNs");
         }
     }
 

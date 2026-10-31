@@ -192,6 +192,39 @@ pub fn vc_merge_flow_item(x: usize, y: usize, m: &MergeArgs<'_>, dst: &mut Globa
     dst.set(o + 1, b);
 }
 
+pub fn vc_blue_u8_item(i: usize, old: &[u8], dst: &mut Global<u8>, blue: &[f32], n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let o = i * 4;
+    for c in 0..3 {
+        dst.set(o + c, old[o + c]);
+    }
+    dst.set(o + 3, rs::store_q_u8(blue[i] * 255.0f32));
+}
+
+pub fn vc_blue_u16_item(i: usize, old: &[u16], dst: &mut Global<u16>, blue: &[f32], n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let o = i * 4;
+    for c in 0..3 {
+        dst.set(o + c, old[o + c]);
+    }
+    dst.set(o + 3, rs::store_q_u16(blue[i] * 65535.0f32));
+}
+
+pub fn vc_blue_f32_item(i: usize, old: &[f32], dst: &mut Global<f32>, blue: &[f32], n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let o = i * 4;
+    for c in 0..3 {
+        dst.set(o + c, old[o + c]);
+    }
+    dst.set(o + 3, blue[i]);
+}
+
 pub fn vc_dec_int(c: f32, den: f64, scale: f64) -> f32 {
     ((((c as f64) * 2.0f64) / den - 1.0f64) * scale) as f32
 }
@@ -488,6 +521,32 @@ pub fn mt_over_weights_item(i: usize, m: [&[f32]; 3], o: &mut [Global<f32>; 4], 
     }
 }
 
+#[allow(clippy::too_many_arguments)]
+pub fn mt_stack_weights_item(i: usize, m: [&[f32]; 3], o: &mut [Global<f32>; 4], first: u32, last: u32, nfg: u32, n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let mut vis = 1.0f32;
+    for k in 0..4i32 {
+        if k > last as i32 {
+            break;
+        }
+        let j = k - first as i32;
+        if k == nfg as i32 {
+            o[j as usize].set(i, vis);
+            break;
+        }
+        let mk = mt_clamp_matte(m[k as usize][i]);
+        if k >= first as i32 {
+            o[j as usize].set(i, mk * vis);
+        }
+        if k < last as i32 {
+            let inv = 1.0f32 - mk;
+            vis = mt_clamp01(inv * vis);
+        }
+    }
+}
+
 // ---- PREP -------------------------------------------------------------------------------------
 
 #[allow(clippy::too_many_arguments)]
@@ -611,6 +670,54 @@ pub fn pp_luma_f32_item(i: usize, s: &[f32], out: &mut Global<f32>, alpha: i32, 
 
 // ---- OVERLAY ----------------------------------------------------------------------------------
 
+pub fn ov_fill_u8_item(i: usize, old: &[u8], w: &mut Global<u8>, y: &[u8], n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let o = i * 4;
+    if old[o] == 0 {
+        for c in 0..4 {
+            w.set(o + c, y[o + c]);
+        }
+        return;
+    }
+    for c in 0..4 {
+        w.set(o + c, old[o + c]);
+    }
+}
+
+pub fn ov_fill_u16_item(i: usize, old: &[u16], w: &mut Global<u16>, y: &[u16], n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let o = i * 4;
+    if old[o] == 0 {
+        for c in 0..4 {
+            w.set(o + c, y[o + c]);
+        }
+        return;
+    }
+    for c in 0..4 {
+        w.set(o + c, old[o + c]);
+    }
+}
+
+pub fn ov_fill_f32_item(i: usize, old: &[f32], w: &mut Global<f32>, y: &[f32], n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let o = i * 4;
+    if old[o] == 0.0f32 {
+        for c in 0..4 {
+            w.set(o + c, y[o + c]);
+        }
+        return;
+    }
+    for c in 0..4 {
+        w.set(o + c, old[o + c]);
+    }
+}
+
 pub fn ov_blend_u8_item(i: usize, a: &[u8], b: &[u8], out: &mut Global<u8>, n: u32) {
     if i >= n as usize {
         return;
@@ -636,17 +743,34 @@ pub fn ov_blend_f32_item(i: usize, a: &[f32], b: &[f32], out: &mut Global<f32>, 
     out.set(i, (b[i] - a[i]) * 0.5f32 + a[i] + 0.0f32);
 }
 
+pub fn ov_diff_int(dr: i64, dg: i64, db: i64, top: i64) -> i64 {
+    let s = 725 * dr + 1475 * dg + 300 * db;
+    let v = if s < 0 { -s } else { s };
+    let r = (v + 500) / 1000;
+    if r < top {
+        r
+    } else {
+        top
+    }
+}
+
+pub fn ov_diff_value(dr: f32, dg: f32, db: f32) -> f32 {
+    ((dr * 0.725f32 + dg * 1.475f32) + db * 0.3f32).abs()
+}
+
 pub fn ov_diff_u8_item(i: usize, a: &[u8], b: &[u8], out: &mut Global<u8>, n: u32) {
     if i >= n as usize {
         return;
     }
     let o = i * 4;
+    let dr = a[o + 1] as i64 - b[o + 1] as i64;
+    let dg = a[o + 2] as i64 - b[o + 2] as i64;
+    let db = a[o + 3] as i64 - b[o + 3] as i64;
+    let v = ov_diff_int(dr, dg, db, 255) as u8;
     out.set(o, 255);
-    for c in 1..4 {
-        let x = a[o + c];
-        let y = b[o + c];
-        out.set(o + c, if x > y { x - y } else { y - x });
-    }
+    out.set(o + 1, v);
+    out.set(o + 2, v);
+    out.set(o + 3, v);
 }
 
 pub fn ov_diff_u16_item(i: usize, a: &[u16], b: &[u16], out: &mut Global<u16>, n: u32) {
@@ -654,12 +778,14 @@ pub fn ov_diff_u16_item(i: usize, a: &[u16], b: &[u16], out: &mut Global<u16>, n
         return;
     }
     let o = i * 4;
+    let dr = a[o + 1] as i64 - b[o + 1] as i64;
+    let dg = a[o + 2] as i64 - b[o + 2] as i64;
+    let db = a[o + 3] as i64 - b[o + 3] as i64;
+    let v = ov_diff_int(dr, dg, db, 65535) as u16;
     out.set(o, 65535);
-    for c in 1..4 {
-        let x = a[o + c];
-        let y = b[o + c];
-        out.set(o + c, if x > y { x - y } else { y - x });
-    }
+    out.set(o + 1, v);
+    out.set(o + 2, v);
+    out.set(o + 3, v);
 }
 
 pub fn ov_diff_f32_item(i: usize, a: &[f32], b: &[f32], out: &mut Global<f32>, n: u32) {
@@ -667,10 +793,11 @@ pub fn ov_diff_f32_item(i: usize, a: &[f32], b: &[f32], out: &mut Global<f32>, n
         return;
     }
     let o = i * 4;
+    let v = ov_diff_value(a[o + 1] - b[o + 1], a[o + 2] - b[o + 2], a[o + 3] - b[o + 3]);
     out.set(o, 1.0f32);
-    for c in 1..4 {
-        out.set(o + c, (a[o + c] - b[o + c]).abs());
-    }
+    out.set(o + 1, v);
+    out.set(o + 2, v);
+    out.set(o + 3, v);
 }
 
 pub fn ov_overlay_u8_item(i: usize, r: &[f32], g: &[f32], out: &mut Global<u8>, n: u32) {
@@ -678,10 +805,11 @@ pub fn ov_overlay_u8_item(i: usize, r: &[f32], g: &[f32], out: &mut Global<u8>, 
         return;
     }
     let o = i * 4;
+    let gv = rs::store_q_u8(g[i] * 255.0f32);
     out.set(o, 255);
     out.set(o + 1, rs::store_q_u8(r[i] * 255.0f32));
-    out.set(o + 2, rs::store_q_u8(g[i] * 255.0f32));
-    out.set(o + 3, 0);
+    out.set(o + 2, gv);
+    out.set(o + 3, gv);
 }
 
 pub fn ov_overlay_u16_item(i: usize, r: &[f32], g: &[f32], out: &mut Global<u16>, n: u32) {
@@ -689,10 +817,11 @@ pub fn ov_overlay_u16_item(i: usize, r: &[f32], g: &[f32], out: &mut Global<u16>
         return;
     }
     let o = i * 4;
+    let gv = rs::store_q_u16(g[i] * 65535.0f32);
     out.set(o, 65535);
     out.set(o + 1, rs::store_q_u16(r[i] * 65535.0f32));
-    out.set(o + 2, rs::store_q_u16(g[i] * 65535.0f32));
-    out.set(o + 3, 0);
+    out.set(o + 2, gv);
+    out.set(o + 3, gv);
 }
 
 pub fn ov_overlay_f32_item(i: usize, r: &[f32], g: &[f32], out: &mut Global<f32>, n: u32) {
@@ -703,22 +832,84 @@ pub fn ov_overlay_f32_item(i: usize, r: &[f32], g: &[f32], out: &mut Global<f32>
     out.set(o, 1.0f32);
     out.set(o + 1, r[i]);
     out.set(o + 2, g[i]);
-    out.set(o + 3, 0.0f32);
+    out.set(o + 3, g[i]);
 }
 
-pub fn ov_detail_item(i: usize, l: &[f32], b: &[f32], out: &mut Global<f32>, n: u32) {
+pub fn ov_lum(r: f32, g: f32, b: f32) -> f32 {
+    (r * 0.29f32 + g * 0.59f32) + b * 0.12f32
+}
+
+pub fn ov_luma_u8_item(i: usize, s: &[u8], out: &mut Global<f32>, n: u32) {
     if i >= n as usize {
         return;
     }
-    out.set(i, mt_clamp01(((l[i] - b[i]) / 255.0f32) + 0.5f32));
+    let p = i * 4;
+    let k = 1.0f32 / 255.0f32;
+    out.set(i, ov_lum(s[p + 1] as f32 * k, s[p + 2] as f32 * k, s[p + 3] as f32 * k));
 }
 
-pub fn ov_edge_item(x: usize, y: usize, b: &[f32], out: &mut Global<f32>, w: u32, h: u32) {
+pub fn ov_luma_u16_item(i: usize, s: &[u16], out: &mut Global<f32>, n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let p = i * 4;
+    let k = 1.0f32 / 65535.0f32;
+    out.set(i, ov_lum(s[p + 1] as f32 * k, s[p + 2] as f32 * k, s[p + 3] as f32 * k));
+}
+
+pub fn ov_luma_f32_item(i: usize, s: &[f32], out: &mut Global<f32>, n: u32) {
+    if i >= n as usize {
+        return;
+    }
+    let p = i * 4;
+    out.set(i, ov_lum(s[p + 1], s[p + 2], s[p + 3]));
+}
+
+pub fn ov_detail_item(x: usize, y: usize, l: &[f32], out: &mut Global<f32>, w: u32, h: u32) {
     if x >= w as usize || y >= h as usize {
         return;
     }
-    let (gx, gy) = pp_grad(b, x, y, w as usize, h as usize, 0);
-    out.set(y * w as usize + x, pp_edge_value(gx, gy));
+    let wd = w as usize;
+    let c = l[y * wd + x];
+    let d = if x == 0 || y == 0 || x + 1 == wd || y + 1 == h as usize {
+        c / 0.7f32
+    } else {
+        let mut s = 0.0f32;
+        for r in 0..3usize {
+            for k in 0..3usize {
+                let yy = y + r - 1;
+                let xx = x + k - 1;
+                if yy != y || xx != x {
+                    s = s + (l[yy * wd + xx] - c).abs();
+                }
+            }
+        }
+        (s / 8.0f32).sqrt() / 0.7f32
+    };
+    out.set(y * wd + x, if d < 1.0f32 { d } else { 1.0f32 });
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn ov_at(l: &[f32], x: usize, y: usize, dy: i32, dx: i32, w: u32, h: u32) -> f32 {
+    let mut yy = y as i64 + dy as i64;
+    let mut xx = x as i64 + dx as i64;
+    let ym = h as i64 - 1;
+    let xm = w as i64 - 1;
+    yy = if yy < 0 { 0 } else if yy > ym { ym } else { yy };
+    xx = if xx < 0 { 0 } else if xx > xm { xm } else { xx };
+    l[yy as usize * w as usize + xx as usize]
+}
+
+pub fn ov_edge_item(x: usize, y: usize, l: &[f32], out: &mut Global<f32>, w: u32, h: u32) {
+    if x >= w as usize || y >= h as usize {
+        return;
+    }
+    let sx = (ov_at(l, x, y, -1, 1, w, h) + 2.0f32 * ov_at(l, x, y, 0, 1, w, h) + ov_at(l, x, y, 1, 1, w, h))
+        - (ov_at(l, x, y, -1, -1, w, h) + 2.0f32 * ov_at(l, x, y, 0, -1, w, h) + ov_at(l, x, y, 1, -1, w, h));
+    let sy = (ov_at(l, x, y, 1, -1, w, h) + 2.0f32 * ov_at(l, x, y, 1, 0, w, h) + ov_at(l, x, y, 1, 1, w, h))
+        - (ov_at(l, x, y, -1, -1, w, h) + 2.0f32 * ov_at(l, x, y, -1, 0, w, h) + ov_at(l, x, y, -1, 1, w, h));
+    let m = ((sx * sx + sy * sy) / 8.0f32).sqrt() / 0.7f32;
+    out.set(y * w as usize + x, if m < 1.0f32 { m } else { 1.0f32 });
 }
 
 // ---- GEOM -------------------------------------------------------------------------------------

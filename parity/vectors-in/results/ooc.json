@@ -1,0 +1,544 @@
+{
+ "module": "vectors-in",
+ "measured_at": "2026-10-31",
+ "command": "phase_b.py ooc --status ~/twixtor-parity/fix-vectors/vin/run_status_combined.json; the reason of the size-1x1 cases set to the tiny-frame rule",
+ "status_file": "~/twixtor-parity/fix-vectors/vin/run_status_combined.json",
+ "cases_total": 448,
+ "original_status_counts": {
+  "error": 5,
+  "rendered": 443
+ },
+ "in_contract": 443,
+ "moved_out": [
+  {
+   "id": "vectors-in.size-1x1.1x1.d8.df556d",
+   "group": "size",
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 1x1 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85eb1",
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "status": "rendered",
+    "exit": 0,
+    "note": ""
+   },
+   "params": [
+    "vectors_max_displace=32",
+    "speed_percent=50"
+   ],
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "vectors-in.size-1x1.1x1.d16.29769c",
+   "group": "size",
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 1x1 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85eb1",
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "status": "rendered",
+    "exit": 0,
+    "note": ""
+   },
+   "params": [
+    "vectors_max_displace=32",
+    "speed_percent=50"
+   ],
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "vectors-in.size-1x1.1x1.d32.430cf7",
+   "group": "size",
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 1x1 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85eb1",
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "status": "rendered",
+    "exit": 0,
+    "note": ""
+   },
+   "params": [
+    "vectors_max_displace=32",
+    "speed_percent=50"
+   ],
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "vectors-in.spvecR-inv-flt_max.12x9.d32.e1a439",
+   "group": "sp_vecR",
+   "reason": "the original errors on it (an emulator fault: check the harness before trusting this)",
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85b11"
+   },
+   "rewrite": {
+    "status": "refused",
+    "exit": 3,
+    "note": "vfx: error: frame 1: unsupported: inverse warp: a sample coordinate is NaN or never converges, which is not supported"
+   },
+   "params": [
+    "vectors_max_displace=32",
+    "speed_percent=50",
+    "warping=1"
+   ]
+  },
+  {
+   "id": "vectors-in.spvecR-inv-nan.12x9.d32.963079",
+   "group": "sp_vecR",
+   "reason": "the original errors on it (an emulator fault: check the harness before trusting this)",
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorProVectorsIn_64.aex+0x85b11"
+   },
+   "rewrite": {
+    "status": "refused",
+    "exit": 3,
+    "note": "vfx: error: frame 1: unsupported: inverse warp: a sample coordinate is NaN or never converges, which is not supported"
+   },
+   "params": [
+    "vectors_max_displace=32",
+    "speed_percent=50",
+    "warping=1"
+   ]
+  }
+ ],
+ "back_in_contract": [],
+ "back_in_contract_note": "the original rendered these and the rewrite refuses them: real comparisons, expected to differ",
+ "candidates": [
+  {
+   "id": "ooc00",
+   "params": "speed_percent=10001",
+   "why": "speed above 10000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `speed_percent`: 10001 outside -10000..=10000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc01",
+   "params": "speed_percent=-10001",
+   "why": "speed below -10000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `speed_percent`: -10001 outside -10000..=10000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc02",
+   "params": "frame_num=200001",
+   "why": "frame number above 200000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_num`: 200001 outside -200000..=200000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc03",
+   "params": "frame_num=-200001",
+   "why": "frame number below -200000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_num`: -200001 outside -200000..=200000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc04",
+   "params": "vec_scale_x=10.01",
+   "why": "scale x above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_x`: 10.01 outside -10..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc05",
+   "params": "vec_scale_x=-10.01",
+   "why": "scale x below -10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_x`: -10.01 outside -10..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc06",
+   "params": "vec_scale_y=10.01",
+   "why": "scale y above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_y`: 10.01 outside -10..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc07",
+   "params": "vec_scale_y=-10.01",
+   "why": "scale y below -10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_y`: -10.01 outside -10..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc08",
+   "params": "vectors_max_displace=-1",
+   "why": "max displace below 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vectors_max_displace`: -1 outside 0..=10000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc09",
+   "params": "vectors_max_displace=10001",
+   "why": "max displace above 10000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vectors_max_displace`: 10001 outside 0..=10000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc10",
+   "params": "input_frame_rate=0.1",
+   "why": "input rate below the 32 bit minimum",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `input_frame_rate`: 0.1 outside 0.10000000149011612..=1000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc11",
+   "params": "input_frame_rate=1000.5",
+   "why": "input rate above 1000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `input_frame_rate`: 1000.5 outside 0.10000000149011612..=1000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc12",
+   "params": "output_frame_rate=0.1",
+   "why": "output rate below the 32 bit minimum",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `output_frame_rate`: 0.1 outside 0.10000000149011612..=1000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc13",
+   "params": "output_frame_rate=1001",
+   "why": "output rate above 1000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `output_frame_rate`: 1001 outside 0.10000000149011612..=1000"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc14",
+   "params": "blur_compensation=10.01",
+   "why": "blur above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `blur_compensation`: 10.01 outside 0..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc15",
+   "params": "blur_compensation=-0.01",
+   "why": "blur below 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `blur_compensation`: -0.01 outside 0..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc16",
+   "params": "frame_interp=0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_interp`: 0 outside 1..=3"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc17",
+   "params": "frame_interp=4",
+   "why": "popup above 3",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_interp`: 4 outside 1..=3"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc18",
+   "params": "warping=0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `warping`: 0 outside 1..=2"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc19",
+   "params": "warping=3",
+   "why": "popup above 2",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `warping`: 3 outside 1..=2"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc20",
+   "params": "display=0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `display`: 0 outside 1..=6"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc21",
+   "params": "display=7",
+   "why": "popup above 6",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `display`: 7 outside 1..=6"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc22",
+   "params": "src_mark_segments=0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `src_mark_segments`: 0 outside 1..=5"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc23",
+   "params": "src_mark_segments=6",
+   "why": "popup above 5",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `src_mark_segments`: 6 outside 1..=5"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc24",
+   "params": "time_remap_mode=0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `time_remap_mode`: 0 outside 1..=2"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc25",
+   "params": "time_remap_mode=3",
+   "why": "popup above 2",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `time_remap_mode`: 3 outside 1..=2"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc26",
+   "params": "fg1_matte_chan=5",
+   "why": "popup above 4",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `fg1_matte_chan`: 5 outside 1..=4"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc27",
+   "params": "fg1_inv_matte_shrink=10.01",
+   "why": "shrink above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `fg1_inv_matte_shrink`: 10.01 outside 0..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc28",
+   "params": "fg2_inv_matte_shrink=-0.01",
+   "why": "shrink below 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `fg2_inv_matte_shrink`: -0.01 outside 0..=10"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc29",
+   "params": "src_time_offset=1",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `src_time_offset`"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc30",
+   "params": "vectors=2",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `vectors`"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc31",
+   "params": "sensitivity=70",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `sensitivity`"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  },
+  {
+   "id": "ooc32",
+   "params": "smart_blend=1",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `smart_blend`"
+   },
+   "original": {
+    "status": "not_asked",
+    "note": "the plugin was not asked: judged by the rewrite's own range check"
+   }
+  }
+ ],
+ "status_ids_not_in_testset": [],
+ "out_of_contract_total": 38
+}

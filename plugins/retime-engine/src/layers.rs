@@ -54,18 +54,19 @@ use crate::filters::sharpen_step;
 use crate::flow::extras::{MaskPyramid, SolveExtras};
 use crate::flow::{build_pyramid, FlowField, FlowSettings, Pyramid};
 use crate::gaps;
-use crate::holefill::{fill_holes_masked, HoleMaskRef};
+use crate::holefill::{fill_holes_masked, fill_holes_masked_with, HoleMaskRef, VerticalTaps};
 use crate::host::{EngineHost, EngineSettings};
-use crate::image::Image;
+use crate::image::{Image, Samples, A, CHANNELS};
 use crate::matte::{self, Matte};
 use crate::planner::MAX_FG_LAYERS;
-use crate::points::{second_tracker, user_displacement, UserPoint};
+use crate::points::{second_tracker, user_displacement_with, UserPoint};
 use crate::smartblend::{smart_blend, smart_blend_binary};
 use crate::timeline::Selection;
 use crate::vectors::HoleMask;
 use crate::warp::{blur_amount, blur_compensation_wrap, inv_warp, inv_warp_coverage, WarpOpts};
 use fx_core::{FxError, Result};
 
+mod plates;
 #[cfg(test)]
 mod tests;
 
@@ -88,6 +89,26 @@ pub struct LayerJob {
     pub layers: Vec<LayerParams>,
     pub first: usize,
     pub last: usize,
+    /// A single group display of the fast path rebuilds the part of the layer that the layers
+    /// above cover ([`reconstructed_layer`]). Set by retime-fgbg (plugin 03), where it was
+    /// measured; `for_display` leaves it off.
+    pub rebuild_group: bool,
+    /// The fast path of the full group (Display 1, `first == 0 && last == nfg`) with no inverse matte shrink on
+    /// any FG layer reads no FG matte and is the single layer fast path ([`crate::compose::fast_path`]). Set by
+    /// retime-fgbg (plugin 03), where it was measured on the call records (with a shrink the original reads the
+    /// mattes); `for_display` leaves it off.
+    pub full_group_reads_no_matte: bool,
+    /// The layer images and the composition use the plugin's own pixel kernels ([`matte::premultiply_pl`],
+    /// [`matte::over_pl`]: 8 and 16 bpc multiply by the f32 constants 1/255 and 1/65535 instead of dividing) in place
+    /// of the Smart Blend kernels' arithmetic. Set by retime-fgbg (plugin 03), where it was read from the code;
+    /// `for_display` leaves it off.
+    pub pl_kernels: bool,
+    /// The vector path composes the group as the original's per layer loop does ([`plates`]): every layer is
+    /// interpolated on its own from its two plates (its layer image OVER the other frame's warped to its time,
+    /// unpremultiplied, colour filled where it is not opaque, its alpha replaced by its own matte, premultiplied), and
+    /// the interpolated layers are composed OVER, Main_BG first. Set by retime-fgbg (plugin 03), where it was read from
+    /// the code; `for_display` leaves it off.
+    pub plates: bool,
 }
 
 impl LayerJob {
@@ -127,7 +148,7 @@ impl LayerJob {
         let mut layers = fg.to_vec();
         layers.push(main_bg);
         let (first, last) = Self::display_group(display, nfg);
-        LayerJob { nfg, layers, first, last }
+        LayerJob { nfg, layers, first, last, rebuild_group: false, full_group_reads_no_matte: false, pl_kernels: false, plates: false }
     }
 
     /// The structural checks of a job: at most three FG layers, `nfg + 1` layers and the group
@@ -149,11 +170,21 @@ impl LayerJob {
     fn shrinks(&self) -> Vec<f32> {
         self.layers[..self.nfg].iter().map(|l| l.shrink).collect()
     }
+
+    /// The fast path of this job is the single layer one ([`crate::compose::fast_path`]): the full group of a job
+    /// whose full group reads no matte there (`full_group_reads_no_matte`), with no inverse matte shrink on any FG
+    /// layer.
+    pub(crate) fn full_group_fast_path(&self) -> bool {
+        self.full_group_reads_no_matte && self.first == 0 && self.last == self.nfg && self.layers[..self.nfg].iter().all(|l| l.shrink == 0.0)
+    }
 }
 
 /// The two mattes of one layer for a flow source: at the layer times of frame `A` and frame `B`.
 /// `compose::retime_layers_with_flows` passes the layer's tracking matte (`matte::effective`,
-/// Main_BG the product of the inverses; the constant 1 when `nfg = 0`).
+/// Main_BG the product of the inverses; the constant 1 when `nfg = 0`), and for a job with
+/// `plates` the layer's composition matte (`plates::comp_mattes`: FG k's raw matte cut by every
+/// FG layer above it, Main_BG white cut, divided by the white of the depth, so that
+/// `trunc(m * white + 0.5)` gives the integer plane back at 8 and 16 bpc and float is the value).
 #[derive(Clone, Copy, Debug)]
 pub struct LayerMattes<'a> {
     pub at_a: &'a Matte,
@@ -231,14 +262,14 @@ pub(crate) fn solve_layer(
         if !track {
             return second_tracker(&pairs(true), geo, out);
         }
-        let user = (!points.is_empty()).then(|| user_displacement(&pairs(true), geo, out));
+        let user = (!points.is_empty()).then(|| user_displacement_with(&pairs(true), geo, out, fs.wrap));
         stages.solve_pyramids_with(pa, pb, fs, SolveExtras { masks, user: user.as_ref() })
     };
     let solve_ba = || -> Result<FlowField> {
         if !track {
             return second_tracker(&pairs(false), geo, out);
         }
-        let user = (!points.is_empty()).then(|| user_displacement(&pairs(false), geo, out));
+        let user = (!points.is_empty()).then(|| user_displacement_with(&pairs(false), geo, out, fs.wrap));
         stages.solve_pyramids_with(pb, pa, fs, SolveExtras { masks: masks.map(|(ma, mb)| (mb, ma)), user: user.as_ref() })
     };
     match sel.interp {
@@ -273,7 +304,9 @@ fn tracking_frames(settings: &EngineSettings, host: &dyn EngineHost, sel: &Selec
 /// The single layer vector path (`nfg = 0`) with tracking points in use: the fetches and the
 /// error fill check of today's vector path, the solves with the user displacement of the points
 /// ([`solve_layer`] with `layer`'s sensitivity, no masks: the only layer's tracking matte is the
-/// constant 1) and today's composition (`compose::compose_vectors`).
+/// constant 1) and today's composition (`compose::compose_vectors`). With
+/// `EngineSettings::motion_rows_reversed` the whole path runs on bottom-up rows, as the vector path without points
+/// does: the frames reversed, the points at `H - 1 - y` ([`points_rows_reversed`]), the output turned back.
 pub(crate) fn single_layer_with_points(
     settings: &EngineSettings,
     host: &dyn EngineHost,
@@ -288,14 +321,33 @@ pub(crate) fn single_layer_with_points(
     if let Some(fill) = issue_fill(settings, host) {
         return Ok(fill);
     }
+    let fs = FlowSettings { sensitivity: layer.sensitivity, ..flow_settings(settings, sel) };
+    if settings.motion_rows_reversed {
+        let (ra, rb) = (a.rows_reversed(), b.rows_reversed());
+        let rtracking = tracking.as_ref().map(|(ta, tb)| (ta.rows_reversed(), tb.rows_reversed()));
+        let (xa, xb) = match &rtracking {
+            Some((ta, tb)) => (ta, tb),
+            None => (&ra, &rb),
+        };
+        let rpts = points_rows_reversed(points, a.height);
+        let (pa, pb) = pyramids(xa, xb, &fs)?;
+        let flows = solve_layer(settings, sel, &fs, layer.track, &pa, &pb, None, &rpts)?;
+        return Ok(Rendered::Image(compose_vectors(settings, sel, &ra, &rb, &flows)?.rows_reversed()));
+    }
     let (xa, xb) = match &tracking {
         Some((ta, tb)) => (ta, tb),
         None => (&a, &b),
     };
-    let fs = FlowSettings { sensitivity: layer.sensitivity, ..flow_settings(settings, sel) };
     let (pa, pb) = pyramids(xa, xb, &fs)?;
     let flows = solve_layer(settings, sel, &fs, layer.track, &pa, &pb, None, points)?;
     Ok(Rendered::Image(compose_vectors(settings, sel, &a, &b, &flows)?))
+}
+
+/// The points of a layer on the bottom-up rows of the motion path: `y` becomes `(H - 1) - y` (f32) at both frames, as
+/// the original's point source flips them (READ in TwixtorPro_64: `(float)(H - 1) - y`).
+fn points_rows_reversed(points: &[UserPoint], height: usize) -> Vec<UserPoint> {
+    let last_row = height as f32 - 1.0;
+    points.iter().map(|p| UserPoint { at_a: [p.at_a[0], last_row - p.at_a[1]], at_b: [p.at_b[0], last_row - p.at_b[1]] }).collect()
 }
 
 /// The raw mattes of the FG layers at frame `A` and at frame `B` (`matte::extract` of
@@ -314,7 +366,8 @@ fn fetch_mattes(host: &dyn EngineHost, job: &LayerJob, sel: &Selection, like: &I
                     img.width, img.height, like.width, like.height
                 )));
             }
-            list.push(matte::extract(&img, chan));
+            // the per layer plates read the raw plane (a float matte keeps NaN and values outside 0..1)
+            list.push(if job.plates { matte::extract_raw(&img, chan) } else { matte::extract(&img, chan) });
         }
     }
     Ok((at_a, at_b))
@@ -324,11 +377,22 @@ fn fetch_mattes(host: &dyn EngineHost, job: &LayerJob, sel: &Selection, like: &I
 /// Main_BG (`k == nfg`, matte 1) the frame itself (`q(c * 1.0)` is `c` at 8 and 16 bpc and
 /// `c * 1.0` is `c` in float, so the premultiply is skipped). A matte of another size than the
 /// frame is `FxError::Mismatch`.
-fn layer_image<'f>(frame: &'f Image, mattes: &[Matte], k: usize, nfg: usize) -> Result<Cow<'f, Image>> {
-    if k == nfg {
+fn layer_image<'f>(job: &LayerJob, frame: &'f Image, mattes: &[Matte], k: usize) -> Result<Cow<'f, Image>> {
+    if k == job.nfg {
         Ok(Cow::Borrowed(frame))
+    } else if job.pl_kernels {
+        Ok(Cow::Owned(matte::premultiply_pl(frame, &mattes[k])?))
     } else {
         Ok(Cow::Owned(matte::premultiply(frame, &mattes[k])?))
+    }
+}
+
+/// `src` OVER `dest` for a layer of `job`: the plugin's own kernels when `job.pl_kernels`, else the Smart Blend OVER.
+fn over_with(job: &LayerJob, dest: &mut Image, src: &Image) -> Result<()> {
+    if job.pl_kernels {
+        matte::over_pl(dest, src)
+    } else {
+        matte::over(dest, src)
     }
 }
 
@@ -337,7 +401,7 @@ fn layer_image<'f>(frame: &'f Image, mattes: &[Matte], k: usize, nfg: usize) -> 
 fn compose_group(frame: &Image, mattes: &[Matte], job: &LayerJob) -> Result<Image> {
     let mut r = Image::new(frame.width, frame.height, frame.fmt());
     for k in (job.first..=job.last).rev() {
-        matte::over(&mut r, &*layer_image(frame, mattes, k, job.nfg)?)?;
+        over_with(job, &mut r, &*layer_image(job, frame, mattes, k)?)?;
     }
     Ok(r)
 }
@@ -348,6 +412,9 @@ fn compose_group(frame: &Image, mattes: &[Matte], job: &LayerJob) -> Result<Imag
 /// single layer fast path on them). Records G1 (a layered frame), G1h for a single group display
 /// (`first == last`) and G1c with two or more FG layers (the composition order).
 pub(crate) fn fast_path(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, sel: &Selection) -> Result<Rendered> {
+    if job.full_group_fast_path() {
+        return crate::compose::fast_path(settings, host, sel);
+    }
     let a = host.main_frame(sel.a)?;
     let b = host.main_frame(sel.b)?;
     let (ma, mb) = fetch_mattes(host, job, sel, &a)?;
@@ -361,11 +428,111 @@ pub(crate) fn fast_path(settings: &EngineSettings, host: &dyn EngineHost, job: &
     if job.nfg >= 2 {
         fx_core::gaps::record(&gaps::G1C);
     }
-    let ra = compose_group(&a, &ma, job)?;
-    let rb = compose_group(&b, &mb, job)?;
+    let (ra, rb) = if job.plates && job.rebuild_group && job.first == job.last {
+        let fill = FillFrame { is360: settings.wrap_360, taps: settings.stages.get().vertical_taps(), reversed: settings.motion_rows_reversed };
+        (rebuilt_plate(&a, &ma, job, fill)?, rebuilt_plate(&b, &mb, job, fill)?)
+    } else if job.rebuild_group && job.first == job.last {
+        let shrinks = job.shrinks();
+        let ea = matte::effective(&ma, &shrinks, a.width, a.height)?;
+        let eb = matte::effective(&mb, &shrinks, a.width, a.height)?;
+        let k = job.first;
+        let fill = FillFrame { is360: settings.wrap_360, taps: settings.stages.get().vertical_taps(), reversed: settings.motion_rows_reversed };
+        (reconstructed_layer(&a, &ma, &ea[k], k, job.nfg, fill)?, reconstructed_layer(&b, &mb, &eb[k], k, job.nfg, fill)?)
+    } else {
+        (compose_group(&a, &ma, job)?, compose_group(&b, &mb, job)?)
+    };
     let mut out = Image::new(a.width, a.height, a.fmt());
     interpolate(&mut out, sel, &ra, &rb)?;
     Ok(Rendered::Image(out))
+}
+
+/// The image of layer `k` in a single group display of the fast path (`LayerJob::rebuild_group`):
+/// the pixels the layers above cover (the layer's visible matte `vis` from `matte::effective`
+/// below 1) are holes; they are filled from the other pixels of the frame by the engine's
+/// pull-push fill (`holefill::fill_holes_masked` with the mask `1 - vis`) and made opaque (with no
+/// known pixel anywhere they become opaque black); the result is premultiplied by the layer's own
+/// raw matte (Main_BG's is 1: no premultiply). A transparent pixel of the frame that no layer
+/// above covers stays as it is. MEASURED for hard mattes on exact frames of the FG2, FG3 and
+/// Background displays; partial alpha (soft mattes, an inverse matte shrink) and 32 bpc are not
+/// settled. The fill runs in the frame of the motion path ([`FillFrame`]).
+fn reconstructed_layer(frame: &Image, mattes: &[Matte], vis: &Matte, k: usize, nfg: usize, fill: FillFrame) -> Result<Image> {
+    let holes: Vec<f32> = vis.data.iter().map(|&v| 1.0f32 - v).collect();
+    let mut img = frame.clone();
+    fill.fill(&mut img, &holes)?;
+    let hole = |i: usize| f64::from(holes[i]) >= crate::holefill::WIDE_EPS;
+    match &mut img.samples {
+        Samples::U8(s) => s.chunks_exact_mut(CHANNELS).enumerate().filter(|(i, _)| hole(*i)).for_each(|(_, p)| p[A] = 255),
+        Samples::U16(s) => s.chunks_exact_mut(CHANNELS).enumerate().filter(|(i, _)| hole(*i)).for_each(|(_, p)| p[A] = 65535),
+        Samples::F32(s) => s.chunks_exact_mut(CHANNELS).enumerate().filter(|(i, _)| hole(*i)).for_each(|(_, p)| p[A] = 1.0),
+    }
+    if k == nfg {
+        Ok(img)
+    } else {
+        matte::premultiply(&img, &mattes[k])
+    }
+}
+
+/// The frame the hole fill of the layered fast path runs in: the rows of the motion path (`reversed`:
+/// `EngineSettings::motion_rows_reversed`, bottom row first) with the vertical tap order of the render's stages (`taps`)
+/// and the wrap flag `is360`. TwixtorPro_64's single channel fill walks the plugin's own rows, which
+/// run from the bottom of the host frame; with the rows reversed and the tap above first the engine's fill gives the
+/// plugin's filled plates bit for bit at 16 and 32 bpc (TRACED), where the
+/// host rows give the last bits of the 32 bpc rebuilds.
+#[derive(Clone, Copy, Debug)]
+struct FillFrame {
+    is360: bool,
+    taps: VerticalTaps,
+    reversed: bool,
+}
+
+impl FillFrame {
+    /// `holefill::fill_holes_masked_with` of `img` with the hole mask `holes` (one value per pixel, host rows) in this
+    /// frame; the image comes back in host rows.
+    fn fill(self, img: &mut Image, holes: &[f32]) -> Result<()> {
+        if !self.reversed {
+            return fill_holes_masked_with(img, HoleMaskRef::F32(holes), self.is360, self.taps);
+        }
+        let w = img.width;
+        let rev: Vec<f32> = if w == 0 { Vec::new() } else { holes.chunks(w).rev().flatten().copied().collect() };
+        let mut r = img.rows_reversed();
+        fill_holes_masked_with(&mut r, HoleMaskRef::F32(&rev), self.is360, self.taps)?;
+        *img = r.rows_reversed();
+        Ok(())
+    }
+}
+
+/// The image of the single layer `k = job.first` of a single group display on the fast path of a render with plates
+/// (`LayerJob::plates`): the degenerate plate of the original's render function, which on an exact frame composes the
+/// layer image with ITSELF (no warp, `LA OVER LA`), refills it ([`plates::refill`]: unpremultiply, the pull-push fill
+/// where the plate is not opaque, the alpha replaced by FG k's raw matte or Main_BG's frame alpha, premultiply) in the
+/// frame of the motion path ([`FillFrame`]), and an FG layer is then composed OVER an empty image (TRACED,
+/// TwixtorPro_64: `exact-d6-d32`, `shrink0-bg` and `mix00` frame 0, the hole mask is `white` minus the plate's alpha:
+/// 0 of 240 mask samples differ, against 220 for the cut plane).
+fn rebuilt_plate(frame: &Image, mattes: &[Matte], job: &LayerJob, fill: FillFrame) -> Result<Image> {
+    let (w, h, fmt) = (frame.width, frame.height, frame.fmt());
+    let k = job.first;
+    let raws: Vec<plates::Plane> = mattes.iter().map(|m| plates::raw_plane(m, fmt)).collect();
+    let l = plates::layer_times(frame, &plates::comp_plane(&raws, &job.shrinks(), k, fmt, w, h)?);
+    let mut p = l.clone();
+    matte::over_pl(&mut p, &l)?;
+    let flip = |i: &Image| if fill.reversed { i.rows_reversed() } else { i.clone() };
+    let mut q = flip(&p);
+    if k == job.nfg {
+        let fa = flip(frame);
+        plates::refill(&mut q, plates::Alpha::Frame(&fa), fill.is360, fill.taps)?;
+    } else {
+        let r = &raws[k];
+        let v: Vec<f32> = if fill.reversed && w > 0 { r.v.chunks(w).rev().flatten().copied().collect() } else { r.v.clone() };
+        let rp = plates::Plane { white: r.white, v };
+        plates::refill(&mut q, plates::Alpha::Plane(&rp), fill.is360, fill.taps)?;
+    }
+    let p = flip(&q);
+    if k == job.nfg {
+        return Ok(p);
+    }
+    let mut out = Image::new(w, h, fmt);
+    matte::over_pl(&mut out, &p)?;
+    Ok(out)
 }
 
 /// The layered vector path of `compose::retime_layers` (`nfg >= 1`; module documentation, steps 1
@@ -390,7 +557,43 @@ where
         Some((ta, tb)) => (ta, tb),
         None => (&a, &b),
     };
+    if settings.motion_rows_reversed {
+        // the whole motion path on bottom-up rows, its output turned back (EngineSettings::motion_rows_reversed)
+        let (ra, rb) = (a.rows_reversed(), b.rows_reversed());
+        let rtracking = tracking.as_ref().map(|(ta, tb)| (ta.rows_reversed(), tb.rows_reversed()));
+        let rmattes = (
+            mattes.0.iter().map(Matte::rows_reversed).collect::<Vec<_>>(),
+            mattes.1.iter().map(Matte::rows_reversed).collect::<Vec<_>>(),
+        );
+        let rpts: Vec<Vec<UserPoint>> = pts.iter().map(|l| points_rows_reversed(l, a.height)).collect();
+        let (rxa, rxb) = match &rtracking {
+            Some((ta, tb)) => (ta, tb),
+            None => (&ra, &rb),
+        };
+        let out = solve_and_compose(settings, sel, job, &ra, &rb, rxa, rxb, &rmattes, &rpts)?;
+        return Ok(Rendered::Image(out.rows_reversed()));
+    }
+    Ok(Rendered::Image(solve_and_compose(settings, sel, job, &a, &b, xa, xb, &mattes, &pts)?))
+}
+
+/// The solves of every layer of the group and the composition of [`compose_layers`] (steps 3 to 6 of the module
+/// documentation) on the tracking frames `xa`, `xb` and the main frames `a`, `b`.
+#[allow(clippy::too_many_arguments)]
+fn solve_and_compose(
+    settings: &EngineSettings,
+    sel: &Selection,
+    job: &LayerJob,
+    a: &Image,
+    b: &Image,
+    xa: &Image,
+    xb: &Image,
+    mattes: &(Vec<Matte>, Vec<Matte>),
+    pts: &[Vec<UserPoint>],
+) -> Result<Image> {
     let shrinks = job.shrinks();
+    if job.plates {
+        return plates::solve_and_compose_plates(settings, sel, job, a, b, xa, xb, mattes, pts);
+    }
     let ea = matte::effective(&mattes.0, &shrinks, a.width, a.height)?;
     let eb = matte::effective(&mattes.1, &shrinks, a.width, a.height)?;
     let base = flow_settings(settings, sel);
@@ -403,7 +606,7 @@ where
         let (ma, mb) = (ma?, mb?);
         flows.push(solve_layer(settings, sel, &fs, layer.track, &pa, &pb, Some((&ma, &mb)), &pts[k])?);
     }
-    Ok(Rendered::Image(compose_layers(settings, sel, job, &a, &b, &mattes, &flows)?))
+    compose_layers(settings, sel, job, a, b, mattes, &flows)
 }
 
 /// With exactly one flow of a layer loaded the other one is its inversion
@@ -437,11 +640,14 @@ fn complete_layer_flows(settings: &EngineSettings, sel: &Selection, flows: &mut 
 }
 
 /// The layered Vectors In path of `compose::retime_layers_with_flows` (`nfg >= 1`): the main
-/// frames, the FG mattes at `A` and `B`, the error fill check, the tracking mattes of every layer
-/// (`matte::effective`), then per layer `k` of the group, FG1 first, `flows(sel, k, mattes)` with
-/// the layer's tracking mattes at `A` and `B` (the front-end's per layer load, rule G1e) and the
-/// inversion of a missing flow of that layer ([`complete_layer_flows`]), then the composition of
-/// [`compose_layers`] with Vectors In's settings (no wrap).
+/// frames, the FG mattes at `A` and `B`, the error fill check, the mattes of every layer for its
+/// loads (the tracking mattes of `matte::effective`; with `plates` the composition mattes of
+/// `plates::comp_mattes`, the planes the original's per layer vector loader caps the vector alpha
+/// with, READ in TwixtorProVectorsIn_64), then per layer
+/// `k` of the group, FG1 first, `flows(sel, k, mattes)` with the layer's mattes at `A` and `B` (the
+/// front-end's per layer load, rule G1e) and the inversion of a missing flow of that layer
+/// ([`complete_layer_flows`]), then the composition of [`compose_layers`] with Vectors In's settings
+/// (no wrap).
 pub(crate) fn vector_path_with_flows<F>(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, sel: &Selection, mut flows: F) -> Result<Rendered>
 where
     F: FnMut(&Selection, usize, &LayerMattes<'_>) -> Result<Flows>,
@@ -455,8 +661,11 @@ where
     }
     fx_core::gaps::record(&gaps::G1);
     let shrinks = job.shrinks();
-    let ea = matte::effective(&mattes.0, &shrinks, a.width, a.height)?;
-    let eb = matte::effective(&mattes.1, &shrinks, a.width, a.height)?;
+    let (ea, eb) = if job.plates {
+        (plates::comp_mattes(&mattes.0, &shrinks, &a)?, plates::comp_mattes(&mattes.1, &shrinks, &a)?)
+    } else {
+        (matte::effective(&mattes.0, &shrinks, a.width, a.height)?, matte::effective(&mattes.1, &shrinks, a.width, a.height)?)
+    };
     let tail = blur_amount(sel.s0, sel.s1, settings.blur).is_some();
     let mut per_layer = Vec::with_capacity(job.last - job.first + 1);
     for k in job.first..=job.last {
@@ -465,6 +674,29 @@ where
         per_layer.push(f);
     }
     Ok(Rendered::Image(compose_layers(settings, sel, job, &a, &b, &mattes, &per_layer)?))
+}
+
+/// The flow loads of an exact frame of a render with external flows and `plates` whose fast path is not the single
+/// layer one ([`LayerJob::full_group_fast_path`]): per layer `k` of the group, FG1 first, `flows(sel, k, mattes)` with
+/// the layer's composition mattes at `A` and `B` (as [`vector_path_with_flows`] passes them), the results dropped. The
+/// original's render function loads the vector layers of every layer of the group on such a frame too and composes the
+/// fast path without them (TRACED, TwixtorProVectorsIn_64: the vector decode runs on the exact frames of a single group
+/// display), so the reads are the original's; the output does not depend on them.
+pub(crate) fn exact_frame_flow_loads<F>(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, sel: &Selection, mut flows: F) -> Result<()>
+where
+    F: FnMut(&Selection, usize, &LayerMattes<'_>) -> Result<Flows>,
+{
+    let like = Image::new(settings.width, settings.height, settings.fmt);
+    let (ma, mb) = fetch_mattes(host, job, sel, &like)?;
+    if issue_fill(settings, host).is_some() {
+        return Ok(());
+    }
+    let shrinks = job.shrinks();
+    let (ca, cb) = (plates::comp_mattes(&ma, &shrinks, &like)?, plates::comp_mattes(&mb, &shrinks, &like)?);
+    for k in job.first..=job.last {
+        let _ = flows(sel, k, &LayerMattes { at_a: &ca[k], at_b: &cb[k] })?;
+    }
+    Ok(())
 }
 
 /// Whether the Nearest composition of warping code `code` takes frame `A` (else `B`), with the
@@ -567,6 +799,9 @@ pub(crate) fn compose_layers(
             return Err(FxError::Mismatch(format!("layered composition: a {}x{} matte for {}x{} frames", m.width, m.height, a.width, a.height)));
         }
     }
+    if job.plates {
+        return plates::compose_layers_plates(settings, sel, job, a, b, mattes, flows);
+    }
     let wa = sel.wa;
     // frac = 1.0f - wA, the position after frame A; the amount of A and the weight of B
     let frac = 1.0f32 - wa;
@@ -584,12 +819,12 @@ pub(crate) fn compose_layers(
     for k in (job.first..=job.last).rev() {
         let f = &flows[k - job.first];
         if let Some(r) = ra.as_mut() {
-            let t = warp_layer(settings, weighted, &*layer_image(a, &mattes.0, k, job.nfg)?, side_flow(f, code, sel, true, k)?, frac)?;
-            matte::over(r, &t)?;
+            let t = warp_layer(settings, weighted, &*layer_image(job, a, &mattes.0, k)?, side_flow(f, code, sel, true, k)?, frac)?;
+            over_with(job, r, &t)?;
         }
         if let Some(r) = rb.as_mut() {
-            let t = warp_layer(settings, weighted, &*layer_image(b, &mattes.1, k, job.nfg)?, side_flow(f, code, sel, false, k)?, wa)?;
-            matte::over(r, &t)?;
+            let t = warp_layer(settings, weighted, &*layer_image(job, b, &mattes.1, k)?, side_flow(f, code, sel, false, k)?, wa)?;
+            over_with(job, r, &t)?;
         }
     }
     if fills {

@@ -43,14 +43,14 @@ fn frame_to_time_is_the_plain_rounded_product() {
 
 #[test]
 fn it_is_not_plugin_01s_frame_time_when_the_rates_differ() {
-    // 24 in 30: plugin 01 adds the K bias on unequal rates (frame 5 gives 637), plugin 04 does not (625)
+    // 24 in 30: plugin 01 adds the FRAME_TIME_K bias on unequal rates (frame 5 gives 631), plugin 04 does not (625)
     let c = curves(&[]);
     let p = CurveParams04::new(&c).unwrap();
     let r = rates(24.0, 30.0);
     let ours = VectorsInTimeMap::new(p, r, 0);
     let theirs = RemapTimeMap::new(p, r, 0);
     assert_eq!(ours.frame_time(5.0), 625);
-    assert_eq!(theirs.frame_time(5.0), 637);
+    assert_eq!(theirs.frame_time(5.0), 631);
     // equal rates agree
     let r = rates(30.0, 30.0);
     let (ours, theirs) = (VectorsInTimeMap::new(p, r, 0), RemapTimeMap::new(p, r, 0));

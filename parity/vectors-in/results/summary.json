@@ -1,0 +1,47 @@
+{
+ "module": "vectors-in",
+ "plugin": "TwixtorProVectorsIn_64.aex",
+ "plugin_sha256": "25c05e6820ccef02f7b48e2ed020a348c6dc551a6ed806cda9f45c18318b9159",
+ "effect": "vectors-in",
+ "status": "verified",
+ "blockers": [],
+ "cases": {
+  "in_contract": 443,
+  "compared": 443,
+  "identical": 443,
+  "differing": 0,
+  "out_of_contract": 38,
+  "logic_parity": 19
+ },
+ "values": {
+  "bytes_compared": 1384032,
+  "floats_compared": 370960,
+  "differing_values": 0,
+  "max_ulp": 0
+ },
+ "call_records": {
+  "compared": 443,
+  "matching": 443
+ },
+ "mutants": {
+  "total": 29,
+  "killed": 29,
+  "survivors": []
+ },
+ "stand_ins": [
+  "AE keyframe interpolation: 19 grid cases key a parameter (tag keyframe_interpolation); both sides read the same labelled interpolation of the keys, and those cases count as logic_parity (19 compared, 19 identical)"
+ ],
+ "fixes": [],
+ "commands": [
+  "python3 tools/gen_grid.py --out testsets/grid",
+  "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/grid --out results/base.grid.tsv --keep refs/grid --jobs 2",
+  "python3 tools/run_grid.py check --vfx bin/vfx-base --ooc testsets/grid/out_of_contract.json --out results/out_of_contract.tsv",
+  "bash tools/build_mutants.sh m00 m01 ... m24",
+  "phase_b.py ooc --status ~/twixtor-parity/fix-vectors/vin/run_status_combined.json; the reason of the size-1x1 cases set to the tiny-frame rule",
+  "fx-parity run --testset ~/twixtor-parity/regress-m3/ts/vectors-in --refs ~/twixtor-parity/fix-vectors/vin/grid_run2/refs --max-ulp 0 --json --vfx ~/twixtor-parity/re/f6-close-vin/bin/vfx",
+  "phase_b.py kills --refs ~/twixtor-parity/fix-vectors/vin/grid_run2/refs --rerender --only m00,m01,m02,m03,m04,m05,m06,m07,m08,m09,m10,m11,m12,m13,m14,m15,m16,m17,m18,m19,m20,m21,m22,m23,m24,m25,m26,m27,m28,m29",
+  "phase_b.py calls --rule reads --plugin-records ~/twixtor-parity/fix-vectors/vin/grid_run2/records --rewrite-records ~/twixtor-parity/re/f6-close-vin/rw/m12",
+  "python3 tools/phase_b.py summary"
+ ],
+ "measured_at": "2026-10-31"
+}

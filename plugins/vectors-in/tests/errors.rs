@@ -171,20 +171,24 @@ fn the_output_frame_must_match_the_context() {
 }
 
 #[test]
-fn vector_layers_shorter_than_the_output_run_are_the_red_fill_from_their_end_on() {
-    // presence is decided at current_time: at half speed the output is twice as long as the source,
-    // and layers that end with the source are absent for every output frame after that, whatever
-    // the source holds
+fn vector_layers_shorter_than_the_output_run_stay_present() {
+    // presence is decided at current_time, and outside its clip a layer keeps its size with transparent pixels: at
+    // half speed the output is twice as long as the source, and layers that end with the source stay present after
+    // their end, so the loads read them at the source frame times as layers of full length would, never the red fill
     let (prev, next) = vectors(Depth::U8, W, H);
-    let (prev, next): (Vec<Frame>, Vec<Frame>) = (prev.into_iter().take(6).collect(), next.into_iter().take(6).collect());
-    let r = Rig::new(clip(Depth::U8, W, H), &[("warping", "1"), ("vectors_max_displace", "16"), ("speed_percent", "50")])
-        .with_frames(12)
-        .with_layer("vectors_prev", prev)
-        .with_layer("vectors_next", next);
-    for n in 0..6 {
+    let make = |prev: Vec<Frame>, next: Vec<Frame>| {
+        Rig::new(clip(Depth::U8, W, H), &[("warping", "1"), ("vectors_max_displace", "16"), ("speed_percent", "50")])
+            .with_frames(12)
+            .with_layer("vectors_prev", prev)
+            .with_layer("vectors_next", next)
+    };
+    let r = make(prev.iter().take(6).cloned().collect(), next.iter().take(6).cloned().collect());
+    let long = make(prev, next);
+    for n in 0..12 {
         assert_ne!(r.render(n).unwrap(), fill(Depth::U8, true, W, H), "frame {n}");
     }
-    for n in 6..12 {
-        assert_eq!(r.render(n).unwrap(), fill(Depth::U8, true, W, H), "frame {n}");
+    // up to output frame 10 every load falls inside the six frames (frame 11 reads frame 6 of Prev)
+    for n in 0..11 {
+        assert_eq!(r.render(n).unwrap(), long.render(n).unwrap(), "frame {n}");
     }
 }

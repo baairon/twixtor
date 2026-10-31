@@ -1163,3 +1163,75 @@ fn output_to_a_file_matches_stdout() {
     assert_eq!(std::fs::read(&path).unwrap(), piped.stdout);
     let _ = std::fs::remove_dir_all(dir);
 }
+
+// ---- VFX_CALL_RECORD ----------------------------------------------------------------------
+
+fn record_lines(path: &Path) -> Vec<Value> {
+    std::fs::read_to_string(path).unwrap().lines().map(|l| serde_json::from_str(l).unwrap()).collect()
+}
+
+#[test]
+fn the_call_record_logs_every_clip_read_and_leaves_the_output_alone() {
+    let dir = scratch_dir("record");
+    let clip = frames(8, W, H, 4);
+    let over = frames(8, W, H, 2);
+    let (cp, op, log) = (dir.join("clip.raw"), dir.join("over.raw"), dir.join("calls.jsonl"));
+    std::fs::write(&cp, &clip).unwrap();
+    std::fs::write(&op, &over).unwrap();
+    let spec = format!("overlay={}", op.display());
+    let mut args = base_args(SHIFT, "8");
+    args.extend(["--param", "offset=1", "--in", cp.to_str().unwrap(), "--layer", &spec, "--layer-fps", "overlay=12"]);
+    let plain = vfx(&args, &[]);
+    assert_eq!(plain.status.code(), Some(0));
+    let logged = vfx_env(&args, &[], &[("VFX_CALL_RECORD", log.to_str().unwrap())]);
+    assert_eq!(logged.status.code(), Some(0), "{}", String::from_utf8_lossy(&logged.stderr));
+    assert_eq!((&logged.stdout, &logged.stderr), (&plain.stdout, &plain.stderr), "the log changes nothing");
+
+    let lines = record_lines(&log);
+    assert_eq!(lines[0]["ev"], "run");
+    assert_eq!((lines[0]["effect"].as_str(), lines[0]["time_scale"].as_u64(), lines[0]["time_step"].as_u64()), (Some(SHIFT), Some(2400), Some(100)));
+    assert_eq!(lines[0]["params"], serde_json::json!(["offset=1"]));
+    assert_eq!(lines[0]["frames"], 4);
+    let frames_seen: Vec<u64> = lines.iter().filter(|l| l["ev"] == "frame").map(|l| l["out_frame"].as_u64().unwrap()).collect();
+    assert_eq!(frames_seen, [0, 1, 2, 3]);
+    assert!(lines.iter().filter(|l| l["ev"] == "frame").all(|l| l["time"] == l["out_frame"].as_i64().unwrap() * 100));
+    let reads: Vec<&Value> = lines.iter().filter(|l| l["ev"] == "read").collect();
+    assert!(!reads.is_empty());
+    for r in &reads {
+        let (t, n) = (r["time"].as_i64().unwrap(), r["out_frame"].as_i64().unwrap());
+        match r["layer"].as_str().unwrap() {
+            // the input at the output rate: tick / 100
+            "input" => {
+                assert_eq!(r["clip_frames"], 4);
+                let want = t.div_euclid(100);
+                assert_eq!(r["index"], if (0..4).contains(&want) { serde_json::json!(want) } else { Value::Null }, "{r}");
+            }
+            // the overlay at 12 fps under 24 fps: floor(tick / 200)
+            "overlay" => {
+                assert_eq!(r["clip_frames"], 2);
+                let want = t.div_euclid(200);
+                assert_eq!(r["index"], if (0..2).contains(&want) { serde_json::json!(want) } else { Value::Null }, "{r}");
+            }
+            other => panic!("unknown layer {other}"),
+        }
+        assert!((0..4).contains(&n), "{r}");
+    }
+    assert!(reads.iter().any(|r| r["layer"] == "overlay") && reads.iter().any(|r| r["layer"] == "input"));
+    // the input is read at the shifted frame: output frame 0 with offset 1 asks for source frame 1
+    assert!(reads.iter().any(|r| r["layer"] == "input" && r["out_frame"] == 0 && r["index"] == 1), "{reads:?}");
+
+    // unset and empty write nothing and still render; --check never creates the file
+    let _ = std::fs::remove_file(&log);
+    let empty = vfx_env(&args, &[], &[("VFX_CALL_RECORD", "")]);
+    assert_eq!(empty.stdout, plain.stdout);
+    let mut check = args.clone();
+    check.push("--check");
+    assert_eq!(vfx_env(&check, &[], &[("VFX_CALL_RECORD", log.to_str().unwrap())]).status.code(), Some(0));
+    assert!(!log.exists());
+    // an unwritable log is an io error before any frame
+    let bad = dir.join("no-such-dir").join("calls.jsonl");
+    let out = vfx_env(&args, &[], &[("VFX_CALL_RECORD", bad.to_str().unwrap())]);
+    assert_eq!(out.status.code(), Some(4));
+    assert!(out.stdout.is_empty() && stderr_line(&out).contains("VFX_CALL_RECORD"));
+    let _ = std::fs::remove_dir_all(dir);
+}

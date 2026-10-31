@@ -35,6 +35,7 @@ use crate::apply::{frame_len, guarded, is_stdio, open_output, same_file};
 use crate::cli::ApplyArgs;
 use crate::clip::{output_frames, spool, IoNote, RawClip, SpoolGuard};
 use crate::error::CliError;
+use crate::record::CallRecord;
 use fx_core::{Effect, Env, Frame, Layer, LayerSet, ParamCurves, Rational, TemporalContext, TimeBase};
 use std::fs::File;
 use std::io::{self, IsTerminal, Write};
@@ -158,7 +159,7 @@ pub fn render_all(
     out: &mut dyn Write,
     notes: &mut dyn Write,
 ) -> Result<(), CliError> {
-    render_all_on(effect, args, time, curves, input, layers, frames, note, out, notes, None)
+    render_all_on(effect, args, time, curves, input, layers, frames, note, out, notes, None, None)
 }
 
 /// One frame and how its render ended, compared by the frame's wire bytes and the error's code
@@ -191,6 +192,7 @@ pub fn render_all_on(
     out: &mut dyn Write,
     notes: &mut dyn Write,
     device: Option<&Arc<retime_engine::device::exec::Executor>>,
+    record: Option<&CallRecord>,
 ) -> Result<(), CliError> {
     let (w, h, depth) = (args.width, args.height, args.depth);
     fx_core::gaps::take_recorded();
@@ -198,6 +200,9 @@ pub fn render_all_on(
     let handle: Option<Arc<dyn std::any::Any + Send + Sync>> =
         device.map(|e| Arc::new(retime_engine::stages::StageSet::new(e.clone())) as Arc<dyn std::any::Any + Send + Sync>);
     for n in 0..frames {
+        if let Some(record) = record {
+            record.begin_frame(n, time);
+        }
         let mut cx = TemporalContext::new(w, h, depth, time, n, frames);
         if let Some(quality) = args.quality {
             cx.quality = quality;
@@ -294,6 +299,7 @@ pub fn run(effect: &dyn Effect, args: &ApplyArgs) -> Result<(), CliError> {
     if args.check {
         return Ok(());
     }
+    let record = CallRecord::from_env()?;
 
     let (input, output) = (args.input.as_deref().filter(|p| !is_stdio(p)), args.output.as_deref());
     if let Some(o) = output.filter(|o| !is_stdio(o)) {
@@ -308,7 +314,7 @@ pub fn run(effect: &dyn Effect, args: &ApplyArgs) -> Result<(), CliError> {
     // closed by then, which Windows needs before it lets go of the name
     let mut spooled: Option<SpoolGuard> = None;
     let main = match input {
-        Some(path) => open_clip(path, format!("input {}", path.display()), args, time, &note)?,
+        Some(path) => open_clip(path, format!("input {}", path.display()), args, time, &note)?.with_record("input", record.as_ref()),
         None => {
             if io::stdin().is_terminal() {
                 return Err(CliError::usage("refusing to read raw frames from a terminal, pipe them in or use --in"));
@@ -316,7 +322,7 @@ pub fn run(effect: &dyn Effect, args: &ApplyArgs) -> Result<(), CliError> {
             let dir = args.tmp_dir.clone().unwrap_or_else(std::env::temp_dir);
             let (guard, file) = spool(&mut io::stdin().lock(), &dir)?;
             spooled = Some(guard);
-            RawClip::new(file, "input", (args.width, args.height, args.depth), time, note.clone())?
+            RawClip::new(file, "input", (args.width, args.height, args.depth), time, note.clone())?.with_record("input", record.as_ref())
         }
     };
     let main = match args.clip_fps {
@@ -332,7 +338,8 @@ pub fn run(effect: &dyn Effect, args: &ApplyArgs) -> Result<(), CliError> {
         let clip = match args.layer_fps.iter().find(|(k, _)| k == id) {
             Some((_, rate)) => clip.with_rate(*rate),
             None => clip,
-        };
+        }
+        .with_record(id, record.as_ref());
         layers.insert(id, Arc::new(clip));
     }
 
@@ -342,7 +349,10 @@ pub fn run(effect: &dyn Effect, args: &ApplyArgs) -> Result<(), CliError> {
     });
     let mut writer = open_output(output)?;
     let exec = device.executor.as_ref();
-    let result = render_all_on(effect, args, time, &curves, &main, &layers, frames, &note, &mut writer, &mut io::stderr(), exec);
+    if let Some(record) = &record {
+        record.run(args, fps, time, frames);
+    }
+    let result = render_all_on(effect, args, time, &curves, &main, &layers, frames, &note, &mut writer, &mut io::stderr(), exec, record.as_deref());
     if let Some(e) = exec {
         if std::env::var_os("VFX_DEVICE_REPORT").is_some() {
             eprintln!("vfx: note: device report: {}", e.summary());
@@ -352,7 +362,8 @@ pub fn run(effect: &dyn Effect, args: &ApplyArgs) -> Result<(), CliError> {
     drop(layers);
     drop(main);
     drop(spooled);
-    result
+    let logged = record.map_or(Ok(()), |r| r.finish());
+    result.and(logged)
 }
 
 #[cfg(test)]

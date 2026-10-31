@@ -1,0 +1,400 @@
+id	block	tags
+retime-fgbg.size-w3.pan-1x1.d8.90864f27	size	tiny
+retime-fgbg.size-w3.fastbox-1x1.d16.c1f4d776	size	tiny
+retime-fgbg.size-w3.movebox-1x1.d32.670657c1	size	tiny
+retime-fgbg.size-w3.fastbox-2x2.d8.d4877bae	size	tiny
+retime-fgbg.size-w3.alphabox-2x2.d16.30a0b6ba	size	tiny
+retime-fgbg.size-w3.pan-2x2.d32.3065e7ff	size	tiny
+retime-fgbg.size-w3.alphabox-2x3.d8.c5754c85	size	tiny
+retime-fgbg.size-w3.movebox-2x3.d16.daaa90cf	size	tiny
+retime-fgbg.size-w3.fastbox-2x3.d32.2f4bbd9b	size	tiny
+retime-fgbg.size-w3.movebox-3x2.d8.703e00b7	size	tiny
+retime-fgbg.size-w3.pan-3x2.d16.c920043d	size	tiny
+retime-fgbg.size-w3.alphabox-3x2.d32.1ca77c53	size	tiny
+retime-fgbg.size-w3.pan-1x5.d8.2e7a0fd8	size	tiny
+retime-fgbg.size-w3.fastbox-1x5.d16.23453826	size	tiny
+retime-fgbg.size-w3.movebox-1x5.d32.8d13093a	size	tiny
+retime-fgbg.size-w3.fastbox-5x1.d8.033b8e94	size	tiny
+retime-fgbg.size-w3.alphabox-5x1.d16.372109a7	size	tiny
+retime-fgbg.size-w3.pan-5x1.d32.787e54f2	size	tiny
+retime-fgbg.size-w3.alphabox-3x3.d8.4a24f0d8	size	tiny
+retime-fgbg.size-w3.movebox-3x3.d16.4d9a275c	size	tiny
+retime-fgbg.size-w3.fastbox-3x3.d32.4495c1f4	size	tiny
+retime-fgbg.size-w3.movebox-4x4.d8.62794c80	size	
+retime-fgbg.size-w3.pan-4x4.d16.fff4e6f9	size	
+retime-fgbg.size-w3.alphabox-4x4.d32.c44a0982	size	
+retime-fgbg.size-w3.pan-5x5.d8.ca8f1c77	size	
+retime-fgbg.size-w3.fastbox-5x5.d16.5dd1ffac	size	
+retime-fgbg.size-w3.movebox-5x5.d32.2b0136e0	size	
+retime-fgbg.size-w3.fastbox-7x9.d8.43b82120	size	
+retime-fgbg.size-w3.alphabox-7x9.d16.ccb1634a	size	
+retime-fgbg.size-w3.pan-7x9.d32.ab67b4a9	size	
+retime-fgbg.size-w3.alphabox-9x7.d8.1c4fcc4d	size	
+retime-fgbg.size-w3.movebox-9x7.d16.3a4db9b0	size	
+retime-fgbg.size-w3.fastbox-9x7.d32.4880a2ec	size	
+retime-fgbg.size-w3.movebox-16x12.d8.617cf4cc	size	
+retime-fgbg.size-w3.pan-16x12.d16.f2d2b8a8	size	
+retime-fgbg.size-w3.alphabox-16x12.d32.ea0588e2	size	
+retime-fgbg.size-w3.pan-17x13.d8.6027e47c	size	
+retime-fgbg.size-w3.fastbox-17x13.d16.c17007bb	size	
+retime-fgbg.size-w3.movebox-17x13.d32.7b3a526c	size	
+retime-fgbg.size-w3.fastbox-23x31.d8.7fff1924	size	
+retime-fgbg.size-w3.alphabox-23x31.d16.6eb03cad	size	
+retime-fgbg.size-w3.pan-23x31.d32.941f7ed2	size	
+retime-fgbg.size-w3.alphabox-37x23.d8.f99975d6	size	
+retime-fgbg.size-w3.movebox-37x23.d16.21473378	size	
+retime-fgbg.size-w3.fastbox-37x23.d32.ae3fa2e6	size	
+retime-fgbg.size-w3.movebox-64x48.d8.9d9a6ac0	size	
+retime-fgbg.size-w3.pan-64x48.d16.4c530b50	size	
+retime-fgbg.size-w3.alphabox-64x48.d32.8122b4bb	size	
+retime-fgbg.size-default.movebox-1x1.d8.610fa225	size	defaults
+retime-fgbg.size-default.movebox-1x1.d16.ebb43bc6	size	defaults
+retime-fgbg.size-default.movebox-1x1.d32.28d9edf5	size	defaults
+retime-fgbg.size-default.movebox-2x3.d8.48154d07	size	defaults
+retime-fgbg.size-default.movebox-2x3.d16.42ed67bf	size	defaults
+retime-fgbg.size-default.movebox-2x3.d32.05830767	size	defaults
+retime-fgbg.size-default.movebox-5x5.d8.0c0c822e	size	defaults
+retime-fgbg.size-default.movebox-5x5.d16.01846ec5	size	defaults
+retime-fgbg.size-default.movebox-5x5.d32.75d689c3	size	defaults
+retime-fgbg.size-default.movebox-17x13.d8.6b21ff18	size	defaults
+retime-fgbg.size-default.movebox-17x13.d16.3c3639eb	size	defaults
+retime-fgbg.size-default.movebox-17x13.d32.07b48ffc	size	defaults
+retime-fgbg.size-default.movebox-64x48.d8.812134c5	size	defaults
+retime-fgbg.size-default.movebox-64x48.d16.acf8af4f	size	defaults
+retime-fgbg.size-default.movebox-64x48.d32.7c0a26cf	size	defaults
+retime-fgbg.size-w1.pan-2x2.d8.5c2f900d	size	
+retime-fgbg.size-w1.pan-2x2.d32.b7b588a8	size	
+retime-fgbg.size-w1.pan-3x3.d8.b39cc39f	size	
+retime-fgbg.size-w1.pan-3x3.d32.2f4b6fca	size	
+retime-fgbg.size-w1.pan-7x9.d8.5df0be29	size	
+retime-fgbg.size-w1.pan-7x9.d32.188be3b0	size	
+retime-fgbg.size-w1.pan-16x12.d8.b809ee64	size	
+retime-fgbg.size-w1.pan-16x12.d32.5df867ee	size	
+retime-fgbg.warp1.movebox-24x16.d8.9b1462d3	warping	
+retime-fgbg.warp1.movebox-24x16.d8.a78f5273	warping	
+retime-fgbg.warp1.movebox-24x16.d8.189c3be8	warping	
+retime-fgbg.warp1.movebox-24x16.d16.57b13848	warping	
+retime-fgbg.warp1.movebox-24x16.d16.97e67692	warping	
+retime-fgbg.warp1.movebox-24x16.d16.7340d759	warping	
+retime-fgbg.warp1.movebox-24x16.d32.b8574e14	warping	
+retime-fgbg.warp1.movebox-24x16.d32.ba601979	warping	
+retime-fgbg.warp1.movebox-24x16.d32.bb11040e	warping	
+retime-fgbg.warp2.movebox-24x16.d8.84193daf	warping	
+retime-fgbg.warp2.movebox-24x16.d8.1a13de05	warping	
+retime-fgbg.warp2.movebox-24x16.d8.8af48ab4	warping	
+retime-fgbg.warp2.movebox-24x16.d16.160e3bbf	warping	
+retime-fgbg.warp2.movebox-24x16.d16.d92d1523	warping	
+retime-fgbg.warp2.movebox-24x16.d16.0ad9a76a	warping	
+retime-fgbg.warp2.movebox-24x16.d32.5d31baca	warping	
+retime-fgbg.warp2.movebox-24x16.d32.8eae587b	warping	
+retime-fgbg.warp2.movebox-24x16.d32.424287ca	warping	
+retime-fgbg.warp3.movebox-24x16.d8.187cad27	warping	
+retime-fgbg.warp3.movebox-24x16.d8.fbe6c495	warping	
+retime-fgbg.warp3.movebox-24x16.d8.15db25d5	warping	
+retime-fgbg.warp3.movebox-24x16.d16.0ec0c18e	warping	
+retime-fgbg.warp3.movebox-24x16.d16.5e15a74b	warping	
+retime-fgbg.warp3.movebox-24x16.d16.3aeb2b5a	warping	
+retime-fgbg.warp3.movebox-24x16.d32.4e0aa9f0	warping	
+retime-fgbg.warp3.movebox-24x16.d32.1973d907	warping	
+retime-fgbg.warp3.movebox-24x16.d32.d045364c	warping	
+retime-fgbg.warp4.movebox-24x16.d8.6370ab56	warping	
+retime-fgbg.warp4.movebox-24x16.d8.a4841f19	warping	
+retime-fgbg.warp4.movebox-24x16.d8.0d6c1937	warping	
+retime-fgbg.warp4.movebox-24x16.d16.0dfc47e2	warping	
+retime-fgbg.warp4.movebox-24x16.d16.d3ac5747	warping	
+retime-fgbg.warp4.movebox-24x16.d16.a600a5e0	warping	
+retime-fgbg.warp4.movebox-24x16.d32.1c8d222f	warping	
+retime-fgbg.warp4.movebox-24x16.d32.de9a8d85	warping	
+retime-fgbg.warp4.movebox-24x16.d32.1ab848fd	warping	
+retime-fgbg.interp1-w1.alphabox-17x13.d8.aec8dc61	interp	
+retime-fgbg.interp2-w1.alphabox-17x13.d8.fdb95297	interp	
+retime-fgbg.interp3-w1.alphabox-17x13.d8.0d29c010	interp	
+retime-fgbg.interp1-w2.alphabox-17x13.d8.4dc2ae8c	interp	
+retime-fgbg.interp2-w2.alphabox-17x13.d8.d434b918	interp	
+retime-fgbg.interp3-w2.alphabox-17x13.d8.65568e27	interp	
+retime-fgbg.interp1-w3.alphabox-17x13.d8.5efb99bc	interp	
+retime-fgbg.interp2-w3.alphabox-17x13.d8.b9f388ad	interp	
+retime-fgbg.interp3-w3.alphabox-17x13.d8.303c7a28	interp	
+retime-fgbg.interp1-w4.alphabox-17x13.d8.2e23fd1c	interp	
+retime-fgbg.interp2-w4.alphabox-17x13.d8.8bb38ec6	interp	
+retime-fgbg.interp3-w4.alphabox-17x13.d8.689f265a	interp	
+retime-fgbg.interp1-w3.movebox-16x12.d16.90d52a06	interp	
+retime-fgbg.interp1-w4.pan-16x12.d16.cfdec237	interp	
+retime-fgbg.interp1-w2.movebox-16x12.d16.4cb33eb6	interp	
+retime-fgbg.interp1-w3.movebox-16x12.d32.5b7fb75b	interp	
+retime-fgbg.interp1-w4.pan-16x12.d32.fe29ea0e	interp	
+retime-fgbg.interp1-w2.movebox-16x12.d32.40b961d2	interp	
+retime-fgbg.interp3-w3.movebox-16x12.d16.0c561bb8	interp	
+retime-fgbg.interp3-w4.pan-16x12.d16.ce767965	interp	
+retime-fgbg.interp3-w2.movebox-16x12.d16.84fa8227	interp	
+retime-fgbg.interp3-w3.movebox-16x12.d32.7bd51b88	interp	
+retime-fgbg.interp3-w4.pan-16x12.d32.5834f016	interp	
+retime-fgbg.interp3-w2.movebox-16x12.d32.f908a97c	interp	
+retime-fgbg.vec1-w1.movebox-32x24.d16.1f329edb	vectors	
+retime-fgbg.vec1-w3.movebox-32x24.d16.4281f1e4	vectors	
+retime-fgbg.vec2-w1.movebox-32x24.d16.189d346f	vectors	
+retime-fgbg.vec2-w3.movebox-32x24.d16.103f858e	vectors	
+retime-fgbg.vec3-w1.movebox-32x24.d16.7959785a	vectors	
+retime-fgbg.vec3-w3.movebox-32x24.d16.eb18b2ef	vectors	
+retime-fgbg.vec4-w1.movebox-32x24.d16.cea07e91	vectors	
+retime-fgbg.vec4-w3.movebox-32x24.d16.b943bb13	vectors	
+retime-fgbg.vec5-w1.movebox-32x24.d16.c0a9521e	vectors	
+retime-fgbg.vec5-w3.movebox-32x24.d16.84ec8a79	vectors	
+retime-fgbg.vec4-w4.fastbox-32x24.d8.896ff0e5	vectors	
+retime-fgbg.vec3-w2.fastbox-32x24.d8.76055479	vectors	
+retime-fgbg.prep1.pan-20x14.d8.4d3db2db	prep	
+retime-fgbg.prep1.pan-20x14.d32.998b211c	prep	
+retime-fgbg.prep2.pan-20x14.d8.9f9d5114	prep	
+retime-fgbg.prep2.pan-20x14.d32.2eb9ce70	prep	
+retime-fgbg.prep3.pan-20x14.d8.15f96473	prep	
+retime-fgbg.prep3.pan-20x14.d32.5f724e31	prep	
+retime-fgbg.prep2-w1.pan-20x14.d16.ea76727c	prep	
+retime-fgbg.prep3-w1.pan-20x14.d16.f4dba8bb	prep	
+retime-fgbg.sens0.fastbox-24x16.d8.598da370	sens	
+retime-fgbg.sens-0.fastbox-24x16.d8.aa0b3f2e	sens	negzero
+retime-fgbg.sens1.fastbox-24x16.d8.acc31074	sens	
+retime-fgbg.sens35.fastbox-24x16.d8.64ecf996	sens	
+retime-fgbg.sens70.fastbox-24x16.d8.6da14aaa	sens	
+retime-fgbg.sens99.99.fastbox-24x16.d8.a4887da5	sens	
+retime-fgbg.sens100.fastbox-24x16.d8.c7b416b0	sens	
+retime-fgbg.sens0-w1.fastbox-24x16.d16.e6111f04	sens	
+retime-fgbg.sens50-w1.fastbox-24x16.d16.a0fe08d7	sens	
+retime-fgbg.sens100-w1.fastbox-24x16.d16.1190cde8	sens	
+retime-fgbg.blur0-s50.movebox-20x14.d8.5f01e659	blur	
+retime-fgbg.blur0-s200.movebox-20x14.d8.66e7ec46	blur	
+retime-fgbg.blur-0-s50.movebox-20x14.d8.788589b4	blur	negzero
+retime-fgbg.blur-0-s200.movebox-20x14.d8.c4abf8c7	blur	negzero
+retime-fgbg.blur0.01-s50.movebox-20x14.d8.96245c49	blur	
+retime-fgbg.blur0.01-s200.movebox-20x14.d8.d7fb46c5	blur	
+retime-fgbg.blur1-s50.movebox-20x14.d8.7f202202	blur	
+retime-fgbg.blur1-s200.movebox-20x14.d8.d929ca04	blur	
+retime-fgbg.blur2.5-s50.movebox-20x14.d8.b3a727d2	blur	
+retime-fgbg.blur2.5-s200.movebox-20x14.d8.b02974d1	blur	
+retime-fgbg.blur5-s50.movebox-20x14.d8.57ad4a9f	blur	
+retime-fgbg.blur5-s200.movebox-20x14.d8.900a5c03	blur	
+retime-fgbg.blur10-s50.movebox-20x14.d8.3a2b9fd8	blur	
+retime-fgbg.blur10-s200.movebox-20x14.d8.045db58e	blur	
+retime-fgbg.blur3-w1.pan-20x14.d16.2de81fa3	blur	
+retime-fgbg.blur3-w1.pan-20x14.d32.12c0811e	blur	
+retime-fgbg.blur3-w2.pan-20x14.d16.c108a96e	blur	
+retime-fgbg.blur3-w2.pan-20x14.d32.8e22d32f	blur	
+retime-fgbg.blur3-w4.pan-20x14.d16.beed4925	blur	
+retime-fgbg.blur3-w4.pan-20x14.d32.95286859	blur	
+retime-fgbg.blur1-s100.movebox-20x14.d8.730f713a	blur	
+retime-fgbg.blur2-vec1.movebox-20x14.d8.22fb4ba1	blur	
+retime-fgbg.blur10-neg.movebox-20x14.d32.21ca1c32	blur	
+retime-fgbg.trk-w1.pan-16x12.d8.f712eaf9	wrap	
+retime-fgbg.trk-w1.pan-16x12.d16.91e8a395	wrap	
+retime-fgbg.trk-w1.pan-16x12.d32.604a52c9	wrap	
+retime-fgbg.trk-w2.pan-16x12.d8.777c0ead	wrap	
+retime-fgbg.trk-w2.pan-16x12.d16.e1733d97	wrap	
+retime-fgbg.trk-w2.pan-16x12.d32.66077466	wrap	
+retime-fgbg.trk-w3.pan-16x12.d8.d8c72c93	wrap	
+retime-fgbg.trk-w3.pan-16x12.d16.e6cc64bc	wrap	
+retime-fgbg.trk-w3.pan-16x12.d32.cb81911b	wrap	
+retime-fgbg.trk-w4.pan-16x12.d8.749f2598	wrap	
+retime-fgbg.trk-w4.pan-16x12.d16.a52ec1ab	wrap	
+retime-fgbg.trk-w4.pan-16x12.d32.de75426e	wrap	
+retime-fgbg.trk-blur.pan-16x12.d8.60af1861	wrap	
+retime-fgbg.v360-w1.alphabox-16x12.d8.6b3c558d	wrap	
+retime-fgbg.v360-w2.alphabox-16x12.d8.e2cc81ef	wrap	
+retime-fgbg.v360-w3.alphabox-16x12.d8.96ae4469	wrap	
+retime-fgbg.v360-w4.alphabox-16x12.d8.613de1d5	wrap	
+retime-fgbg.v360-w3-32.alphabox-16x12.d32.0618ff14	wrap	
+retime-fgbg.disp1.movebox-16x12.d8.946deb87	display	
+retime-fgbg.disp2.movebox-16x12.d8.a2443865	display	
+retime-fgbg.disp3.movebox-16x12.d8.fc529c62	display	nomatte
+retime-fgbg.disp4.movebox-16x12.d8.3259ae83	display	nomatte
+retime-fgbg.disp5.movebox-16x12.d8.e5c38ac7	display	nomatte
+retime-fgbg.disp6.movebox-16x12.d8.bf2f0383	display	nomatte
+retime-fgbg.disp2.movebox-16x12.d16.ebb5c982	display	
+retime-fgbg.disp2.movebox-16x12.d32.a33c14a1	display	
+retime-fgbg.disp2-speed.movebox-16x12.d8.0b00e1e4	display	
+retime-fgbg.disp6-32.movebox-16x12.d32.234a1883	display	nomatte
+retime-fgbg.disp3-w1.movebox-16x12.d8.7fa589d4	display	nomatte
+retime-fgbg.speed-10000.movebox-16x12.d8.6b0bc53e	time	
+retime-fgbg.speed-100.movebox-16x12.d8.97e35489	time	
+retime-fgbg.speed-50.movebox-16x12.d8.f708a881	time	
+retime-fgbg.speed0.movebox-16x12.d8.8f13ebef	time	
+retime-fgbg.speed-0.movebox-16x12.d8.2f94c71c	time	negzero
+retime-fgbg.speed25.movebox-16x12.d8.1247e876	time	
+retime-fgbg.speed100.movebox-16x12.d8.b3444f3f	time	
+retime-fgbg.speed250.movebox-16x12.d8.829903de	time	
+retime-fgbg.speed400.movebox-16x12.d8.8adc2f19	time	
+retime-fgbg.speed10000.movebox-16x12.d8.295da8fe	time	
+retime-fgbg.fnum0.movebox-16x12.d16.f7cde833	time	
+retime-fgbg.fnum-0.movebox-16x12.d16.2b7728b8	time	negzero
+retime-fgbg.fnum1.movebox-16x12.d16.b6651a60	time	
+retime-fgbg.fnum1.5.movebox-16x12.d16.29eb2053	time	
+retime-fgbg.fnum2.25.movebox-16x12.d16.bce27d8f	time	
+retime-fgbg.fnum3.movebox-16x12.d16.bf93477b	time	
+retime-fgbg.fnum-1.movebox-16x12.d16.2759a8ac	time	
+retime-fgbg.fnum200000.movebox-16x12.d16.538ed929	time	
+retime-fgbg.fnum-200000.movebox-16x12.d16.7792b819	time	
+retime-fgbg.fnum-w1.movebox-16x12.d8.e8e646a1	time	
+retime-fgbg.inrate12.movebox-16x12.d8.88b6a97d	time	
+retime-fgbg.inrate24.movebox-16x12.d8.d5aa6aa9	time	
+retime-fgbg.inrate29.97.movebox-16x12.d8.d3d384b4	time	
+retime-fgbg.inrate0.10000000149011612.movebox-16x12.d8.9fee6642	time	
+retime-fgbg.inrate1000.movebox-16x12.d8.af5db40a	time	
+retime-fgbg.inrate59.94.movebox-16x12.d8.e539a9a8	time	
+retime-fgbg.inrate23.976.movebox-16x12.d8.09ccb2e9	time	
+retime-fgbg.fields2.movebox-16x12.d8.4b51c569	time	
+retime-fgbg.fields3.movebox-16x12.d8.196cd444	time	
+retime-fgbg.plenty0.movebox-16x12.d8.2f05f5d5	time	
+retime-fgbg.ntsc-w3.movebox-16x12.d16.b9d596d8	time	
+retime-fgbg.ntsc-w1.movebox-16x12.d16.cd7ce7f3	time	
+retime-fgbg.mark1.movebox-16x12.d8.52efa2c9	time	
+retime-fgbg.mark2.movebox-16x12.d8.dadb8100	time	
+retime-fgbg.mark3.movebox-16x12.d8.9df47598	time	
+retime-fgbg.mark4.movebox-16x12.d8.4aecf952	time	
+retime-fgbg.mark5.movebox-16x12.d8.33bf1a42	time	
+retime-fgbg.ramp-speed.movebox-16x12.d8.38ccb6e9	keyed	standin
+retime-fgbg.ramp-fnum.movebox-16x12.d16.aa30eb36	keyed	standin
+retime-fgbg.ramp-blur.movebox-16x12.d32.910446fe	keyed	standin
+retime-fgbg.ramp-sens.fastbox-16x12.d8.be61da52	keyed	standin
+retime-fgbg.mark-cut.movebox-16x12.d8.5f6bdc7e	keyed	standin
+retime-fgbg.rate29.97-s100.movebox-8x6.d8.8f2f0dd7	time2	
+retime-fgbg.rate29.97-s250.movebox-8x6.d8.2e2c9427	time2	
+retime-fgbg.rate23.976-s100.movebox-8x6.d8.0c7a206b	time2	
+retime-fgbg.rate23.976-s250.movebox-8x6.d8.1e756a8c	time2	
+retime-fgbg.rate17.3-s100.movebox-8x6.d8.3ceaf12c	time2	
+retime-fgbg.rate17.3-s250.movebox-8x6.d8.a9852990	time2	
+retime-fgbg.rate7.7-s100.movebox-8x6.d8.0c7bc474	time2	
+retime-fgbg.rate7.7-s250.movebox-8x6.d8.568c5b49	time2	
+retime-fgbg.rate41.123-s100.movebox-8x6.d8.74ed4300	time2	
+retime-fgbg.rate41.123-s250.movebox-8x6.d8.8a07b3ab	time2	
+retime-fgbg.rate24.024-s100.movebox-8x6.d8.5a990224	time2	
+retime-fgbg.rate24.024-s250.movebox-8x6.d8.1704d50b	time2	
+retime-fgbg.rate24.5-s100.movebox-8x6.d8.d246bcef	time2	
+retime-fgbg.rate24.5-s250.movebox-8x6.d8.8e7c4b80	time2	
+retime-fgbg.rate29.97-s100-16.pan-8x6.d16.c323bcd8	time2	
+retime-fgbg.rate7.7-fnum.movebox-8x6.d8.e581d64a	time2	
+retime-fgbg.rate17.3-mark.movebox-8x6.d8.f2f74eba	time2	
+retime-fgbg.specrgb-w1.specrgb-8x6.d32.863c5a4f	spec	special
+retime-fgbg.specrgb-w2.specrgb-8x6.d32.b352a2a5	spec	special
+retime-fgbg.specrgb-w3.specrgb-8x6.d32.3893928d	spec	special
+retime-fgbg.specrgb-w4.specrgb-8x6.d32.537e8a74	spec	special
+retime-fgbg.specrgb-w3-big.specrgb-16x12.d32.3bd060f0	spec	special
+retime-fgbg.specrgb-disp2.specrgb-8x6.d32.e6bce056	spec	special
+retime-fgbg.specall-w1.specall-8x6.d32.9c377e6f	spec	special
+retime-fgbg.specall-w2.specall-8x6.d32.51f9e95e	spec	special
+retime-fgbg.specall-w3.specall-8x6.d32.72669dc0	spec	special
+retime-fgbg.specall-w4.specall-8x6.d32.4f4319a6	spec	special
+retime-fgbg.specall-w3-big.specall-16x12.d32.fcdd029f	spec	special
+retime-fgbg.specall-disp2.specall-8x6.d32.e3430e99	spec	special
+retime-fgbg.specnan-w1.specnan-8x6.d32.73031f64	spec	special
+retime-fgbg.specnan-w2.specnan-8x6.d32.c2fd685b	spec	special
+retime-fgbg.specnan-w3.specnan-8x6.d32.311bf297	spec	special
+retime-fgbg.specnan-w4.specnan-8x6.d32.a054c65d	spec	special
+retime-fgbg.specnan-w3-big.specnan-16x12.d32.613bbc0a	spec	special
+retime-fgbg.specnan-disp2.specnan-8x6.d32.1fa94022	spec	special
+retime-fgbg.specbox-w1.specbox-8x6.d32.c084fab1	spec	special
+retime-fgbg.specbox-w2.specbox-8x6.d32.e9677db8	spec	special
+retime-fgbg.specbox-w3.specbox-8x6.d32.892eb89b	spec	special
+retime-fgbg.specbox-w4.specbox-8x6.d32.93d3a3cb	spec	special
+retime-fgbg.specbox-w3-big.specbox-16x12.d32.c66b09c8	spec	special
+retime-fgbg.specbox-disp2.specbox-8x6.d32.c7ee8427	spec	special
+retime-fgbg.specboxa-w1.specboxa-8x6.d32.3582ae82	spec	special
+retime-fgbg.specboxa-w2.specboxa-8x6.d32.b57d3e66	spec	special
+retime-fgbg.specboxa-w3.specboxa-8x6.d32.b7781a6a	spec	special
+retime-fgbg.specboxa-w4.specboxa-8x6.d32.0199b8dd	spec	special
+retime-fgbg.specboxa-w3-big.specboxa-16x12.d32.92356f04	spec	special
+retime-fgbg.specboxa-disp2.specboxa-8x6.d32.d6f186ce	spec	special
+retime-fgbg.specbox-blur.specbox-16x12.d32.de37ff21	spec	special
+retime-fgbg.specbox-v1.specbox-16x12.d32.7701d860	spec	special
+retime-fgbg.specbox-w1-i3.specbox-16x12.d32.3e7caa0d	spec	special
+retime-fgbg.specbox-w3-i1.specbox-16x12.d32.b9f017e1	spec	special
+retime-fgbg.specbox-trk.specbox-16x12.d32.790ebf51	spec	special
+retime-fgbg.specbox-prep3.specbox-16x12.d32.943f2900	spec	special
+retime-fgbg.edge-w1.edge-9x7.d8.32b3a8be	spec	special
+retime-fgbg.edge-w2.edge-9x7.d8.753df1e9	spec	special
+retime-fgbg.edge-w3.edge-9x7.d8.8365aca7	spec	special
+retime-fgbg.edge-w4.edge-9x7.d8.df6249e0	spec	special
+retime-fgbg.edge-w3-big.edge-16x12.d8.e970cc2c	spec	special
+retime-fgbg.edge-w1.edge-9x7.d16.078a522d	spec	special
+retime-fgbg.edge-w2.edge-9x7.d16.f0b7e9ec	spec	special
+retime-fgbg.edge-w3.edge-9x7.d16.b8d1805d	spec	special
+retime-fgbg.edge-w4.edge-9x7.d16.8708e36f	spec	special
+retime-fgbg.edge-w3-big.edge-16x12.d16.b2f53503	spec	special
+retime-fgbg.mot-movebox-w1.movebox-48x32.d16.728108a7	motion	
+retime-fgbg.mot-movebox-w2.movebox-48x32.d8.4d75edb5	motion	
+retime-fgbg.mot-movebox-w3.movebox-48x32.d32.64387cd9	motion	
+retime-fgbg.mot-movebox-w4.movebox-48x32.d16.d24b254b	motion	
+retime-fgbg.mot-fastbox-w1.fastbox-48x32.d32.e1e0c549	motion	
+retime-fgbg.mot-fastbox-w2.fastbox-48x32.d16.e6c4813c	motion	
+retime-fgbg.mot-fastbox-w3.fastbox-48x32.d8.c3345fdc	motion	
+retime-fgbg.mot-fastbox-w4.fastbox-48x32.d32.0d594dda	motion	
+retime-fgbg.mot-pan-w1.pan-48x32.d8.31ed082e	motion	
+retime-fgbg.mot-pan-w2.pan-48x32.d32.af0a4fe7	motion	
+retime-fgbg.mot-pan-w3.pan-48x32.d16.0719f004	motion	
+retime-fgbg.mot-pan-w4.pan-48x32.d8.b655a90b	motion	
+retime-fgbg.mot-backbox-w1.backbox-48x32.d16.e2170739	motion	
+retime-fgbg.mot-backbox-w2.backbox-48x32.d8.63188eca	motion	
+retime-fgbg.mot-backbox-w3.backbox-48x32.d32.b5a585d3	motion	
+retime-fgbg.mot-backbox-w4.backbox-48x32.d16.6643c592	motion	
+retime-fgbg.mot-64x48.fastbox-64x48.d8.f5e05927	motion	
+retime-fgbg.mot-64x48-w4.movebox-64x48.d8.c4a15732	motion	
+retime-fgbg.mot-64x48.fastbox-64x48.d16.07f1b8f3	motion	
+retime-fgbg.mot-64x48-w4.movebox-64x48.d16.a57f9723	motion	
+retime-fgbg.mot-64x48.fastbox-64x48.d32.6588e18f	motion	
+retime-fgbg.mot-64x48-w4.movebox-64x48.d32.c04fd49e	motion	
+retime-fgbg.mot-back.backbox-32x24.d8.cb3a872d	motion	
+retime-fgbg.mot-hi-sens.fastbox-40x30.d16.05902a2f	motion	
+retime-fgbg.mot-lo-vec.fastbox-40x30.d16.d06f929a	motion	
+retime-fgbg.alpha-w1.alphabox-16x12.d8.294cf7a8	alpha	
+retime-fgbg.alpha-w1.alphabox-16x12.d16.a2e58192	alpha	
+retime-fgbg.alpha-w1.alphabox-16x12.d32.6177058f	alpha	
+retime-fgbg.alpha-w2.alphabox-16x12.d8.e63e88b9	alpha	
+retime-fgbg.alpha-w2.alphabox-16x12.d16.48b78614	alpha	
+retime-fgbg.alpha-w2.alphabox-16x12.d32.9e941e0d	alpha	
+retime-fgbg.alpha-w3.alphabox-16x12.d8.eddcf3f7	alpha	
+retime-fgbg.alpha-w3.alphabox-16x12.d16.1b172003	alpha	
+retime-fgbg.alpha-w4.alphabox-16x12.d8.c74edfa6	alpha	
+retime-fgbg.alpha-w4.alphabox-16x12.d16.19603355	alpha	
+retime-fgbg.alpha-w4.alphabox-16x12.d32.b5f8627d	alpha	
+retime-fgbg.noise-w1.noise-12x9.d8.b25e4ab2	noise	
+retime-fgbg.noise-w1.noise-12x9.d16.d66f0312	noise	
+retime-fgbg.noise-w1.noise-12x9.d32.33cea6a2	noise	
+retime-fgbg.noise-w3.noise-12x9.d8.79f2e201	noise	
+retime-fgbg.noise-w3.noise-12x9.d16.e9ba9166	noise	
+retime-fgbg.noise-w3.noise-12x9.d32.bcdc89a0	noise	
+retime-fgbg.flat-w1.flat-12x9.d8.aee0fb58	noise	
+retime-fgbg.flat-w3.flat-12x9.d8.cc5eb7a4	noise	
+retime-fgbg.flat-w3-32.flat-12x9.d32.7a9cc598	noise	
+retime-fgbg.mix00.backbox-17x13.d32.d1121126	mix	
+retime-fgbg.mix01.fastbox-8x8.d8.0c80cf76	mix	
+retime-fgbg.mix02.alphabox-16x12.d8.edad2f7e	mix	
+retime-fgbg.mix03.movebox-17x13.d32.8dc9d18c	mix	
+retime-fgbg.mix04.movebox-8x8.d32.f006815e	mix	
+retime-fgbg.mix05.movebox-16x12.d8.b53fab55	mix	
+retime-fgbg.mix06.pan-16x12.d16.9622fe7c	mix	
+retime-fgbg.mix07.backbox-8x8.d8.e1c5b598	mix	
+retime-fgbg.mix08.movebox-31x21.d32.3f6a9135	mix	
+retime-fgbg.mix09.pan-16x12.d8.8b0d60f8	mix	
+retime-fgbg.mix10.pan-23x15.d32.760513a6	mix	
+retime-fgbg.mix11.fastbox-31x21.d8.4820d417	mix	
+retime-fgbg.mix12.fastbox-23x15.d16.d82d3b33	mix	
+retime-fgbg.mix13.fastbox-12x20.d16.e3606d18	mix	
+retime-fgbg.mix14.movebox-16x12.d16.ec3a7399	mix	
+retime-fgbg.mix15.pan-17x13.d32.be70f273	mix	
+retime-fgbg.mix16.fastbox-17x13.d32.c1685736	mix	
+retime-fgbg.mix17.fastbox-16x12.d8.2909b4d1	mix	
+retime-fgbg.mix18.pan-8x8.d16.151bbe3c	mix	
+retime-fgbg.mix19.pan-8x8.d8.fc6b0842	mix	
+retime-fgbg.mix20.movebox-8x8.d8.c758565a	mix	
+retime-fgbg.mix21.alphabox-12x20.d8.547c1b9c	mix	
+retime-fgbg.mix22.movebox-8x8.d16.c61aeec8	mix	
+retime-fgbg.mix23.pan-23x15.d32.9fae2ee2	mix	
+retime-fgbg.mix24.alphabox-31x21.d16.5a46641a	mix	
+retime-fgbg.mix25.pan-23x15.d8.8d4b084a	mix	
+retime-fgbg.mix26.movebox-12x20.d16.8798183a	mix	
+retime-fgbg.mix27.alphabox-12x20.d8.a1098d59	mix	
+retime-fgbg.mix28.movebox-12x20.d8.d5f95e55	mix	
+retime-fgbg.mix29.alphabox-16x12.d32.e31c1a29	mix	
+retime-fgbg.mix30.movebox-12x20.d16.06ce1345	mix	
+retime-fgbg.mix31.fastbox-8x8.d16.694254e8	mix	
+retime-fgbg.mix32.backbox-16x12.d16.8dd0f3f0	mix	
+retime-fgbg.mix33.alphabox-8x8.d16.6a79e4ca	mix	
+retime-fgbg.mix34.alphabox-8x8.d8.7727ee61	mix	
+retime-fgbg.mix35.alphabox-12x20.d16.d7152353	mix	

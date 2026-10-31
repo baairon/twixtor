@@ -21,11 +21,10 @@ pub use prerender::{LAYER_FG_MATTE, LAYER_SOURCE, LAYER_VECTORS_NEXT, LAYER_VECT
 
 pub struct VectorsIn;
 
-/// Default of "Input: Frame Rate" and "Output: Frame Rate": the 32 bit float 29.97 widened to a
-/// double, not the double 29.97.
+/// Default of "Input: Frame Rate": the 32 bit float 29.97 widened to a double, not the double 29.97.
 pub const FRAME_RATE_DEFAULT: f64 = 29.97_f32 as f64;
 
-/// Valid and slider minimum of both frame rate sliders: the 32 bit float 0.1 widened to a double.
+/// Valid and slider minimum of the frame rate slider: the 32 bit float 0.1 widened to a double.
 pub const FRAME_RATE_MIN: f64 = 0.1_f32 as f64;
 
 fn popup(id: &'static str, name: &'static str, choices: &[&str], default: u32) -> ParamSpec {
@@ -83,7 +82,12 @@ impl Effect for VectorsIn {
     fn params(&self) -> Vec<ParamSpec> {
         let mut v = vec![
             // Value 2 (Source) shows the source layer only.
-            popup("display", "Display", &["Output", "Source", "FG1", "FG2", "FG3", "Background"], 1),
+            popup(
+                "display",
+                "Display",
+                &["Twixtored Output", "Source", "FG1 Twixtored", "FG2 Twixtored", "FG3 Twixtored", "Background Twixtored"],
+                1,
+            ),
             // Enabled only while Display is "Source".
             popup(
                 "src_mark_segments",
@@ -113,21 +117,11 @@ impl Effect for VectorsIn {
             // Float slider, enabled only in Frame Number mode.
             slider("frame_num", "Frame Num", (-200000.0, 200000.0), (0.0, 2000.0), 0.0, 2),
             // Default is Blend.
-            popup("frame_interp", "Frame Interp", &["Nearest", "Blend", "Weighted Blend"], 2),
+            popup("frame_interp", "Frame Interp", &["Nearest", "Blend", "Motion Weighted Blend"], 2),
             // Default is Forward.
             popup("warping", "Warping", &["Inverse", "Forward"], 2),
             // Fixed point slider.
-            slider("blur_compensation", "Blur Compensation", (0.0, 10.0), (0.0, 10.0), 0.0, 2),
-            // Float slider. The value is read and then ignored: the output rate is the composition
-            // frame rate.
-            slider(
-                "output_frame_rate",
-                "Output: Frame Rate",
-                (FRAME_RATE_MIN, 1000.0),
-                (FRAME_RATE_MIN, 1000.0),
-                FRAME_RATE_DEFAULT,
-                3,
-            ),
+            slider("blur_compensation", "Motion Blur Compensation", (0.0, 10.0), (0.0, 10.0), 0.0, 2),
         ];
         for n in 1..=3 {
             v.extend(fg_params(n));
@@ -145,16 +139,16 @@ impl Effect for VectorsIn {
         EffectKind::Temporal
     }
 
-    /// The layer parameters. `Source` is the retimed footage; when it is left out the input layer
-    /// plays its part. `Vectors: Prev` is fetched at frame `B` and holds the displacement from `B`
-    /// back to `A`, `Vectors: Next` is fetched at frame `A` and holds the displacement from `A`
-    /// forward to `B`; at least one of them is needed (with none the render shows the red error
+    /// The layer parameters. `Color Source` (id `source`) is the retimed footage; when it is left out
+    /// the input layer plays its part. `Vectors: Prev` is fetched at frame `B` and holds the
+    /// displacement from `B` back to `A`, `Vectors: Next` is fetched at frame `A` and holds the
+    /// displacement from `A` forward to `B`; at least one of them is needed (with none the render shows the red error
     /// fill), with one the other flow is derived by inversion. The three FG Matte layers feed the
     /// n-layer path (the consecutive layers with pixels from FG1 on; their sizes are probed for the
     /// error fills).
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
-            LayerSpec { id: LAYER_SOURCE, name: "Source", optional: true },
+            LayerSpec { id: LAYER_SOURCE, name: "Color Source", optional: true },
             LayerSpec { id: LAYER_VECTORS_PREV, name: "Vectors: Prev", optional: true },
             LayerSpec { id: LAYER_VECTORS_NEXT, name: "Vectors: Next", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[0], name: "FG1 Matte", optional: true },
@@ -173,9 +167,9 @@ impl Effect for VectorsIn {
         glue::dependencies(cx, env)
     }
 
-    /// Time Remap Mode Speed and Frame Number, Nearest, Blend and Weighted Blend, Warping "Inverse" and
-    /// "Forward", Blur Compensation, Max Displace and Vec Scale, one or two vector layers, the FG Matte
-    /// layers with the Display groups, and the Source display.
+    /// Time Remap Mode Speed and Frame Number, Nearest, Blend and Motion Weighted Blend, Warping
+    /// "Inverse" and "Forward", Motion Blur Compensation, Max Displace and Vec Scale, one or two
+    /// vector layers, the FG Matte layers with the Display groups, and the Source display.
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
         glue::render_temporal(cx, env, output)
     }
@@ -224,7 +218,6 @@ mod tests {
                 "frame_interp",
                 "warping",
                 "blur_compensation",
-                "output_frame_rate",
                 "fg1_matte_chan",
                 "fg1_inv_matte_shrink",
                 "fg2_matte_chan",
@@ -233,6 +226,14 @@ mod tests {
                 "fg3_inv_matte_shrink",
             ]
         );
+        // the plugin registers no output rate control, so there is none
+        assert_eq!(ids.len(), 19);
+        // the display names as the plugin registers them
+        let name = |id: &str| find(id).name;
+        assert_eq!(name("blur_compensation"), "Motion Blur Compensation");
+        assert_eq!(name("frame_interp"), "Frame Interp");
+        let layers: Vec<(&str, &str)> = VectorsIn.layers().iter().map(|l| (l.id, l.name)).collect();
+        assert_eq!(layers[0], ("source", "Color Source"));
         let mut sorted = ids.clone();
         sorted.sort_unstable();
         sorted.dedup();
@@ -251,10 +252,19 @@ mod tests {
             }
             other => panic!("{id} is {other:?}"),
         };
-        check("display", 6, 1, "Output", "Background");
+        check("display", 6, 1, "Twixtored Output", "Background Twixtored");
+        let texts = |id: &str| match find(id).kind {
+            ParamKind::Popup { choices, .. } => choices,
+            other => panic!("{id} is {other:?}"),
+        };
+        assert_eq!(
+            texts("display"),
+            ["Twixtored Output", "Source", "FG1 Twixtored", "FG2 Twixtored", "FG3 Twixtored", "Background Twixtored"]
+        );
+        assert_eq!(texts("frame_interp"), ["Nearest", "Blend", "Motion Weighted Blend"]);
         check("src_mark_segments", 5, 1, "Cut A", "No MV, Frame Blend");
         check("time_remap_mode", 2, 1, "Speed", "Frame Number");
-        check("frame_interp", 3, 2, "Nearest", "Weighted Blend");
+        check("frame_interp", 3, 2, "Nearest", "Motion Weighted Blend");
         check("warping", 2, 2, "Inverse", "Forward");
         for n in 1..=3 {
             check(&format!("fg{n}_matte_chan"), 4, 1, "Red", "Alpha");
@@ -274,7 +284,6 @@ mod tests {
         assert_eq!(float("vec_scale_x"), (-10.0, 10.0, -10.0, 10.0, 1.0, 2));
         assert_eq!(float("vec_scale_y"), (-10.0, 10.0, -10.0, 10.0, 1.0, 2));
         assert_eq!(float("input_frame_rate"), (fr_min, 1000.0, fr_min, 1000.0, fr_def, 3));
-        assert_eq!(float("output_frame_rate"), (fr_min, 1000.0, fr_min, 1000.0, fr_def, 3));
         assert_eq!(float("speed_percent"), (-10000.0, 10000.0, -1000.0, 1000.0, 100.0, 3));
         assert_eq!(float("frame_num"), (-200000.0, 200000.0, 0.0, 2000.0, 0.0, 2));
         assert_eq!(float("blur_compensation"), (0.0, 10.0, 0.0, 10.0, 0.0, 2));

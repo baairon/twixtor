@@ -1,0 +1,94 @@
+{
+ "measured_at": "2026-10-31",
+ "testset": "~/twixtor-parity/re/f7-supp/supp/time",
+ "refs": "~/twixtor-parity/re/f7-supp/refs/time",
+ "command": "~/twixtor-parity/re/f7-supp/state/fx-parity run --testset ~/twixtor-parity/re/f7-supp/supp/time --refs ~/twixtor-parity/re/f7-supp/refs/time --max-ulp 0 --json --vfx ~/twixtor-parity/re/f7-supp/state/vfx --jobs 1",
+ "fx_parity_summary": {
+  "fail": 2,
+  "no_reference": 0,
+  "pass": 0,
+  "total": 2
+ },
+ "totals": {
+  "cases": 2,
+  "compared": 2,
+  "identical": 0,
+  "differing": 2,
+  "no_reference": 0,
+  "bytes_compared": 8,
+  "floats_compared": 8,
+  "differing_values": 0,
+  "max_ulp": 0,
+  "nan_mismatch_values": 0
+ },
+ "cases": [
+  {
+   "id": "retime.supp-dur-f32-fn475-at15.alt-1x1.d8",
+   "status": "FAIL",
+   "tags": {
+    "group": "",
+    "class": "value",
+    "depth": 8,
+    "size": "1x1",
+    "frames": 2,
+    "fps": "15",
+    "source": "alt"
+   },
+   "logic_parity": false,
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=475",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=29.97"
+   ],
+   "depth": 8,
+   "width": 1,
+   "height": 1,
+   "frames": 2,
+   "bytes_compared": 8,
+   "floats_compared": 0,
+   "differing_values": 0,
+   "max_ulp": null,
+   "nan_mismatch_values": 0,
+   "first_failing_frame": null,
+   "failing_frames": 0,
+   "error": "input ~/twixtor-parity/re/f7-supp/supp/time/inputs/alt-1x1.d8.f480.rgba has 1920 bytes, 2 frames of 1x1 at 8 bpc are 8",
+   "fx_parity": {}
+  },
+  {
+   "id": "retime.supp-dur-f32-fn475-at15.alt-1x1.d32",
+   "status": "FAIL",
+   "tags": {
+    "group": "",
+    "class": "value",
+    "depth": 32,
+    "size": "1x1",
+    "frames": 2,
+    "fps": "15",
+    "source": "alt"
+   },
+   "logic_parity": false,
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=475",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=29.97"
+   ],
+   "depth": 32,
+   "width": 1,
+   "height": 1,
+   "frames": 2,
+   "bytes_compared": 0,
+   "floats_compared": 8,
+   "differing_values": 0,
+   "max_ulp": 0,
+   "nan_mismatch_values": 0,
+   "first_failing_frame": null,
+   "failing_frames": 0,
+   "error": "input ~/twixtor-parity/re/f7-supp/supp/time/inputs/alt-1x1.d32.f480.gbrapf32le has 7680 bytes, 2 frames of 1x1 at 32 bpc are 32",
+   "fx_parity": {}
+  }
+ ]
+}

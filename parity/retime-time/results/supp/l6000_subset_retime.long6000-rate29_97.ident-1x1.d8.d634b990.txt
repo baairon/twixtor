@@ -1,0 +1,27 @@
+frame     0 identical
+frame     1 identical
+frame     2 identical
+frame     3 identical
+frame    10 identical
+frame   100 identical
+frame  1000 identical
+frame  2999 identical
+frame  3000 identical
+frame  4999 identical
+frame  5000 identical
+frame  5125 identical
+frame  5126 identical
+frame  5127 identical
+frame  5128 identical
+frame  5129 identical
+frame  5130 identical
+frame  5131 identical
+frame  5200 identical
+frame  5300 identical
+frame  5500 identical
+frame  5600 identical
+frame  5900 identical
+frame  5997 identical
+frame  5998 identical
+frame  5999 identical
+26 frames compared, 26 identical, 0 different

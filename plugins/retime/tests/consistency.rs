@@ -114,7 +114,7 @@ fn check(params: &[(&str, &str)], with_alt: bool, with_b: bool, n: u64, (w, h): 
     for (name, rec, layer) in [("input", &input, None), ("alt_source_a", &alt, Some("alt_source_a")), ("alt_source_b", &tracking, Some("alt_source_b"))] {
         for t in rec.take() {
             let wanted = Checkout { layer, time: t };
-            // the source layer is the input unless Alt Source A is set; fetches go through the dependencies of that layer
+            // the source layer is the input unless Alt Color Source is set; fetches go through the dependencies of that layer
             if !deps.contains(&wanted) {
                 return Err(format!("{name} fetched at {t} but dependencies are {deps:?}"));
             }
@@ -147,7 +147,7 @@ fn moving_clip() -> Vec<Frame> {
 }
 
 /// Like [`check`], on a clip the solver can work on. The render must succeed; the number of tracking layer fetches
-/// is returned (an interpolated frame with Alt Source B set fetches it twice, an exact one not at all).
+/// is returned (an interpolated frame with Alt Motion Source set fetches it twice, an exact one not at all).
 fn check_vector(params: &[(&str, &str)], with_alt: bool, with_b: bool, n: u64) -> Result<(usize, usize), String> {
     let input = Recorder::new(moving_clip());
     let alt = Recorder::new(moving_clip());

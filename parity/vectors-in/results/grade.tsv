@@ -1,0 +1,449 @@
+id	status	differing_pixels	differing_values	max_ulp	nan_mismatch	group	tags	logic_parity	depth	size	frames	note
+vectors-in.size-1x1.1x1.d8.df556d	out of contract					size	tiny	no	8	1x1	4	
+vectors-in.size-1x1.1x1.d16.29769c	out of contract					size	tiny	no	16	1x1	4	
+vectors-in.size-1x1.1x1.d32.430cf7	out of contract					size	tiny	no	32	1x1	4	
+vectors-in.size-2x2.2x2.d8.03591b	pass	0	0		0	size	tiny	no	8	2x2	4	
+vectors-in.size-2x2.2x2.d16.a2e51f	pass	0	0		0	size	tiny	no	16	2x2	4	
+vectors-in.size-2x2.2x2.d32.34096e	pass	0	0	0	0	size	tiny	no	32	2x2	4	
+vectors-in.size-3x2.3x2.d8.403be6	pass	0	0		0	size	tiny	no	8	3x2	4	
+vectors-in.size-3x2.3x2.d16.70bcea	pass	0	0		0	size	tiny	no	16	3x2	4	
+vectors-in.size-3x2.3x2.d32.440491	pass	0	0	0	0	size	tiny	no	32	3x2	4	
+vectors-in.size-5x4.5x4.d8.94cf41	pass	0	0		0	size	tiny	no	8	5x4	4	
+vectors-in.size-5x4.5x4.d16.5b2586	pass	0	0		0	size	tiny	no	16	5x4	4	
+vectors-in.size-5x4.5x4.d32.99a2e2	pass	0	0	0	0	size	tiny	no	32	5x4	4	
+vectors-in.size-7x6.7x6.d8.90311d	pass	0	0		0	size		no	8	7x6	4	
+vectors-in.size-7x6.7x6.d16.4aa10b	pass	0	0		0	size		no	16	7x6	4	
+vectors-in.size-7x6.7x6.d32.dbc6c1	pass	0	0	0	0	size		no	32	7x6	4	
+vectors-in.size-9x7.9x7.d8.01775a	pass	0	0		0	size		no	8	9x7	4	
+vectors-in.size-9x7.9x7.d16.5144bd	pass	0	0		0	size		no	16	9x7	4	
+vectors-in.size-9x7.9x7.d32.0ed9f9	pass	0	0	0	0	size		no	32	9x7	4	
+vectors-in.size-16x12.16x12.d8.6baa8b	pass	0	0		0	size		no	8	16x12	4	
+vectors-in.size-16x12.16x12.d16.e84d74	pass	0	0		0	size		no	16	16x12	4	
+vectors-in.size-16x12.16x12.d32.5729bc	pass	0	0	0	0	size		no	32	16x12	4	
+vectors-in.size-17x13.17x13.d8.9eb946	pass	0	0		0	size		no	8	17x13	4	
+vectors-in.size-17x13.17x13.d16.e143e7	pass	0	0		0	size		no	16	17x13	4	
+vectors-in.size-17x13.17x13.d32.71b4d3	pass	0	0	0	0	size		no	32	17x13	4	
+vectors-in.size-24x16.24x16.d8.4bc726	pass	0	0		0	size		no	8	24x16	4	
+vectors-in.size-24x16.24x16.d16.0a5bef	pass	0	0		0	size		no	16	24x16	4	
+vectors-in.size-24x16.24x16.d32.0e991a	pass	0	0	0	0	size		no	32	24x16	4	
+vectors-in.size-37x23.37x23.d8.5870aa	pass	0	0		0	size		no	8	37x23	4	
+vectors-in.size-37x23.37x23.d16.a2d3de	pass	0	0		0	size		no	16	37x23	4	
+vectors-in.size-37x23.37x23.d32.5a184f	pass	0	0	0	0	size		no	32	37x23	4	
+vectors-in.size-48x32.48x32.d8.2dfd07	pass	0	0		0	size		no	8	48x32	4	
+vectors-in.size-48x32.48x32.d16.ca9f45	pass	0	0		0	size		no	16	48x32	4	
+vectors-in.size-48x32.48x32.d32.dde86d	pass	0	0	0	0	size		no	32	48x32	4	
+vectors-in.tiny-inv-2x2.2x2.d8.0b7073	pass	0	0		0	tiny	tiny	no	8	2x2	4	
+vectors-in.tiny-inv-2x2.2x2.d16.114377	pass	0	0		0	tiny	tiny	no	16	2x2	4	
+vectors-in.tiny-inv-2x2.2x2.d32.e0be52	pass	0	0	0	0	tiny	tiny	no	32	2x2	4	
+vectors-in.tiny-inv-3x2.3x2.d8.3d48ae	pass	0	0		0	tiny	tiny	no	8	3x2	4	
+vectors-in.tiny-inv-3x2.3x2.d16.2041cb	pass	0	0		0	tiny	tiny	no	16	3x2	4	
+vectors-in.tiny-inv-3x2.3x2.d32.e79bb9	pass	0	0	0	0	tiny	tiny	no	32	3x2	4	
+vectors-in.tiny-inv-5x4.5x4.d8.4e4c5f	pass	0	0		0	tiny	tiny	no	8	5x4	4	
+vectors-in.tiny-inv-5x4.5x4.d16.8e28e7	pass	0	0		0	tiny	tiny	no	16	5x4	4	
+vectors-in.tiny-inv-5x4.5x4.d32.0813c8	pass	0	0	0	0	tiny	tiny	no	32	5x4	4	
+vectors-in.pure-defaults.64x48.d8.c031f3	pass	0	0		0	defaults		no	8	64x48	4	
+vectors-in.pure-defaults.64x48.d16.8ee4ef	pass	0	0		0	defaults		no	16	64x48	4	
+vectors-in.pure-defaults.64x48.d32.775cc2	pass	0	0	0	0	defaults		no	32	64x48	4	
+vectors-in.warp1-interp1.16x12.d8.8ba316	pass	0	0		0	warp		no	8	16x12	4	
+vectors-in.warp1-interp2.16x12.d8.e02309	pass	0	0		0	warp		no	8	16x12	4	
+vectors-in.warp1-interp3.16x12.d8.f88779	pass	0	0		0	warp		no	8	16x12	4	
+vectors-in.warp2-interp1.16x12.d8.c09ec9	pass	0	0		0	warp		no	8	16x12	4	
+vectors-in.warp2-interp3.16x12.d8.ce94ce	pass	0	0		0	warp		no	8	16x12	4	
+vectors-in.warp1-interp1.16x12.d16.e34192	pass	0	0		0	warp		no	16	16x12	4	
+vectors-in.warp1-interp2.16x12.d16.4b426a	pass	0	0		0	warp		no	16	16x12	4	
+vectors-in.warp1-interp3.16x12.d16.fb34a8	pass	0	0		0	warp		no	16	16x12	4	
+vectors-in.warp2-interp1.16x12.d16.c07a1f	pass	0	0		0	warp		no	16	16x12	4	
+vectors-in.warp2-interp3.16x12.d16.35c0ad	pass	0	0		0	warp		no	16	16x12	4	
+vectors-in.warp1-interp1.16x12.d32.cf7145	pass	0	0	0	0	warp		no	32	16x12	4	
+vectors-in.warp1-interp2.16x12.d32.a905e7	pass	0	0	0	0	warp		no	32	16x12	4	
+vectors-in.warp1-interp3.16x12.d32.dcc0c0	pass	0	0	0	0	warp		no	32	16x12	4	
+vectors-in.warp2-interp1.16x12.d32.23b9e8	pass	0	0	0	0	warp		no	32	16x12	4	
+vectors-in.warp2-interp3.16x12.d32.25448f	pass	0	0	0	0	warp		no	32	16x12	4	
+vectors-in.warp1-interp1-irregular.17x13.d8.460f9f	pass	0	0		0	warp		no	8	17x13	4	
+vectors-in.warp1-interp2-irregular.17x13.d8.f72bee	pass	0	0		0	warp		no	8	17x13	4	
+vectors-in.warp1-interp3-irregular.17x13.d8.6ddb9b	pass	0	0		0	warp		no	8	17x13	4	
+vectors-in.warp2-interp1-irregular.17x13.d8.25dde5	pass	0	0		0	warp		no	8	17x13	4	
+vectors-in.warp2-interp2-irregular.17x13.d8.dc6d4f	pass	0	0		0	warp		no	8	17x13	4	
+vectors-in.warp2-interp3-irregular.17x13.d8.99c80c	pass	0	0		0	warp		no	8	17x13	4	
+vectors-in.speed50-fps30.16x12.d8.dd1bef	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed50-fps24.16x12.d8.c0274c	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed50-fps30000_1001.16x12.d8.99a70d	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed50-fps25.16x12.d8.ea8e5c	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed100-fps24.16x12.d8.bf4a87	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed100-fps25.16x12.d8.404e2d	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed100-fps30000_1001.16x12.d8.126c4b	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed100-fps30.16x12.d8.a638cc	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed25.16x12.d8.3f8af7	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed75.16x12.d8.cc2b92	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed33p3333.16x12.d8.87cad2	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed12p5.16x12.d8.42fd39	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed99p99.16x12.d8.147329	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed0.16x12.d8.b3e131	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed0p5.16x12.d8.dd5159	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed-0.16x12.d8.010de7	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed1.16x12.d8.07f333	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.speed66p6667.16x12.d8.593a7a	pass	0	0		0	speed		no	8	16x12	4	
+vectors-in.fast120.16x12.d8.f5a227	pass	0	0		0	speed	long_source	no	8	16x12	4	
+vectors-in.fast150.16x12.d8.db76aa	pass	0	0		0	speed	long_source	no	8	16x12	4	
+vectors-in.fast200.16x12.d8.a3c022	pass	0	0		0	speed	long_source	no	8	16x12	4	
+vectors-in.fast300.16x12.d8.15ffd3	pass	0	0		0	speed	long_source	no	8	16x12	4	
+vectors-in.fast1000.16x12.d8.4f854d	pass	0	0		0	speed	long_source,reads_past_end	no	8	16x12	4	
+vectors-in.fast10000.16x12.d8.8e6bc9	pass	0	0		0	speed	long_source,reads_past_end	no	8	16x12	4	
+vectors-in.backm50.16x12.d8.8f1f26	pass	0	0		0	speed	reads_before_start	no	8	16x12	4	
+vectors-in.backm100.16x12.d8.07552f	pass	0	0		0	speed	reads_before_start	no	8	16x12	4	
+vectors-in.backm200.16x12.d8.470d45	pass	0	0		0	speed	reads_before_start	no	8	16x12	4	
+vectors-in.backm10000.16x12.d8.32f42d	pass	0	0		0	speed	reads_before_start	no	8	16x12	4	
+vectors-in.fnum0.16x12.d8.1570b1	pass	0	0		0	framenum		no	8	16x12	4	
+vectors-in.fnum0p5.16x12.d8.721b29	pass	0	0		0	framenum		no	8	16x12	4	
+vectors-in.fnum1p25.16x12.d8.244e17	pass	0	0		0	framenum		no	8	16x12	4	
+vectors-in.fnum2p75.16x12.d8.e0a2cc	pass	0	0		0	framenum		no	8	16x12	4	
+vectors-in.fnum3.16x12.d8.c1cf32	pass	0	0		0	framenum		no	8	16x12	4	
+vectors-in.fnumm1.16x12.d8.73f7fe	pass	0	0		0	framenum	reads_before_start	no	8	16x12	4	
+vectors-in.fnum7.16x12.d8.27cc87	pass	0	0		0	framenum	reads_past_end	no	8	16x12	4	
+vectors-in.fnum200000.16x12.d8.bbeea9	pass	0	0		0	framenum	reads_past_end	no	8	16x12	4	
+vectors-in.fnumm200000.16x12.d8.d24333	pass	0	0		0	framenum	reads_before_start	no	8	16x12	4	
+vectors-in.fnumm0.16x12.d8.a2e37b	pass	0	0		0	framenum		no	8	16x12	4	
+vectors-in.fnum0p5.16x12.d16.d4de4f	pass	0	0		0	framenum		no	16	16x12	4	
+vectors-in.fnum2p25.16x12.d16.773eeb	pass	0	0		0	framenum		no	16	16x12	4	
+vectors-in.fnum0p5.16x12.d32.686512	pass	0	0	0	0	framenum		no	32	16x12	4	
+vectors-in.fnum2p25.16x12.d32.ba73f6	pass	0	0	0	0	framenum		no	32	16x12	4	
+vectors-in.fnum-keys-0at0_3at3.16x12.d8.c178b5	pass	0	0		0	framenum	stand_in:keyframe_interpolation	yes	8	16x12	4	
+vectors-in.fnum-keys-0at0_2p5at3e.16x12.d8.a7ccd1	pass	0	0		0	framenum	stand_in:keyframe_interpolation	yes	8	16x12	4	
+vectors-in.fnum-keys-3at0_0at3.16x12.d8.09310a	pass	0	0		0	framenum	stand_in:keyframe_interpolation	yes	8	16x12	4	
+vectors-in.fnum-keys-0at0_1at1_3at3.16x12.d8.e12318	pass	0	0		0	framenum	stand_in:keyframe_interpolation	yes	8	16x12	4	
+vectors-in.ftime-fps10-fnum3p4-tvar.16x12.d8.d2a856	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps10-fnum3p4-grad.16x12.d8.5841eb	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps10-fnum6p4-tvar.16x12.d8.03c1fe	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps10-fnum6p4-grad.16x12.d8.0f8df6	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps15-fnum3p5-tvar.16x12.d8.91f961	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps15-fnum3p5-grad.16x12.d8.92f962	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps15-fnum6p5-tvar.16x12.d8.ade28f	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps15-fnum6p5-grad.16x12.d8.4fbdbd	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps7p5-fnum3p4-tvar.16x12.d8.b948dd	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps7p5-fnum3p4-grad.16x12.d8.dfaf19	pass	0	0		0	ftime		no	8	16x12	4	
+vectors-in.ftime-fps10-speed110.16x12.d8.e8e650	pass	0	0		0	ftime		no	8	16x12	8	
+vectors-in.inrate29p97.16x12.d8.7677f5	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate29p969999313354492.16x12.d8.1740bb	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate24.16x12.d8.4cf6d5	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate23p976.16x12.d8.935a02	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate59p94.16x12.d8.034527	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate12.16x12.d8.50d81c	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate60.16x12.d8.01250b	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate1000.16x12.d8.9e3138	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate0p10000000149011612.16x12.d8.75dbe5	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate29p97003.16x12.d8.fd0d88	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate30.16x12.d8.c1d05f	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate100.16x12.d8.2d3603	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate15.16x12.d8.b77d85	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate7p5.16x12.d8.527736	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate29p97-fps30.16x12.d8.86fb6c	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate29p97003-fps30.16x12.d8.83f067	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate24-fps30.16x12.d8.9f6608	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate29p97-fps30000_1001.16x12.d8.89ecda	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate29p97003-fps30000_1001.16x12.d8.41dd59	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate24-fps30000_1001.16x12.d8.1ff444	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.inrate-ignored.16x12.d8.bae8b3	pass	0	0		0	inrate		no	8	16x12	4	
+vectors-in.mark1.16x12.d8.21a9db	pass	0	0		0	mark		no	8	16x12	5	
+vectors-in.mark2.16x12.d8.30f325	pass	0	0		0	mark		no	8	16x12	5	
+vectors-in.mark3.16x12.d8.b03a01	pass	0	0		0	mark		no	8	16x12	5	
+vectors-in.mark4.16x12.d8.5a3ae6	pass	0	0		0	mark		no	8	16x12	5	
+vectors-in.mark5.16x12.d8.510520	pass	0	0		0	mark		no	8	16x12	5	
+vectors-in.mark-keys-1at0_2at2.16x12.d8.4a7c86	pass	0	0		0	mark	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.mark-keys-4at0_1at3.16x12.d8.30fa52	pass	0	0		0	mark	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.mark-keys-5at0_2at2.16x12.d8.ada6d5	pass	0	0		0	mark	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.mark-keys-2at0_3at1_1at2.16x12.d8.f86cd2	pass	0	0		0	mark	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.display1.16x12.d8.11e7b4	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display2.16x12.d8.4283da	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display3.16x12.d8.584672	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display4.16x12.d8.0859e3	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display5.16x12.d8.cf34ea	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display6.16x12.d8.e2918c	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display2-source-layer.16x12.d8.e825a9	pass	0	0		0	display		no	8	16x12	4	
+vectors-in.display2-d16.16x12.d16.d874d5	pass	0	0		0	display		no	16	16x12	4	
+vectors-in.display2-d32.16x12.d32.f96f2a	pass	0	0	0	0	display		no	32	16x12	4	
+vectors-in.blur0p01.16x12.d8.415b98	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur0p5.16x12.d8.68ce0b	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur1.16x12.d8.c82fd9	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur2p5.16x12.d8.11d5be	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur5.16x12.d8.179208	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur10.16x12.d8.d7b203	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur1-fast.16x12.d8.7cd72c	pass	0	0		0	blur	long_source	no	8	16x12	4	
+vectors-in.blur10-fast.16x12.d8.50e4a2	pass	0	0		0	blur	long_source	no	8	16x12	4	
+vectors-in.blur-0.16x12.d8.93f8d7	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur2p5.16x12.d16.a8b6c8	pass	0	0		0	blur		no	16	16x12	4	
+vectors-in.blur2p5.16x12.d32.d31f29	pass	0	0	0	0	blur		no	32	16x12	4	
+vectors-in.blur1-inv.16x12.d8.58631a	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.blur5-inv.16x12.d8.d79507	pass	0	0		0	blur		no	8	16x12	4	
+vectors-in.scalexm1.16x12.d8.211903	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaleym1.16x12.d8.c22b72	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex0.16x12.d8.f1538b	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaley0.16x12.d8.b344ca	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalexm0.16x12.d8.9efdb3	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaleym0.16x12.d8.32e060	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex0p5.16x12.d8.4c608e	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaley0p5.16x12.d8.e1c795	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex2.16x12.d8.0da228	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaley2.16x12.d8.507881	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex10.16x12.d8.672cb1	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaley10.16x12.d8.8154ae	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalexm10.16x12.d8.7a0873	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaleym10.16x12.d8.b6aa6c	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex0p01.16x12.d8.80b79e	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaley0p01.16x12.d8.2805d7	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex3p3.16x12.d8.2b00a3	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scaley3p3.16x12.d8.b0dd5b	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalexy-flip.16x12.d8.1c4a2e	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalexy-mid.16x12.d8.48665d	pass	0	0		0	vecscale		no	8	16x12	4	
+vectors-in.scalex2.16x12.d16.d8b59f	pass	0	0		0	vecscale		no	16	16x12	4	
+vectors-in.scalex2.16x12.d32.def570	pass	0	0	0	0	vecscale		no	32	16x12	4	
+vectors-in.md0.16x12.d8.a25b4e	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md1.16x12.d8.52996d	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md4.16x12.d8.5c7cf9	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md8.16x12.d8.20f7f5	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md16.16x12.d8.4f2180	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md24.16x12.d8.219170	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md40.16x12.d8.df116a	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md48.16x12.d8.586dc7	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md64.16x12.d8.7bd759	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md100.16x12.d8.042121	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md2048.16x12.d8.ea23a1	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md10000.16x12.d8.59d445	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md7p505.16x12.d8.e3552f	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md0p0001.16x12.d8.f232e5	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md31p99999.16x12.d8.31e387	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md-0.16x12.d8.6f4379	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md16.16x12.d16.947edb	pass	0	0		0	maxdisp		no	16	16x12	4	
+vectors-in.md16.16x12.d32.e7027c	pass	0	0	0	0	maxdisp		no	32	16x12	4	
+vectors-in.md2048-big.16x12.d8.fc34e6	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md2048-med.16x12.d8.ae1391	pass	0	0		0	maxdisp		no	8	16x12	4	
+vectors-in.md2048-big.16x12.d16.bdf547	pass	0	0		0	maxdisp		no	16	16x12	4	
+vectors-in.md2048-med.16x12.d16.dca777	pass	0	0		0	maxdisp		no	16	16x12	4	
+vectors-in.md2048-big.16x12.d32.d15538	pass	0	0	0	0	maxdisp		no	32	16x12	4	
+vectors-in.md2048-med.16x12.d32.ee98b1	pass	0	0	0	0	maxdisp		no	32	16x12	4	
+vectors-in.key-speed_percent.16x12.d8.663e75	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-speed_percent.16x12.d8.2f9d2c	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-vec_scale_x.16x12.d8.dca825	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-vec_scale_y.16x12.d8.1fe60b	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-vectors_max_displace.16x12.d8.8a2470	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-blur_compensation.16x12.d8.e0daa0	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-frame_interp.16x12.d8.8c11c3	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-warping.16x12.d8.80b4f4	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-display.16x12.d8.d1e331	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-input_frame_rate.16x12.d8.ff93bf	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.key-time_remap_mode.16x12.d8.ce9eb0	pass	0	0		0	keyed	stand_in:keyframe_interpolation	yes	8	16x12	5	
+vectors-in.vec-zero.16x12.d8.f6df42	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-zero.16x12.d16.ec094f	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-zero.16x12.d32.81b31d	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-sub.16x12.d8.dbd911	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-sub.16x12.d16.141af5	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-sub.16x12.d32.26afd3	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-sub2.16x12.d8.b38c53	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-sub2.16x12.d16.8c2c1f	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-sub2.16x12.d32.f2f8fb	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-small.16x12.d8.6c6d87	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-small.16x12.d16.3b2984	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-small.16x12.d32.a1b381	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-med.16x12.d8.eabc8a	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-med.16x12.d16.b4ffd3	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-med.16x12.d32.d0a14d	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-large.16x12.d8.04e84a	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-large.16x12.d16.fa9482	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-large.16x12.d32.0aebd0	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-clipped.16x12.d8.5e55a8	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-clipped.16x12.d16.0f2d01	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-clipped.16x12.d32.8a5752	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-edgeval.16x12.d8.5e6d41	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-edgeval.16x12.d16.364308	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-edgeval.16x12.d32.1e8d5e	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-grad.16x12.d8.eccca5	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-grad.16x12.d16.911f29	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-grad.16x12.d32.ffb79b	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-rot.16x12.d8.02c1d5	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-rot.16x12.d16.2350de	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-rot.16x12.d32.513230	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-stripes.16x12.d8.bda9b7	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-stripes.16x12.d16.13af25	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-stripes.16x12.d32.523551	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-holes.16x12.d8.de27e3	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-holes.16x12.d16.91ef54	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-holes.16x12.d32.a08a4c	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-partial.16x12.d8.d50a21	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-partial.16x12.d16.ed0415	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-partial.16x12.d32.39d6be	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-allhole.16x12.d8.5b7757	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-allhole.16x12.d16.a802a6	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-allhole.16x12.d32.b14cfd	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-noisef.16x12.d8.c2c11a	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-noisef.16x12.d16.7c491e	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-noisef.16x12.d32.8167f7	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-tvar.16x12.d8.c3a1b9	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-tvar.16x12.d16.c79168	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-tvar.16x12.d32.9d9a62	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-gholes.16x12.d8.20dc4e	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-gholes.16x12.d16.1ce361	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-gholes.16x12.d32.9f7fee	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-gpartial.16x12.d8.d14ed4	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-gpartial.16x12.d16.c2325c	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-gpartial.16x12.d32.4044c5	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-galpha.16x12.d8.0acd2b	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-galpha.16x12.d16.534091	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-galpha.16x12.d32.2d88f5	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-gall.16x12.d8.60aef5	pass	0	0		0	vecfield		no	8	16x12	4	
+vectors-in.vec-gall.16x12.d16.30e4e0	pass	0	0		0	vecfield		no	16	16x12	4	
+vectors-in.vec-gall.16x12.d32.fa38ed	pass	0	0	0	0	vecfield		no	32	16x12	4	
+vectors-in.vec-coh-big-frame.37x23.d8.a49e75	pass	0	0		0	vecfield		no	8	37x23	4	
+vectors-in.vec-grad-big-frame.37x23.d8.001115	pass	0	0		0	vecfield		no	8	37x23	4	
+vectors-in.vec-noisef-big-frame.37x23.d8.bf72c4	pass	0	0		0	vecfield		no	8	37x23	4	
+vectors-in.no-vectors.16x12.d8.438d7f	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-only.16x12.d8.9bfafb	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only.16x12.d8.30de79	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.both-source-layer.16x12.d8.40e6d5	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.no-vectors.16x12.d16.f0e6bf	pass	0	0		0	layers		no	16	16x12	4	
+vectors-in.prev-only.16x12.d16.d963dc	pass	0	0		0	layers		no	16	16x12	4	
+vectors-in.next-only.16x12.d16.2148be	pass	0	0		0	layers		no	16	16x12	4	
+vectors-in.both-source-layer.16x12.d16.c7c991	pass	0	0		0	layers		no	16	16x12	4	
+vectors-in.no-vectors.16x12.d32.c0995b	pass	0	0	0	0	layers		no	32	16x12	4	
+vectors-in.prev-only.16x12.d32.6bbc14	pass	0	0	0	0	layers		no	32	16x12	4	
+vectors-in.next-only.16x12.d32.bd1982	pass	0	0	0	0	layers		no	32	16x12	4	
+vectors-in.both-source-layer.16x12.d32.eee609	pass	0	0	0	0	layers		no	32	16x12	4	
+vectors-in.prev-only-w1-i1.16x12.d8.09598c	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only-w1-i1.16x12.d8.772c1e	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-only-w1-i2.16x12.d8.874a11	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only-w1-i2.16x12.d8.32568d	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-only-w1-i3.16x12.d8.066bfc	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only-w1-i3.16x12.d8.5dbd3f	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-only-w2-i1.16x12.d8.29d671	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only-w2-i1.16x12.d8.6f5bc1	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-only-w2-i2.16x12.d8.db1233	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only-w2-i2.16x12.d8.e371d4	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-only-w2-i3.16x12.d8.81eebc	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.next-only-w2-i3.16x12.d8.3f00f5	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.short-vectors.16x12.d8.8db962	pass	0	0		0	layers		no	8	16x12	6	
+vectors-in.short-vectors.16x12.d16.7752cd	pass	0	0		0	layers		no	16	16x12	6	
+vectors-in.short-vectors.16x12.d32.a575e0	pass	0	0	0	0	layers		no	32	16x12	6	
+vectors-in.short-next-only.16x12.d8.9e18f9	pass	0	0		0	layers		no	8	16x12	6	
+vectors-in.vectors-1-frame.16x12.d8.fb0c73	pass	0	0		0	layers		no	8	16x12	4	
+vectors-in.prev-short-next-full.16x12.d8.9ea76b	pass	0	0		0	layers		no	8	16x12	6	
+vectors-in.foot-noise.16x12.d8.458592	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-noise.16x12.d16.83e35c	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-noise.16x12.d32.1c937e	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-alpha.16x12.d8.fe2b00	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-alpha.16x12.d16.6938ae	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-alpha.16x12.d32.f50a20	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-flat.16x12.d8.508881	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-flat.16x12.d16.d1afcf	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-flat.16x12.d32.f88230	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-checker.16x12.d8.a9e6fb	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-checker.16x12.d16.15b2fe	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-checker.16x12.d32.fdce11	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-disc.16x12.d8.c1fe74	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-disc.16x12.d16.185653	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-disc.16x12.d32.7ae360	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-multi.16x12.d8.c21f13	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-multi.16x12.d16.130fb7	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-multi.16x12.d32.a80afa	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-edge.16x12.d8.9a4753	pass	0	0		0	footage		no	8	16x12	4	
+vectors-in.foot-edge.16x12.d16.d4a4a2	pass	0	0		0	footage		no	16	16x12	4	
+vectors-in.foot-edge.16x12.d32.5e518e	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.foot-hdr.16x12.d32.5bcaab	pass	0	0	0	0	footage		no	32	16x12	4	
+vectors-in.spsrc-zero.12x9.d32.21e6c5	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-zero.12x9.d32.544e88	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-zero.12x9.d32.a67aeb	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-zero.12x9.d32.fc3f33	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-zero.12x9.d32.dabc5e	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-negzero.12x9.d32.3fa719	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-negzero.12x9.d32.91004d	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-negzero.12x9.d32.55a685	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-negzero.12x9.d32.7d50b5	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-negzero.12x9.d32.14078a	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-denorm_min.12x9.d32.1b9043	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-denorm_min.12x9.d32.eca490	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-denorm_min.12x9.d32.4fec6b	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-denorm_min.12x9.d32.deffcc	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-denorm_min.12x9.d32.5e6514	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-denorm_max.12x9.d32.b830c0	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-denorm_max.12x9.d32.bc6a62	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-denorm_max.12x9.d32.fe8812	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-denorm_max.12x9.d32.dff3a0	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-denorm_max.12x9.d32.92a7c6	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-flt_min.12x9.d32.04338a	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-flt_min.12x9.d32.c965f8	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-flt_min.12x9.d32.8f058b	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-flt_min.12x9.d32.1f3e38	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-flt_min.12x9.d32.c2f27b	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-one.12x9.d32.47570d	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-one.12x9.d32.01ec75	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-one.12x9.d32.8cae0b	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-one.12x9.d32.a39fb9	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-one.12x9.d32.4bc655	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-above1.12x9.d32.bfb027	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-above1.12x9.d32.de2381	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-above1.12x9.d32.2d84b5	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-above1.12x9.d32.2dab9c	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-above1.12x9.d32.ccb4b2	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-flt_max.12x9.d32.cbd956	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-flt_max.12x9.d32.275486	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-flt_max.12x9.d32.06e76a	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-flt_max.12x9.d32.772e25	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-flt_max.12x9.d32.8f4468	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-inf.12x9.d32.0e1dc3	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-inf.12x9.d32.18f155	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-inf.12x9.d32.43a55b	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-inf.12x9.d32.2f4bbe	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-inf.12x9.d32.d0212c	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-ninf.12x9.d32.76dbd6	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-ninf.12x9.d32.f15818	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-ninf.12x9.d32.0ed212	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-ninf.12x9.d32.95504e	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-ninf.12x9.d32.2bb89f	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-nan.12x9.d32.6ced48	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-nan.12x9.d32.1b4a99	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-nan.12x9.d32.807913	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-nan.12x9.d32.baf786	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-nan.12x9.d32.818572	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spsrc-nnan.12x9.d32.7f1e65	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spsrcA-nnan.12x9.d32.5cf091	pass	0	0	0	0	sp_src		no	32	12x9	4	
+vectors-in.spvecR-nnan.12x9.d32.03a6bb	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecG-nnan.12x9.d32.067ed8	pass	0	0	0	0	sp_vecG		no	32	12x9	4	
+vectors-in.spvecA-nnan.12x9.d32.b9e5f2	pass	0	0	0	0	sp_vecA		no	32	12x9	4	
+vectors-in.spvecB-zero.12x9.d32.e9bbe3	pass	0	0	0	0	sp_vecB		no	32	12x9	4	
+vectors-in.spvecB-negzero.12x9.d32.3b31cf	pass	0	0	0	0	sp_vecB		no	32	12x9	4	
+vectors-in.spvecB-one.12x9.d32.f5855a	pass	0	0	0	0	sp_vecB		no	32	12x9	4	
+vectors-in.spvecB-flt_max.12x9.d32.88d5e5	pass	0	0	0	0	sp_vecB		no	32	12x9	4	
+vectors-in.spvecB-inf.12x9.d32.9bb2bb	pass	0	0	0	0	sp_vecB		no	32	12x9	4	
+vectors-in.spvecB-nan.12x9.d32.16c786	pass	0	0	0	0	sp_vecB		no	32	12x9	4	
+vectors-in.spvecR-inv-zero.12x9.d32.da5de7	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecR-inv-negzero.12x9.d32.8971a1	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecR-inv-denorm_min.12x9.d32.f9ae76	pass	0	0	0	0	sp_vecR		no	32	12x9	4	
+vectors-in.spvecR-inv-flt_max.12x9.d32.e1a439	out of contract					sp_vecR		no	32	12x9	4	
+vectors-in.spvecR-inv-nan.12x9.d32.963079	out of contract					sp_vecR		no	32	12x9	4	
+vectors-in.fg1-display1.16x12.d8.50e11f	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-display3.16x12.d8.11976b	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-display6.16x12.d8.8141db	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg2-display1.16x12.d8.d80b13	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg2-display4.16x12.d8.f8d8c5	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg3-display1.16x12.d8.3302ce	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg3-display5.16x12.d8.df9e95	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg3-display6.16x12.d8.1f1a1a	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-chan1.16x12.d8.50c8f9	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-chan2.16x12.d8.44d9a5	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-chan3.16x12.d8.55e2eb	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-chan4.16x12.d8.668f39	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-shrink1p5.16x12.d8.baa739	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-shrink10.16x12.d8.5b7141	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-display3.16x12.d16.c3486e	pass	0	0		0	fg		no	16	16x12	4	
+vectors-in.fg2-display1.16x12.d16.153b6d	pass	0	0		0	fg		no	16	16x12	4	
+vectors-in.fg1-display3.16x12.d32.7af19b	pass	0	0	0	0	fg		no	32	16x12	4	
+vectors-in.fg2-display1.16x12.d32.5eaec5	pass	0	0	0	0	fg		no	32	16x12	4	
+vectors-in.fg1-prev-only.16x12.d8.1b10c7	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-warp-inverse.16x12.d8.dbdd4b	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-source-display.16x12.d8.b6c08f	pass	0	0		0	fg		no	8	16x12	4	
+vectors-in.fg1-short-matte.16x12.d8.3554f3	pass	0	0		0	fg		no	8	16x12	6	
+vectors-in.fps12.16x12.d8.ea6da5	pass	0	0		0	misc		no	8	16x12	4	
+vectors-in.fps23p976.16x12.d8.ed75b9	pass	0	0		0	misc		no	8	16x12	4	
+vectors-in.fps60.16x12.d8.2dbf87	pass	0	0		0	misc		no	8	16x12	4	
+vectors-in.fps24000_1001.16x12.d8.194c7f	pass	0	0		0	misc		no	8	16x12	4	
+vectors-in.frames1.16x12.d8.dd9eb4	pass	0	0		0	misc		no	8	16x12	1	
+vectors-in.frames2.16x12.d8.e07ae8	pass	0	0		0	misc		no	8	16x12	2	
+vectors-in.frames8.16x12.d8.66af9a	pass	0	0		0	misc		no	8	16x12	8	
+vectors-in.speed100-n1.16x12.d8.9c1792	pass	0	0		0	misc		no	8	16x12	1	

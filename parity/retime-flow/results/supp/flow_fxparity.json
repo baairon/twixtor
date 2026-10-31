@@ -1,0 +1,66 @@
+{
+  "cases": [
+    {
+      "clip_differing_pixels": 0,
+      "depth": 8,
+      "differing_pixels": 0,
+      "effect": "retime",
+      "fps": "24",
+      "frames": 4,
+      "height": 30,
+      "id": "retime.supp-exact-tol-s99.disc-40x30.d8",
+      "input": "inputs/disc-40x30.d8.f4.rgba",
+      "kind": "temporal",
+      "label": "supp-exact-tol-s99",
+      "layers": {},
+      "max_abs_diff": 0.0,
+      "mean_abs_diff": 0.0,
+      "mismatches": [],
+      "params": [
+        "speed_percent=99"
+      ],
+      "reference": "retime.supp-exact-tol-s99.disc-40x30.d8.rgba",
+      "source": "disc",
+      "status": "pass",
+      "width": 40
+    },
+    {
+      "clip_differing_pixels": 0,
+      "depth": 8,
+      "differing_pixels": 0,
+      "effect": "retime",
+      "fps": "24",
+      "frames": 4,
+      "height": 30,
+      "id": "retime.supp-exact-tol-s101.disc-40x30.d8",
+      "input": "inputs/disc-40x30.d8.f4.rgba",
+      "kind": "temporal",
+      "label": "supp-exact-tol-s101",
+      "layers": {},
+      "max_abs_diff": 0.0,
+      "mean_abs_diff": 0.0,
+      "mismatches": [],
+      "params": [
+        "speed_percent=101"
+      ],
+      "reference": "retime.supp-exact-tol-s101.disc-40x30.d8.rgba",
+      "source": "disc",
+      "status": "pass",
+      "width": 40
+    }
+  ],
+  "graded": {
+    "retime": {
+      "compared": 2,
+      "exact": 2,
+      "mean_abs_diff": 0.0,
+      "worst": null
+    }
+  },
+  "summary": {
+    "fail": 0,
+    "no_reference": 0,
+    "pass": 2,
+    "total": 2
+  }
+}

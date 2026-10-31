@@ -57,7 +57,7 @@ fn display_source_lists_the_probes_and_the_one_frame_at_the_offset() {
     // cur + trunc(Src Time Offset) * time_step = 700 + 2 * 100
     let rig = Rig::new(clip(), &[("display", "2"), ("src_time_offset", "2.9")]);
     assert_eq!(rig.deps(7).unwrap(), vec![cp(None, 700), cp(A, 700), cp(None, 700), cp(B, 700), cp(None, 900)]);
-    // with Alt Source A set the frame comes from layer A and the second probe of the input is skipped
+    // with Alt Color Source set the frame comes from layer A and the second probe of the input is skipped
     let rig = Rig::new(clip(), &[("display", "2")]).with_layer("alt_source_a", clip());
     assert_eq!(rig.deps(7).unwrap(), vec![cp(None, 700), cp(A, 700), cp(B, 700), cp(A, 700)]);
 }
@@ -99,10 +99,11 @@ fn alt_source_a_is_the_source_layer() {
 #[test]
 fn input_fields_double_the_rate_and_fetch_every_entry_twice() {
     // Input: Fields = Upper Field First: in_fps = 2 * 30, out_fps = 30, so one source frame lasts 50 ticks and
-    // output frame 7 is source position 14. Times: trunc(p * 50 + 50 * K) with K = 0.1, and the half frame positions p + 0.5.
+    // output frame 7 is source position 14. Times: trunc(p * 50 + 50 * FRAME_TIME_K) with FRAME_TIME_K = 0.05, and the half
+    // frame positions p + 0.5.
     let rig = Rig::new(clip(), &[("input_fields", "2")]);
     let got = rig.deps(7).unwrap();
-    assert_eq!(&got[7..], &[cp(None, 705), cp(None, 730), cp(None, 755), cp(None, 780)]);
+    assert_eq!(&got[7..], &[cp(None, 702), cp(None, 727), cp(None, 752), cp(None, 777)]);
 }
 
 #[test]

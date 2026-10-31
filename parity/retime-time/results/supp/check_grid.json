@@ -1,0 +1,34 @@
+{
+ "compare": "per output frame the original rendered, the SMART_PRE_RENDER layer checkouts (layer, time) of the original against the rewrite's checkout list (VFX_CALL_RECORD `checkouts`), as sets",
+ "compared": 458,
+ "matching": 458,
+ "mismatching": 0,
+ "skipped": 2,
+ "classes_in_matching_frames": [
+  [
+   "multiplicity input: original 3, rewrite 2",
+   7150
+  ],
+  [
+   "multiplicity input: original 6, rewrite 5",
+   327
+  ],
+  [
+   "multiplicity input: original 5, rewrite 4",
+   131
+  ]
+ ],
+ "mismatches": [],
+ "skipped_cases": [
+  {
+   "id": "retime.long6000-rate29_97.ident-1x1.d8.d634b990",
+   "state": "skipped",
+   "reason": "no plugin record"
+  },
+  {
+   "id": "retime.long6000-rate29_97003.ident-1x1.d8.9b45a592",
+   "state": "skipped",
+   "reason": "no plugin record"
+  }
+ ]
+}

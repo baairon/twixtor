@@ -1,0 +1,878 @@
+{
+ "format": 1,
+ "note": "candidates, never counted as passes or failures",
+ "cases": [
+  {
+   "id": "retime-fgbg.oc-fg1_matte_chan-0",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_matte_chan",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_matte_chan=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_matte_chan-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_matte_chan`: 0 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_matte_chan-5",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_matte_chan",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_matte_chan=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_matte_chan-5.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_matte_chan`: 5 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-fg2_matte_chan-5",
+   "effect": "retime-fgbg",
+   "label": "oc-fg2_matte_chan",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg2_matte_chan=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg2_matte_chan-5.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg2_matte_chan`: 5 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-fg3_matte_chan-0",
+   "effect": "retime-fgbg",
+   "label": "oc-fg3_matte_chan",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg3_matte_chan=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg3_matte_chan-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg3_matte_chan`: 0 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_sensitivity-100.01",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_sensitivity",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_sensitivity=100.01"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_sensitivity-100.01.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_sensitivity`: 100.01 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_sensitivity--0.01",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_sensitivity",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_sensitivity=-0.01"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_sensitivity--0.01.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_sensitivity`: -0.01 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-fg2_sensitivity-101",
+   "effect": "retime-fgbg",
+   "label": "oc-fg2_sensitivity",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg2_sensitivity=101"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg2_sensitivity-101.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg2_sensitivity`: 101 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-fg3_sensitivity--1",
+   "effect": "retime-fgbg",
+   "label": "oc-fg3_sensitivity",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg3_sensitivity=-1"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg3_sensitivity--1.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg3_sensitivity`: -1 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink-10.01",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_inv_matte_shrink=10.01"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_inv_matte_shrink-10.01.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_inv_matte_shrink`: 10.01 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--0.01",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_inv_matte_shrink=-0.01"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_inv_matte_shrink--0.01.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_inv_matte_shrink`: -0.01 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--0.5",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_inv_matte_shrink=-0.5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_inv_matte_shrink--0.5.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_inv_matte_shrink`: -0.5 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--1",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_inv_matte_shrink=-1"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_inv_matte_shrink--1.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_inv_matte_shrink`: -1 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--2.5",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_inv_matte_shrink=-2.5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_inv_matte_shrink--2.5.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg1_inv_matte_shrink`: -2.5 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-fg2_inv_matte_shrink--1",
+   "effect": "retime-fgbg",
+   "label": "oc-fg2_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg2_inv_matte_shrink=-1"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg2_inv_matte_shrink--1.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg2_inv_matte_shrink`: -1 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-fg3_inv_matte_shrink-11",
+   "effect": "retime-fgbg",
+   "label": "oc-fg3_inv_matte_shrink",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg3_inv_matte_shrink=11"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg3_inv_matte_shrink-11.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `fg3_inv_matte_shrink`: 11 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-display-0",
+   "effect": "retime-fgbg",
+   "label": "oc-display",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "display=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-display-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `display`: 0 outside 1..=6"
+  },
+  {
+   "id": "retime-fgbg.oc-display-7",
+   "effect": "retime-fgbg",
+   "label": "oc-display",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "display=7"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-display-7.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `display`: 7 outside 1..=6"
+  },
+  {
+   "id": "retime-fgbg.oc-draw_geom-0",
+   "effect": "retime-fgbg",
+   "label": "oc-draw_geom",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "draw_geom=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-draw_geom-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `draw_geom`: 0 outside 1..=6"
+  },
+  {
+   "id": "retime-fgbg.oc-draw_geom-7",
+   "effect": "retime-fgbg",
+   "label": "oc-draw_geom",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "draw_geom=7"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-draw_geom-7.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `draw_geom`: 7 outside 1..=6"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_use-0",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_use",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_use=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_use-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `pt1_use`: 0 outside 1..=5"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_use-6",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_use",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_use=6"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_use-6.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `pt1_use`: 6 outside 1..=5"
+  },
+  {
+   "id": "retime-fgbg.oc-pt12_use-6",
+   "effect": "retime-fgbg",
+   "label": "oc-pt12_use",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt12_use=6"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt12_use-6.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `pt12_use`: 6 outside 1..=5"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_color-256,0,0",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_color",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_color=256,0,0",
+    "pt1_use=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_color-256,0,0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `pt1_color`: cannot parse `256,0,0`"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_color--1,0,0",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_color",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_color=-1,0,0",
+    "pt1_use=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_color--1,0,0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `pt1_color`: cannot parse `-1,0,0`"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_color-0,0",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_color",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_color=0,0",
+    "pt1_use=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_color-0,0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `pt1_color`: cannot parse `0,0`"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_pos-nan,0",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_pos",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_pos=nan,0",
+    "pt1_use=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_pos-nan,0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "accepted by --check"
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_pos-0,inf",
+   "effect": "retime-fgbg",
+   "label": "oc-pt1_pos",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "pt1_pos=0,inf",
+    "pt1_use=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-pt1_pos-0,inf.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "accepted by --check"
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_sensitivity-100.01",
+   "effect": "retime-fgbg",
+   "label": "oc-main_bg_sensitivity",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "main_bg_sensitivity=100.01"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-main_bg_sensitivity-100.01.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `main_bg_sensitivity`: 100.01 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_track-0",
+   "effect": "retime-fgbg",
+   "label": "oc-main_bg_track",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "main_bg_track=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-main_bg_track-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: unknown param `main_bg_track`"
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_track-0",
+   "effect": "retime-fgbg",
+   "label": "oc-fg1_track",
+   "params": [
+    "speed_percent=50",
+    "warping=3",
+    "fg1_track=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-fg1_track-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: unknown param `fg1_track`"
+  },
+  {
+   "id": "retime-fgbg.oc-warping-5",
+   "effect": "retime-fgbg",
+   "label": "oc-warping",
+   "params": [
+    "speed_percent=50",
+    "warping=5"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-warping-5.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `warping`: 5 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-warping-0",
+   "effect": "retime-fgbg",
+   "label": "oc-warping",
+   "params": [
+    "speed_percent=50",
+    "warping=0"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-warping-0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-24x16.d8.f3.rgba"
+   },
+   "reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "vfx_verdict": "vfx: error: bad value for `warping`: 0 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-matte-wrong-size",
+   "effect": "retime-fgbg",
+   "label": "oc-matte-size",
+   "params": [
+    "speed_percent=50",
+    "warping=3"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-matte-wrong-size.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-25x16.d8.f3.rgba"
+   },
+   "reason": "matte layer of another size than the footage (the plugin shows an error fill)",
+   "vfx_verdict": "accepted by --check"
+  },
+  {
+   "id": "retime-fgbg.oc-matte-short",
+   "effect": "retime-fgbg",
+   "label": "oc-matte-short",
+   "params": [
+    "speed_percent=50",
+    "warping=3"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-matte-short.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f1.rgba"
+   },
+   "reason": "matte clip shorter than the footage: frames past its end are an unprovided host read",
+   "vfx_verdict": "accepted by --check"
+  },
+  {
+   "id": "retime-fgbg.oc-matte-depth-mismatch-note",
+   "effect": "retime-fgbg",
+   "label": "oc-note",
+   "params": [
+    "speed_percent=50",
+    "warping=3"
+   ],
+   "depth": 8,
+   "width": 24,
+   "height": 16,
+   "source": "box2",
+   "input": "inputs/box2-24x16.d8.f3.rgba",
+   "reference": "retime-fgbg.oc-matte-depth-mismatch-note.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "fg1_matte": "inputs/m-hard-0-24x16.d8.f3.rgba"
+   },
+   "reason": "control case: a valid render listed with the candidates so their verdicts can be compared",
+   "vfx_verdict": "accepted by --check"
+  }
+ ]
+}

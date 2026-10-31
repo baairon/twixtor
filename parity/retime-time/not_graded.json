@@ -1,0 +1,88 @@
+{
+ "reason": "host-side Bezier interpolation, not part of the bar",
+ "cases": [
+  {
+   "id": "retime.keyed-fn-handles.extreme-5x7.d8.a7d0a83c",
+   "effect": "retime",
+   "label": "keyed-fn-handles",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=0@0o0/50;11@11i0/50"
+   ],
+   "depth": 8,
+   "width": 5,
+   "height": 7,
+   "source": "extreme",
+   "input": "inputs/extreme-5x7.d8.f12.rgba",
+   "reference": "retime.keyed-fn-handles.extreme-5x7.d8.a7d0a83c.rgba",
+   "kind": "temporal",
+   "frames": 12,
+   "fps": "24",
+   "group": "keyed",
+   "class": "logic_parity"
+  },
+  {
+   "id": "retime.keyed-fn-handles.extreme-5x7.d16.a7da0851",
+   "effect": "retime",
+   "label": "keyed-fn-handles",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=0@0o0/50;11@11i0/50"
+   ],
+   "depth": 16,
+   "width": 5,
+   "height": 7,
+   "source": "extreme",
+   "input": "inputs/extreme-5x7.d16.f12.rgba64le",
+   "reference": "retime.keyed-fn-handles.extreme-5x7.d16.a7da0851.rgba64le",
+   "kind": "temporal",
+   "frames": 12,
+   "fps": "24",
+   "group": "keyed",
+   "class": "logic_parity"
+  },
+  {
+   "id": "retime.keyed-fn-handles.extreme-5x7.d32.a7395d5f",
+   "effect": "retime",
+   "label": "keyed-fn-handles",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=0@0o0/50;11@11i0/50"
+   ],
+   "depth": 32,
+   "width": 5,
+   "height": 7,
+   "source": "extreme",
+   "input": "inputs/extreme-5x7.d32.f12.gbrapf32le",
+   "reference": "retime.keyed-fn-handles.extreme-5x7.d32.a7395d5f.gbrapf32le",
+   "kind": "temporal",
+   "frames": 12,
+   "fps": "24",
+   "group": "keyed",
+   "class": "logic_parity"
+  },
+  {
+   "id": "retime.keyed-sp-handles.alphaslide-5x7.d16.72c8c796",
+   "effect": "retime",
+   "label": "keyed-sp-handles",
+   "params": [
+    "vectors=1",
+    "speed_percent=100@0o0/50;50@11i-30/50h"
+   ],
+   "depth": 16,
+   "width": 5,
+   "height": 7,
+   "source": "alphaslide",
+   "input": "inputs/alphaslide-5x7.d16.f12.rgba64le",
+   "reference": "retime.keyed-sp-handles.alphaslide-5x7.d16.72c8c796.rgba64le",
+   "kind": "temporal",
+   "frames": 12,
+   "fps": "24",
+   "group": "keyed",
+   "class": "logic_parity"
+  }
+ ]
+}

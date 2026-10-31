@@ -1,0 +1,170 @@
+[
+ {
+  "id": "m01",
+  "file": "plugins/retime-engine/src/prep.rs",
+  "kind": "operand order",
+  "desc": "8 bpc luma sum associated differently: r*0.3 + (g*0.59 + b*0.11)",
+  "old": "let sum = (r * W30F + g * W59F) + b * W11F;",
+  "new": "let sum = r * W30F + (g * W59F + b * W11F);"
+ },
+ {
+  "id": "m02",
+  "file": "plugins/retime-engine/src/prep.rs",
+  "kind": "pyramid level",
+  "desc": "level_count adds one more level when a side reaches 2",
+  "old": "if w > 2 && h > 2 && !(w == 2 && h == 2) {",
+  "new": "if w >= 2 && h >= 2 {"
+ },
+ {
+  "id": "m03",
+  "file": "plugins/retime-engine/src/flow.rs",
+  "kind": "f32 vs f64",
+  "desc": "structure tensor determinant t computed in f64 in new_disp",
+  "old": "let t = ab * ab - ad * aa;",
+  "new": "let t = ((ab as f64) * (ab as f64) - (ad as f64) * (aa as f64)) as f32;"
+ },
+ {
+  "id": "m04",
+  "file": "plugins/retime-engine/src/warp/blurcomp.rs",
+  "kind": "dropped clamp",
+  "desc": "upper clamp of the blur compensation amount (20) removed",
+  "old": "if 20.0f32 < amount {\n        amount = 20.0;\n    } else if amount < -10.0f32 {",
+  "new": "if amount < -10.0f32 {"
+ },
+ {
+  "id": "m05",
+  "file": "plugins/retime-engine/src/warp.rs",
+  "kind": "rounding",
+  "desc": "8 bpc store truncates instead of adding 0.5",
+  "old": "pub(crate) fn sat_u8(v: f32) -> u8 {\n    let i = cvtt32(v + 0.5f32);",
+  "new": "pub(crate) fn sat_u8(v: f32) -> u8 {\n    let i = cvtt32(v);"
+ },
+ {
+  "id": "m06",
+  "file": "plugins/retime-engine/src/warp.rs",
+  "kind": "operand order",
+  "desc": "vertical lerp of the bilinear sampler written as top*(1-fy) + bot*fy",
+  "old": "let bot = (p11 - p01) * fx + p01;\n        out[k] = (bot - top) * fy + top;\n    }\n    out",
+  "new": "let bot = (p11 - p01) * fx + p01;\n        out[k] = top * (1.0f32 - fy) + bot * fy;\n    }\n    out"
+ },
+ {
+  "id": "m07",
+  "file": "plugins/retime-engine/src/smartblend.rs",
+  "kind": "swapped weight",
+  "desc": "Smart Blend mix uses (1-w) on the first composite instead of w on the second",
+  "old": "v[i] = (c2[i] - c1[i]) * w + c1[i];",
+  "new": "v[i] = (c1[i] - c2[i]) * (1.0f32 - w) + c2[i];"
+ },
+ {
+  "id": "m08",
+  "file": "plugins/retime-engine/src/holefill.rs",
+  "kind": "rounding",
+  "desc": "8 bpc hole fill store adds 0.25 instead of 0.5",
+  "old": "fn store_u8(x: f32) -> u8 {\n    let y = x + 0.5f32;",
+  "new": "fn store_u8(x: f32) -> u8 {\n    let y = x + 0.25f32;"
+ },
+ {
+  "id": "m09",
+  "file": "plugins/retime-engine/src/filters.rs",
+  "kind": "constant",
+  "desc": "Weighted Blend sharpening blur radius 3.0 changed to 2.0",
+  "old": "pub const BLUR_RADIUS: f32 = 3.0;",
+  "new": "pub const BLUR_RADIUS: f32 = 2.0;"
+ },
+ {
+  "id": "m10",
+  "file": "plugins/retime-engine/src/compose/vector.rs",
+  "kind": "boundary",
+  "desc": "Nearest at exactly half way takes B instead of A",
+  "old": "if 0.5 <= wa {",
+  "new": "if 0.5 < wa {"
+ },
+ {
+  "id": "m11",
+  "file": "plugins/retime-engine/src/warp/blurcomp.rs",
+  "kind": "operand order",
+  "desc": "blur amount written as a*blur - blur",
+  "old": "Some((a - 1.0f32) * blur)",
+  "new": "Some(a * blur - blur)"
+ },
+ {
+  "id": "m12",
+  "file": "plugins/retime-engine/src/flow.rs",
+  "kind": "boundary",
+  "desc": "solver right-hand side keeps samples at exactly w-1 out of range",
+  "old": "if sx < 0.0 || fw - 1.0 < sx || sy < 0.0 || fh - 1.0 < sy {",
+  "new": "if sx < 0.0 || fw - 1.0 <= sx || sy < 0.0 || fh - 1.0 < sy {"
+ },
+ {
+  "id": "m13",
+  "file": "plugins/retime-engine/src/prep.rs",
+  "kind": "f32 vs f64",
+  "desc": "Delinearize power in single precision powf",
+  "old": "*v = (base as f64).powf(inv as f64) as f32 * 255.0f32;",
+  "new": "*v = base.powf(inv) * 255.0f32;"
+ },
+ {
+  "id": "m14",
+  "file": "plugins/retime-engine/src/warp.rs",
+  "kind": "rounding",
+  "desc": "edge fade scale of 8 bpc drops its +0.5 rounding term",
+  "old": "cvtt64(v as f64 + 0.5) as u8",
+  "new": "cvtt64(v as f64) as u8"
+ },
+ {
+  "id": "m15",
+  "file": "plugins/retime-engine/src/flow.rs",
+  "kind": "iteration off by one",
+  "desc": "finest-level block matching runs after iteration 2 instead of 1",
+  "old": "if it == 1 && l == 0 && !settings.skip_refine {",
+  "new": "if it == 2 && l == 0 && !settings.skip_refine {"
+ },
+ {
+  "id": "m16",
+  "file": "plugins/retime-engine/src/smartblend.rs",
+  "kind": "operand order",
+  "desc": "over(): inverse alpha as (white - a)/white",
+  "old": "let ia = 1.0f32 - a[0] / white;\n    let alpha",
+  "new": "let ia = (white - a[0]) / white;\n    let alpha"
+ },
+ {
+  "id": "m17",
+  "file": "plugins/retime-engine/src/flow.rs",
+  "kind": "boundary",
+  "desc": "start level: sensitivity 100 (x == L) takes the interpolated branch",
+  "old": "if x < lv || x.is_nan() {",
+  "new": "if x <= lv || x.is_nan() {"
+ },
+ {
+  "id": "m18",
+  "file": "plugins/retime-engine/src/filters.rs",
+  "kind": "swapped weight",
+  "desc": "sharpen strength halved again (0.25 instead of 0.5)",
+  "old": "(f64::from(neg) * 0.5) as f32",
+  "new": "(f64::from(neg) * 0.25) as f32"
+ },
+ {
+  "id": "m19",
+  "file": "plugins/retime-engine/src/holefill.rs",
+  "kind": "operand order",
+  "desc": "hole fill combine multiplies by the reciprocal",
+  "old": "*s = v / w;",
+  "new": "*s = v * (1.0f32 / w);"
+ },
+ {
+  "id": "m20",
+  "file": "plugins/retime-engine/src/prep.rs",
+  "kind": "f32 vs f64",
+  "desc": "16 bpc luma narrows its f64 sum before the division by 257",
+  "old": "(sum / 257.0f64) as f32",
+  "new": "(sum as f32) / 257.0f32"
+ },
+ {
+  "id": "m21",
+  "file": "plugins/retime-engine/src/prep.rs",
+  "kind": "f32 vs f64",
+  "desc": "float luma narrows its f64 sum before the scale by 255",
+  "old": "(sum * 255.0f64) as f32",
+  "new": "(sum as f32) * 255.0f32"
+ }
+]

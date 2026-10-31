@@ -1,6 +1,6 @@
 # Parameters
 
-Every control of the four effects: values, defaults, ranges and what each one changes. `target/release/vfx list --json` is the source of truth for ids, kinds, ranges and defaults; where this file disagrees with it, the listing is right. Value syntax and error messages: [README: parameter values](../README.md#parameter-values). How keyed speeds and frame numbers become source positions: [timing](timing.md).
+Every control of the four effects: values, defaults, ranges and what each one changes. `target/release/vfx list --json` is the source of truth for ids, kinds, ranges and defaults; where this file disagrees with it, the listing is right. Value syntax and error messages: [reference: parameter values](reference.md#parameter-values). How keyed speeds and frame numbers become source positions: [timing](timing.md).
 
 An *exact* output frame is one whose source position lies within 0.005 of a whole source frame: that frame is copied. Every other output frame is an *in-between* frame, built from the two source frames around the position ([timing: terms](timing.md#terms)).
 
@@ -17,14 +17,14 @@ Listed as **Retime**. 17 params, layers `alt_source_a` and `alt_source_b`.
 | `in_fps_is_out_fps` | In FPS is Out FPS | `1` on, `0` off | `1` | |
 | `input_frame_rate` | Input: Frame Rate | frames per second | `29.969999313354492` | 0.10000000149011612 to 1000 |
 | `input_fields` | Input: Fields | `1` None, `2` Upper Field First, `3` Lower Field First | `1` | |
-| `frame_interp` | Frame Interp | `1` Nearest, `2` Blend, `3` Weighted Blend | `2` | |
-| `vectors` | Vectors | `1` No Vectors, `2` Sloppy, `3` Medium, `4` High, `5` Best | `5` | |
-| `prep` | Prep | `1` None, `2` Contrast/Edge Enhance, `3` Delinearize | `1` | |
-| `sensitivity` | Sensitivity | number | `70` | 0 to 100 |
+| `frame_interp` | Frame Interp | `1` Nearest, `2` Blend, `3` Motion Weighted Blend | `2` | |
+| `vectors` | Motion Vectors | `1` No Motion Vectors, `2` Sloppy, `3` Medium, `4` High, `5` Best | `5` | |
+| `prep` | Image Prep | `1` None, `2` Contrast/Edge Enhance, `3` Delinearize | `1` | |
+| `sensitivity` | Motion Sensitivity | number | `70` | 0 to 100 |
 | `smart_blend` | Smart Blend | `1` on, `0` off | `0` | |
-| `blur_compensation` | Blur Compensation | number | `0` | 0 to 10 |
+| `blur_compensation` | Motion Blur Compensation | number | `0` | 0 to 10 |
 | `src_mark_segments` | Src: Mark Segments | `1` Cut A, `2` Cut B, `3` Cut C, `4` No MV, Use Nearest, `5` No MV, Frame Blend | `1` | |
-| `display` | Display | `1` Output, `2` Source | `1` | |
+| `display` | Display | `1` Twixtored Output, `2` Source | `1` | |
 | `video_360` | 360 Video | `1` on, `0` off | `0` | |
 | `plenty_memory` | Plenty Memory? | `1` on, `0` off | `1` | |
 
@@ -66,13 +66,13 @@ How an in-between frame combines its two source frames.
 |---|---|---|
 | `1` Nearest | the nearer source frame alone, moved along the motion (the earlier one at exactly half way) | the nearer frame copied: frames repeat (0, 0, 1, 1 at 50%) |
 | `2` Blend | both neighbours moved to the in-between moment and mixed by their distance to it | a cross-fade of the two frames |
-| `3` Weighted Blend | Blend with a sharpening step on each moved frame | identical to Blend |
+| `3` Motion Weighted Blend | Blend with a sharpening step on each moved frame | identical to Blend |
 
 None of them changes an exact frame.
 
 ### vectors
 
-How finely motion is searched. `1` No Vectors skips the search: in-between frames are copies or cross-fades. `5` searches at half the frame's width and height, `4` at a quarter, `3` and `2` at an eighth (`2` and `3` give identical output). `--quality draft` halves once more, never below an eighth. The search never halves below 2x2: a frame too small for its halvings is searched at the last size of at least 2x2 (6x6 at `4`: 3x3), and a frame with a side of 1 pixel has no search and renders as `vectors=1` (`create-vectors`: the zero vector). No result of the original is established at those sizes, so the rule is this project's own ([parity: rules without a note](parity.md#rules-without-a-note)). Exact frames never run the search. Cost per setting: [engine: cost](engine.md#cost).
+How finely motion is searched. `1` No Motion Vectors skips the search: in-between frames are copies or cross-fades. `5` searches at half the frame's width and height, `4` at a quarter, `3` and `2` at an eighth (`2` and `3` give identical output). `--quality draft` halves once more, never below an eighth. The search never halves below 2x2: a frame too small for its halvings is searched at the last size of at least 2x2 (6x6 at `4`: 3x3), and a frame with a side of 1 pixel has no search and renders as `vectors=1` (`create-vectors`: the zero vector). No result of the original is established at those sizes, so the rule is this project's own ([parity: rules without a note](parity.md#rules-without-a-note)). Exact frames never run the search. Cost per setting: [engine: cost](engine.md#cost).
 
 ### prep
 
@@ -109,7 +109,7 @@ Its keys count source frames (clip frames), not output frames: the label is samp
 
 ### alt_source_a, alt_source_b
 
-Optional layers. `tools/apply.py` scales each to the output's size (stretched, not cropped) and pixel format, and resamples it to the input's rate; with `--size` or `--fps` a layer keeps its own rate and `vfx` reads it by time (`--layer-fps`).
+Optional layers, listed as **Alt Color Source** (`alt_source_a`) and **Alt Motion Source** (`alt_source_b`). `tools/apply.py` scales each to the output's size (stretched, not cropped) and pixel format, and resamples it to the input's rate; with `--size` or `--fps` a layer keeps its own rate and `vfx` reads it by time (`--layer-fps`).
 
 | Layer | Role | Output pixels come from |
 |---|---|---|
@@ -120,7 +120,7 @@ Past a layer's last frame, A gives an empty picture and B gives the search an em
 
 ### video_360
 
-Not a spherical-video switch: nothing wraps at the frame edges (in `retime-fgbg` the wrap-around flag is `track_rgb_a`). On, the motion search reads only the red channel (as video range, 16 to 235) instead of a mix of all three, and with `smart_blend=1` and `frame_interp=2` the composite uses a binary-alpha variant. Both change in-between frames.
+In `retime` it is not a spherical-video switch: nothing wraps at the frame edges. On, the motion search reads only the red channel (as video range, 16 to 235) instead of a mix of all three, and with `smart_blend=1` and `frame_interp=2` the composite uses a binary-alpha variant. Both change in-between frames. In `retime-fgbg` it does wrap (below).
 
 ### plenty_memory
 
@@ -130,14 +130,15 @@ Caching only; output was byte for byte the same with `0`.
 
 Listed as **Retime (FG/BG)**. 63 params, layers `alt_source_a`, `alt_source_b`, `fg1_matte`, `fg2_matte`, `fg3_matte`. The FG matte layers (FG1 first; FG2 counts only after FG1, FG3 after FG2) split the frame into layers with one motion each, composed bottom up with FG1 on top ([engine: FG matte layers](engine.md#fg-matte-layers)); without them only the single layer path runs.
 
-Every `retime` control except `src_time_offset` and `smart_blend`, with `sensitivity` named `main_bg_sensitivity` (0 to 100, default 70), plus:
+Every `retime` control except `src_time_offset` and `smart_blend`, with `sensitivity` named `main_bg_sensitivity` (listed as Main_BG Sensitivity, 0 to 100, default 70), plus:
 
 | Id | Values | Default | Effect |
 |---|---|---|---|
 | `warping` | `1` Inverse, `2` Inverse w/ Smart Blend, `3` Forward, `4` Forward, no Smart Blend | `1` | the warp of in-between frames, below |
-| `display` | `1` Output, `2` Source, `3` FG1, `4` FG2, `5` FG3, `6` Background | `1` | the layers composed: `1` all, `3` to `5` FG1 to FG3 alone (a missing one is the background), `6` the background (Main_BG, the whole frame warped with the background motion); without matte layers `3` to `6` render as `1` (gaps G1g, G1h) |
-| `draw_geom` | `1` None, `2` All, `3` FG1, `4` FG2, `5` FG3, `6` Main_BG | `2` | on the Source display, the points in use of that group (`2` all) drawn as opaque discs of radius 1.5 pixels in their `ptN_color`, later points on top (gap G3) |
-| `track_rgb_a` | checkbox | `0` | the wrap-around flag: the motion search, the inverse warps, the hole fill and the blur tail wrap horizontally (the forward warp itself does not); it adds no alpha to the search (gap G6) |
+| `display` | `1` Twixtored Output, `2` Source, `3` FG1 Twixtored, `4` FG2 Twixtored, `5` FG3 Twixtored, `6` Background Twixtored | `1` | the layers composed: `1` all, `3` to `5` FG1 to FG3 alone (a missing one is the background), `6` the background (Main_BG, the whole frame warped with the background motion); without matte layers `3` to `6` render as `1` (gaps G1g, G1h) |
+| `draw_geom` | `1` None, `2` All, `3` FG1, `4` FG2, `5` FG3, `6` Main_BG | `2` | on the Source display, the points in use of that group (`2` all) drawn as opaque discs of radius 1.5 pixels in their `ptN_color`, later points on top; the original draws an antialiased cross there, which this rewrite does not do yet (gap G3) |
+| `track_rgb_a` | checkbox | `0` | adds the alpha channel to what the motion search reads; in a layered render it also switches the luma pyramids' filters to their 360 variants (gap G6) |
+| `video_360` | checkbox | `0` | the wrap-around flag: the motion search, the inverse warps, the hole fill and the blur go around the sphere (x wraps, the poles reflect with a half turn); the forward warp itself does not wrap |
 
 | `warping` | In-between frame | Measured |
 |---|---|---|
@@ -146,32 +147,32 @@ Every `retime` control except `src_time_offset` and `smart_blend`, with `sensiti
 | `3` Forward | each source frame pushed along its own motion, with Smart Blend and gap filling | about 1.5 times the time on a small clip, about 6 times at 1080p |
 | `4` Forward, no Smart Blend | the push of `3` without the Smart Blend step or gap filling: pixels nothing lands on stay empty | |
 
-With matte layers, `fg1_matte_chan` to `fg3_matte_chan` (`1` Red to `4` Alpha) pick each layer's matte channel, `fg1_sensitivity` to `fg3_sensitivity` its search sensitivity, and `fg1_inv_matte_shrink` to `fg3_inv_matte_shrink` shrink its inverse matte, in pixels, in the tracking mattes of the layers below (gap G1). `pt1_use` to `pt12_use` (`1` Don't Use, `2` FG 1, `3` FG 2, `4` FG3, `5` Main_BG Layer; without that layer the point goes to Main_BG) put the point `ptN_pos` on a layer when its value is the same at both source frames of the pair: on frames that search motion, the search then moves that pixel as the point moves (gap G2). `ptN_color` is the colour Draw Geom draws it in. Without matte layers or points in use none of these changes anything.
+With matte layers, `fg1_matte_chan` to `fg3_matte_chan` (`1` Red to `4` Alpha) pick each layer's matte channel, `fg1_sensitivity` to `fg3_sensitivity` (FG1 Motion Sensitivity to FG3 Motion Sensitivity) its search sensitivity, and `fg1_inv_matte_shrink` to `fg3_inv_matte_shrink` choke, in pixels, the matte with which that layer cuts the layers below, with the plugin's own choke kernel; a shrink also makes exact frames take the motion path (gap G1). `pt1_use` to `pt12_use` (`1` Don't Use, `2` FG 1, `3` FG 2, `4` FG3, `5` Main_BG Layer; without that layer the point goes to Main_BG) put the point `ptN_pos` on a layer when its value is the same at both source frames of the pair: on frames that search motion, the point's displacement enters the search at the finest level and the coarser levels take it from the image pyramid (gap G2). `ptN_color` (Pt N: Color) is the colour Draw Geom draws it in. Without matte layers or points in use none of these changes anything.
 
 ## create-vectors
 
-Listed as **Create Vectors**. 59 params, layers `alt_source_a` (Alt Src), `fg1_matte`, `fg2_matte`, `fg3_matte`. Does not retime: output frame n is an encoded vector image of the motion between source frame n and a neighbour ([engine: vector images](engine.md#vector-images)).
+Listed as **Create Vectors**. 59 params, layers `alt_source_a` (Alt Motion Src), `fg1_matte`, `fg2_matte`, `fg3_matte`. Does not retime: output frame n is an encoded vector image of the motion between source frame n and a neighbour ([engine: vector images](engine.md#vector-images)).
 
 | Id | Values | Default | Effect |
 |---|---|---|---|
-| `display` | `1` Source, `2` Vectors, `3` Debug | `2` | `1` copies the source and draws the tracking points `draw_geom` names; `3` shows the Debug view of `debug_view_method` (the frame pair swaps: Previous compares frame n + 1 pushed onto frame n, Next frame n - 1) with the same overlay |
+| `display` | `1` Source, `2` Motion Vectors, `3` Debug | `2` | `1` copies the source and draws the tracking points `draw_geom` names; `3` shows the Debug view of `debug_view_method` (the frame pair swaps: Previous compares frame n + 1 pushed onto frame n, Next frame n - 1) with the same overlay |
 | `vector_resolution` | `1` Normal (half res), `2` Full res | `1` | the search resolution; `1` matches `vectors=5` in `retime` |
 | `track_frame` | `1` Previous, `2` Next | `1` | the neighbour of frame n: `1` makes `vectors_prev`, `2` makes `vectors_next` |
 | `max_displace` | 1 to 8192 | `2048` | the largest motion in pixels the image holds; larger motion is clipped. Stored in steps of `max_displace` / 127 pixels at 8 bits and / 32767 at 16 bits (16-pixel steps at 8 bits with the default) |
 | `prep` | as in `retime` | `1` | as in `retime` |
 | `track_rgb_a` | checkbox | `0` | adds the alpha channel to what the search reads |
 | `main_bg_sensitivity` | 0 to 100 | `70` | as `sensitivity` in `retime` |
-| `main_bg_track` | checkbox | `1` | `0` replaces the search of the background layer by its tracking points (the second tracker, gap G5): the motion is the points' displacement spread over the frame, none at all without a point |
+| `main_bg_track` | checkbox, listed as Main_BG: Image Track | `1` | `0` replaces the search of the background layer by its tracking points (the second tracker, gap G5): the motion is the points' displacement spread over the frame, none at all without a point |
 
-With `fg1_matte` (then `fg2_matte`, `fg3_matte`; a layer counts only after the one before it) every layer gets its own motion: FG k with `fgk_sensitivity` and `fgk_track`, its matte the `fgk_matte_chan` channel (`1` Red to `4` Alpha) of the layer, FG1 on top; the background (Main_BG) is the part the FG mattes leave free, and `fgk_inv_matte_shrink` (pixels) shrinks that free part around FG k (gap G1). `layers_output` picks what the image holds: `1` All merges the layers weighted by their mattes (gap G1d), `2` to `4` one FG layer (zero motion outside its matte), `5` MAIN_BG the background motion everywhere; a layer that does not exist gives MAIN_BG. `pt1_use` to `pt12_use` (`1` Don't Use, `2` FG1, `3` FG2, `4` FG3, `5` Main_BG Layer; without that layer the point goes to Main_BG) put the point `ptN_pos` on a layer when the value is the same at both frames of the pair: the search then moves that pixel exactly as the point moves (gap G2). `debug_view_method` (`1` Warp to `5` Edge Compare, default `2`) is read with `display=3` (gap G4 for `2` to `5`); `draw_geom` (`1` None, `2` All, `3` FG1 to `6` Main_BG, default `2`) draws the points in use at the frame time as discs in `ptN_color` on the Source and Debug displays (gap G3). A frame 1 pixel wide or high has no motion search: Vectors and Debug show the zero vector whatever these controls. Without matte layers or points in use, these controls change nothing.
+With `fg1_matte` (then `fg2_matte`, `fg3_matte`; a layer counts only after the one before it) every layer gets its own motion: FG k with `fgk_sensitivity` and `fgk_track` (FGk: Image Track), its matte the `fgk_matte_chan` channel (`1` Red to `4` Alpha) of the layer, FG1 on top; the background (Main_BG) is the part the FG mattes leave free, and `fgk_inv_matte_shrink` (pixels) shrinks that free part around FG k (gap G1). `layers_output` picks what the image holds: `1` All composites the layers' motion from the bottom up with their mattes (gap G1d), `2` to `4` one FG layer (its own motion, unweighted, with its visible matte in the blue channel), `5` MAIN_BG the background motion everywhere; a layer that does not exist gives MAIN_BG. `pt1_use` to `pt12_use` (`1` Don't Use, `2` FG1, `3` FG2, `4` FG3, `5` Main_BG Layer; without that layer the point goes to Main_BG) put the point `ptN_pos` on a layer when the value is the same at both frames of the pair: the point's displacement enters the search at the finest level and the coarser levels take it from the image pyramid (gap G2). `debug_view_method` (`1` Warp to `5` Edge Compare, default `2`) is read with `display=3` (gap G4); `draw_geom` (`1` None, `2` All, `3` FG1 to `6` Main_BG, default `2`) draws the points in use at the frame time as the original's antialiased cross in `ptN_color` (Pt N: Color) on the Source and Debug displays (gap G3). A frame 1 pixel wide or high has no motion search: Vectors and Debug show the zero vector whatever these controls. Without matte layers or points in use, these controls change nothing.
 
 ## vectors-in
 
-Listed as **VectorsIn**. 20 params, layers `source`, `vectors_prev`, `vectors_next`, `fg1_matte`, `fg2_matte`, `fg3_matte`. Retimes with the vector images of `create-vectors` instead of searching for motion. The footage is the `source` layer when given, else the input clip. With only one vector layer the other direction is derived from it; with neither, every frame is the error fill ([README: exit codes](../README.md#exit-codes)).
+Listed as **VectorsIn**. 19 params, layers `source` (listed as **Color Source**), `vectors_prev`, `vectors_next`, `fg1_matte`, `fg2_matte`, `fg3_matte`. Retimes with the vector images of `create-vectors` instead of searching for motion. The footage is the `source` layer when given, else the input clip. With only one vector layer the other direction is derived from it; with neither, every frame is the error fill ([reference: exit codes](reference.md#exit-codes)).
 
 | Id | Values | Default | Effect |
 |---|---|---|---|
-| `display` | `1` Output, `2` Source, `3` FG1 to `5` FG3, `6` Background | `1` | the layer groups as in `retime-fgbg`; without matte layers `3` to `6` render as `1` |
+| `display` | `1` Twixtored Output, `2` Source, `3` FG1 Twixtored to `5` FG3 Twixtored, `6` Background Twixtored | `1` | the layer groups as in `retime-fgbg`; without matte layers `3` to `6` render as `1` |
 | `src_mark_segments` | as in `retime` | `1` | as in `retime` |
 | `vectors_max_displace` | 0 to 10000 | `2048` | the `max_displace` the vector images were written with |
 | `vec_scale_x`, `vec_scale_y` | -10 to 10 | `1` | multiply the stored motion; negative flips it |
@@ -180,9 +181,8 @@ Listed as **VectorsIn**. 20 params, layers `source`, `vectors_prev`, `vectors_ne
 | `frame_interp` | as in `retime` | `2` | as in `retime` |
 | `warping` | `1` Inverse, `2` Forward | `2` | as `warping` `1` and `3` in `retime-fgbg` |
 | `blur_compensation` | as in `retime` | `0` | as in `retime` |
-| `output_frame_rate` | 0.10000000149011612 to 1000 | 29.97 | read and ignored: the clip's rate is used |
 
-With matte layers the vector layers are read once per layer of the `display` group: each read sets alpha to 0 where the layer's tracking matte is below 0.95, then decodes and fills as without (gap G1e), and each layer is warped with its own vectors; `fgN_matte_chan` and `fgN_inv_matte_shrink` act as in `retime-fgbg`. Without matte layers they change nothing. Not offered: `vectors`, `prep`, `sensitivity`, `smart_blend`, `src_time_offset`, `input_fields`, `video_360`, `plenty_memory`.
+With matte layers the vector layers are read once per layer of the `display` group: each read caps the vector alpha by the layer's composition matte, then decodes and fills as without (gap G1e), and each layer is interpolated with its own vectors, as in `retime-fgbg`; `fgN_matte_chan` and `fgN_inv_matte_shrink` act as in `retime-fgbg`. Without matte layers they change nothing. Not offered: `vectors`, `prep`, `sensitivity`, `smart_blend`, `src_time_offset`, `input_fields`, `video_360`, `plenty_memory`. There is no output frame rate control: the plugin registers none, the output keeps the clip's rate, and `output_frame_rate` is refused as `unknown param`.
 
 | Rule | Otherwise |
 |---|---|
@@ -192,7 +192,7 @@ With matte layers the vector layers are read once per layer of the `display` gro
 | at a clip rate other than 30 fps, `in_fps_is_out_fps=0` and the clip's rate in `input_frame_rate` | with `in_fps_is_out_fps=1` the clip is read as 30 fps and frame timing turns irregular |
 | the vector clips are lossless (`tools/apply.py --lossless`, depth 16 for fine steps) | yuv420p and tv range change the stored motion |
 
-Verified pair on the [smoke test](../README.md#smoke-test) clip: the vector file has 96 frames (ffv1, `gbrap16le`), and the mean colour of the output's last frame is `104 96 110`, not the `255 0 0` of the error fill.
+Verified pair on the [smoke test](reference.md#smoke-test) clip: the vector file has 96 frames (ffv1, `gbrap16le`), and the mean colour of the output's last frame is `104 96 110`, not the `255 0 0` of the error fill.
 
 ```sh
 python tools/apply.py target/demo/clip.mp4 create-vectors --param track_frame=2 --param max_displace=32 --frames 96 --depth 16 --lossless -o target/demo/vectors_next.mkv
@@ -216,7 +216,7 @@ python tools/apply.py target/demo/clip.mp4 vectors-in --layer vectors_next=targe
 | `blur_compensation` | yes | no | yes | yes |
 | `src_mark_segments` | yes | no | yes | yes |
 | `video_360`, `plenty_memory` | yes | no | yes | no |
-| `track_rgb_a` | no | adds alpha to the search | the wrap-around flag | no |
+| `track_rgb_a` | no | adds alpha to the search | adds alpha to the search (and the 360 filter variants in a layered render) | no |
 | `display` | 2 choices | 3 choices | 6 choices | 6 choices |
 | layers | `alt_source_a`, `alt_source_b` | `alt_source_a`, `fg1_matte` to `fg3_matte` | `alt_source_a`, `alt_source_b`, `fg1_matte` to `fg3_matte` | `source`, `vectors_prev`, `vectors_next`, `fg1_matte` to `fg3_matte` |
 

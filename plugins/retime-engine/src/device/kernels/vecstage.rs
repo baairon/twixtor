@@ -6,9 +6,7 @@
 //! Identifier prefixes: every kernel and helper here starts with one of `vc_` (vector coding),
 //! `mt_` (matte), `ov_` (overlays), `gm_` (geometry and points) or `pp_` (prep and filters), so the
 //! executor can concatenate the sources of every stage module into one program. The sources build on
-//! each other in the order of [`PARTS`]: [`MATTE`], [`VECTORS`] and [`PREP`] use only the
-//! prelude, [`OVERLAY`] uses `mt_clamp01` of [`MATTE`] and `pp_grad` and `pp_edge_value` of
-//! [`PREP`], [`GEOM`] only the prelude.
+//! each other in the order of [`PARTS`]: every part uses only the prelude.
 //!
 //! Precision contracts (V: the CPU function named is the reference; every kernel keeps its
 //! operation order and precision, f32 or f64 as the CPU writes it, no fused multiply add, the
@@ -20,6 +18,8 @@
 //! * `vc_merge_*`, `vc_merge_flow`: `vectors::encode_vectors_merged` and `vectors::merge_flows`:
 //!   per pixel the sum over at most [`MAX_LAYERS`] layers in their order from `0.0f`,
 //!   `acc = acc + w * (u * kx)`, then the encoder's clamp and store (or the plain sum).
+//!   `vc_blue_*`: the blue store of `vectors::encode_vectors_merged_blue` after the merge, in
+//!   place (`q(w * 255.0f)`, `q(w * 65535.0f)`, `w` in float; create-vectors fix 03).
 //! * `vc_decode_*`: `vectors::decode_vectors` (`A == 0` gives zero; integer depths in f64,
 //!   `(float)((((double)c * 2.0) / den - 1.0) * scale)`; float `(c * 2.0f - 1.0f) * md`).
 //! * `vc_holes_*`: `vectors::vector_hole_mask` (`white - A`), also `matte::alpha_holes`.
@@ -27,16 +27,26 @@
 //! * `mt_extract_*`: `matte::extract` (`clamp01(v / white)`). `mt_premultiply_*`:
 //!   `matte::premultiply` (`q(c * m)`, `c * m` in float, `m` read through `mt_clamp_matte`).
 //!   `mt_over_*`: `matte::over` (`smartblend::over` and the plain stores). `mt_effective`,
-//!   `mt_over_weights`: the products and visibilities of `matte::effective` (zero shrinks only,
-//!   the choke needs a blur) and `matte::over_weights`, the layers in their order inside one work
+//!   `mt_over_weights`, `mt_stack_weights`: the products and visibilities of `matte::effective`
+//!   (zero shrinks only, the choke needs a blur), `matte::over_weights` and `matte::stack_weights`
+//!   (create-vectors fix 03: the loop starts at layer 0, so the FG layers above the group occlude
+//!   it, and only the group's weights are stored), the layers in their order inside one work
 //!   item, every matte value read through `mt_clamp_matte` before its first use, as the CPU's
 //!   `matte::clamp_matte` (`x > 1` gives 1, `x >= 0` the value, `-0.0` included, anything else
 //!   0, a NaN too).
-//! * `ov_blend_*`: branch 4 of `blend::blend` at the weight 0.5 (the Blend view). `ov_diff_*`:
-//!   the Diff view (`abs_diff` of the integers, `fabs(w - y)` in float, alpha white).
-//!   `ov_overlay_*`: the R/G overlay (`q(v * 255.0f)`, `q(v * 65535.0f)`, `v` in float).
-//!   `ov_detail`: `clamp01(((l - b) / 255.0f) + 0.5f)`. `ov_edge`: the gradient of the blurred
-//!   luma (`flow::calc_grad`) and `m <= 20.0f ? m * 0.05f : 1.0f` of `m = sqrt(gx*gx + gy*gy)`.
+//! * the Debug views of `debug.rs` (create-vectors fix 05): `ov_fill_*`: `debug::fill_transparent`
+//!   (`W'`: a pixel with alpha 0, `-0.0` included, takes the pixel of `Y`; in place).
+//!   `ov_blend_*`: branch 4 of `blend::blend` at the weight 0.5 (the Blend view). `ov_diff_*`:
+//!   `debug::diff`, grey, at 8 and 16 bpc `min((|725 dR + 1475 dG + 300 dB| + 500) / 1000, white)`
+//!   in 64 bit integers, in float `fabs((dR * 0.725f + dG * 1.475f) + dB * 0.3f)` of the f32
+//!   differences; alpha white. `ov_overlay_*`: `debug::overlay`, red `r`, green and blue `g`
+//!   (`q(v * 255.0f)`, `q(v * 65535.0f)`, `v` in float). `ov_luma_*`: `debug::debug_luma`, each
+//!   colour sample times the f32 `1.0f / 255.0f` or `1.0f / 65535.0f` (1 in float), then
+//!   `(r * 0.29f + g * 0.59f) + b * 0.12f`. `ov_detail`: `debug::detail`, `l / 0.7f` on the border,
+//!   inside `sqrt(s / 8.0f) / 0.7f` with `s` summed from `0.0f` over the 8 neighbours in row order
+//!   (`s = s + fabs(n - l)`); `ov_edge`: `debug::edge`, the Sobel sums of the luma with the
+//!   coordinates clamped into the plane, each sum left to right, `sqrt((sx * sx + sy * sy) / 8.0f)
+//!   / 0.7f`; both then `v < 1.0f ? v : 1.0f` (the CPU's `f32::min`, a NaN gives 1).
 //! * `gm_draw_*`: `geom::draw_points` (the point boxes come from the host's `geom::span`; per
 //!   pixel the last point in order whose disc covers it wins, which is the CPU's overwrite in
 //!   point order). `gm_splat`: the splat of `points::user_displacement` (per pixel the points in
@@ -50,7 +60,7 @@
 /// The most layers one merge launch takes (FG1 to FG3 and Main_BG); the loops of `vc_merge_*`
 /// are bounded by this literal.
 pub const MAX_LAYERS: usize = 4;
-/// The most FG mattes `mt_effective` and `mt_over_weights` take.
+/// The most FG mattes `mt_effective`, `mt_over_weights` and `mt_stack_weights` take.
 pub const MAX_FG: usize = 3;
 /// The most points one `gm_draw_*` or `gm_splat` launch takes (the effects have 12).
 pub const MAX_POINTS: usize = 16;
@@ -271,6 +281,45 @@ __kernel void vc_merge_flow(__global const float* f0, __global const float* f1, 
     size_t o = (y * dw + x) * 2;
     dst[o] = a;
     dst[o + 1] = b;
+}
+
+/* encode_vectors_merged_blue after the merge, in place: the blue sample of every pixel holds the
+   weight w of its pixel, q(w * 255) or q(w * 65535) (the low byte or word), w in float; the other
+   samples are written back unchanged. */
+__kernel void vc_blue_u8(__global uchar* dst, __global const float* blue, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t o = i * 4;
+    for (int c = 0; c < 3; c++) {
+        dst[o + c] = dst[o + c];
+    }
+    dst[o + 3] = store_q_u8(blue[i] * 0x1.fep+7f);
+}
+
+__kernel void vc_blue_u16(__global ushort* dst, __global const float* blue, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t o = i * 4;
+    for (int c = 0; c < 3; c++) {
+        dst[o + c] = dst[o + c];
+    }
+    dst[o + 3] = store_q_u16(blue[i] * 0x1.fffep+15f);
+}
+
+__kernel void vc_blue_f32(__global float* dst, __global const float* blue, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t o = i * 4;
+    for (int c = 0; c < 3; c++) {
+        dst[o + c] = dst[o + c];
+    }
+    dst[o + 3] = blue[i];
 }
 
 /* dec_int of vectors.rs: ((c * 2.0) / den - 1.0) * scale in double, one narrowing at the end. */
@@ -629,6 +678,40 @@ __kernel void mt_over_weights(__global const float* m0, __global const float* m1
         }
     }
 }
+
+/* matte::stack_weights: the OVER weights of the layers first..=last inside the whole stack. The
+   loop starts at layer 0, so the FG layers above first occlude the group too; only the group's
+   weights are stored. For first == 0 it is mt_over_weights. */
+__kernel void mt_stack_weights(__global const float* m0, __global const float* m1, __global const float* m2,
+                               __global float* o0, __global float* o1, __global float* o2, __global float* o3,
+                               uint first, uint last, uint nfg, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    float vis = 0x1p+0f;
+    for (int k = 0; k < 4; k++) {
+        if (k > (int)last) {
+            break;
+        }
+        int j = k - (int)first;
+        if (k == (int)nfg) {
+            __global float* o = j == 0 ? o0 : (j == 1 ? o1 : (j == 2 ? o2 : o3));
+            o[i] = vis;
+            break;
+        }
+        __global const float* m = k == 0 ? m0 : (k == 1 ? m1 : m2);
+        float mk = mt_clamp_matte(m[i]);
+        if (k >= (int)first) {
+            __global float* o = j == 0 ? o0 : (j == 1 ? o1 : (j == 2 ? o2 : o3));
+            o[i] = mk * vis;
+        }
+        if (k < (int)last) {
+            float inv = 0x1p+0f - mk;
+            vis = mt_clamp01(inv * vis);
+        }
+    }
+}
 "#;
 
 pub const PREP: &str = r#"
@@ -767,6 +850,59 @@ __kernel void pp_luma_f32(__global const float* s, __global float* out, int alph
 "#;
 
 pub const OVERLAY: &str = r#"
+/* W' of the Debug views (debug::fill_transparent), in place: a pixel of w whose alpha is 0 (-0.0
+   included) takes the pixel of y; the others are written back unchanged. */
+__kernel void ov_fill_u8(__global uchar* w, __global const uchar* y, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t o = i * 4;
+    if (w[o] == 0) {
+        for (int c = 0; c < 4; c++) {
+            w[o + c] = y[o + c];
+        }
+        return;
+    }
+    for (int c = 0; c < 4; c++) {
+        w[o + c] = w[o + c];
+    }
+}
+
+__kernel void ov_fill_u16(__global ushort* w, __global const ushort* y, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t o = i * 4;
+    if (w[o] == 0) {
+        for (int c = 0; c < 4; c++) {
+            w[o + c] = y[o + c];
+        }
+        return;
+    }
+    for (int c = 0; c < 4; c++) {
+        w[o + c] = w[o + c];
+    }
+}
+
+__kernel void ov_fill_f32(__global float* w, __global const float* y, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t o = i * 4;
+    if (w[o] == 0x0p+0f) {
+        for (int c = 0; c < 4; c++) {
+            w[o + c] = y[o + c];
+        }
+        return;
+    }
+    for (int c = 0; c < 4; c++) {
+        w[o + c] = w[o + c];
+    }
+}
+
 /* The Blend view: branch 4 of blend::blend at the weight 0.5, then the blend store. */
 __kernel void ov_blend_u8(__global const uchar* a, __global const uchar* b, __global uchar* out, uint n) {
     size_t i = get_global_id(0);
@@ -796,19 +932,36 @@ __kernel void ov_blend_f32(__global const float* a, __global const float* b, __g
     out[i] = (b[i] - a[i]) * 0x1p-1f + a[i] + 0x0p+0f;
 }
 
-/* The Diff view: |w - y| per colour channel, alpha white. */
+/* diff_int of debug.rs: |725 dR + 1475 dG + 300 dB| / 1000 rounded half up, at most top, exact in
+   64 bit integers. */
+long ov_diff_int(long dr, long dg, long db, long top) {
+    long s = 725 * dr + 1475 * dg + 300 * db;
+    long v = s < 0 ? -s : s;
+    long r = (v + 500) / 1000;
+    return r < top ? r : top;
+}
+
+/* diff_value of debug.rs: |(dR * 0.725 + dG * 1.475) + dB * 0.3| in f32. */
+float ov_diff_value(float dr, float dg, float db) {
+    return fabs((dr * 0x1.733334p-1f + dg * 0x1.79999ap+0f) + db * 0x1.333334p-2f);
+}
+
+/* The Diff view (debug::diff): the grey value of the channel differences of w and y in R, G and
+   B, alpha white. */
 __kernel void ov_diff_u8(__global const uchar* a, __global const uchar* b, __global uchar* out, uint n) {
     size_t i = get_global_id(0);
     if (i >= n) {
         return;
     }
     size_t o = i * 4;
+    long dr = (long)a[o + 1] - (long)b[o + 1];
+    long dg = (long)a[o + 2] - (long)b[o + 2];
+    long db = (long)a[o + 3] - (long)b[o + 3];
+    uchar v = (uchar)ov_diff_int(dr, dg, db, 255);
     out[o] = (uchar)255;
-    for (int c = 1; c < 4; c++) {
-        uchar x = a[o + c];
-        uchar y = b[o + c];
-        out[o + c] = x > y ? (uchar)(x - y) : (uchar)(y - x);
-    }
+    out[o + 1] = v;
+    out[o + 2] = v;
+    out[o + 3] = v;
 }
 
 __kernel void ov_diff_u16(__global const ushort* a, __global const ushort* b, __global ushort* out, uint n) {
@@ -817,12 +970,14 @@ __kernel void ov_diff_u16(__global const ushort* a, __global const ushort* b, __
         return;
     }
     size_t o = i * 4;
+    long dr = (long)a[o + 1] - (long)b[o + 1];
+    long dg = (long)a[o + 2] - (long)b[o + 2];
+    long db = (long)a[o + 3] - (long)b[o + 3];
+    ushort v = (ushort)ov_diff_int(dr, dg, db, 65535);
     out[o] = (ushort)65535;
-    for (int c = 1; c < 4; c++) {
-        ushort x = a[o + c];
-        ushort y = b[o + c];
-        out[o + c] = x > y ? (ushort)(x - y) : (ushort)(y - x);
-    }
+    out[o + 1] = v;
+    out[o + 2] = v;
+    out[o + 3] = v;
 }
 
 __kernel void ov_diff_f32(__global const float* a, __global const float* b, __global float* out, uint n) {
@@ -831,23 +986,25 @@ __kernel void ov_diff_f32(__global const float* a, __global const float* b, __gl
         return;
     }
     size_t o = i * 4;
+    float v = ov_diff_value(a[o + 1] - b[o + 1], a[o + 2] - b[o + 2], a[o + 3] - b[o + 3]);
     out[o] = 0x1p+0f;
-    for (int c = 1; c < 4; c++) {
-        out[o + c] = fabs(a[o + c] - b[o + c]);
-    }
+    out[o + 1] = v;
+    out[o + 2] = v;
+    out[o + 3] = v;
 }
 
-/* The R/G overlay: alpha white, red r, green g, blue 0. */
+/* The red/cyan overlay (debug::overlay): alpha white, red r, green and blue g. */
 __kernel void ov_overlay_u8(__global const float* r, __global const float* g, __global uchar* out, uint n) {
     size_t i = get_global_id(0);
     if (i >= n) {
         return;
     }
     size_t o = i * 4;
+    uchar gv = store_q_u8(g[i] * 0x1.fep+7f);
     out[o] = (uchar)255;
     out[o + 1] = store_q_u8(r[i] * 0x1.fep+7f);
-    out[o + 2] = store_q_u8(g[i] * 0x1.fep+7f);
-    out[o + 3] = (uchar)0;
+    out[o + 2] = gv;
+    out[o + 3] = gv;
 }
 
 __kernel void ov_overlay_u16(__global const float* r, __global const float* g, __global ushort* out, uint n) {
@@ -856,10 +1013,11 @@ __kernel void ov_overlay_u16(__global const float* r, __global const float* g, _
         return;
     }
     size_t o = i * 4;
+    ushort gv = store_q_u16(g[i] * 0x1.fffep+15f);
     out[o] = (ushort)65535;
     out[o + 1] = store_q_u16(r[i] * 0x1.fffep+15f);
-    out[o + 2] = store_q_u16(g[i] * 0x1.fffep+15f);
-    out[o + 3] = (ushort)0;
+    out[o + 2] = gv;
+    out[o + 3] = gv;
 }
 
 __kernel void ov_overlay_f32(__global const float* r, __global const float* g, __global float* out, uint n) {
@@ -871,29 +1029,97 @@ __kernel void ov_overlay_f32(__global const float* r, __global const float* g, _
     out[o] = 0x1p+0f;
     out[o + 1] = r[i];
     out[o + 2] = g[i];
-    out[o + 3] = 0x0p+0f;
+    out[o + 3] = g[i];
 }
 
-/* The detail of a luma plane l from its pyramid blur b: clamp01(((l - b) / 255) + 0.5). */
-__kernel void ov_detail(__global const float* l, __global const float* b, __global float* out, uint n) {
+/* The luma of the Debug views (debug::debug_luma) from colour samples scaled to 0..1. */
+float ov_lum(float r, float g, float b) {
+    return (r * 0x1.28f5c2p-2f + g * 0x1.2e147ap-1f) + b * 0x1.eb851ep-4f;
+}
+
+__kernel void ov_luma_u8(__global const uchar* s, __global float* out, uint n) {
     size_t i = get_global_id(0);
     if (i >= n) {
         return;
     }
-    out[i] = mt_clamp01(((l[i] - b[i]) / 0x1.fep+7f) + 0x1p-1f);
+    size_t p = i * 4;
+    float k = 0x1.010102p-8f;
+    out[i] = ov_lum((float)s[p + 1] * k, (float)s[p + 2] * k, (float)s[p + 3] * k);
 }
 
-/* The edge measure of the blurred luma b: the gradient and m <= 20 ? m * 0.05 : 1. */
-__kernel void ov_edge(__global const float* b, __global float* out, uint w, uint h) {
+__kernel void ov_luma_u16(__global const ushort* s, __global float* out, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t p = i * 4;
+    float k = 0x1.0001p-16f;
+    out[i] = ov_lum((float)s[p + 1] * k, (float)s[p + 2] * k, (float)s[p + 3] * k);
+}
+
+__kernel void ov_luma_f32(__global const float* s, __global float* out, uint n) {
+    size_t i = get_global_id(0);
+    if (i >= n) {
+        return;
+    }
+    size_t p = i * 4;
+    out[i] = ov_lum(s[p + 1], s[p + 2], s[p + 3]);
+}
+
+/* The detail of a luma plane (debug::detail): l / 0.7 on the border, inside sqrt(s / 8) / 0.7 of
+   the sum s of |l(n) - l(p)| over the 8 neighbours n in row order, then at most 1. */
+__kernel void ov_detail(__global const float* l, __global float* out, uint w, uint h) {
     size_t x = get_global_id(0);
     size_t y = get_global_id(1);
     if (x >= w || y >= h) {
         return;
     }
-    float gx;
-    float gy;
-    pp_grad(b, x, y, (size_t)w, (size_t)h, 0, &gx, &gy);
-    out[y * w + x] = pp_edge_value(gx, gy);
+    size_t wd = (size_t)w;
+    float c = l[y * wd + x];
+    float d;
+    if (x == 0 || y == 0 || x + 1 == wd || y + 1 == (size_t)h) {
+        d = c / 0x1.666666p-1f;
+    } else {
+        float s = 0x0p+0f;
+        for (int r = 0; r < 3; r++) {
+            for (int k = 0; k < 3; k++) {
+                size_t yy = y + (size_t)r - 1;
+                size_t xx = x + (size_t)k - 1;
+                if (yy != y || xx != x) {
+                    s = s + fabs(l[yy * wd + xx] - c);
+                }
+            }
+        }
+        d = sqrt(s / 0x1p+3f) / 0x1.666666p-1f;
+    }
+    out[y * wd + x] = d < 0x1p+0f ? d : 0x1p+0f;
+}
+
+/* The luma at (x + dx, y + dy) with the coordinates clamped into the w x h plane. */
+float ov_at(__global const float* l, size_t x, size_t y, int dy, int dx, uint w, uint h) {
+    long yy = (long)y + (long)dy;
+    long xx = (long)x + (long)dx;
+    long ym = (long)h - 1;
+    long xm = (long)w - 1;
+    yy = yy < 0 ? 0 : (yy > ym ? ym : yy);
+    xx = xx < 0 ? 0 : (xx > xm ? xm : xx);
+    return l[(size_t)yy * (size_t)w + (size_t)xx];
+}
+
+/* The edge measure of a luma plane (debug::edge): the 3 x 3 Sobel sums with the border repeated
+   outwards, sqrt((sx * sx + sy * sy) / 8) / 0.7, then at most 1. */
+__kernel void ov_edge(__global const float* l, __global float* out, uint w, uint h) {
+    size_t x = get_global_id(0);
+    size_t y = get_global_id(1);
+    if (x >= w || y >= h) {
+        return;
+    }
+    float sx = (ov_at(l, x, y, -1, 1, w, h) + 0x1p+1f * ov_at(l, x, y, 0, 1, w, h) + ov_at(l, x, y, 1, 1, w, h))
+        - (ov_at(l, x, y, -1, -1, w, h) + 0x1p+1f * ov_at(l, x, y, 0, -1, w, h) + ov_at(l, x, y, 1, -1, w, h));
+    float sy = (ov_at(l, x, y, 1, -1, w, h) + 0x1p+1f * ov_at(l, x, y, 1, 0, w, h) + ov_at(l, x, y, 1, 1, w, h))
+        - (ov_at(l, x, y, -1, -1, w, h) + 0x1p+1f * ov_at(l, x, y, -1, 0, w, h) + ov_at(l, x, y, -1, 1, w, h));
+    float m = sqrt((sx * sx + sy * sy) / 0x1p+3f) / 0x1.666666p-1f;
+    out[y * (size_t)w + x] = m < 0x1p+0f ? m : 0x1p+0f;
 }
 "#;
 

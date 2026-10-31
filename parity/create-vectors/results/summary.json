@@ -1,0 +1,54 @@
+{
+ "module": "create-vectors",
+ "plugin": "CreateMotionVectors_64.aex",
+ "plugin_sha256": "9b16c3350e4e41f10cf7fc56ead2a0e0aeea00eb76708ef973f2d10e99d57e0a",
+ "effect": "create-vectors",
+ "status": "in_progress",
+ "blockers": [
+  "mutants: 47 of 51 killed; survivors m05, m06, m29, m41",
+  "2 cases hit emulator or harness problems and are unresolved"
+ ],
+ "cases": {
+  "in_contract": 418,
+  "compared": 418,
+  "identical": 418,
+  "differing": 0,
+  "out_of_contract": 48,
+  "logic_parity": 5
+ },
+ "values": {
+  "bytes_compared": 892476,
+  "floats_compared": 335208,
+  "differing_values": 0,
+  "max_ulp": 0
+ },
+ "call_records": {
+  "compared": 418,
+  "matching": 418
+ },
+ "mutants": {
+  "total": 51,
+  "killed": 47,
+  "survivors": [
+   "m05",
+   "m06",
+   "m29",
+   "m41"
+  ]
+ },
+ "stand_ins": [
+  "5 cases with keyed params use the vfx keyframe syntax as the shared stand-in for AE keyframe interpolation (keyframe interpolation of the host: eased end key; keyframe interpolation of the host: linear; keyframe interpolation of the host: point, linear)",
+  "5 keyed-parameter cases are logic parity, not full parity: 5 compared, 5 identical"
+ ],
+ "fixes": [],
+ "commands": [
+  "python3 phase_b.py grade --refs REFS",
+  "python3 phase_b.py ooc --status run_summary.json --param-map ../harness/param_map.tsv --records RECORDS",
+  "python3 phase_b.py calls --plugin-records RECORDS --rewrite-records REWRITE_RECORDS --param-map ../harness/param_map.tsv",
+  "python3 phase_b.py record-rewrite --out REWRITE_RECORDS",
+  "python3 phase_b.py kills --refs REFS",
+  "python3 phase_b.py summary",
+  "fx-parity run --testset grid --refs REFS --max-ulp 0 --json --vfx src/target/release/vfx"
+ ],
+ "measured_at": "2026-10-31"
+}

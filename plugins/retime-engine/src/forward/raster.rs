@@ -4,6 +4,9 @@
 //! The three tests against a double constant (`span > 1e-08`, `frac <= 0.01`, `span > 1e-05`)
 //! widen the float first.
 
+// The colour payload arithmetic runs over `crate::nanrule::Arith`: the colours of the Gouraud variant can be NaNs.
+use crate::nanrule as nr;
+
 /// One vertex of the payload `[x, y, u, v, d]`: the position from `mesh::position_row`,
 /// `u = c / w1`, `v = r / h1` and `d` the mip level from `mesh::mip_level`.
 #[derive(Clone, Copy, Debug)]
@@ -53,27 +56,27 @@ pub(crate) fn cvtt32(x: f32) -> i32 {
 /// is active, to `edges[1]` otherwise. The state is initialised for the scanline `y - 1` (the
 /// caller advances it once before use).
 #[inline]
-fn edge_init(a: &Vtx, b: &Vtx, y: f32, edges: &mut [Edge; 2], count: &mut u32) {
+fn edge_init<A: nr::Arith>(a: &Vtx, b: &Vtx, y: f32, edges: &mut [Edge; 2], count: &mut u32) {
     if a.y <= y && y < b.y {
         let slot = if *count != 0 { 1 } else { 0 };
         *count += 1;
         let dx = b.x - a.x;
-        let du = b.u - a.u;
-        let dv = b.v - a.v;
-        let dd = b.d - a.d;
+        let du = A::sub(b.u, a.u);
+        let dv = A::sub(b.v, a.v);
+        let dd = A::sub(b.d, a.d);
         let inv = 1.0f32 / (b.y - a.y);
         let t = ((y - 1.0f32) - a.y) * inv;
         edges[slot] = Edge {
             ay: a.y,
             by: b.y,
             x: dx * t + a.x,
-            u: du * t + a.u,
-            v: dv * t + a.v,
-            d: dd * t + a.d,
+            u: A::add(A::mul(du, t), a.u),
+            v: A::add(A::mul(dv, t), a.v),
+            d: A::add(A::mul(dd, t), a.d),
             dx: dx * inv,
-            du: du * inv,
-            dv: dv * inv,
-            dd: dd * inv,
+            du: A::mul(du, inv),
+            dv: A::mul(dv, inv),
+            dd: A::mul(dd, inv),
         };
     }
 }
@@ -104,7 +107,7 @@ fn sort_by_y(v: &[Vtx; 3]) -> [Vtx; 3] {
 }
 
 /// One span of the main pass: `l` and `r` are the left and right edge, `y` the scanline.
-fn span<S: Sink>(l: &Edge, r: &Edge, y: f32, w1: i32, sink: &mut S) {
+fn span<A: nr::Arith, S: Sink>(l: &Edge, r: &Edge, y: f32, w1: i32, sink: &mut S) {
     let x0 = cvtt32(l.x.ceil()).max(0);
     let x1 = cvtt32(r.x.floor()).min(w1);
     let wid = r.x - l.x;
@@ -118,25 +121,25 @@ fn span<S: Sink>(l: &Edge, r: &Edge, y: f32, w1: i32, sink: &mut S) {
     let yi = cvtt32(y) as usize;
     if x0 == x1 {
         let t = ((x0 as f32) - l.x) * (1.0f32 / wid);
-        let u = (r.u - l.u) * t + l.u;
-        let v = (r.v - l.v) * t + l.v;
-        let d = (r.d - l.d) * t + l.d;
+        let u = A::add(A::mul(A::sub(r.u, l.u), t), l.u);
+        let v = A::add(A::mul(A::sub(r.v, l.v), t), l.v);
+        let d = A::add(A::mul(A::sub(r.d, l.d), t), l.d);
         sink.hit(x0 as usize, yi, u, v, d);
     } else {
         let inv = 1.0f32 / wid;
-        let du = r.u - l.u;
-        let dv = r.v - l.v;
-        let dd = r.d - l.d;
+        let du = A::sub(r.u, l.u);
+        let dv = A::sub(r.v, l.v);
+        let dd = A::sub(r.d, l.d);
         let t = ((x0 as f32) - l.x) * inv;
-        let mut u = du * t + l.u;
-        let mut v = dv * t + l.v;
-        let mut d = dd * t + l.d;
+        let mut u = A::add(A::mul(du, t), l.u);
+        let mut v = A::add(A::mul(dv, t), l.v);
+        let mut d = A::add(A::mul(dd, t), l.d);
         let mut x = x0;
         while x < x1 {
             sink.hit(x as usize, yi, u, v, d);
-            u += du * inv;
-            v += dv * inv;
-            d += dd * inv;
+            u = A::add(u, A::mul(du, inv));
+            v = A::add(v, A::mul(dv, inv));
+            d = A::add(d, A::mul(dd, inv));
             x += 1;
         }
         sink.hit(x as usize, yi, u, v, d);
@@ -148,6 +151,15 @@ fn span<S: Sink>(l: &Edge, r: &Edge, y: f32, w1: i32, sink: &mut S) {
 /// both triangles), edges active for `a.y <= y < b.y`; the last row `h1` is only reached through the
 /// degenerate pass at the end.
 pub(crate) fn triangle<S: Sink>(tri: &[Vtx; 3], w1: i32, h1: i32, sink: &mut S) {
+    // a NaN colour: the interpolation with the NaN rule (`crate::nanrule`); numbers are the same bits either way
+    if tri.iter().any(|v| v.u.is_nan() || v.v.is_nan() || v.d.is_nan()) {
+        triangle_with::<nr::Rule, S>(tri, w1, h1, sink)
+    } else {
+        triangle_with::<nr::Plain, S>(tri, w1, h1, sink)
+    }
+}
+
+fn triangle_with<A: nr::Arith, S: Sink>(tri: &[Vtx; 3], w1: i32, h1: i32, sink: &mut S) {
     let w1f = w1 as f32;
     let h1f = h1 as f32;
     let t = tri;
@@ -199,16 +211,16 @@ pub(crate) fn triangle<S: Sink>(tri: &[Vtx; 3], w1: i32, h1: i32, sink: &mut S) 
                     }
                     match vi {
                         0 => {
-                            edge_init(&vs[0], &vs[1], y, &mut e, &mut count);
-                            edge_init(&vs[0], &vs[2], y, &mut e, &mut count);
+                            edge_init::<A>(&vs[0], &vs[1], y, &mut e, &mut count);
+                            edge_init::<A>(&vs[0], &vs[2], y, &mut e, &mut count);
                         }
                         1 => {
-                            edge_init(&vs[1], &vs[2], y, &mut e, &mut count);
-                            edge_init(&vs[1], &vs[0], y, &mut e, &mut count);
+                            edge_init::<A>(&vs[1], &vs[2], y, &mut e, &mut count);
+                            edge_init::<A>(&vs[1], &vs[0], y, &mut e, &mut count);
                         }
                         _ => {
-                            edge_init(&vs[2], &vs[0], y, &mut e, &mut count);
-                            edge_init(&vs[2], &vs[1], y, &mut e, &mut count);
+                            edge_init::<A>(&vs[2], &vs[0], y, &mut e, &mut count);
+                            edge_init::<A>(&vs[2], &vs[1], y, &mut e, &mut count);
                         }
                     }
                     vi += 1;
@@ -219,16 +231,16 @@ pub(crate) fn triangle<S: Sink>(tri: &[Vtx; 3], w1: i32, h1: i32, sink: &mut S) 
             }
             for k in 0..2 {
                 e[k].x += e[k].dx;
-                e[k].u += e[k].du;
-                e[k].v += e[k].dv;
-                e[k].d += e[k].dd;
+                e[k].u = A::add(e[k].u, e[k].du);
+                e[k].v = A::add(e[k].v, e[k].dv);
+                e[k].d = A::add(e[k].d, e[k].dd);
             }
             if count == 2 {
                 // the left edge is the second slot only when it lies strictly left of the first
                 if e[1].x < e[0].x {
-                    span(&e[1], &e[0], y, w1, sink);
+                    span::<A, S>(&e[1], &e[0], y, w1, sink);
                 } else {
-                    span(&e[0], &e[1], y, w1, sink);
+                    span::<A, S>(&e[0], &e[1], y, w1, sink);
                 }
             }
             y += 1.0f32;
@@ -259,24 +271,24 @@ pub(crate) fn triangle<S: Sink>(tri: &[Vtx; 3], w1: i32, h1: i32, sink: &mut S) 
                 };
                 if x0 == x1 {
                     let tt = ((x0 as f32) - l.x) * inv;
-                    let u = (r.u - l.u) * tt + l.u;
-                    let v = (r.v - l.v) * tt + l.v;
-                    let d = (r.d - l.d) * tt + l.d;
+                    let u = A::add(A::mul(A::sub(r.u, l.u), tt), l.u);
+                    let v = A::add(A::mul(A::sub(r.v, l.v), tt), l.v);
+                    let d = A::add(A::mul(A::sub(r.d, l.d), tt), l.d);
                     emit(x0, u, v, d, sink);
                 } else {
-                    let du = r.u - l.u;
-                    let dv = r.v - l.v;
-                    let dd = r.d - l.d;
+                    let du = A::sub(r.u, l.u);
+                    let dv = A::sub(r.v, l.v);
+                    let dd = A::sub(r.d, l.d);
                     let tt = ((x0 as f32) - l.x) * inv;
-                    let mut u = du * tt + l.u;
-                    let mut v = dv * tt + l.v;
-                    let mut d = dd * tt + l.d;
+                    let mut u = A::add(A::mul(du, tt), l.u);
+                    let mut v = A::add(A::mul(dv, tt), l.v);
+                    let mut d = A::add(A::mul(dd, tt), l.d);
                     let mut x = x0;
                     while x < x1 {
                         emit(x, u, v, d, sink);
-                        u += du * inv;
-                        v += dv * inv;
-                        d += dd * inv;
+                        u = A::add(u, A::mul(du, inv));
+                        v = A::add(v, A::mul(dv, inv));
+                        d = A::add(d, A::mul(dd, inv));
                         x += 1;
                     }
                     // no `x0 <= x1` test here: a span narrower than a pixel still writes `x0`

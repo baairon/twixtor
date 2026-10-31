@@ -1,0 +1,218 @@
+[
+ {
+  "id": "M01",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "let radius = (1.0f32 - fr) + r;",
+  "new": "let radius = ((1.0f32 - fr) + r) + 0.5f32;",
+  "count": 1,
+  "what": "shrink radius larger by half a pixel (G1)"
+ },
+ {
+  "id": "M02",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "let t = 1.0f32 - (k[ni] + k[ni + 1]);",
+  "new": "let t = 1.0f32 - k[ni];",
+  "count": 1,
+  "what": "shrink threshold T drops the k[n+1] term (G1)"
+ },
+ {
+  "id": "M03",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "*v = *v * it + cv * t;",
+  "new": "*v = *v * t + cv * it;",
+  "count": 1,
+  "what": "fractional shrink mixes the two whole shrinks with swapped weights (G1)"
+ },
+ {
+  "id": "M04",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "3 => B,",
+  "new": "3 => G,",
+  "count": 1,
+  "what": "matte channel 3 reads green instead of blue"
+ },
+ {
+  "id": "M05",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "let v = smartblend::over(a, b, P::WHITE);",
+  "new": "let v = smartblend::over(b, a, P::WHITE);",
+  "count": 1,
+  "what": "layer OVER with source and destination swapped"
+ },
+ {
+  "id": "M06",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "row[x * CHANNELS + c] = q(f32::from(s[i + c]) * mv) as u8;",
+  "new": "row[x * CHANNELS + c] = (f32::from(s[i + c]) * mv) as u8;",
+  "count": 1,
+  "what": "8 bpc layer premultiply truncates instead of rounding"
+ },
+ {
+  "id": "M07",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "old": "occlude(&mut vis, &inv.data, w);",
+  "new": "let _ = &inv.data;",
+  "count": 1,
+  "what": "visibility of the layers below never reduced: layer order lost (G1c)"
+ },
+ {
+  "id": "M08",
+  "file": "plugins/retime-engine/src/layers.rs",
+  "old": "for k in (job.first..=job.last).rev() {",
+  "new": "for k in job.first..=job.last {",
+  "count": 2,
+  "what": "layers composed top down instead of bottom up (both compositions)"
+ },
+ {
+  "id": "M09",
+  "file": "plugins/retime-engine/src/layers.rs",
+  "old": "layer_image(b, &mattes.1, k, job.nfg)?",
+  "new": "layer_image(b, &mattes.0, k, job.nfg)?",
+  "count": 1,
+  "what": "frame B premultiplied by the matte of frame A"
+ },
+ {
+  "id": "M10",
+  "file": "plugins/retime-engine/src/layers.rs",
+  "old": "let g = ((display - 3) as usize).min(nfg);",
+  "new": "let g = ((display - 2) as usize).min(nfg);",
+  "count": 1,
+  "what": "display group off by one layer"
+ },
+ {
+  "id": "M11",
+  "file": "plugins/retime-engine/src/layers.rs",
+  "old": "(code >= 2) == side_a",
+  "new": "(code >= 3) == side_a",
+  "count": 1,
+  "what": "forward warp code 2 takes the inverse flow assignment of the sides"
+ },
+ {
+  "id": "M12",
+  "file": "plugins/retime-engine/src/layers.rs",
+  "old": "masks: masks.map(|(ma, mb)| (mb, ma))",
+  "new": "masks: masks",
+  "count": 1,
+  "what": "reverse solve keeps the mask pyramids in A, B order"
+ },
+ {
+  "id": "M13",
+  "file": "plugins/retime-engine/src/layers.rs",
+  "old": "user_displacement(&pairs(false), geo, out)",
+  "new": "user_displacement(&pairs(true), geo, out)",
+  "count": 1,
+  "what": "reverse solve uses the forward point pairs (G2)"
+ },
+ {
+  "id": "M14",
+  "file": "plugins/retime-engine/src/points.rs",
+  "old": "let ix = cvtt(from[0] * kx + 0.5f32);",
+  "new": "let ix = cvtt(from[0] * kx + 1.5f32);",
+  "count": 1,
+  "what": "point lands one pixel to the right (G2)"
+ },
+ {
+  "id": "M15",
+  "file": "plugins/retime-engine/src/points.rs",
+  "old": "fx >= 0.0 && fx < out.0 as f32",
+  "new": "fx > 0.0 && fx < out.0 as f32",
+  "count": 1,
+  "what": "in_frame excludes a point at x = -0.5 (G2)"
+ },
+ {
+  "id": "M16",
+  "file": "plugins/retime-engine/src/points.rs",
+  "old": "lvl.w[i] = lvl.w[i] + 1.0f32;",
+  "new": "lvl.w[i] = lvl.w[i] + 2.0f32;",
+  "count": 1,
+  "what": "point weight 2 instead of 1 (G2)"
+ },
+ {
+  "id": "M17",
+  "file": "plugins/retime-engine/src/points.rs",
+  "old": "lvl.d[2 * i] = lvl.d[2 * i] + (from[0] - to[0]) * kx;",
+  "new": "lvl.d[2 * i] = lvl.d[2 * i] + (to[0] - from[0]) * kx;",
+  "count": 1,
+  "what": "point displacement x with the wrong sign (G2)"
+ },
+ {
+  "id": "M18",
+  "file": "plugins/retime-engine/src/points.rs",
+  "old": "if use_value < 2 {",
+  "new": "if use_value < 3 {",
+  "count": 1,
+  "what": "Pt Use value 2 (FG 1) treated as Don't Use"
+ },
+ {
+  "id": "M19",
+  "file": "plugins/retime-engine/src/points.rs",
+  "old": "let kx = (wl - 1) as f32 / (out.0 - 1) as f32;",
+  "new": "let kx = (wl - 1) as f32 / out.0 as f32;",
+  "count": 1,
+  "what": "level scale of a point uses the width instead of width - 1 (G2)"
+ },
+ {
+  "id": "M20",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "old": "let r = 1.5f32 * ratio;",
+  "new": "let r = 2.0f32 * ratio;",
+  "count": 1,
+  "what": "Draw Geom disc radius 2.0 instead of 1.5 (G3)"
+ },
+ {
+  "id": "M21",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "old": "if dx * dx + dy * dy <= r2 {",
+  "new": "if dx * dx + dy * dy < r2 {",
+  "count": 1,
+  "what": "Draw Geom disc edge exclusive (G3)"
+ },
+ {
+  "id": "M22",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "old": "u16::from(c) * 257",
+  "new": "u16::from(c) * 256",
+  "count": 1,
+  "what": "Draw Geom 16 bpc colour scale 256 (G3)"
+ },
+ {
+  "id": "M23",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "old": "f32::from(c) / 255.0f32",
+  "new": "f32::from(c) / 256.0f32",
+  "count": 1,
+  "what": "Draw Geom float colour divided by 256 (G3)"
+ },
+ {
+  "id": "M24",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "old": "for &(p, col) in pts {",
+  "new": "for &(p, col) in pts.iter().rev() {",
+  "count": 1,
+  "what": "Draw Geom draws later points first, so earlier points end on top (G3)"
+ },
+ {
+  "id": "M25",
+  "file": "plugins/retime-engine/src/flow/extras.rs",
+  "old": "*v = if *v >= MASK_ON { 1.0 } else { 0.0 };",
+  "new": "*v = if *v > MASK_ON { 1.0 } else { 0.0 };",
+  "count": 1,
+  "what": "mask binarize threshold exclusive at 0.95 (G1b)"
+ },
+ {
+  "id": "M26",
+  "file": "plugins/retime-engine/src/flow/extras.rs",
+  "old": "f[x * 2 + 1] = d[x * 2 + 1] / k;",
+  "new": "f[x * 2 + 1] = d[x * 2] / k;",
+  "count": 1,
+  "what": "user displacement y takes the x component (G2)"
+ },
+ {
+  "id": "M27",
+  "file": "plugins/retime-engine/src/flow/extras.rs",
+  "old": "apply_user(flow, u, w);",
+  "new": "let _ = (&flow, u, w);",
+  "count": 2,
+  "what": "user displacement never applied to the flow (G2)"
+ }
+]

@@ -1,0 +1,3 @@
+id	status	differing_values	max_ulp	tags	logic_parity	first_failing_frame	failing_frames	error
+retime.supp-dur-f32-fn475-at15.alt-1x1.d8	FAIL	0		group=;class=value;depth=8;size=1x1;frames=2;fps=15;source=alt	no		0	input ~/twixtor-parity/re/f7-supp/supp/time/inputs/alt-1x1.d8.f480.rgba has 1920 bytes, 2 frames of 1x1 at 8 bpc are 8
+retime.supp-dur-f32-fn475-at15.alt-1x1.d32	FAIL	0	0	group=;class=value;depth=32;size=1x1;frames=2;fps=15;source=alt	no		0	input ~/twixtor-parity/re/f7-supp/supp/time/inputs/alt-1x1.d32.f480.gbrapf32le has 7680 bytes, 2 frames of 1x1 at 32 bpc are 32

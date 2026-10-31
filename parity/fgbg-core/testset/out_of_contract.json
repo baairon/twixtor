@@ -1,0 +1,464 @@
+{
+ "format": 1,
+ "note": "candidates, never counted as passes or failures",
+ "cases": [
+  {
+   "id": "retime-fgbg.oc-speed_percent-10000.5",
+   "effect": "retime-fgbg",
+   "label": "oc-speed_percent",
+   "params": [
+    "speed_percent=10000.5"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-speed_percent-10000.5.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `speed_percent`: 10000.5 outside -10000..=10000"
+  },
+  {
+   "id": "retime-fgbg.oc-speed_percent--10001",
+   "effect": "retime-fgbg",
+   "label": "oc-speed_percent",
+   "params": [
+    "speed_percent=-10001"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-speed_percent--10001.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `speed_percent`: -10001 outside -10000..=10000"
+  },
+  {
+   "id": "retime-fgbg.oc-frame_num-200001",
+   "effect": "retime-fgbg",
+   "label": "oc-frame_num",
+   "params": [
+    "frame_num=200001",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-frame_num-200001.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `frame_num`: 200001 outside -200000..=200000"
+  },
+  {
+   "id": "retime-fgbg.oc-frame_num--200001",
+   "effect": "retime-fgbg",
+   "label": "oc-frame_num",
+   "params": [
+    "frame_num=-200001",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-frame_num--200001.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `frame_num`: -200001 outside -200000..=200000"
+  },
+  {
+   "id": "retime-fgbg.oc-input_frame_rate-0.1",
+   "effect": "retime-fgbg",
+   "label": "oc-input_frame_rate",
+   "params": [
+    "input_frame_rate=0.1",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-input_frame_rate-0.1.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `input_frame_rate`: 0.1 outside 0.10000000149011612..=1000"
+  },
+  {
+   "id": "retime-fgbg.oc-input_frame_rate-0.09",
+   "effect": "retime-fgbg",
+   "label": "oc-input_frame_rate",
+   "params": [
+    "input_frame_rate=0.09",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-input_frame_rate-0.09.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `input_frame_rate`: 0.09 outside 0.10000000149011612..=1000"
+  },
+  {
+   "id": "retime-fgbg.oc-input_frame_rate-1000.5",
+   "effect": "retime-fgbg",
+   "label": "oc-input_frame_rate",
+   "params": [
+    "input_frame_rate=1000.5",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-input_frame_rate-1000.5.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `input_frame_rate`: 1000.5 outside 0.10000000149011612..=1000"
+  },
+  {
+   "id": "retime-fgbg.oc-blur_compensation-10.01",
+   "effect": "retime-fgbg",
+   "label": "oc-blur_compensation",
+   "params": [
+    "blur_compensation=10.01",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-blur_compensation-10.01.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `blur_compensation`: 10.01 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-blur_compensation--0.01",
+   "effect": "retime-fgbg",
+   "label": "oc-blur_compensation",
+   "params": [
+    "blur_compensation=-0.01",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-blur_compensation--0.01.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `blur_compensation`: -0.01 outside 0..=10"
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_sensitivity-100.01",
+   "effect": "retime-fgbg",
+   "label": "oc-main_bg_sensitivity",
+   "params": [
+    "main_bg_sensitivity=100.01",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-main_bg_sensitivity-100.01.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `main_bg_sensitivity`: 100.01 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_sensitivity--0.01",
+   "effect": "retime-fgbg",
+   "label": "oc-main_bg_sensitivity",
+   "params": [
+    "main_bg_sensitivity=-0.01",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-main_bg_sensitivity--0.01.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `main_bg_sensitivity`: -0.01 outside 0..=100"
+  },
+  {
+   "id": "retime-fgbg.oc-warping-0",
+   "effect": "retime-fgbg",
+   "label": "oc-warping",
+   "params": [
+    "warping=0",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-warping-0.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `warping`: 0 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-warping-5",
+   "effect": "retime-fgbg",
+   "label": "oc-warping",
+   "params": [
+    "warping=5",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-warping-5.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `warping`: 5 outside 1..=4"
+  },
+  {
+   "id": "retime-fgbg.oc-vectors-0",
+   "effect": "retime-fgbg",
+   "label": "oc-vectors",
+   "params": [
+    "vectors=0",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-vectors-0.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `vectors`: 0 outside 1..=5"
+  },
+  {
+   "id": "retime-fgbg.oc-vectors-6",
+   "effect": "retime-fgbg",
+   "label": "oc-vectors",
+   "params": [
+    "vectors=6",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-vectors-6.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `vectors`: 6 outside 1..=5"
+  },
+  {
+   "id": "retime-fgbg.oc-prep-4",
+   "effect": "retime-fgbg",
+   "label": "oc-prep",
+   "params": [
+    "prep=4",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-prep-4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `prep`: 4 outside 1..=3"
+  },
+  {
+   "id": "retime-fgbg.oc-frame_interp-4",
+   "effect": "retime-fgbg",
+   "label": "oc-frame_interp",
+   "params": [
+    "frame_interp=4",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-frame_interp-4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `frame_interp`: 4 outside 1..=3"
+  },
+  {
+   "id": "retime-fgbg.oc-display-7",
+   "effect": "retime-fgbg",
+   "label": "oc-display",
+   "params": [
+    "display=7",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-display-7.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `display`: 7 outside 1..=6"
+  },
+  {
+   "id": "retime-fgbg.oc-display-0",
+   "effect": "retime-fgbg",
+   "label": "oc-display",
+   "params": [
+    "display=0",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-display-0.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `display`: 0 outside 1..=6"
+  },
+  {
+   "id": "retime-fgbg.oc-time_remap_mode-3",
+   "effect": "retime-fgbg",
+   "label": "oc-time_remap_mode",
+   "params": [
+    "time_remap_mode=3",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-time_remap_mode-3.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `time_remap_mode`: 3 outside 1..=2"
+  },
+  {
+   "id": "retime-fgbg.oc-src_mark_segments-6",
+   "effect": "retime-fgbg",
+   "label": "oc-src_mark_segments",
+   "params": [
+    "src_mark_segments=6",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-src_mark_segments-6.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `src_mark_segments`: 6 outside 1..=5"
+  },
+  {
+   "id": "retime-fgbg.oc-input_fields-4",
+   "effect": "retime-fgbg",
+   "label": "oc-input_fields",
+   "params": [
+    "input_fields=4",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-input_fields-4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `input_fields`: 4 outside 1..=3"
+  },
+  {
+   "id": "retime-fgbg.oc-track_rgb_a-2",
+   "effect": "retime-fgbg",
+   "label": "oc-track_rgb_a",
+   "params": [
+    "track_rgb_a=2",
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "movebox",
+   "input": "inputs/movebox-16x12.d8.f4.rgba",
+   "reference": "retime-fgbg.oc-track_rgb_a-2.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "reason": "outside the registered range or popup choices",
+   "vfx_verdict": "vfx: error: bad value for `track_rgb_a`: cannot parse `2`"
+  }
+ ]
+}

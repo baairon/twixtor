@@ -179,8 +179,9 @@ fn presence_is_the_checkout_at_the_given_time() {
     let l = layer(vec![frame8(W, H, vec![[0, 0, 0, 255]; W * H]); 2]);
     assert_eq!(present_at(Some(&l), 0).unwrap(), Some((W, H)));
     assert_eq!(present_at(Some(&l), 199).unwrap(), Some((W, H)));
-    assert_eq!(present_at(Some(&l), 200).unwrap(), None, "no frame at the time");
-    assert_eq!(present_at(Some(&l), -1).unwrap(), None);
+    // outside its clip the layer keeps its size (transparent pixels): present
+    assert_eq!(present_at(Some(&l), 200).unwrap(), Some((W, H)), "no frame at the time");
+    assert_eq!(present_at(Some(&l), -1).unwrap(), Some((W, H)));
     assert_eq!(present_at(None, 0).unwrap(), None);
     let empty = layer(vec![Frame::new(0, 0, Depth::U8)]);
     assert_eq!(present_at(Some(&empty), 0).unwrap(), None);

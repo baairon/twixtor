@@ -1,0 +1,1132 @@
+{
+ "moved": [
+  {
+   "id": "retime-fgbg.size-w3.pan-1x1.d8.90864f27",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 16,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.fastbox-1x1.d16.c1f4d776",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 32,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.movebox-1x1.d32.670657c1",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 64,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.fastbox-2x2.d8.d4877bae",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 64,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.alphabox-2x2.d16.30a0b6ba",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 128,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.pan-2x2.d32.3065e7ff",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 256,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.alphabox-2x3.d8.c5754c85",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 96,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.movebox-2x3.d16.daaa90cf",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 192,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.fastbox-2x3.d32.2f4bbd9b",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 384,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.movebox-3x2.d8.703e00b7",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 96,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.pan-3x2.d16.c920043d",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 192,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.alphabox-3x2.d32.1ca77c53",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 384,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.pan-1x5.d8.2e7a0fd8",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 80,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.fastbox-1x5.d16.23453826",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 160,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.movebox-1x5.d32.8d13093a",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 320,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.fastbox-5x1.d8.033b8e94",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 80,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.alphabox-5x1.d16.372109a7",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 160,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.pan-5x1.d32.787e54f2",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 320,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.alphabox-3x3.d8.4a24f0d8",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 144,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.movebox-3x3.d16.4d9a275c",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 288,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w3.fastbox-3x3.d32.4495c1f4",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 576,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w1.pan-2x2.d8.5c2f900d",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 64,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w1.pan-2x2.d32.b7b588a8",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 256,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w1.pan-3x3.d8.b39cc39f",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 144,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-w1.pan-3x3.d32.2f4b6fca",
+   "reason": "judged out of contract: tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+   "judgement": {
+    "reason": "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "evidence": "fix-pro/runs/g1core/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 576,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.disp2.movebox-16x12.d32.a33c14a1",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 12288,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.specrgb-disp2.specrgb-8x6.d32.e6bce056",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 3072,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.specall-disp2.specall-8x6.d32.e3430e99",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 3072,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.specnan-disp2.specnan-8x6.d32.1fa94022",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 3072,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.specbox-disp2.specbox-8x6.d32.c7ee8427",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 3072,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.specboxa-disp2.specboxa-8x6.d32.d6f186ce",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 3072,
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.mix00.backbox-17x13.d32.d1121126",
+   "reason": "judged out of contract: uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+   "judgement": {
+    "reason": "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "evidence": "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane",
+    "file": "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null
+   },
+   "rewrite": {
+    "exit": 0,
+    "output_bytes": 14144,
+    "error": ""
+   }
+  }
+ ],
+ "candidates": [
+  {
+   "id": "retime-fgbg.oc-speed_percent-10000.5",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "speed_percent=10000.5"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `speed_percent`: 10000.5 outside -10000..=10000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-speed_percent--10001",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "speed_percent=-10001"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `speed_percent`: -10001 outside -10000..=10000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-frame_num-200001",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "frame_num=200001",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `frame_num`: 200001 outside -200000..=200000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-frame_num--200001",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "frame_num=-200001",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `frame_num`: -200001 outside -200000..=200000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-input_frame_rate-0.1",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "input_frame_rate=0.1",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `input_frame_rate`: 0.1 outside 0.10000000149011612..=1000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-input_frame_rate-0.09",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "input_frame_rate=0.09",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `input_frame_rate`: 0.09 outside 0.10000000149011612..=1000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-input_frame_rate-1000.5",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "input_frame_rate=1000.5",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `input_frame_rate`: 1000.5 outside 0.10000000149011612..=1000",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-blur_compensation-10.01",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "blur_compensation=10.01",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `blur_compensation`: 10.01 outside 0..=10",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-blur_compensation--0.01",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "blur_compensation=-0.01",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `blur_compensation`: -0.01 outside 0..=10",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_sensitivity-100.01",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "main_bg_sensitivity=100.01",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `main_bg_sensitivity`: 100.01 outside 0..=100",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_sensitivity--0.01",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "main_bg_sensitivity=-0.01",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `main_bg_sensitivity`: -0.01 outside 0..=100",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-warping-0",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "warping=0",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `warping`: 0 outside 1..=4",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-warping-5",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "warping=5",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `warping`: 5 outside 1..=4",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-vectors-0",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "vectors=0",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `vectors`: 0 outside 1..=5",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-vectors-6",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "vectors=6",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `vectors`: 6 outside 1..=5",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-prep-4",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "prep=4",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `prep`: 4 outside 1..=3",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-frame_interp-4",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "frame_interp=4",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `frame_interp`: 4 outside 1..=3",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-display-7",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "display=7",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `display`: 7 outside 1..=6",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-display-0",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "display=0",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `display`: 0 outside 1..=6",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-time_remap_mode-3",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "time_remap_mode=3",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `time_remap_mode`: 3 outside 1..=2",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "error",
+    "error": "PluginError: SMART_RENDER returned PF_Err 4 (return_msg of 0 bytes)",
+    "kind": "plugin_error"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-src_mark_segments-6",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "src_mark_segments=6",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `src_mark_segments`: 6 outside 1..=5",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-input_fields-4",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "input_fields=4",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `input_fields`: 4 outside 1..=3",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  },
+  {
+   "id": "retime-fgbg.oc-track_rgb_a-2",
+   "reason": "outside the registered range or popup choices",
+   "params": [
+    "track_rgb_a=2",
+    "speed_percent=50"
+   ],
+   "rewrite": {
+    "verdict": "vfx: error: bad value for `track_rgb_a`: cannot parse `2`",
+    "refused_before_rendering": true
+   },
+   "plugin": {
+    "status": "rendered",
+    "error": null,
+    "kind": "rendered"
+   },
+   "note": "the original renders a case the rewrite refuses: review the rewrite's range"
+  }
+ ],
+ "not_judged": [
+  {
+   "id": "retime-fgbg.mix01.fastbox-8x8.d8.0c80cf76",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix02.alphabox-16x12.d8.edad2f7e",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x83ea7"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix06.pan-16x12.d16.9622fe7c",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix10.pan-23x15.d32.760513a6",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85669"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix13.fastbox-12x20.d16.e3606d18",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix14.movebox-16x12.d16.ec3a7399",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix16.fastbox-17x13.d32.c1685736",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix18.pan-8x8.d16.151bbe3c",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix23.pan-23x15.d32.9fae2ee2",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix29.alphabox-16x12.d32.e31c1a29",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85b11"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix30.movebox-12x20.d16.06ce1345",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix31.fastbox-8x8.d16.694254e8",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix32.backbox-16x12.d16.8dd0f3f0",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  },
+  {
+   "id": "retime-fgbg.mix35.alphabox-12x20.d16.d7152353",
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: unhandled exception: no handler found"
+   },
+   "note": "the emulation failed, not shown to be the original's behaviour: stays in contract with no reference"
+  }
+ ],
+ "counts": {
+  "in_contract_before": 399,
+  "moved": 32,
+  "in_contract_after": 367,
+  "candidates": 23,
+  "out_of_contract_total": 55,
+  "not_judged": 14,
+  "rendered_by_the_original": 353,
+  "without_status": 0,
+  "candidates_rendered_by_the_original": 22,
+  "judged": 32
+ },
+ "judged_unknown": [],
+ "format": 1,
+ "measured_at": "2026-10-31",
+ "status_file": [
+  "~/twixtor-parity/fix-pro/runs/g1core/status_merged.json",
+  "~/twixtor-parity/fix-pro/runs/ooc_core/status_merged.json"
+ ],
+ "command": "phase_b.py ooc --status ~/twixtor-parity/fix-pro/runs/g1core/status_merged.json ~/twixtor-parity/fix-pro/runs/ooc_core/status_merged.json --judged ~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv",
+ "param_ranges_checked": true,
+ "judged_files": [
+  "~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv"
+ ],
+ "rule": "moved: the original refused it or returned an error, or a param is outside the ranges it registers, or the case is listed with its reason in a --judged file (a judgement of what the original defines, reversible by leaving the file out); never a pass or a failure. Harness failures (emulator fault, timeout, not run) are not the original's behaviour and stay in contract unless --move-harness-failures is given or a judgement lists them."
+}

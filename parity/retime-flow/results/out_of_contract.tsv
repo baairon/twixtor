@@ -1,0 +1,18 @@
+id	label	why	rewrite_check_exit	message
+ooc.0	vectors=0	popup below 1	3	vfx: error: bad value for `vectors`: 0 outside 1..=5
+ooc.1	vectors=6	popup above 5	3	vfx: error: bad value for `vectors`: 6 outside 1..=5
+ooc.2	frame_interp=0	popup below 1	3	vfx: error: bad value for `frame_interp`: 0 outside 1..=3
+ooc.3	frame_interp=4	popup above 3	3	vfx: error: bad value for `frame_interp`: 4 outside 1..=3
+ooc.4	smart_blend=2	checkbox not 0 or 1	3	vfx: error: bad value for `smart_blend`: cannot parse `2`
+ooc.5	video_360=2	checkbox not 0 or 1	3	vfx: error: bad value for `video_360`: cannot parse `2`
+ooc.6	prep=0	popup below 1	3	vfx: error: bad value for `prep`: 0 outside 1..=3
+ooc.7	prep=4	popup above 3	3	vfx: error: bad value for `prep`: 4 outside 1..=3
+ooc.8	sensitivity=100.01	float above 100	3	vfx: error: bad value for `sensitivity`: 100.01 outside 0..=100
+ooc.9	sensitivity=-0.01	float below 0	3	vfx: error: bad value for `sensitivity`: -0.01 outside 0..=100
+ooc.10	sensitivity=nan	float NaN	3	vfx: error: bad value for `sensitivity`: NaN outside 0..=100
+ooc.11	blur_compensation=10.01	float above 10	3	vfx: error: bad value for `blur_compensation`: 10.01 outside 0..=10
+ooc.12	blur_compensation=-0.01	float below 0	3	vfx: error: bad value for `blur_compensation`: -0.01 outside 0..=10
+ooc.13	speed_percent=10001	float above 10000	3	vfx: error: bad value for `speed_percent`: 10001 outside -10000..=10000
+ooc.14	speed_percent=-10001	float below -10000	3	vfx: error: bad value for `speed_percent`: -10001 outside -10000..=10000
+ooc.15	vectors=Best	popup given by name	3	vfx: error: bad value for `vectors`: cannot parse `Best`
+ooc.16	speed_percent=50@	key without a frame	3	vfx: error: bad value for `speed_percent`: `` is not a frame number (a frame may end in h to hold or e to ease, not both)

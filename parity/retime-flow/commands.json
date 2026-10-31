@@ -1,0 +1,13 @@
+[
+ "cp -a ~/twixtor-parity/src/base ~/twixtor-parity/retime-flow/src",
+ "python3 tools/gen.py --out testsets",
+ "cp src/target/release/vfx bin/vfx-base",
+ "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/grid --out results/base.grid.tsv --keep refs/grid --jobs 2",
+ "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/draft --out results/base.draft.tsv --keep refs/draft --jobs 2",
+ "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/grid --out results/base2.grid.tsv --jobs 2   (determinism rerun, same for draft)",
+ "python3 tools/run_grid.py check --vfx bin/vfx-base --ooc testsets/out_of_contract.json --out results/out_of_contract.tsv",
+ "REUSE=1 REBUILD=\"m12 m14 m17 m20 m21\" bash tools/build_mutants.sh m00 m01 m02 m03 m04 m05 m06 m07 m08 m09 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m20 m21   (first pass without REUSE for m00..m19)",
+ "python3 tools/explore_sens.py --testsets testsets --a bin/vfx-base --b bin/vfx-m17   (run once against the first m17, a single precision logarithm: 0 of 100 non-integer sensitivities differed, so it was replaced by the boundary mutant m17 now in the list)",
+ "fx-parity run --testset testsets/grid --refs refs/grid --vfx bin/vfx-base --brief   (format check of the test set against the base outputs, run on the first 299-case grid: 299 pass; draft set with wrapper/vfx-draft: 15 pass)",
+ "python3 tools/compare.py --results results --mutants tools/mutants.json --cases-dir testsets --date 2026-10-30"
+]

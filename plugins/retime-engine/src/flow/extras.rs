@@ -56,6 +56,9 @@ pub struct MaskPyramid {
     geometry: FlowGeometry,
     /// `w_l * h_l` values of 0.0 or 1.0 per level, finest first.
     levels: Vec<Vec<f32>>,
+    /// Whether the mask of `X` also gates the block matching sweeps ([`MaskPyramid::build`]) or not
+    /// ([`MaskPyramid::build_ungated`]).
+    gate: bool,
 }
 
 /// `v >= 0.95 ? 1 : 0` on every value, rows in parallel (a NaN value gives 0).
@@ -115,7 +118,24 @@ impl MaskPyramid {
                 None => break,
             }
         }
-        Ok(MaskPyramid { geometry, levels })
+        Ok(MaskPyramid { geometry, levels, gate: true })
+    }
+
+    /// [`MaskPyramid::build`] for a solve whose block matching is not gated: the gradient masking and
+    /// the B vector step read the mask as before, every block matching sweep runs. READ in the
+    /// original's solver (`CreateMotionVectors_64`, the same code in all four plugins):
+    /// the CPU block matching routines get null masks, only the device path passes the mask
+    /// pyramids. The layers of Create Vectors take their
+    /// masks this way.
+    pub fn build_ungated(m: &Matte, s: &FlowSettings) -> Result<MaskPyramid> {
+        let mut p = MaskPyramid::build(m, s)?;
+        p.gate = false;
+        Ok(p)
+    }
+
+    /// Whether the mask of `X` gates the block matching.
+    pub fn gates(&self) -> bool {
+        self.gate
     }
 
     /// The binary mask of level `l`, 0 the finest.
@@ -187,6 +207,9 @@ pub(crate) fn apply_user(flow: &mut [f32], u: &UserLevel, w: usize) {
 /// 4. the block matching: with masks the sweep step of a pixel where `X`'s mask is 0 is skipped
 ///    and the cost stays unmasked (G1b, U); with wrap the cost wraps its column and window and
 ///    the step tests the target row only (G6, U);
+///    on the finest level `flow = d / w` is set again right after the block matching step of the
+///    second iteration, whether or not that step runs (READ in the solver); a pyramid made by
+///    [`MaskPyramid::build_ungated`] does not gate the block matching;
 /// 5. (V) `flow = d / w` again at the end of the level, before the range check; the start level's damping
 ///    follows the range check as in the plain driver, so it scales the set pixels too (at
 ///    Sensitivity 100 there is no damping);
@@ -280,6 +303,7 @@ fn refine(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: usize, gate: Opti
 /// bit for bit. With wrap, rotating every input of the level by `k` columns rotates `flow` by `k`
 /// columns, bit for bit, for any `k`.
 #[allow(clippy::too_many_arguments)]
+#[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn level_step(
     img_a: &[f32],
     img_b: &[f32],
@@ -292,12 +316,31 @@ pub(crate) fn level_step(
     finest: bool,
     flow: &mut [f32],
 ) {
+    level_step_gated(img_a, img_b, w, h, mask_x, mask_y, mask_x, user, s, finest, flow);
+}
+
+/// [`level_step`] with the block matching gate given on its own (`gate`: the mask of `X` of a gating
+/// [`MaskPyramid`], or `None`); the gradient masking and the B vector step read `mask_x` and `mask_y`.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn level_step_gated(
+    img_a: &[f32],
+    img_b: &[f32],
+    w: usize,
+    h: usize,
+    mask_x: Option<&[f32]>,
+    mask_y: Option<&[f32]>,
+    gate: Option<&[f32]>,
+    user: Option<&UserLevel>,
+    s: &FlowSettings,
+    finest: bool,
+    flow: &mut [f32],
+) {
     let wrap = s.wrap;
     let blur = |data: &mut [f32], c: usize, r: f32| {
         if wrap {
-            conv::blur_gaussian_wrapx(data, w, h, c, r);
+            conv::blur_gaussian_wrapx_above_first(data, w, h, c, r);
         } else {
-            conv::blur_gaussian(data, w, h, c, r);
+            conv::blur_gaussian_above_first(data, w, h, c, r);
         }
     };
     if let Some(u) = user {
@@ -318,12 +361,19 @@ pub(crate) fn level_step(
         blur(&mut b, 2, 7.0);
         new_disp(flow, &a, &b);
         blur(&mut *flow, 2, 5.0);
-        if it == 1 && finest && !s.skip_refine {
-            refine(img_a, img_b, flow, w, h, mask_x, wrap);
+        if it == 1 && finest {
+            if !s.skip_refine {
+                refine(img_a, img_b, flow, w, h, gate, wrap);
+            }
+            // READ (the solver): the user displacement is set again right after the block
+            // matching step of the finest level, also when that step is skipped
+            if let Some(u) = user {
+                apply_user(flow, u, w);
+            }
         }
     }
     if !finest && !s.skip_refine {
-        refine(img_a, img_b, flow, w, h, mask_x, wrap);
+        refine(img_a, img_b, flow, w, h, gate, wrap);
     }
     if let Some(u) = user {
         apply_user(flow, u, w);
@@ -354,10 +404,13 @@ fn solve_extended(
         let (w, h) = geo.sizes[l];
         let mask_x = masks.map(|(m, _)| m.level(l));
         let mask_y = masks.map(|(_, m)| m.level(l));
+        let gate = masks.and_then(|(m, _)| m.gates().then(|| m.level(l)));
         let u = user.map(|u| &u.levels[l]);
-        level_step(&x.levels[l].data, &y.levels[l].data, w, h, mask_x, mask_y, u, s, l == 0, &mut flow);
+        level_step_gated(&x.levels[l].data, &y.levels[l].data, w, h, mask_x, mask_y, gate, u, s, l == 0, &mut flow);
         if check {
-            let out = if wrap { all_flow_out_of_range_y(&flow, w, h) } else { all_flow_out_of_range(&flow, w, h) };
+            // READ: the range check of the solver (TwixtorPro_64) takes no mode
+            // argument, the 360 mode checks both axes as the plain driver does
+            let out = all_flow_out_of_range(&flow, w, h);
             if out {
                 flow.iter_mut().for_each(|v| *v = 0.0);
             } else {

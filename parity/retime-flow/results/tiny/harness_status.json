@@ -1,0 +1,394 @@
+{
+ "testset": "~/twixtor-parity/re/f8-tiny/ts-flow-tiny",
+ "refs": "~/twixtor-parity/re/f8-tiny/flowrun/refs",
+ "seconds": 621.8,
+ "jobs": 1,
+ "cases": [
+  {
+   "event": "done",
+   "id": "retime.size-default.alpha-1x6.d16.542de920",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "last_api": "utils.host_dispose_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab3cc",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab3cc"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.noise-1x6.d32.2a45baca",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "last_api": "utils.host_dispose_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab3cc",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab3cc"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.alpha-7x1.d8.f33838df",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab3cc",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab3cc"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.noise-7x1.d16.3cefe003",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab3cc",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab3cc"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.shift-7x1.d32.276ca9c6",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x1807ab3cc",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x70",
+     "size": 8,
+     "pc": "0x1807ab3cc"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.noise-2x2.d8.427ca099",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x5001e8958",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.shift-2x2.d16.748f806a",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x5001e89d8",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.disc-2x2.d32.01cccd59",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x5001e8c98",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.shift-3x3.d8.3a6b6ea5",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x7001e8aa8",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.disc-3x3.d16.0d9c36b4",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x7001e8d28",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.size-default.alpha-3x3.d32.3f275f95",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x7001e90e8",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.sb-tiny.shift-3x3.d32.3d6b8ec8",
+   "status": "error",
+   "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "last_api": "utils.host_lock_handle",
+   "last_callback": "utils.host_dispose_handle",
+   "pc": "0x180085ed1",
+   "faults": [
+    {
+     "access": "read",
+     "address": "0x7001e90e8",
+     "size": 4,
+     "pc": "0x180085ed1"
+    }
+   ],
+   "messages": []
+  }
+ ],
+ "boots": [
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 49.6,
+   "load_seconds": 36.6,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 50.9,
+   "load_seconds": 36.8,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 48.0,
+   "load_seconds": 34.7,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 49.1,
+   "load_seconds": 36.2,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 50.6,
+   "load_seconds": 36.8,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 48.4,
+   "load_seconds": 35.8,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 48.9,
+   "load_seconds": 35.6,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 51.8,
+   "load_seconds": 38.6,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 51.9,
+   "load_seconds": 38.5,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 53.3,
+   "load_seconds": 39.1,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 53.0,
+   "load_seconds": 39.8,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  },
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 53.4,
+   "load_seconds": 39.2,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  }
+ ]
+}

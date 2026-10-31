@@ -27,19 +27,21 @@ const MARGIN: usize = 10;
 const FORWARD: [(&str, i32); 2] = [("3", 2), ("4", 3)];
 
 /// Output frame `n` of half speed (n odd: between source frames `(n - 1) / 2` and `(n + 1) / 2`) computed with the
-/// engine functions directly, from the settings the front-end reads.
+/// engine functions directly, from the settings the front-end reads (with their Gouraud forward warp stages), on
+/// bottom-up rows as plugin 03's vector path runs (`EngineSettings::motion_rows_reversed`).
 fn engine_frame(rig: &Rig, n: u64, depth: Depth) -> Frame {
     let cx = rig.cx(n);
     let env = rig.env();
     let settings = retime_fgbg::glue::read_settings(&cx, &env).unwrap();
+    assert!(settings.motion_rows_reversed);
     let k = ((n - 1) / 2) as usize;
     let clip = &rig.input;
-    let frame = |i: usize| Image::from_frame(&*fx_core::Layer::frame_at(clip, (i as i64) * 100).unwrap().expect("frame"));
+    let frame = |i: usize| Image::from_frame(&*fx_core::Layer::frame_at(clip, (i as i64) * 100).unwrap().expect("frame")).rows_reversed();
     let (a, b) = (frame(k), frame(k + 1));
     let pos = n as f32 / 2.0;
     let sel = Selection { s0: pos, s1: pos + 0.5, a: k as i32, b: k as i32 + 1, wa: 0.5, exact: false, vectors_quality: settings.vectors_quality, interp: settings.interp };
     let flows = solve_flows(&settings, &sel, &a, &b).unwrap();
-    let img = compose_vectors(&settings, &sel, &a, &b, &flows).unwrap();
+    let img = compose_vectors(&settings, &sel, &a, &b, &flows).unwrap().rows_reversed();
     let _ = depth;
     Rendered::Image(img).into_frame()
 }

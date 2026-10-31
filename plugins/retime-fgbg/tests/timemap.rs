@@ -107,13 +107,13 @@ fn frame_time_is_trunc_of_f58_times_n_plus_half_with_no_base() {
 
 #[test]
 fn frame_time_differs_from_plugin_01_when_the_rates_differ_and_agrees_when_they_do_not() {
-    // 24 -> 30: plugin 01 adds `dur * K` to the f32 product in its unequal rate branch: 637 and 887
+    // 24 -> 30: plugin 01 adds `dur * FRAME_TIME_K` to the f32 product in its unequal rate branch: 631 and 881
     // for frames 5 and 7, plugin 03 has no such branch: 625 and 875
     let mock = Mock::speed(100);
     let r = rates(24.0, 30.0, FieldOrder::Progressive, 100);
     let p1 = RemapTimeMap::new(&mock, r, 700);
     let p3 = RetimeFgBgTimeMap::new(&mock, r, 700);
-    assert_eq!((p1.frame_time(5.0), p1.frame_time(7.0)), (637, 887));
+    assert_eq!((p1.frame_time(5.0), p1.frame_time(7.0)), (631, 881));
     assert_eq!((p3.frame_time(5.0), p3.frame_time(7.0)), (625, 875));
     // equal rates: both are trunc(n * dur + 0.5) (an f64 product), identical
     let r = rates(30.0, 30.0, FieldOrder::Progressive, 100);

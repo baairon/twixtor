@@ -1,6 +1,7 @@
 //! The pre-render checkout list of plugin 04, with or without FG matte layers.
 //!
-//! Layers: the input layer, `Source`, `Vectors: Prev`, `Vectors: Next` and the FG matte layers.
+//! Layers: the input layer, `Source` (displayed as "Color Source"), `Vectors: Prev`, `Vectors: Next` and the FG
+//! matte layers.
 //! Plugin 04 has no Alt Source A or B and no mask hooks.
 //!
 //! The list, in issue order:
@@ -30,7 +31,7 @@ use fx_core::{Checkout, Result};
 use retime_engine::planner::{plan_layers, EntryKind};
 use retime_engine::timeline::{frame_positions, TimeMap};
 
-/// Layer id of `Source`.
+/// Layer id of `Source`, displayed as "Color Source".
 pub const LAYER_SOURCE: &str = "source";
 /// Layer id of `Vectors: Prev`: the flow of frame `B` back to `A` (`F_BA`).
 pub const LAYER_VECTORS_PREV: &str = "vectors_prev";

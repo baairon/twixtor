@@ -1,0 +1,104 @@
+{
+ "format": 1,
+ "ffmpeg": null,
+ "inputs": [
+  {
+   "file": "inputs/ramp-1x8.d8.f3.rgba",
+   "source": "ramp",
+   "width": 1,
+   "height": 8,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/ramp-1x8.d32.f3.gbrapf32le",
+   "source": "ramp",
+   "width": 1,
+   "height": 8,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/ramp-8x1.d8.f3.rgba",
+   "source": "ramp",
+   "width": 8,
+   "height": 1,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/ramp-8x1.d32.f3.gbrapf32le",
+   "source": "ramp",
+   "width": 8,
+   "height": 1,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  }
+ ],
+ "cases": [
+  {
+   "id": "create-vectors.supp-side1.ramp-1x8.d8",
+   "effect": "create-vectors",
+   "label": "supp-side1",
+   "params": [],
+   "depth": 8,
+   "width": 1,
+   "height": 8,
+   "source": "ramp",
+   "input": "inputs/ramp-1x8.d8.f3.rgba",
+   "reference": "create-vectors.supp-side1.ramp-1x8.d8.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24"
+  },
+  {
+   "id": "create-vectors.supp-side1.ramp-1x8.d32",
+   "effect": "create-vectors",
+   "label": "supp-side1",
+   "params": [],
+   "depth": 32,
+   "width": 1,
+   "height": 8,
+   "source": "ramp",
+   "input": "inputs/ramp-1x8.d32.f3.gbrapf32le",
+   "reference": "create-vectors.supp-side1.ramp-1x8.d32.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24"
+  },
+  {
+   "id": "create-vectors.supp-side1.ramp-8x1.d8",
+   "effect": "create-vectors",
+   "label": "supp-side1",
+   "params": [],
+   "depth": 8,
+   "width": 8,
+   "height": 1,
+   "source": "ramp",
+   "input": "inputs/ramp-8x1.d8.f3.rgba",
+   "reference": "create-vectors.supp-side1.ramp-8x1.d8.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24"
+  },
+  {
+   "id": "create-vectors.supp-side1.ramp-8x1.d32",
+   "effect": "create-vectors",
+   "label": "supp-side1",
+   "params": [],
+   "depth": 32,
+   "width": 8,
+   "height": 1,
+   "source": "ramp",
+   "input": "inputs/ramp-8x1.d32.f3.gbrapf32le",
+   "reference": "create-vectors.supp-side1.ramp-8x1.d32.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24"
+  }
+ ]
+}

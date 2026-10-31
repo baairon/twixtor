@@ -7,6 +7,7 @@
 
 Checks:
   regen   the generated figures and tables equal a fresh `gen_docs.py` generation, no unknown key
+  limits  the Limits table of README.md lists exactly the gaps of docs/data/gaps.tsv, with the same titles
   links   relative links and #anchors in README.md and docs/*.md resolve (GitHub heading anchors)
   paths   inline code that looks like a repository path (crates/, plugins/, tools/, docs/, contracts/,
           .github/, .forgejo/ or a root file) exists; a `:LINE` suffix is ignored, and so are spans with a
@@ -37,7 +38,7 @@ sys.path.insert(0, TOOLS)
 from docgen.data import ROOT, SKIP_DIRS  # noqa: E402
 from docgen.render import md_files  # noqa: E402
 
-CHECKS = ["regen", "links", "paths", "ascii", "dashes", "flags"]
+CHECKS = ["regen", "limits", "links", "paths", "ascii", "dashes", "flags"]
 TEXT_EXT = (".md", ".py", ".rs", ".toml", ".json", ".tsv", ".yml", ".yaml", ".txt", ".lock")
 ROOT_FILES = {"README.md", "Cargo.toml", "Cargo.lock", "LICENSE", ".gitignore", ".gitattributes"}
 PATH_HEAD = re.compile(r"^(crates|plugins|tools|docs|contracts|\.github|\.forgejo)/")
@@ -145,6 +146,37 @@ def check_regen(ctx):
         return [("regen", "docs/data", 0, "cannot generate: {}".format(e))]
     out = [("regen", p, 0, "differs from a fresh generation (run python -I tools/gen_docs.py)") for p in changed]
     out += [("regen", u.split(": ")[0], 0, "unknown marker key " + u.split(": ", 1)[1]) for u in unknown]
+    return out
+
+
+def check_limits(ctx):
+    from docgen import data as dg
+    path = os.path.join(ctx.root, dg.DATA, "gaps.tsv")
+    try:
+        want = {g["id"]: g["title"] for g in dg.read_tsv(path, dg.GAPS_HEADER)}
+    except (OSError, dg.DataError) as e:
+        return [("limits", dg.DATA + "/gaps.tsv", 0, "cannot read: {}".format(e))]
+    if "README.md" not in ctx.md:
+        return [("limits", "README.md", 0, "no README.md")]
+    got, inside, start = {}, False, 0
+    for i, line in enumerate(ctx.text("README.md").split("\n"), 1):
+        if re.match(r"##\s+Limits\s*$", line):
+            inside, start = True, i
+        elif re.match(r"##\s", line):
+            inside = False
+        elif inside and line.lstrip().startswith("|"):
+            cells = [c.strip() for c in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
+            if len(cells) > 1 and re.match(r"^G\d+[a-z]?$", cells[0]):
+                got[cells[0]] = (cells[1], i)
+    if not start:
+        return [("limits", "README.md", 0, "no `## Limits` heading")]
+    out = [("limits", "README.md", start, "gap {} ({}) is not in the Limits table".format(g, t))
+           for g, t in want.items() if g not in got]
+    for g, (title, i) in got.items():
+        if g not in want:
+            out.append(("limits", "README.md", i, "gap {} is not in docs/data/gaps.tsv".format(g)))
+        elif title != want[g]:
+            out.append(("limits", "README.md", i, "gap {} is titled {!r}, the register says {!r}".format(g, title, want[g])))
     return out
 
 

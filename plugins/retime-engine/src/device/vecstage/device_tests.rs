@@ -104,7 +104,7 @@ fn vector_coding_on_the_device_equals_the_cpu() {
     let _one = ONE_AT_A_TIME.lock().unwrap_or_else(|p| p.into_inner());
     for (dev, s) in sessions("vector coding") {
         let mut rng = Rng::new(0xD0C0_0001);
-        let (mut enc, mut mrg, mut mfl, mut dec, mut hol, mut scl, mut zer) = (0, 0, 0, 0, 0, 0, 0);
+        let (mut enc, mut mrg, mut mfl, mut dec, mut hol, mut scl, mut zer, mut blu) = (0, 0, 0, 0, 0, 0, 0, 0);
         for (dw, dh) in sizes() {
             let big = dw * dh > 10_000;
             for fmt in FMTS {
@@ -135,6 +135,14 @@ fn vector_coding_on_the_device_equals_the_cpu() {
                         if let Some(img) = rule(&dev, "merge", "", img_nan(&want), vc::encode_vectors_merged_image_gpu(&s, dw, dh, fmt, &layers, 6.0)) {
                             same(&dev, "merge", "wrapper", &image_bits(&want), &image_bits(&img));
                         }
+                        // create-vectors fix 03: a weight in the blue channel
+                        let mut want = Image::new(dw, dh, fmt);
+                        crate::vectors::encode_vectors_merged_blue(&mut want, &layers, 6.0, &weights[0]).unwrap();
+                        let mut got = Image::new(dw, dh, fmt);
+                        raw(|| vc::encode_vectors_merged_blue_gpu(&s, &mut got, &layers, 6.0, &weights[0])).unwrap();
+                        blu += same(&dev, "merge blue", &format!("{fmt:?} {dw}x{dh} {nl}"), &image_bits(&want), &image_bits(&got));
+                        let mut again = Image::new(dw, dh, fmt);
+                        rule(&dev, "merge blue", "", img_nan(&want), vc::encode_vectors_merged_blue_gpu(&s, &mut again, &layers, 6.0, &weights[0]));
                         if fmt == Fmt::F32 || big {
                             let want = crate::vectors::merge_flows(dw, dh, &layers).unwrap();
                             let got = raw(|| vc::merge_flows_gpu(&s, dw, dh, &layers)).unwrap();
@@ -169,8 +177,15 @@ fn vector_coding_on_the_device_equals_the_cpu() {
                 rule(&dev, "vec scale", "", nan(&want.data), vc::apply_vec_scale_gpu(&s, &mut again, sx, sy));
             }
         }
-        println!("{dev}: encode {enc}, merge {mrg}, merge_flows {mfl}, decode {dec}, holes {hol}, vec scale {scl}, zero {zer} samples identical");
-        for (name, n) in [("encode", enc), ("merge", mrg), ("merge_flows", mfl), ("decode", dec), ("holes", hol), ("vec scale", scl), ("zero", zer)] {
+        // a blue weight of another size is the CPU's Mismatch, Unsupported before any launch
+        let f = flow(&mut rng, 3, 2, 1.0, false);
+        let one = Matte::filled(3, 2, 1.0);
+        let small = Matte::filled(2, 2, 1.0);
+        let mut dst = Image::new(3, 2, Fmt::U8);
+        assert!(matches!(crate::vectors::encode_vectors_merged_blue(&mut dst, &[(&f, &one)], 1.0, &small), Err(fx_core::FxError::Mismatch(_))));
+        assert!(matches!(vc::encode_vectors_merged_blue_gpu(&s, &mut dst, &[(&f, &one)], 1.0, &small), Err(StageError::Unsupported(_))));
+        println!("{dev}: encode {enc}, merge {mrg}, merge blue {blu}, merge_flows {mfl}, decode {dec}, holes {hol}, vec scale {scl}, zero {zer} samples identical");
+        for (name, n) in [("encode", enc), ("merge", mrg), ("merge blue", blu), ("merge_flows", mfl), ("decode", dec), ("holes", hol), ("vec scale", scl), ("zero", zer)] {
             assert!(n >= MILLION, "{dev} {name}: only {n} samples compared");
         }
     }
@@ -181,7 +196,7 @@ fn matte_operations_on_the_device_equal_the_cpu() {
     let _one = ONE_AT_A_TIME.lock().unwrap_or_else(|p| p.into_inner());
     for (dev, s) in sessions("matte") {
         let mut rng = Rng::new(0xD0C0_0002);
-        let (mut ext, mut pre, mut ovr, mut eff, mut ow) = (0, 0, 0, 0, 0);
+        let (mut ext, mut pre, mut ovr, mut eff, mut ow, mut sw) = (0, 0, 0, 0, 0, 0);
         for (w, h) in sizes() {
             let big = w * h > 10_000;
             for fmt in FMTS {
@@ -231,6 +246,13 @@ fn matte_operations_on_the_device_equal_the_cpu() {
                         for (a, b) in want.iter().zip(&got) {
                             ow += same(&dev, "over_weights", &format!("{case} {first}..={last}"), &float_bits(&a.data), &float_bits(&b.data));
                         }
+                        // create-vectors fix 03: the weights inside the whole stack
+                        let want = crate::matte::stack_weights(&mattes, first, last, w, h).unwrap();
+                        let got = raw(|| mt::stack_weights_gpu(&s, &mattes, first, last, w, h)).unwrap();
+                        assert_eq!(want.len(), got.len(), "{dev} stack_weights {case}: entries");
+                        for (a, b) in want.iter().zip(&got) {
+                            sw += same(&dev, "stack_weights", &format!("{case} {first}..={last}"), &float_bits(&a.data), &float_bits(&b.data));
+                        }
                     }
                 }
             }
@@ -248,13 +270,17 @@ fn matte_operations_on_the_device_equal_the_cpu() {
             assert!(matches!(mt::over_weights_gpu(&s, &[half.clone()], first, last, w, h), Err(StageError::Unsupported(_))), "{dev}: over_weights {first}..={last} {w}x{h}");
         }
         assert!(matches!(mt::over_weights_gpu(&s, &[short.clone()], 0, 1, 2, 2), Err(StageError::Unsupported(_))));
+        for (first, last, w, h) in [(1, 0, 2, 2), (0, 2, 2, 2), (0, 1, 3, 2)] {
+            assert!(matches!(crate::matte::stack_weights(&[half.clone()], first, last, w, h), Err(fx_core::FxError::Mismatch(_))));
+            assert!(matches!(mt::stack_weights_gpu(&s, &[half.clone()], first, last, w, h), Err(StageError::Unsupported(_))), "{dev}: stack_weights {first}..={last} {w}x{h}");
+        }
         for m in [Matte::filled(2, 3, 1.0), Matte { width: 3, height: 2, data: vec![1.0; 5] }] {
             assert!(matches!(crate::matte::premultiply(&Image::new(3, 2, Fmt::U8), &m), Err(fx_core::FxError::Mismatch(_))));
             assert!(matches!(mt::premultiply_gpu(&s, &Image::new(3, 2, Fmt::U8), &m), Err(StageError::Unsupported(_))));
         }
         assert!(matches!(mt::over_gpu(&s, &mut Image::new(3, 2, Fmt::U8), &Image::new(3, 2, Fmt::U16)), Err(StageError::Unsupported(_))));
-        println!("{dev}: extract {ext}, premultiply {pre}, over {ovr}, effective {eff}, over_weights {ow} samples identical");
-        for (name, n) in [("extract", ext), ("premultiply", pre), ("over", ovr), ("effective", eff), ("over_weights", ow)] {
+        println!("{dev}: extract {ext}, premultiply {pre}, over {ovr}, effective {eff}, over_weights {ow}, stack_weights {sw} samples identical");
+        for (name, n) in [("extract", ext), ("premultiply", pre), ("over", ovr), ("effective", eff), ("over_weights", ow), ("stack_weights", sw)] {
             assert!(n >= MILLION, "{dev} {name}: only {n} samples compared");
         }
     }
@@ -265,7 +291,7 @@ fn debug_compositions_on_the_device_equal_the_cpu() {
     let _one = ONE_AT_A_TIME.lock().unwrap_or_else(|p| p.into_inner());
     for (dev, s) in sessions("debug views") {
         let mut rng = Rng::new(0xD0C0_0003);
-        let (mut bl, mut df, mut ol, mut dt, mut ed) = (0, 0, 0, 0, 0);
+        let (mut fl, mut bl, mut df, mut ol, mut lu, mut dt, mut ed) = (0, 0, 0, 0, 0, 0, 0);
         for (w, h) in sizes() {
             let big = w * h > 10_000;
             for fmt in FMTS {
@@ -280,6 +306,19 @@ fn debug_compositions_on_the_device_equal_the_cpu() {
                     crate::debug::diff(&mut want, &a, &b);
                     df += same(&dev, "diff view", &format!("{fmt:?} {w}x{h}"), &image_bits(&want), &image_bits(&raw(|| ov::diff_view_gpu(&s, &a, &b)).unwrap()));
                     rule(&dev, "diff view", "", img_nan(&want), ov::diff_view_gpu(&s, &a, &b));
+                    // W': every third pixel of `a` transparent on top of the corpus alpha
+                    let mut wa = a.clone();
+                    super::tests::punch(&mut wa);
+                    let mut want = wa.clone();
+                    crate::debug::fill_transparent(&mut want, &b);
+                    let mut got = wa.clone();
+                    raw(|| ov::fill_transparent_gpu(&s, &mut got, &b)).unwrap();
+                    fl += same(&dev, "fill", &format!("{fmt:?} {w}x{h}"), &image_bits(&want), &image_bits(&got));
+                    let mut got = wa.clone();
+                    rule(&dev, "fill", "", img_nan(&want), ov::fill_transparent_gpu(&s, &mut got, &b));
+                    let want = crate::debug::debug_luma(&a);
+                    lu += same(&dev, "debug luma", &format!("{fmt:?} {w}x{h}"), &float_bits(&want.data), &float_bits(&raw(|| ov::debug_luma_gpu(&s, &a)).unwrap().data));
+                    rule(&dev, "debug luma", "", nan(&want.data), ov::debug_luma_gpu(&s, &a));
                 }
                 let r: Vec<f32> = (0..w * h).map(|_| matte_value(&mut rng, !big)).collect();
                 let gg: Vec<f32> = (0..w * h).map(|_| matte_value(&mut rng, !big)).collect();
@@ -288,21 +327,19 @@ fn debug_compositions_on_the_device_equal_the_cpu() {
                 ol += same(&dev, "overlay", &format!("{fmt:?} {w}x{h}"), &image_bits(&want), &image_bits(&raw(|| ov::overlay_gpu(&s, w, h, fmt, &r, &gg)).unwrap()));
                 rule(&dev, "overlay", "", img_nan(&want), ov::overlay_gpu(&s, w, h, fmt, &r, &gg));
             }
-            for _ in 0..4 {
-                let l = plane(&mut rng, w, h, 300.0, !big);
-                let mut b = l.clone();
-                crate::prep::blur5(&mut b);
+            for k in 0..4 {
+                // luma planes in the 0..1 range of the Debug views, then wider values
+                let l = plane(&mut rng, w, h, if k < 2 { 1.0 } else { 300.0 }, !big);
                 let want = crate::debug::detail(&l);
-                dt += same(&dev, "detail", &format!("{w}x{h}"), &float_bits(&want), &float_bits(&raw(|| ov::detail_tail_gpu(&s, w, h, &l.data, &b.data)).unwrap()));
-                let mut bg = l.data.clone();
-                crate::flow::conv::blur_gaussian(&mut bg, w, h, 1, 2.0);
+                dt += same(&dev, "detail", &format!("{w}x{h}"), &float_bits(&want), &float_bits(&raw(|| ov::detail_gpu(&s, &l)).unwrap()));
+                rule(&dev, "detail", "", nan(&want), ov::detail_gpu(&s, &l));
                 let want = crate::debug::edge(&l);
-                ed += same(&dev, "edge", &format!("{w}x{h}"), &float_bits(&want), &float_bits(&raw(|| ov::edge_tail_gpu(&s, w, h, &bg)).unwrap()));
-                rule(&dev, "edge", "", nan(&want), ov::edge_tail_gpu(&s, w, h, &bg));
+                ed += same(&dev, "edge", &format!("{w}x{h}"), &float_bits(&want), &float_bits(&raw(|| ov::edge_gpu(&s, &l)).unwrap()));
+                rule(&dev, "edge", "", nan(&want), ov::edge_gpu(&s, &l));
             }
         }
-        println!("{dev}: blend view {bl}, diff view {df}, overlay {ol}, detail {dt}, edge {ed} samples identical");
-        for (name, n) in [("blend view", bl), ("diff view", df), ("overlay", ol), ("detail", dt), ("edge", ed)] {
+        println!("{dev}: fill {fl}, blend view {bl}, diff view {df}, overlay {ol}, debug luma {lu}, detail {dt}, edge {ed} samples identical");
+        for (name, n) in [("fill", fl), ("blend view", bl), ("diff view", df), ("overlay", ol), ("debug luma", lu), ("detail", dt), ("edge", ed)] {
             assert!(n >= MILLION, "{dev} {name}: only {n} samples compared");
         }
     }
@@ -440,7 +477,6 @@ fn timing_probe_1080p() {
     let flows: Vec<FlowField> = (0..3).map(|_| flow(&mut rng, 480, 270, 10.0, false)).collect();
     let layers: Vec<(&FlowField, &Matte)> = flows.iter().zip(&mattes).collect();
     let pts: Vec<([f32; 2], [u8; 3])> = (0..12).map(|k| ([100.0 + 150.0 * k as f32, 500.0], [255, 0, 0])).collect();
-    let l = crate::prep::luma(&img, false, false).unwrap();
     let mut row: Vec<(String, f64)> = Vec::new();
     let cpu = |name: &str, row: &mut Vec<(String, f64)>, t: f64| row.push((format!("cpu {name}"), t));
     cpu("encode", &mut row, best(|| drop(crate::vectors::encode_vectors_image(w, h, fmt, &f, 8.0).unwrap())));
@@ -453,8 +489,9 @@ fn timing_probe_1080p() {
     cpu("overlay", &mut row, best(|| crate::debug::overlay(&mut Image::new(w, h, fmt), &mattes[0].data, &mattes[1].data)));
     cpu("draw 12", &mut row, best(|| crate::geom::draw_points(&mut img.clone(), &pts, 1.0)));
     cpu("luma", &mut row, best(|| drop(crate::prep::luma(&img, false, false).unwrap())));
-    cpu("edge tail", &mut row, best(|| drop(crate::debug::edge(&l))));
-    println!("1080p 8 bpc, best of 3, milliseconds (CPU edge includes its Gaussian):");
+    let dl = crate::debug::debug_luma(&img);
+    cpu("debug edge", &mut row, best(|| drop(crate::debug::edge(&dl))));
+    println!("1080p 8 bpc, best of 3, milliseconds:");
     for (name, t) in &row {
         println!("  {name:<16} {t:8.2}");
     }
@@ -470,7 +507,7 @@ fn timing_probe_1080p() {
         out.push(("overlay", best(|| drop(ov::overlay_gpu(&s, w, h, fmt, &mattes[0].data, &mattes[1].data).unwrap()))));
         out.push(("draw 12", best(|| g::draw_points_gpu(&s, &mut img.clone(), &pts, 1.0).unwrap())));
         out.push(("luma", best(|| drop(pp::luma_gpu(&s, &img, false, false).unwrap()))));
-        out.push(("edge tail", best(|| drop(ov::edge_tail_gpu(&s, w, h, &l.data).unwrap()))));
+        out.push(("debug edge", best(|| drop(ov::edge_gpu(&s, &dl).unwrap()))));
         println!("{dev}, transfers included:");
         for (name, t) in out {
             println!("  gpu {name:<12} {t:8.2}");

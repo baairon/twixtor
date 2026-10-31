@@ -97,16 +97,22 @@ fn reverse_playback_starts_at_frame_zero_and_runs_off_the_clip() {
 }
 
 #[test]
-fn display_source_shows_the_frame_at_the_current_time_without_retiming() {
+fn display_source_shows_alt_color_source_at_the_current_time_without_retiming() {
     for set in sets() {
-        // no offset parameter: output frame n shows source frame n whatever the speed is
-        let rig = set.rig(&[("display", "2"), ("speed_percent", "50")]);
+        // no offset parameter: output frame n shows frame n of Alt Color Source whatever the speed is
+        let rig = set.rig(&[("display", "2"), ("speed_percent", "50")]).with_layer("alt_source_a", set.clip.clone());
         let got: Vec<_> = (0..5).map(|n| rig.render(n).unwrap()).collect();
         assert_eq!(got, vec![set.rt[0].clone(), set.rt[1].clone(), set.rt[2].clone(), set.rt[3].clone(), set.transparent()], "{:?}", set.depth);
         // the Draw Geom overlay with no tracking point in use draws nothing, at any setting
         for geom in ["1", "2", "3", "6"] {
-            let rig = set.rig(&[("display", "2"), ("draw_geom", geom)]);
+            let rig = set.rig(&[("display", "2"), ("draw_geom", geom)]).with_layer("alt_source_a", set.clip.clone());
             assert_eq!(rig.render(1).unwrap(), set.rt[1], "{:?} draw_geom {geom}", set.depth);
+        }
+        // without Alt Color Source the Source display is the missing layer fill, never the input layer
+        let (w, h) = (set.rt[0].width, set.rt[0].height);
+        let rig = set.rig(&[("display", "2"), ("speed_percent", "50"), ("pt1_use", "5"), ("pt1_pos", "1,1")]);
+        for n in 0..5 {
+            assert_eq!(rig.render(n).unwrap(), fill(set.depth, false, w, h), "{:?} frame {n}", set.depth);
         }
     }
 }
@@ -155,12 +161,14 @@ fn engine_frame(rig: &Rig, n: u64) -> Frame {
     let env = rig.env();
     let settings = retime_fgbg::glue::read_settings(&cx, &env).unwrap();
     let k = ((n - 1) / 2) as usize;
-    let frame = |i: usize| Image::from_frame(&*fx_core::Layer::frame_at(&rig.input, (i as i64) * 100).unwrap().expect("frame"));
+    // the vector path runs on bottom-up rows (`EngineSettings::motion_rows_reversed`)
+    assert!(settings.motion_rows_reversed);
+    let frame = |i: usize| Image::from_frame(&*fx_core::Layer::frame_at(&rig.input, (i as i64) * 100).unwrap().expect("frame")).rows_reversed();
     let (a, b) = (frame(k), frame(k + 1));
     let pos = n as f32 / 2.0;
     let sel = Selection { s0: pos, s1: pos + 0.5, a: k as i32, b: k as i32 + 1, wa: 0.5, exact: false, vectors_quality: 4, interp: settings.interp };
     let flows = solve_flows(&settings, &sel, &a, &b).unwrap();
-    Rendered::Image(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap()).into_frame()
+    Rendered::Image(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap().rows_reversed()).into_frame()
 }
 
 #[test]
@@ -270,7 +278,11 @@ fn alt_source_a_is_retimed_instead_of_the_input_and_an_empty_one_is_ignored() {
 fn fg_matte_layers_do_not_change_a_source_display() {
     // the Source display copies the source frame and does not take the multi layer path
     for set in sets() {
-        let rig = set.rig(&[("display", "2")]).with_layer("fg1_matte", set.clip.clone()).with_layer("fg2_matte", set.clip.clone());
+        let rig = set
+            .rig(&[("display", "2")])
+            .with_layer("alt_source_a", set.clip.clone())
+            .with_layer("fg1_matte", set.clip.clone())
+            .with_layer("fg2_matte", set.clip.clone());
         assert_eq!(rig.render(2).unwrap(), set.rt[2], "{:?}", set.depth);
     }
 }

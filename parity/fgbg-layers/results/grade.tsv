@@ -1,0 +1,387 @@
+id	status	differing_values	max_ulp	block	tags	logic_parity	depth	size	frames	differing_pixels	error
+retime-fgbg.size-n2-w1.box2-1x1.d8.e55ad6e5	no reference	-	-	size	tiny	yes	8	1x1	3	-	
+retime-fgbg.size-n3-w2.box3-1x1.d16.3c565e8a	no reference	-	-	size	tiny	yes	16	1x1	3	-	
+retime-fgbg.size-n2-w3.box2-1x1.d32.9f6d185a	no reference	-	-	size	tiny	yes	32	1x1	3	-	
+retime-fgbg.size-n3-w2.box3-2x2.d8.4fc6df20	no reference	-	-	size	tiny	yes	8	2x2	3	-	
+retime-fgbg.size-n1-w3.box1-2x2.d16.6439bbd1	no reference	-	-	size	tiny	yes	16	2x2	3	-	
+retime-fgbg.size-n3-w4.box3-2x2.d32.d489fb0b	no reference	-	-	size	tiny	yes	32	2x2	3	-	
+retime-fgbg.size-n1-w3.box1-2x3.d8.b944a37c	no reference	-	-	size	tiny	yes	8	2x3	3	-	
+retime-fgbg.size-n2-w4.box2-2x3.d16.2992e55a	no reference	-	-	size	tiny	yes	16	2x3	3	-	
+retime-fgbg.size-n1-w1.box1-2x3.d32.a162c242	no reference	-	-	size	tiny	yes	32	2x3	3	-	
+retime-fgbg.size-n2-w4.box2-3x2.d8.4eee0156	no reference	-	-	size	tiny	yes	8	3x2	3	-	
+retime-fgbg.size-n3-w1.box3-3x2.d16.38695831	no reference	-	-	size	tiny	yes	16	3x2	3	-	
+retime-fgbg.size-n2-w2.box2-3x2.d32.4de773b5	no reference	-	-	size	tiny	yes	32	3x2	3	-	
+retime-fgbg.size-n3-w1.box3-1x5.d8.ed56215a	no reference	-	-	size	tiny	yes	8	1x5	3	-	
+retime-fgbg.size-n1-w2.box1-1x5.d16.12e1d483	no reference	-	-	size	tiny	yes	16	1x5	3	-	
+retime-fgbg.size-n3-w3.box3-1x5.d32.d2c05e5a	no reference	-	-	size	tiny	yes	32	1x5	3	-	
+retime-fgbg.size-n1-w2.box1-5x1.d8.bc07258e	no reference	-	-	size	tiny	yes	8	5x1	3	-	
+retime-fgbg.size-n2-w3.box2-5x1.d16.4a294f1b	no reference	-	-	size	tiny	yes	16	5x1	3	-	
+retime-fgbg.size-n1-w4.box1-5x1.d32.fd6b1067	no reference	-	-	size	tiny	yes	32	5x1	3	-	
+retime-fgbg.size-n2-w3.box2-3x3.d8.1853d35f	no reference	-	-	size	tiny	yes	8	3x3	3	-	
+retime-fgbg.size-n3-w4.box3-3x3.d16.62e16375	no reference	-	-	size	tiny	yes	16	3x3	3	-	
+retime-fgbg.size-n2-w1.box2-3x3.d32.ab10ecbd	no reference	-	-	size	tiny	yes	32	3x3	3	-	
+retime-fgbg.size-n3-w4.box3-4x4.d8.ff91b5c3	pass	0	-	size		yes	8	4x4	3	0	
+retime-fgbg.size-n1-w1.box1-4x4.d16.419164f6	pass	0	-	size		yes	16	4x4	3	0	
+retime-fgbg.size-n3-w2.box3-4x4.d32.2e77441f	pass	0	-	size		yes	32	4x4	3	0	
+retime-fgbg.size-n1-w1.box1-5x5.d8.73b679d3	pass	0	-	size		yes	8	5x5	3	0	
+retime-fgbg.size-n2-w2.box2-5x5.d16.26d82af7	pass	0	-	size		yes	16	5x5	3	0	
+retime-fgbg.size-n1-w3.box1-5x5.d32.02458390	pass	0	-	size		yes	32	5x5	3	0	
+retime-fgbg.size-n2-w2.box2-7x9.d8.39ec04e5	pass	0	-	size		yes	8	7x9	3	0	
+retime-fgbg.size-n1-w4.box1-9x7.d16.b66ef7d9	pass	0	-	size		yes	16	9x7	3	0	
+retime-fgbg.size-n1-w4.box1-16x12.d8.4977ab66	pass	0	-	size		yes	8	16x12	3	0	
+retime-fgbg.size-n2-w1.box2-16x12.d16.2ec6114b	pass	0	-	size		yes	16	16x12	3	0	
+retime-fgbg.size-n1-w2.box1-16x12.d32.ac0a7b26	pass	0	-	size		yes	32	16x12	3	0	
+retime-fgbg.size-n2-w1.box2-17x13.d8.2d0b1e84	pass	0	-	size		yes	8	17x13	3	0	
+retime-fgbg.size-n1-w3.box1-23x31.d16.cea7b1c8	pass	0	-	size		yes	16	23x31	3	0	
+retime-fgbg.size-n1-w1.box1-37x23.d32.9e81c51e	pass	0	-	size		yes	32	37x23	3	0	
+retime-fgbg.size-64x48.box2-64x48.d8.e3739839	pass	0	-	size		yes	8	64x48	3	0	
+retime-fgbg.size-defaults.box1-1x1.d8.14ea6838	pass	0	-	size	defaults,tiny	yes	8	1x1	3	0	
+retime-fgbg.size-defaults.box1-5x5.d8.3ce545f4	pass	0	-	size	defaults	yes	8	5x5	3	0	
+retime-fgbg.size-defaults.box1-17x13.d8.539b0e9a	pass	0	-	size	defaults	yes	8	17x13	3	0	
+retime-fgbg.n1-w1.box1-24x16.d8.97eae5c3	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n1-w2.box1-24x16.d8.5a34ec49	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n1-w3.box1-24x16.d8.938583d0	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n1-w4.box1-24x16.d8.b944509d	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n2-w1.box2-24x16.d8.6660d3dd	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n2-w2.box2-24x16.d8.9229d5f4	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n2-w3.box2-24x16.d8.587c3a75	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n2-w4.box2-24x16.d8.a7091f86	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n3-w1.box3-24x16.d8.b12ce2a0	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n3-w2.box3-24x16.d8.90aa7334	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n3-w3.box3-24x16.d8.fbfa8c76	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n3-w4.box3-24x16.d8.6c3a6749	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.n2-w2.box2-24x16.d16.d02a21b6	pass	0	-	layers		yes	16	24x16	3	0	
+retime-fgbg.n2-w4.box2-24x16.d16.b3d1c681	pass	0	-	layers		yes	16	24x16	3	0	
+retime-fgbg.n3-w2.box3-24x16.d16.f2704987	pass	0	-	layers		yes	16	24x16	3	0	
+retime-fgbg.n3-w4.box3-24x16.d16.e7262c19	pass	0	-	layers		yes	16	24x16	3	0	
+retime-fgbg.n2-w1.box2-24x16.d32.23677bf6	pass	0	-	layers		yes	32	24x16	3	0	
+retime-fgbg.n2-w3.box2-24x16.d32.4c3ca3e8	pass	0	-	layers		yes	32	24x16	3	0	
+retime-fgbg.n3-w1.box3-24x16.d32.df1b9f8d	pass	0	-	layers		yes	32	24x16	3	0	
+retime-fgbg.n3-w3.box3-24x16.d32.e92c2d32	pass	0	-	layers		yes	32	24x16	3	0	
+retime-fgbg.alpha-n2-w1.box2a-24x16.d8.5770d595	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.alpha-n2-w3.box2a-24x16.d8.1389fa79	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.pan-n1.pan-24x16.d8.0c2a7709	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.noise-n2.noise-24x16.d8.9cd8603c	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.flat-n1.flat-24x16.d8.fbae843a	pass	0	-	layers		yes	8	24x16	3	0	
+retime-fgbg.edge-n2-d8.edge-16x12.d8.53b90c87	pass	0	-	layers		yes	8	16x12	3	0	
+retime-fgbg.edge-n2-d16.edge-16x12.d16.c34bfebf	pass	0	-	layers		yes	16	16x12	3	0	
+retime-fgbg.chan1-chan.box1-24x16.d8.d6d73fa3	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan1-alpha.box1-24x16.d8.0d513d6d	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan2-chan.box1-24x16.d8.cf4f1785	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan2-alpha.box1-24x16.d8.4cce1ae7	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan3-chan.box1-24x16.d8.a92de7b6	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan3-alpha.box1-24x16.d8.52bb808f	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan4-chan.box1-24x16.d8.9f68dc24	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan4-alpha.box1-24x16.d8.b317dff7	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.chan2-chan.box1-24x16.d16.e2c72ea5	pass	0	-	chan		yes	16	24x16	3	0	
+retime-fgbg.chan4-chan.box1-24x16.d16.1ed6ac92	pass	0	-	chan		yes	16	24x16	3	0	
+retime-fgbg.chan3-chan.box1-24x16.d32.aaf78cd9	pass	0	-	chan		yes	32	24x16	3	0	
+retime-fgbg.chan4-chan.box1-24x16.d32.de9e3f16	pass	0	-	chan		yes	32	24x16	3	0	
+retime-fgbg.perm123.box3-24x16.d8.2dbda95d	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.perm321.box3-24x16.d8.784a3fce	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.perm444.box3-24x16.d8.4efe0959	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.perm222.box3-24x16.d8.750b50cb	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.perm213.box3-24x16.d8.5015fe8b	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.perm321-alpha.box3-24x16.d8.b2796002	pass	0	-	chan		yes	8	24x16	3	0	
+retime-fgbg.shrink0-bg.box2-36x24.d8.9466382b	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-0-bg.box2-36x24.d8.6f1b4d1c	pass	0	-	shrink	negzero	yes	8	36x24	3	0	
+retime-fgbg.shrink0.01-bg.box2-36x24.d8.d7dfdf0c	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink0.5-bg.box2-36x24.d8.0b01903a	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink1-bg.box2-36x24.d8.81dd6098	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink1.5-bg.box2-36x24.d8.0cef07ce	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink2-bg.box2-36x24.d8.3aa99f69	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink2.99-bg.box2-36x24.d8.379fac06	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink3-bg.box2-36x24.d8.47e4f6ec	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink4.25-bg.box2-36x24.d8.75e08a9a	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink6-bg.box2-36x24.d8.4a9e2a80	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink7.25-bg.box2-36x24.d8.b3c3b436	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink9.99-bg.box2-36x24.d8.36ef5467	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink10-bg.box2-36x24.d8.958c1342	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink1-out.box2-36x24.d8.1a0d09b9	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink2.5-out.box2-36x24.d8.0198ffc5	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink10-out.box2-36x24.d8.4419b25b	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink0.5-bg.box2-36x24.d16.8d66dad6	pass	0	-	shrink		yes	16	36x24	3	0	
+retime-fgbg.shrink0.5-bg.box2-36x24.d32.79ee2ad5	pass	0	-	shrink		yes	32	36x24	3	0	
+retime-fgbg.shrink3-bg.box2-36x24.d16.bdec8461	pass	0	-	shrink		yes	16	36x24	3	0	
+retime-fgbg.shrink3-bg.box2-36x24.d32.47f32eaa	pass	0	-	shrink		yes	32	36x24	3	0	
+retime-fgbg.shrink-soft.box2-36x24.d8.9b186b81	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-fg2.box3-36x24.d8.ca669aca	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-fg3.box3-36x24.d8.a6f0afde	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-fg2-fg2view.box3-36x24.d8.88fbd0ea	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-all3.box3-36x24.d8.6694a905	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-n1-d6.box1-36x24.d8.ee236db6	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-thin.box2-12x9.d8.8bb3abf4	pass	0	-	shrink		yes	8	12x9	3	0	
+retime-fgbg.shrink0.5-pan.pan-36x24.d8.d55d1e71	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink1-pan.pan-36x24.d8.fe61e274	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink2.5-pan.pan-36x24.d8.da69ac69	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink6-pan.pan-36x24.d8.00255e9a	pass	0	-	shrink		yes	8	36x24	3	0	
+retime-fgbg.shrink-nan32.box2-24x16.d32.054ca5b7	pass	0	-	shrink	special	yes	32	24x16	3	0	
+retime-fgbg.disp1-n1.box1-24x16.d8.eef066d5	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp1-n2.box2-24x16.d8.a6033c72	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp1-n3.box3-24x16.d8.b689706a	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp2-n1.box1-24x16.d8.09d5e94f	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp2-n2.box2-24x16.d8.e1fbbfbd	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp2-n3.box3-24x16.d8.767dfd84	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp3-n1.box1-24x16.d8.42bc1c1b	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp3-n2.box2-24x16.d8.b2687b75	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp3-n3.box3-24x16.d8.201e97e9	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp4-n1.box1-24x16.d8.3a9a6955	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp4-n2.box2-24x16.d8.19ef0698	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp4-n3.box3-24x16.d8.ea8166d7	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp5-n1.box1-24x16.d8.fbbe6ed5	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp5-n2.box2-24x16.d8.4a468aff	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp5-n3.box3-24x16.d8.fc1a8011	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp6-n1.box1-24x16.d8.9b0ea5fc	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp6-n2.box2-24x16.d8.746b8d03	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp6-n3.box3-24x16.d8.c51b3704	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp3-n2.box2-24x16.d16.2d911911	pass	0	-	display		yes	16	24x16	3	0	
+retime-fgbg.disp4-n2.box2-24x16.d16.d7a691e0	pass	0	-	display		yes	16	24x16	3	0	
+retime-fgbg.disp6-n2.box2-24x16.d16.f29b5d31	pass	0	-	display		yes	16	24x16	3	0	
+retime-fgbg.disp3-n3.box3-24x16.d32.d994c591	pass	0	-	display		yes	32	24x16	3	0	
+retime-fgbg.disp5-n3.box3-24x16.d32.c0f4a9d6	pass	0	-	display		yes	32	24x16	3	0	
+retime-fgbg.disp6-n3-w4.box3-24x16.d8.0d3f2d1b	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.disp3-n3-w2.box3-24x16.d8.3aa60716	pass	0	-	display		yes	8	24x16	3	0	
+retime-fgbg.exact-d1.box2-24x16.d8.a6fa5ac1	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.exact-d3.box2-24x16.d8.cfc12a8d	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.exact-d4.box2-24x16.d8.f74b500c	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.exact-d6.box2-24x16.d8.1ec9dacc	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.exact-d3-d16.box2-24x16.d16.367a015f	pass	0	-	fast		yes	16	24x16	3	0	
+retime-fgbg.exact-d6-d32.box2-24x16.d32.9775f0f8	pass	0	-	fast		yes	32	24x16	3	0	
+retime-fgbg.novec-d1.box2-24x16.d8.b27fae4e	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.novec-d3.box2-24x16.d8.e2779780	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.novec-d6.box2-24x16.d8.3050517a	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.novec-n3-w1.box3-24x16.d8.405ae61d	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.mark4-d1.box2-24x16.d8.6af0edeb	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.mark4-d3.box2-24x16.d8.920e0712	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.mark5-d1.box2-24x16.d8.f291f96d	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.mark5-d3.box2-24x16.d8.cf637ae2	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.exact-soft.box2-24x16.d8.1a92c0ff	pass	0	-	fast		yes	8	24x16	3	0	
+retime-fgbg.interp1-w1.box2-24x16.d8.2f33a5b0	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp1-w2.box2-24x16.d8.57236bcf	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp1-w3.box2-24x16.d8.cc72b14b	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp1-w4.box2-24x16.d8.33316164	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp2-w1.box2-24x16.d8.12c290a0	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp2-w2.box2-24x16.d8.e05b15df	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp2-w3.box2-24x16.d8.6fe215e6	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp2-w4.box2-24x16.d8.f005e2e6	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp3-w1.box2-24x16.d8.282b7ec9	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp3-w2.box2-24x16.d8.f507523f	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp3-w3.box2-24x16.d8.8312855b	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp3-w4.box2-24x16.d8.fcfe75c6	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.interp1-w3.box2-24x16.d32.5b1a5aff	pass	0	-	interp		yes	32	24x16	3	0	
+retime-fgbg.interp3-w3.box2-24x16.d32.f405317d	pass	0	-	interp		yes	32	24x16	3	0	
+retime-fgbg.interp1-n1.box1-24x16.d8.1e10dd7d	pass	0	-	interp		yes	8	24x16	3	0	
+retime-fgbg.fg1sens0.box2f-32x24.d8.9ed83130	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.fg1sens-0.box2f-32x24.d8.912261ea	pass	0	-	sens	negzero	yes	8	32x24	3	0	
+retime-fgbg.fg1sens100.box2f-32x24.d8.280a26dc	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.fg2sens0.box3f-32x24.d8.56fb8876	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.fg3sens0.box3f-32x24.d8.bcab4c98	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.mbsens0.box2f-32x24.d8.55228790	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.fg2sens100.box3f-32x24.d8.d524eb9b	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.fg3sens100.box3f-32x24.d8.06e3cbaa	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.mbsens100.box2f-32x24.d8.1b315781	pass	0	-	sens		yes	8	32x24	3	0	
+retime-fgbg.allsens100.box3f-32x24.d16.da8a150f	pass	0	-	sens		yes	16	32x24	3	0	
+retime-fgbg.allsens35-d32.box3f-32x24.d32.05582f96	pass	0	-	sens		yes	32	32x24	3	0	
+retime-fgbg.bigmotion.box2f-48x32.d8.c5076af9	pass	0	-	sens		yes	8	48x32	3	0	
+retime-fgbg.blur0.01-d1.box2-24x16.d8.8a894e4e	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur0.01-d3.box2-24x16.d8.e3b0d8e4	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur0.01-d6.box2-24x16.d8.85db7c61	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur1-d1.box2-24x16.d8.687bd49f	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur1-d3.box2-24x16.d8.aa920040	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur1-d6.box2-24x16.d8.0810fb46	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur2.5-d1.box2-24x16.d8.026d7dea	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur2.5-d3.box2-24x16.d8.3e79b4e2	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur2.5-d6.box2-24x16.d8.e3de6341	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur10-d1.box2-24x16.d8.6db051f5	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur10-d3.box2-24x16.d8.2cef04e2	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur10-d6.box2-24x16.d8.a505e44d	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur3-w1.box2-24x16.d8.28b7a82b	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur3-w2.box2-24x16.d8.cfa6f1f4	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur3-w4.box2-24x16.d8.7ededbf8	pass	0	-	blur		yes	8	24x16	3	0	
+retime-fgbg.blur-neg0.box2-24x16.d8.83955489	pass	0	-	blur	negzero	yes	8	24x16	3	0	
+retime-fgbg.blur2-d32.box2-24x16.d32.1d525c2d	pass	0	-	blur		yes	32	24x16	3	0	
+retime-fgbg.order012.box3-24x16.d8.9fed0992	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order210.box3-24x16.d8.7a0abf06	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order120.box3-24x16.d8.6e8611f0	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order201.box3-24x16.d8.b50408cf	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order10.box2-24x16.d8.5e58471c	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-fullfirst.box2-24x16.d8.e3168990	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-fullfirst-d4.box3-24x16.d8.69066ed0	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-fullfirst-d5.box3-24x16.d8.9b24f0d3	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-fullfirst-d6.box3-24x16.d8.a6a32cbf	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-soft-overlap.box3-24x16.d8.6d9f6967	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-same-box.box2-24x16.d8.733e1f37	pass	0	-	order		yes	8	24x16	3	0	
+retime-fgbg.order-d16.box3-24x16.d16.82d37f66	pass	0	-	order		yes	16	24x16	3	0	
+retime-fgbg.fg2only.box3-24x16.d8.b63c82ce	pass	0	-	count		yes	8	24x16	3	0	
+retime-fgbg.fg3only.box3-24x16.d8.97ef02eb	pass	0	-	count		yes	8	24x16	3	0	
+retime-fgbg.fg1fg3.box3-24x16.d8.dde39766	pass	0	-	count		yes	8	24x16	3	0	
+retime-fgbg.fg2fg3.box3-24x16.d8.88620e65	pass	0	-	count		yes	8	24x16	3	0	
+retime-fgbg.fg1fg3-d6.box3-24x16.d8.07f65770	pass	0	-	count		yes	8	24x16	3	0	
+retime-fgbg.fg1fg2-d32.box3-24x16.d32.d3c54a25	pass	0	-	count		yes	32	24x16	3	0	
+retime-fgbg.m-empty.box1-24x16.d8.e4eafca5	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-emptya.box1-24x16.d8.eb7a7a25	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-full.box1-24x16.d8.96ef67ce	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-grey.box1-24x16.d8.4c58db7b	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-thrA.box1-24x16.d8.656442b8	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-thrB.box1-24x16.d8.add5ee17	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-soft.box1-24x16.d8.decd7a59	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-noise.box1-24x16.d8.e4d4537e	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-ramp.box1-24x16.d8.2d3b735d	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-thrA.box1-24x16.d16.759285cf	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.m-thrB.box1-24x16.d16.54ef68b3	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.m-grey.box1-24x16.d16.36d93562	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.m-noise.box1-24x16.d16.fcbc7cd0	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.m-ramp.box1-24x16.d16.e242f4aa	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.m-empty.box1-24x16.d16.510959d3	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.m-empty.box1-24x16.d32.a02e649c	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-full.box1-24x16.d32.4763fd38	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-grey.box1-24x16.d32.770f16b4	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-thrA.box1-24x16.d32.4c6e1a3b	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-thrB.box1-24x16.d32.c2b1090d	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-noise.box1-24x16.d32.d81f42c9	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-ramp.box1-24x16.d32.05ccd16a	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-soft.box1-24x16.d32.6de1baed	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-emptya.box1-24x16.d32.b2dd3bfb	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-empty-n2.box2-24x16.d8.aaf7a6e4	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-empty-first.box2-24x16.d8.dee18236	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-empty-all3.box3-24x16.d8.f1fd6bb3	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-thr-n2.box2-24x16.d8.54851bc7	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-thr-n2-d32.box2-24x16.d32.7d65daf3	pass	0	-	mattes		yes	32	24x16	3	0	
+retime-fgbg.m-full-n3.box3-24x16.d8.802a698c	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-grey-bg.box1-24x16.d8.79e42307	pass	0	-	mattes		yes	8	24x16	3	0	
+retime-fgbg.m-ramp-d6.box2-24x16.d16.509a66a0	pass	0	-	mattes		yes	16	24x16	3	0	
+retime-fgbg.specbox2-w1.specbox2-16x12.d32.74e1c7bf	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox2-w2.specbox2-16x12.d32.0771a904	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox2-w3.specbox2-16x12.d32.27976dd1	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox2-w4.specbox2-16x12.d32.3a92a83b	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox2a-w3.specbox2a-16x12.d32.c3bbdbce	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox1-w1.specbox1-16x12.d32.154c73a4	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox3-w3.specbox3-16x12.d32.94d441e5	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specall-w1.specall-16x12.d32.9a81f276	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specall-w3.specall-16x12.d32.a531ee90	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-chan1.box1-16x12.d32.3a405ed7	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-chan2.box1-16x12.d32.526699e0	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-chan3.box1-16x12.d32.aeb06458	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-chan4.box1-16x12.d32.1d870515	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-n2.box2-16x12.d32.f5dd9d21	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-n2-w4.box2-16x12.d32.60f01149	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specbox-bg.box2-16x12.d32.b48b1389	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.specm-bg-shrink.box2-16x12.d32.c20e0a24	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-nanall.box1-16x12.d32.bd554737	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-negnanall.box1-16x12.d32.353236df	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-infall.box1-16x12.d32.d6a37879	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-ninfall.box1-16x12.d32.eb33ea40	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-maxall.box1-16x12.d32.ea745f10	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-denall.box1-16x12.d32.254b9d67	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-maxden.box1-16x12.d32.886829ec	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-fltmin.box1-16x12.d32.cee1998b	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-negzero.box1-16x12.d32.20894ab8	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-over1.box1-16x12.d32.57373ebe	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-nanbox.box1-16x12.d32.b3f9e7c3	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-nanall-n2-bg.box2-16x12.d32.301bec7f	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-infall-n2-bg.box2-16x12.d32.bd8cec31	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-negzero-n2-bg.box2-16x12.d32.989e65c8	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-over1-n2-bg.box2-16x12.d32.0c1c4d6b	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-denall-n2-bg.box2-16x12.d32.7f56e9c7	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.m-negzero-out.box2-16x12.d32.51cf18c0	pass	0	-	spec	special,negzero	yes	32	16x12	3	0	
+retime-fgbg.specm-exact.box2-16x12.d32.6fb9a4a8	pass	0	-	spec	special	yes	32	16x12	3	0	
+retime-fgbg.pt-use2-n0.box1-32x24.d8.c820ffca	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use3-n0.box1-32x24.d8.9b6aa786	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use4-n0.box1-32x24.d8.b5c0e76e	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use5-n0.box1-32x24.d8.f519144c	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use2-n2.box2-32x24.d8.bf2b4ded	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use3-n2.box2-32x24.d8.a7977aec	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use4-n2.box2-32x24.d8.7f6cc61e	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use5-n2.box2-32x24.d8.35548c28	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use1-n2.box2-32x24.d8.1b761699	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-still.box2-32x24.d8.749b2a76	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-use3-n3.box3-32x24.d8.7c9d5e13	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-same-pixel.box2-32x24.d8.3be809c5	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-all12.box3-32x24.d8.850939f0	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt12-only.box2-32x24.d8.14a7edd6	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-outside.box2-32x24.d8.32cb7b89	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-outside-to.box2-32x24.d8.f86a8801	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-default-pos.box2-32x24.d8.c47dbdf6	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-use-keyed.box2-32x24.d8.988de7fb	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-use-keyed2.box2-32x24.d8.b0c56146	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-subpixel.box1-32x24.d8.a65728f0	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-w1.box2-32x24.d8.1d740969	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-w2-n3.box3-32x24.d8.a2edb883	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-key.box2-32x24.d16.45fb7af1	pass	0	-	points	standin	yes	16	32x24	3	0	
+retime-fgbg.pt-key.box2-32x24.d32.68be32dc	pass	0	-	points	standin	yes	32	32x24	3	0	
+retime-fgbg.pt-interp1.box2-32x24.d8.3abd5699	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-interp3.box2-32x24.d8.2e5d5afd	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-bg-view.box2-32x24.d8.9f197306	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-neg0.box2-32x24.d8.8c5c37ec	pass	0	-	points	standin,negzero	yes	8	32x24	3	0	
+retime-fgbg.pt-fast.box2-32x24.d8.781c0d53	pass	0	-	points	standin	yes	8	32x24	3	0	
+retime-fgbg.pt-still-edge.pan-32x24.d8.30e3e8d6	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-still-edge.pan-32x24.d8.a2d4583a	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-still-edge.pan-32x24.d8.1f033d31	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-still-edge.pan-32x24.d8.8ecc2ae9	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-still-edge.pan-32x24.d8.33f29f51	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-still-edge.pan-32x24.d8.e6af5dc0	pass	0	-	points		yes	8	32x24	3	0	
+retime-fgbg.pt-tiny.box1-3x3.d8.764d4b6c	no reference	-	-	points	standin,tiny	yes	8	3x3	3	-	
+retime-fgbg.pt-wide.box1-40x12.d8.eb0e963a	pass	0	-	points	standin	yes	8	40x12	3	0	
+retime-fgbg.pt-tall.box1-12x40.d8.859728dd	pass	0	-	points	standin	yes	8	12x40	3	0	
+retime-fgbg.dg1-n2.box2-32x24.d8.908307e8	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg2-n2.box2-32x24.d8.6f0e7e21	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg3-n2.box2-32x24.d8.918d0612	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg4-n2.box2-32x24.d8.e6b66c97	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg5-n2.box2-32x24.d8.a652258f	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg6-n2.box2-32x24.d8.28d3528b	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg2-n0.box1-32x24.d8.1c587374	pass	0	-	geom		no	8	32x24	3	0	
+retime-fgbg.dg3-n0.box1-32x24.d8.77cd3e3a	pass	0	-	geom		no	8	32x24	3	0	
+retime-fgbg.dg6-n0.box1-32x24.d8.8f631508	pass	0	-	geom		no	8	32x24	3	0	
+retime-fgbg.dg2-n3.box3-32x24.d8.11feb1cc	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg5-n3.box3-32x24.d8.e822d5df	pass	0	-	geom		yes	8	32x24	3	0	
+retime-fgbg.dg2-n2.box2-32x24.d16.65d71ac1	pass	0	-	geom		yes	16	32x24	3	0	
+retime-fgbg.dg4-n2.box2-32x24.d16.fbc6b190	pass	0	-	geom		yes	16	32x24	3	0	
+retime-fgbg.dg6-n2.box2-32x24.d16.dd9e6296	pass	0	-	geom		yes	16	32x24	3	0	
+retime-fgbg.dg2-n2.box2-32x24.d32.b1f7d1e6	FAIL	2304	3182671	geom		yes	32	32x24	3	2304	
+retime-fgbg.dg4-n2.box2-32x24.d32.d018122e	FAIL	2304	3182671	geom		yes	32	32x24	3	2304	
+retime-fgbg.dg6-n2.box2-32x24.d32.6d54b178	FAIL	2304	3182671	geom		yes	32	32x24	3	2304	
+retime-fgbg.edge0.box1-32x24.d8.0d6fe00e	pass	0	-	geom		no	8	32x24	3	0	
+retime-fgbg.edge0.box1-32x24.d32.26a025a3	FAIL	2304	3182671	geom		no	32	32x24	3	2304	
+retime-fgbg.edge4.box1-32x24.d8.d59a3f0f	no reference	-	-	geom		no	8	32x24	3	-	
+retime-fgbg.edge4.box1-32x24.d32.d1c8f48c	no reference	-	-	geom		no	32	32x24	3	-	
+retime-fgbg.edge8.box1-32x24.d8.e1ca4338	no reference	-	-	geom		no	8	32x24	3	-	
+retime-fgbg.edge8.box1-32x24.d32.6b6a9426	no reference	-	-	geom		no	32	32x24	3	-	
+retime-fgbg.edge-all12.box3-32x24.d16.664ffcc3	no reference	-	-	geom		yes	16	32x24	3	-	
+retime-fgbg.overlap-order.box1-16x12.d8.b9bdecf9	pass	0	-	geom		no	8	16x12	3	0	
+retime-fgbg.overlap-order-d32.box1-16x12.d32.f8b7331d	FAIL	576	3182671	geom		no	32	16x12	3	576	
+retime-fgbg.overlap-reverse.box1-16x12.d8.71e3db01	pass	0	-	geom		no	8	16x12	3	0	
+retime-fgbg.alpha-src.box1a-16x12.d8.96e71169	pass	0	-	geom		no	8	16x12	3	0	
+retime-fgbg.alpha-src-d16.box1a-16x12.d16.701bdabf	pass	0	-	geom		no	16	16x12	3	0	
+retime-fgbg.keyed-pos.box1-32x24.d8.26be5967	pass	0	-	geom	standin	yes	8	32x24	3	0	
+retime-fgbg.keyed-pos-n2.box2-32x24.d8.02ca9942	pass	0	-	geom	standin	yes	8	32x24	3	0	
+retime-fgbg.disc-subpix.flat-16x12.d8.fec3b664	pass	0	-	geom		no	8	16x12	3	0	
+retime-fgbg.disc-subpix-d32.specall-16x12.d32.20fa15c8	FAIL	576	3182671	geom	special	no	32	16x12	3	576	
+retime-fgbg.disc-tiny.box1-2x2.d8.91605ca1	pass	0	-	geom	tiny	no	8	2x2	3	0	
+retime-fgbg.disc-1x1.box1-1x1.d8.cf0daf4a	pass	0	-	geom	tiny	no	8	1x1	3	0	
+retime-fgbg.disp1-no-draw.box1-32x24.d8.39a25a0c	pass	0	-	geom		no	8	32x24	3	0	
+retime-fgbg.wrap-w1.wrapcol-24x16.d8.e13afa31	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-w2.wrapcol-24x16.d8.c8fd7863	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-w3.wrapcol-24x16.d8.4a9ecfae	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-w4.wrapcol-24x16.d8.6391ee84	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-n2.wrapcol-24x16.d8.f93e5de6	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-box-w3.box2-24x16.d8.074b689c	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-bg.wrapcol-24x16.d8.23f2a4fa	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-blur.wrapcol-24x16.d8.3bd7b9ae	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.wrap-pt.wrapcol-24x16.d8.a102ddde	pass	0	-	wrap	standin	yes	8	24x16	3	0	
+retime-fgbg.wrap-d32.wrapcol-24x16.d32.c3a6a5ce	pass	0	-	wrap		yes	32	24x16	3	0	
+retime-fgbg.wrap-d16.wrapcol-24x16.d16.eaca713d	pass	0	-	wrap		yes	16	24x16	3	0	
+retime-fgbg.wrap-off.wrapcol-24x16.d8.86ead36d	pass	0	-	wrap		yes	8	24x16	3	0	
+retime-fgbg.mix00.box2a-12x20.d8.ae846040	pass	0	-	mix		yes	8	12x20	3	0	
+retime-fgbg.mix01.box3f-31x21.d16.460aca23	pass	0	-	mix		yes	16	31x21	3	0	
+retime-fgbg.mix02.box1-17x13.d8.015669cc	pass	0	-	mix		yes	8	17x13	3	0	
+retime-fgbg.mix03.box2-31x21.d8.2df6213a	pass	0	-	mix		yes	8	31x21	3	0	
+retime-fgbg.mix04.box2-24x16.d8.b8267e62	pass	0	-	mix		yes	8	24x16	3	0	
+retime-fgbg.mix05.box1f-31x21.d16.84c40ba8	pass	0	-	mix		yes	16	31x21	3	0	
+retime-fgbg.mix06.box2f-31x21.d16.af442d8d	pass	0	-	mix		yes	16	31x21	3	0	
+retime-fgbg.mix07.box3-17x13.d16.c8f68750	pass	0	-	mix		yes	16	17x13	3	0	
+retime-fgbg.mix08.box3-17x13.d8.d7e029a9	pass	0	-	mix		yes	8	17x13	3	0	
+retime-fgbg.mix09.box2-24x16.d8.913923e3	pass	0	-	mix		yes	8	24x16	3	0	
+retime-fgbg.mix10.box3a-17x13.d16.f08eb61a	pass	0	-	mix		yes	16	17x13	3	0	
+retime-fgbg.mix11.box3a-12x20.d16.5550c056	pass	0	-	mix		yes	16	12x20	3	0	
+retime-fgbg.mix12.box3-16x12.d8.1447dd90	pass	0	-	mix		yes	8	16x12	3	0	
+retime-fgbg.mix13.box1a-31x21.d8.51efdedb	pass	0	-	mix		yes	8	31x21	3	0	

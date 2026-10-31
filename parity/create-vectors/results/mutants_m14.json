@@ -1,0 +1,497 @@
+[
+ {
+  "id": "m01",
+  "kind": "rounding",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;",
+  "new": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0) as u8;",
+  "desc": "8 bpc red channel of the single layer encoder truncates instead of rounding",
+  "adapted": "made unique: the context of encode_vectors added to `old` (meaning unchanged)"
+ },
+ {
+  "id": "m02",
+  "kind": "vector scale",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;\n                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;\n                px[3] = 0;\n            }\n        }),\n        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xffff;\n                px[1] = cvtt64(a as f64 * 32767.0 + 0.5) as u16;\n                px[2] = cvtt64(b as f64 * 32767.0 + 0.5) as u16;",
+  "new": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;\n                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;\n                px[3] = 0;\n            }\n        }),\n        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xffff;\n                px[1] = cvtt64(a as f64 * 32767.0 + 0.5) as u16;\n                px[2] = cvtt64(b as f64 * 32768.0 + 0.5) as u16;",
+  "desc": "16 bpc green channel scale 32768 instead of 32767",
+  "adapted": "made unique: the context of encode_vectors added to `old` (meaning unchanged)"
+ },
+ {
+  "id": "m03",
+  "kind": "channel order",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;\n                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;\n                px[3] = 0;\n            }\n        }),\n        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xffff;\n                px[1] = cvtt64(a as f64 * 32767.0 + 0.5) as u16;\n                px[2] = cvtt64(b as f64 * 32767.0 + 0.5) as u16;\n                px[3] = 0;\n            }\n        }),\n        Samples::F32(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (a, b) = sample(x, y);\n                px[0] = 1.0;\n                px[1] = (a + 1.0f32) * 0.5f32;\n                px[2] = (b + 1.0f32) * 0.5f32;",
+  "new": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;\n                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;\n                px[3] = 0;\n            }\n        }),\n        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xffff;\n                px[1] = cvtt64(a as f64 * 32767.0 + 0.5) as u16;\n                px[2] = cvtt64(b as f64 * 32767.0 + 0.5) as u16;\n                px[3] = 0;\n            }\n        }),\n        Samples::F32(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (a, b) = sample(x, y);\n                px[0] = 1.0;\n                px[1] = (b + 1.0f32) * 0.5f32;\n                px[2] = (a + 1.0f32) * 0.5f32;",
+  "desc": "32 bpc single layer encoder writes dy in red and dx in green",
+  "adapted": "made unique: the context of encode_vectors added to `old` (meaning unchanged)"
+ },
+ {
+  "id": "m04",
+  "kind": "clip",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "} else if -1.0f32 > *v {",
+  "new": "} else if -2.0f32 > *v {",
+  "desc": "lower clip of the integer encoders moved from -1 to -2 (motion beyond -max_displace wraps)"
+ },
+ {
+  "id": "m05",
+  "kind": "vector offset",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "&[0xff, 127, 127, 0]",
+  "new": "&[0xff, 128, 127, 0]",
+  "desc": "8 bpc zero vector image of a frame with a side of 1 centres red on 128"
+ },
+ {
+  "id": "m06",
+  "kind": "vector offset",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "&[1.0, 0.5, 0.5, 0.0]",
+  "new": "&[1.0, 0.5, 0.50000006, 0.0]",
+  "desc": "32 bpc zero vector image green one ULP above the centre"
+ },
+ {
+  "id": "m07",
+  "kind": "rounding order",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "let kx = (dw1 / fw1) / scale;",
+  "new": "let kx = dw1 / (fw1 * scale);",
+  "desc": "horizontal vector scale divides in another order (last bit differences only)"
+ },
+ {
+  "id": "m08",
+  "kind": "vector scale",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "let sy = fh1 / dh1;",
+  "new": "let sy = fw1 / dw1;",
+  "desc": "vertical flow sample step uses the horizontal ratio"
+ },
+ {
+  "id": "m09",
+  "kind": "debug blend weight",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "pub const BLEND_WEIGHT: f32 = 0.5;",
+  "new": "pub const BLEND_WEIGHT: f32 = 0.25;",
+  "desc": "Debug Blend view mixes with weight 0.25 instead of 0.5",
+  "adapted": "rewritten against m14: the weight is now the constant BLEND_WEIGHT"
+ },
+ {
+  "id": "m10",
+  "kind": "debug diff",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "(l1 - l2).abs() * diff_gain()",
+  "new": "(l1 - l2).max(0.0f32) * diff_gain()",
+  "desc": "Debug Diff view is a one sided (saturating) difference instead of the absolute difference",
+  "adapted": "rewritten against m14: the Diff is now the luma difference of re-cmv fix 20"
+ },
+ {
+  "id": "m11",
+  "kind": "debug detail",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "(f64::from(v) * top + 0.5f64) as i64",
+  "new": "(f64::from(v) * top + 0.4f64) as i64",
+  "desc": "Detail and Edge overlay samples round at 0.4 instead of 0.5",
+  "adapted": "rewritten against m14: the overlay store of re-cmv fix 20"
+ },
+ {
+  "id": "m12",
+  "kind": "debug edge",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "* 0.17677669529664f64) as f32",
+  "new": "* 0.2209708691208f64) as f32",
+  "desc": "Edge Compare edge measure scale 1.25 times too large",
+  "adapted": "rewritten against m14: the edge constant of re-cmv fix 20"
+ },
+ {
+  "id": "m13",
+  "kind": "channel order",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "px[R] = overlay_int(overlay_value(r[i], gain), 255.0) as u8;",
+  "new": "px[R] = overlay_int(overlay_value(g[i], gain), 255.0) as u8;",
+  "desc": "8 bpc compare overlay writes the green (Y) measure into the red channel",
+  "adapted": "rewritten against m14: the overlay of re-cmv fix 20"
+ },
+ {
+  "id": "m14",
+  "kind": "frame pair",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "1 => b = n - 1.0f32,",
+  "new": "1 => b = n + 1.0f32,",
+  "desc": "Track Frame Previous reads the next frame"
+ },
+ {
+  "id": "m15",
+  "kind": "frame pair",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "1 => a = n + 1.0f32,",
+  "new": "1 => a = n - 1.0f32,",
+  "desc": "Debug with Track Frame Previous pushes frame n - 1 instead of n + 1"
+ },
+ {
+  "id": "m16",
+  "kind": "popup map",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "if popup == 2 {",
+  "new": "if popup == 1 {",
+  "desc": "Vector Resolution choices swapped"
+ },
+ {
+  "id": "m17",
+  "kind": "sensitivity",
+  "file": "plugins/create-vectors/src/glue.rs",
+  "n": 1,
+  "old": "fixed_reader(c.fixed_at(\"main_bg_sensitivity\", t), 1.0f32) / 100.0f32",
+  "new": "fixed_reader(c.fixed_at(\"main_bg_sensitivity\", t), 1.0f32) / 99.0f32",
+  "desc": "Main_BG sensitivity divided by 99"
+ },
+ {
+  "id": "m18",
+  "kind": "popup map",
+  "file": "plugins/create-vectors/src/glue.rs",
+  "n": 1,
+  "old": "prep_contrast_edge: self.prep == 2,",
+  "new": "prep_contrast_edge: self.prep >= 2,",
+  "desc": "Delinearize also switches on the contrast and edge enhance"
+ },
+ {
+  "id": "m19",
+  "kind": "param ignored",
+  "file": "plugins/create-vectors/src/glue.rs",
+  "n": 1,
+  "old": "track_rgb_a: self.track_rgb_a,",
+  "new": "track_rgb_a: false,",
+  "desc": "Track RGB+A never reaches the solver"
+ },
+ {
+  "id": "m20",
+  "kind": "popup map",
+  "file": "plugins/create-vectors/src/glue.rs",
+  "n": 1,
+  "old": "2 => 0,\n            3 => 1,",
+  "new": "2 => 1,\n            3 => 0,",
+  "desc": "Debug View Method Blend and Diff swapped"
+ },
+ {
+  "id": "m21",
+  "kind": "layer choice",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "let l = ((layers_output - 2) as usize).min(nfg);",
+  "new": "let l = ((layers_output - 2) as usize).min(nfg.saturating_sub(1));",
+  "desc": "Layers Output MAIN_BG with FG layers selects the last FG layer"
+ },
+ {
+  "id": "m22",
+  "kind": "point layer",
+  "file": "plugins/create-vectors/src/glue.rs",
+  "n": 1,
+  "old": "(layer_count as i64 <= target && layer + 1 == layer_count)",
+  "new": "((layer_count as i64) < target && layer + 1 == layer_count)",
+  "desc": "a point naming a layer that does not exist no longer falls to Main_BG when counts are equal"
+ },
+ {
+  "id": "m23",
+  "kind": "rounding order",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "px[c] = ((e - old) * f + old) + 0.0f32;",
+  "new": "px[c] = (e * f + (1.0f32 - f) * old) + 0.0f32;",
+  "desc": "the group composite (composite_vectors, which replaced the merged encoder for create-vectors) mixes weight and vector in another order at 32 bpc (last bits only)",
+  "adapted": "rewritten against m14: encode_vectors_merged is no longer reached by create-vectors (op-residual finding 4)"
+ },
+ {
+  "id": "m24",
+  "kind": "overlay group",
+  "file": "plugins/create-vectors/src/glue.rs",
+  "n": 1,
+  "old": "let l = ((v - 3).max(0) as usize).min(layer_count - 1);",
+  "new": "let l = ((v - 2).max(0) as usize).min(layer_count - 1);",
+  "desc": "Draw Geom FG1..Main_BG picks the layer one too high"
+ },
+ {
+  "id": "m25",
+  "kind": "rounding",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;\n                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;\n                px[3] = 0;\n            }\n        }),\n        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xffff;\n                px[1] = cvtt64(a as f64 * 32767.0 + 0.5) as u16;",
+  "new": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;\n                px[1] = cvtt64(a as f64 * 127.0 + 0.5) as u8;\n                px[2] = cvtt64(b as f64 * 127.0 + 0.5) as u8;\n                px[3] = 0;\n            }\n        }),\n        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xffff;\n                px[1] = cvtt64(a as f64 * 32767.0 + 0.0) as u16;",
+  "desc": "16 bpc red channel truncates instead of rounding",
+  "adapted": "made unique: the context of encode_vectors added to `old` (meaning unchanged)"
+ },
+ {
+  "id": "m26",
+  "kind": "alpha",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xff;",
+  "new": "        (u * kx, v * ky)\n    };\n    match &mut dst.samples {\n        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {\n            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {\n                let (mut a, mut b) = sample(x, y);\n                clamp_unit(&mut a);\n                clamp_unit(&mut b);\n                let (a, b) = (a + 1.0f32, b + 1.0f32);\n                px[0] = 0xfe;",
+  "desc": "8 bpc single layer vector image alpha 254",
+  "adapted": "made unique: the context of encode_vectors added to `old` (meaning unchanged)"
+ },
+ {
+  "id": "m27",
+  "kind": "layered solve input",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "let (lx, ly) = (matte::premultiply_pl(x, &vis_x)?, matte::premultiply_pl(y, &vis_y)?);",
+  "new": "let (lx, ly) = (x.clone(), y.clone());",
+  "desc": "a layer of an FG stack solves on the plain frames instead of the frames times its visible matte",
+  "adapted": "added (m14 rule): op-residual finding 1"
+ },
+ {
+  "id": "m28",
+  "kind": "layered solve mask",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "n": 1,
+  "old": "*o = white - if d > 0.0 { d } else { 0.0 };",
+  "new": "*o = white - 0.0 * if d > 0.0 { d } else { 0.0 };",
+  "desc": "the mask of a layer solve is white everywhere instead of white - (own - visible)",
+  "adapted": "added (m14 rule): op-residual finding 1"
+ },
+ {
+  "id": "m29",
+  "kind": "precision",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "n": 1,
+  "old": "let t = ((1.0f64 - f64::from(pv)) * f64::from(*v)) as f32;",
+  "new": "let t = (1.0f32 - pv) * *v;",
+  "desc": "the occlusion of a layer's visible matte by the layers above in single precision instead of double",
+  "adapted": "added (m14 rule): op-residual finding 1"
+ },
+ {
+  "id": "m30",
+  "kind": "sign",
+  "file": "plugins/retime-engine/src/matte.rs",
+  "n": 1,
+  "old": "choke_with(&mut p, -shrinks[j], true)?;",
+  "new": "choke_with(&mut p, shrinks[j], true)?;",
+  "desc": "the occluding matte of a layer above is choked by its shrink instead of grown",
+  "adapted": "added (m14 rule): op-residual finding 1"
+ },
+ {
+  "id": "m31",
+  "kind": "one layer output",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "vectors::encode_vectors_blue(&mut img, &flows[0], scale, &visible)?;",
+  "new": "vectors::encode_vectors_merged_blue(&mut img, &[(&flows[0], &visible)], scale, &visible)?;",
+  "desc": "a Layers Output of one layer of an FG stack is weighted by its visible matte (fix 07 / finding 2 undone)",
+  "adapted": "added (m14 rule): op-residual finding 2"
+ },
+ {
+  "id": "m32",
+  "kind": "blue channel",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "vectors::encode_vectors_blue(&mut img, &flows[0], scale, &visible)?;",
+  "new": "vectors::encode_vectors(&mut img, &flows[0], scale)?;",
+  "desc": "a Layers Output of one layer of an FG stack leaves blue 0 (fix 03 undone)",
+  "adapted": "added (m14 rule): op-residual finding 2, fix 03"
+ },
+ {
+  "id": "m33",
+  "kind": "composite order",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "for i in (0..n - 1).rev() {",
+  "new": "for i in 0..n - 1 {",
+  "desc": "a group of FG layers is composited from the top layer down instead of bottom up",
+  "adapted": "added (m14 rule): op-residual finding 4"
+ },
+ {
+  "id": "m34",
+  "kind": "composite matte",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "let m = matte::integer_plane(&job.mattes_x[job.first + i], fmt);",
+  "new": "let m = matte::integer_plane(&job.mattes_y[job.first + i], fmt);",
+  "desc": "the group composite lays a layer over with its matte at Y instead of X",
+  "adapted": "added (m14 rule): op-residual finding 4"
+ },
+ {
+  "id": "m35",
+  "kind": "rounding",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "n": 1,
+  "old": "px[c] = (((e - old) * f + old) + 0.5f32) as i64 as u8;",
+  "new": "px[c] = (((e - old) * f + old) + 0.0f32) as i64 as u8;",
+  "desc": "the 8 bpc group composite truncates instead of rounding",
+  "adapted": "added (m14 rule): op-residual finding 4"
+ },
+ {
+  "id": "m36",
+  "kind": "debug W'",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "    let mut out = Image::new(y.width, y.height, y.fmt());\n    crate::matte::over_pl(&mut out, y)?;\n    crate::matte::over_pl(&mut out, w)?;\n    Ok(out)",
+  "new": "    let mut out = w.clone();\n    fill_transparent(&mut out, y);\n    Ok(out)",
+  "desc": "W' of the Debug views is W with its alpha 0 pixels from Y (the rule before fix 70)",
+  "adapted": "added (m14 rule): f6-dbg fix 70"
+ },
+ {
+  "id": "m37",
+  "kind": "debug W'",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "    crate::matte::over_pl(&mut out, y)?;\n    crate::matte::over_pl(&mut out, w)?;",
+  "new": "    crate::matte::over_pl(&mut out, w)?;\n    crate::matte::over_pl(&mut out, y)?;",
+  "desc": "W' of the Debug views lays W first and Y over it",
+  "adapted": "added (m14 rule): f6-dbg fix 70"
+ },
+ {
+  "id": "m38",
+  "kind": "precision",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "    let v = ((tr + tg) + tb) as f32;",
+  "new": "    let v = (r * 0.29f32 + g * 0.59f32) + b * 0.12f32;",
+  "desc": "the float luma of the Detail and Edge views in single precision",
+  "adapted": "added (m14 rule): re-cmv fix 20"
+ },
+ {
+  "id": "m39",
+  "kind": "NaN rule",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "    if v.is_nan() {\n        use crate::nanrule::add64;",
+  "new": "    if false && v.is_nan() {\n        use crate::nanrule::add64;",
+  "desc": "the float luma of the Detail and Edge views returns the processor's NaN, not the NaN rule's",
+  "adapted": "added (m14 rule): f6-dbg fix 71"
+ },
+ {
+  "id": "m40",
+  "kind": "precision",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "    (((r * 0.29f64) + (g * 0.59f64)) + (b * 0.12f64)) as f32\n",
+  "new": "    ((r as f32 * 0.29f32) + (g as f32 * 0.59f32)) + (b as f32 * 0.12f32)\n",
+  "desc": "the Diff luma in single precision",
+  "adapted": "added (m14 rule): re-cmv fix 20"
+ },
+ {
+  "id": "m41",
+  "kind": "rounding order",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "let v = (((r * 0.29f64) / s + (g * 0.59f64) / s) + (b * 0.12f64) / s) as f32;",
+  "new": "let v = ((((r * 0.29f64) + (g * 0.59f64)) + (b * 0.12f64)) / s) as f32;",
+  "desc": "the 8 and 16 bpc Detail and Edge luma divides the sum once instead of every term",
+  "adapted": "added (m14 rule): re-cmv fix 20"
+ },
+ {
+  "id": "m42",
+  "kind": "constant",
+  "file": "plugins/retime-engine/src/debug.rs",
+  "n": 1,
+  "old": "(1.0f64 / f64::from(DIFF_AMOUNT.abs())) as f32",
+  "new": "2.5f32",
+  "desc": "the Diff gain is exactly 2.5 instead of the narrowed double quotient 2.5000002",
+  "adapted": "added (m14 rule): re-cmv fix 20"
+ },
+ {
+  "id": "m43",
+  "kind": "glyph",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "n": 1,
+  "old": "pub const CROSS_HALF_LENGTH: f32 = 3.0;",
+  "new": "pub const CROSS_HALF_LENGTH: f32 = 2.0;",
+  "desc": "the Draw Geom cross arms have half length 2 instead of 3",
+  "adapted": "added (m14 rule): re-cmv fix 21"
+ },
+ {
+  "id": "m44",
+  "kind": "rounding",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "n": 1,
+  "old": "((f64::from((r1 - d2.sqrt()) * 255.0f32) + 0.5f64) as i64) as u8",
+  "new": "((f64::from((r1 - d2.sqrt()) * 255.0f32) + 0.0f64) as i64) as u8",
+  "desc": "the Draw Geom antialiasing alpha truncates instead of rounding",
+  "adapted": "added (m14 rule): re-cmv fix 21"
+ },
+ {
+  "id": "m45",
+  "kind": "16 bpc scale",
+  "file": "plugins/retime-engine/src/geom.rs",
+  "n": 1,
+  "old": "let c16 = |c: u8| f32::from(u16::from(c) << 8);",
+  "new": "let c16 = |c: u8| f32::from(u16::from(c) * 257);",
+  "desc": "the 16 bpc Draw Geom colour is c * 257 instead of c shifted up by 8",
+  "adapted": "added (m14 rule): re-cmv fix 21"
+ },
+ {
+  "id": "m46",
+  "kind": "tap order",
+  "file": "plugins/retime-engine/src/flow/conv.rs",
+  "n": 1,
+  "old": "vpass_ordered_with::<C, true, Plain>(src, dst, w, h, k)",
+  "new": "vpass_ordered_with::<C, false, Plain>(src, dst, w, h, k)",
+  "desc": "the vertical passes of the solver's convolutions take the tap below first in their border rows (fix 08 undone)",
+  "adapted": "added (m14 rule): fix 08, re-flow finding 1"
+ },
+ {
+  "id": "m47",
+  "kind": "tap order",
+  "file": "plugins/retime-engine/src/prep.rs",
+  "n": 1,
+  "old": "conv::blur5_above_first(&mut p.data, p.width, p.height);",
+  "new": "conv::blur5(&mut p.data, p.width, p.height);",
+  "desc": "the luma pyramid filter alone takes the tap below first (the engine's plain blur5)",
+  "adapted": "added (m14 rule): fix 08"
+ },
+ {
+  "id": "m48",
+  "kind": "mask gate",
+  "file": "plugins/retime-engine/src/flow/extras.rs",
+  "n": 1,
+  "old": "p.gate = false;",
+  "new": "p.gate = true;",
+  "desc": "the CPU block matching of a layer solve is gated by the masks (finding 3 undone)",
+  "adapted": "added (m14 rule): op-residual finding 3"
+ },
+ {
+  "id": "m49",
+  "kind": "user displacement",
+  "file": "plugins/retime-engine/src/flow/extras.rs",
+  "n": 1,
+  "old": "            if let Some(u) = user {\n                apply_user(flow, u, w);\n            }\n        }\n    }\n    if !finest && !s.skip_refine {",
+  "new": "        }\n    }\n    if !finest && !s.skip_refine {",
+  "desc": "the user displacement is not set again after the block matching step of the finest level (finding 3 undone)",
+  "adapted": "added (m14 rule): op-residual finding 3"
+ },
+ {
+  "id": "m50",
+  "kind": "debug stack order",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "for k in (job.first..=job.last).rev() {",
+  "new": "for k in job.first..=job.last {",
+  "desc": "the Debug display of an FG stack visits the layers from the top down",
+  "adapted": "added (m14 rule): op-residual finding 5"
+ },
+ {
+  "id": "m51",
+  "kind": "debug alpha match",
+  "file": "plugins/retime-engine/src/create_vectors.rs",
+  "n": 1,
+  "old": "if code != debug::VIEW_BLEND {",
+  "new": "if false && code != debug::VIEW_BLEND {",
+  "desc": "the Debug display of a one layer group skips the alpha match before Diff, Detail and Edge",
+  "adapted": "added (m14 rule): op-residual finding 5"
+ }
+]

@@ -9,6 +9,7 @@
 //! (0.25, 0.5, 0.75) make `frac * v` whole pixels, where the bilinear warp is an exact shift.
 
 use super::*;
+use crate::filters::sharpen_step;
 use crate::compose::{render, select_frames, Rendered};
 use crate::flow::solve_pair;
 use crate::host::test_support::settings;
@@ -431,7 +432,7 @@ fn the_forward_codes_compose_with_the_compositions_of_forward_rs() {
         let (f_ab, f_ba) = (flows.f_ab.clone().unwrap(), flows.f_ba.clone().unwrap());
         for wa in [0.25f32, 0.5, 0.75] {
             for binary in [false, true] {
-                let opts = SmartOpts { binary_alpha: binary, is360: false };
+                let opts = SmartOpts { binary_alpha: binary, is360: false, ..SmartOpts::default() };
                 let mut s = cfg(fmt);
                 s.video_360 = binary;
                 let run = |code: i32, interp: i32| {
@@ -645,7 +646,7 @@ fn smart_blend_composes_with_the_compositions_of_smartblend_rs() {
                 s.warp_mode = 1;
                 s.smart_blend = true;
                 s.video_360 = binary;
-                let opts = SmartOpts { binary_alpha: binary, is360: false };
+                let opts = SmartOpts { binary_alpha: binary, is360: false, ..SmartOpts::default() };
                 // Nearest: the single flow of the rule, F_BA for wA >= 0.5, F_AB below
                 let mut want = Image::new(W, H, fmt);
                 let single = if wa >= 0.5 { &f_ba } else { &f_ab };
@@ -718,6 +719,11 @@ fn flow_settings_carry_quality_sensitivity_prep_and_the_video_range_luma() {
     assert_eq!((fs.quality, fs.hiq, fs.sensitivity), (2, false, 0.55));
     assert!(fs.prep_contrast_edge && fs.prep_delinearize && fs.video_range_luma);
     assert!(!fs.track_alpha && !fs.skip_refine);
+    // plugin 03's Track RGB+A: alpha in the solver's luma
+    let mut t = s.clone();
+    t.video_360 = false;
+    t.track_alpha = true;
+    assert!(flow_settings(&t, &sl).track_alpha && !flow_settings(&t, &sl).video_range_luma);
     // the quality is the one after the segment override, not the popup
     s.vectors_quality = 4;
     assert_eq!(flow_settings(&s, &sl).quality, 2);
@@ -1287,6 +1293,7 @@ fn a_vector_layer_image_becomes_a_flow_decoded_hole_filled_and_scaled() {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_wrap_flag_reaches_the_solves_and_tracks_a_shift_across_the_seam() {
     // `EngineSettings::wrap_360` is `FlowSettings::wrap` of the render's solves. A texture periodic in x moved
     // 2.5 px to the right: with the flag both flows of `solve_flows` are the shift in every column, the two seam

@@ -1,0 +1,348 @@
+plugin	effect	ae_index	ae_name	ae_type	ae_min	ae_max	ae_slider_min	ae_slider_max	ae_default	ae_choices	ae_flags	vfx_kind	vfx_id	vfx_name	vfx_default	vfx_choices	match	ae_kind	pairing_status
+CreateMotionVectors_64	create-vectors	1	Activation	BUTTON							0x40						unmatched	button	host-side
+CreateMotionVectors_64	create-vectors	2	forcererender	FLOAT_SLIDER	0.0	5000000.0	0.0	5000000.0	0.0		0x2						unmatched	float	host-side
+CreateMotionVectors_64	create-vectors	3	Display	POPUP					2	Source|Motion Vectors|Debug	0x40	popup	display	Display	2	Source|Vectors|Debug	exact	popup	
+CreateMotionVectors_64	create-vectors	4	GPU Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	5	Use GPU	POPUP					1	OFF|ON	0x0						unmatched	popup	host-side
+CreateMotionVectors_64	create-vectors	6	Less GPU Mem	CHECKBOX					1		0x0						unmatched	bool	host-side
+CreateMotionVectors_64	create-vectors	7		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	8	Use GPU	POPUP					1	OFF|ON|ON if GPU supported, CPU otherwise	0x0						unmatched	popup	host-side
+CreateMotionVectors_64	create-vectors	9	SavedInPremiere	CHECKBOX					1		0x40						unmatched	bool	host-side
+CreateMotionVectors_64	create-vectors	10	Vector Resolution	POPUP					1	Normal (half res)|Full res	0x40	popup	vector_resolution	Vector Resolution	1	Normal (half res)|Full res	exact	popup	
+CreateMotionVectors_64	create-vectors	11	Alt Motion Src	LAYER					0		0x60	layer	alt_source_a	Alt Src			override	layer	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	12	Debug View Method	POPUP					2	Warp|Blend|Diff|Detail Compare|Edge Compare	0x40	popup	debug_view_method	Debug View Method	2	Warp|Blend|Diff|Detail Compare|Edge Compare	exact	popup	
+CreateMotionVectors_64	create-vectors	13	Draw Geom	POPUP					2	None|All|FG1|FG2|FG3|Main_BG	0x40	popup	draw_geom	Draw Geom	2	None|All|FG1|FG2|FG3|Main_BG	exact	popup	
+CreateMotionVectors_64	create-vectors	14	Track and Output Control	GROUP_START							0x0						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	15	Max Displace	FIX_SLIDER	1.0	8192.0	1.0	8192.0	2048.0		0x60	float	max_displace	Max Displace	2048.0		exact	float	
+CreateMotionVectors_64	create-vectors	16	Track Frame	POPUP					1	Previous|Next	0x40	popup	track_frame	Track Frame	1	Previous|Next	exact	popup	
+CreateMotionVectors_64	create-vectors	17	Image Prep	POPUP					1	None|Contrast/Edge Enhance|Delinearize	0x40	popup	prep	Prep	1	None|Contrast/Edge Enhance|Delinearize	override	popup	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	18	Track RGB+A	CHECKBOX					0		0x40	checkbox	track_rgb_a	Track RGB+A	False		exact	bool	
+CreateMotionVectors_64	create-vectors	19	Layers Output	POPUP					1	All|FG1|FG2|FG3|MAIN_BG	0x40	popup	layers_output	Layers Output	1	All|FG1|FG2|FG3|MAIN_BG	exact	popup	
+CreateMotionVectors_64	create-vectors	20		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	21	Main_BG Settings	GROUP_START							0x0						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	22	Main_BG: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	main_bg_sensitivity	Main_BG: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	23	Main_BG: Image Track	CHECKBOX					1		0x40	checkbox	main_bg_track	Main_BG: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	24	Main_BG: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	25	Main_BG: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	26		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	27	FG1: Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	28	FG1: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg1_sensitivity	FG1: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	29	FG1: Image Track	CHECKBOX					1		0x40	checkbox	fg1_track	FG1: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	30	FG1: Matte	LAYER					0		0x60	layer	fg1_matte	FG1: Matte			exact	layer	
+CreateMotionVectors_64	create-vectors	31	FG1: Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg1_matte_chan	FG1: Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+CreateMotionVectors_64	create-vectors	32	FG1: Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg1_inv_matte_shrink	FG1: Inv Matte Shrink	0.0		exact	float	
+CreateMotionVectors_64	create-vectors	33	FG1: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	34	FG1:: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	35		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	36	FG2: Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	37	FG2: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg2_sensitivity	FG2: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	38	FG2: Image Track	CHECKBOX					1		0x40	checkbox	fg2_track	FG2: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	39	FG2: Matte	LAYER					0		0x60	layer	fg2_matte	FG2: Matte			exact	layer	
+CreateMotionVectors_64	create-vectors	40	FG2: Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg2_matte_chan	FG2: Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+CreateMotionVectors_64	create-vectors	41	FG2: Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg2_inv_matte_shrink	FG2: Inv Matte Shrink	0.0		exact	float	
+CreateMotionVectors_64	create-vectors	42	FG2: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	43	FG2:: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	44		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	45	FG3: Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	46	FG3: Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	fg3_sensitivity	FG3: Sensitivity	70.0		exact	float	
+CreateMotionVectors_64	create-vectors	47	FG3: Image Track	CHECKBOX					1		0x40	checkbox	fg3_track	FG3: Track	True		override	bool	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	48	FG3: Matte	LAYER					0		0x60	layer	fg3_matte	FG3: Matte			exact	layer	
+CreateMotionVectors_64	create-vectors	49	FG3: Matte Chan	POPUP					1	Red|Green|Blue|Alpha	0x40	popup	fg3_matte_chan	FG3: Matte Chan	1	Red|Green|Blue|Alpha	exact	popup	
+CreateMotionVectors_64	create-vectors	50	FG3: Inv Matte Shrink	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	fg3_inv_matte_shrink	FG3: Inv Matte Shrink	0.0		exact	float	
+CreateMotionVectors_64	create-vectors	51	FG3: First Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	52	FG3:: Last Mask	PATH							0x40						unmatched	path	plugin-only
+CreateMotionVectors_64	create-vectors	53		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	54	Track Points	GROUP_START							0x20						unmatched	group_start	group-marker
+CreateMotionVectors_64	create-vectors	55	Pt 1: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt1_use	Pt 1: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	56	Pt 1: Pos	POINT					-5.0,-5.0		0x40	point	pt1_pos	Pt 1: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	57	Pt 1: Color	COLOR					255,0,255,0		0x40	color	pt1_color	Pt 1:	0,255,0		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	58	Pt 2: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt2_use	Pt 2: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	59	Pt 2: Pos	POINT					-5.0,-5.0		0x40	point	pt2_pos	Pt 2: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	60	Pt 2: Color	COLOR					255,0,0,255		0x40	color	pt2_color	Pt 2:	0,0,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	61	Pt 3: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt3_use	Pt 3: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	62	Pt 3: Pos	POINT					-5.0,-5.0		0x40	point	pt3_pos	Pt 3: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	63	Pt 3: Color	COLOR					255,255,255,255		0x40	color	pt3_color	Pt 3:	255,255,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	64	Pt 4: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt4_use	Pt 4: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	65	Pt 4: Pos	POINT					-5.0,-5.0		0x40	point	pt4_pos	Pt 4: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	66	Pt 4: Color	COLOR					255,255,255,0		0x40	color	pt4_color	Pt 4:	255,255,0		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	67	Pt 5: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt5_use	Pt 5: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	68	Pt 5: Pos	POINT					-5.0,-5.0		0x40	point	pt5_pos	Pt 5: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	69	Pt 5: Color	COLOR					255,255,0,255		0x40	color	pt5_color	Pt 5:	255,0,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	70	Pt 6: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt6_use	Pt 6: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	71	Pt 6: Pos	POINT					-5.0,-5.0		0x40	point	pt6_pos	Pt 6: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	72	Pt 6: Color	COLOR					255,0,255,255		0x40	color	pt6_color	Pt 6:	0,255,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	73	Pt 7: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt7_use	Pt 7: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	74	Pt 7: Pos	POINT					-5.0,-5.0		0x40	point	pt7_pos	Pt 7: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	75	Pt 7: Color	COLOR					255,255,128,128		0x40	color	pt7_color	Pt 7:	255,128,128		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	76	Pt 8: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt8_use	Pt 8: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	77	Pt 8: Pos	POINT					-5.0,-5.0		0x40	point	pt8_pos	Pt 8: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	78	Pt 8: Color	COLOR					255,128,255,128		0x40	color	pt8_color	Pt 8:	128,255,128		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	79	Pt 9: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt9_use	Pt 9: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	80	Pt 9: Pos	POINT					-5.0,-5.0		0x40	point	pt9_pos	Pt 9: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	81	Pt 9: Color	COLOR					255,128,128,255		0x40	color	pt9_color	Pt 9:	128,128,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	82	Pt 10: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt10_use	Pt 10: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	83	Pt 10: Pos	POINT					-5.0,-5.0		0x40	point	pt10_pos	Pt 10: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	84	Pt 10: Color	COLOR					255,255,128,64		0x40	color	pt10_color	Pt 10:	255,128,64		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	85	Pt 11: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt11_use	Pt 11: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	86	Pt 11: Pos	POINT					-5.0,-5.0		0x40	point	pt11_pos	Pt 11: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	87	Pt 11: Color	COLOR					255,128,255,64		0x40	color	pt11_color	Pt 11:	128,255,64		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	88	Pt 12: Use	POPUP					1	Don't Use|FG1|FG2|FG3|Main_BG Layer	0x40	popup	pt12_use	Pt 12: Use	1	Don't Use|FG1|FG2|FG3|Main_BG Layer	exact	popup	
+CreateMotionVectors_64	create-vectors	89	Pt 12: Pos	POINT					-5.0,-5.0		0x40	point	pt12_pos	Pt 12: Pos	-5.0,-5.0		exact	point	
+CreateMotionVectors_64	create-vectors	90	Pt 12: Color	COLOR					255,128,64,255		0x40	color	pt12_color	Pt 12:	128,64,255		override	color	by-name-and-evidence
+CreateMotionVectors_64	create-vectors	91		GROUP_END							0x0						unmatched	group_end	group-marker
+CreateMotionVectors_64	create-vectors	92	Hide Mask 0	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	93	Hide Mask 1	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	94	Hide Mask 2	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	95	Hide Mask 3	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	96	Hide Mask 4	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	97	Hide Mask 5	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	98	Hide Mask 6	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	99	Hide Mask 7	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	100	Hide Mask 8	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	101	Hide Mask 9	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	102	Hide Mask 10	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	103	Hide Mask 11	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	104	Hide Mask 12	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	105	Hide Mask 13	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	106	Hide Mask 14	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	107	Hide Mask 15	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	108	Hide Mask 16	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	109	Hide Mask 17	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	110	Hide Mask 18	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	111	Hide Mask 19	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	112	Hide Mask 20	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	113	Hide Mask 21	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	114	Hide Mask 22	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	115	Hide Mask 23	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	116	Hide Mask 24	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	117	Hide Mask 25	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	118	Hide Mask 26	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	119	Hide Mask 27	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	120	Hide Mask 28	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	121	Hide Mask 29	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	122	Hide Mask 30	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	123	Hide Mask 31	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	124	Hide Mask 32	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	125	Hide Mask 33	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	126	Hide Mask 34	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	127	Hide Mask 35	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	128	Hide Mask 36	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	129	Hide Mask 37	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	130	Hide Mask 38	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	131	Hide Mask 39	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	132	Hide Mask 40	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	133	Hide Mask 41	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	134	Hide Mask 42	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	135	Hide Mask 43	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	136	Hide Mask 44	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	137	Hide Mask 45	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	138	Hide Mask 46	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	139	Hide Mask 47	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	140	Hide Mask 48	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	141	Hide Mask 49	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	142	Hide Mask 50	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	143	Hide Mask 51	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	144	Hide Mask 52	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	145	Hide Mask 53	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	146	Hide Mask 54	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	147	Hide Mask 55	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	148	Hide Mask 56	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	149	Hide Mask 57	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	150	Hide Mask 58	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	151	Hide Mask 59	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	152	Hide Mask 60	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	153	Hide Mask 61	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	154	Hide Mask 62	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	155	Hide Mask 63	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	156	Hide Mask 64	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	157	Hide Mask 65	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	158	Hide Mask 66	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	159	Hide Mask 67	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	160	Hide Mask 68	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	161	Hide Mask 69	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	162	Hide Mask 70	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	163	Hide Mask 71	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	164	Hide Mask 72	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	165	Hide Mask 73	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	166	Hide Mask 74	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	167	Hide Mask 75	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	168	Hide Mask 76	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	169	Hide Mask 77	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	170	Hide Mask 78	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	171	Hide Mask 79	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	172	Hide Mask 80	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	173	Hide Mask 81	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	174	Hide Mask 82	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	175	Hide Mask 83	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	176	Hide Mask 84	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	177	Hide Mask 85	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	178	Hide Mask 86	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	179	Hide Mask 87	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	180	Hide Mask 88	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	181	Hide Mask 89	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	182	Hide Mask 90	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	183	Hide Mask 91	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	184	Hide Mask 92	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	185	Hide Mask 93	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	186	Hide Mask 94	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	187	Hide Mask 95	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	188	Hide Mask 96	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	189	Hide Mask 97	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	190	Hide Mask 98	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	191	Hide Mask 99	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	192	Hide Mask 100	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	193	Hide Mask 101	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	194	Hide Mask 102	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	195	Hide Mask 103	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	196	Hide Mask 104	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	197	Hide Mask 105	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	198	Hide Mask 106	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	199	Hide Mask 107	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	200	Hide Mask 108	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	201	Hide Mask 109	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	202	Hide Mask 110	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	203	Hide Mask 111	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	204	Hide Mask 112	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	205	Hide Mask 113	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	206	Hide Mask 114	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	207	Hide Mask 115	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	208	Hide Mask 116	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	209	Hide Mask 117	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	210	Hide Mask 118	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	211	Hide Mask 119	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	212	Hide Mask 120	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	213	Hide Mask 121	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	214	Hide Mask 122	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	215	Hide Mask 123	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	216	Hide Mask 124	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	217	Hide Mask 125	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	218	Hide Mask 126	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	219	Hide Mask 127	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	220	Hide Mask 128	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	221	Hide Mask 129	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	222	Hide Mask 130	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	223	Hide Mask 131	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	224	Hide Mask 132	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	225	Hide Mask 133	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	226	Hide Mask 134	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	227	Hide Mask 135	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	228	Hide Mask 136	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	229	Hide Mask 137	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	230	Hide Mask 138	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	231	Hide Mask 139	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	232	Hide Mask 140	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	233	Hide Mask 141	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	234	Hide Mask 142	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	235	Hide Mask 143	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	236	Hide Mask 144	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	237	Hide Mask 145	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	238	Hide Mask 146	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	239	Hide Mask 147	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	240	Hide Mask 148	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	241	Hide Mask 149	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	242	Hide Mask 150	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	243	Hide Mask 151	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	244	Hide Mask 152	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	245	Hide Mask 153	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	246	Hide Mask 154	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	247	Hide Mask 155	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	248	Hide Mask 156	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	249	Hide Mask 157	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	250	Hide Mask 158	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	251	Hide Mask 159	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	252	Hide Mask 160	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	253	Hide Mask 161	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	254	Hide Mask 162	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	255	Hide Mask 163	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	256	Hide Mask 164	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	257	Hide Mask 165	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	258	Hide Mask 166	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	259	Hide Mask 167	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	260	Hide Mask 168	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	261	Hide Mask 169	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	262	Hide Mask 170	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	263	Hide Mask 171	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	264	Hide Mask 172	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	265	Hide Mask 173	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	266	Hide Mask 174	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	267	Hide Mask 175	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	268	Hide Mask 176	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	269	Hide Mask 177	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	270	Hide Mask 178	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	271	Hide Mask 179	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	272	Hide Mask 180	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	273	Hide Mask 181	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	274	Hide Mask 182	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	275	Hide Mask 183	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	276	Hide Mask 184	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	277	Hide Mask 185	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	278	Hide Mask 186	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	279	Hide Mask 187	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	280	Hide Mask 188	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	281	Hide Mask 189	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	282	Hide Mask 190	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	283	Hide Mask 191	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	284	Hide Mask 192	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	285	Hide Mask 193	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	286	Hide Mask 194	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	287	Hide Mask 195	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	288	Hide Mask 196	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	289	Hide Mask 197	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	290	Hide Mask 198	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	291	Hide Mask 199	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	292	Hide Mask 200	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	293	Hide Mask 201	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	294	Hide Mask 202	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	295	Hide Mask 203	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	296	Hide Mask 204	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	297	Hide Mask 205	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	298	Hide Mask 206	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	299	Hide Mask 207	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	300	Hide Mask 208	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	301	Hide Mask 209	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	302	Hide Mask 210	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	303	Hide Mask 211	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	304	Hide Mask 212	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	305	Hide Mask 213	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	306	Hide Mask 214	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	307	Hide Mask 215	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	308	Hide Mask 216	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	309	Hide Mask 217	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	310	Hide Mask 218	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	311	Hide Mask 219	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	312	Hide Mask 220	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	313	Hide Mask 221	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	314	Hide Mask 222	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	315	Hide Mask 223	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	316	Hide Mask 224	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	317	Hide Mask 225	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	318	Hide Mask 226	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	319	Hide Mask 227	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	320	Hide Mask 228	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	321	Hide Mask 229	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	322	Hide Mask 230	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	323	Hide Mask 231	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	324	Hide Mask 232	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	325	Hide Mask 233	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	326	Hide Mask 234	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	327	Hide Mask 235	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	328	Hide Mask 236	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	329	Hide Mask 237	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	330	Hide Mask 238	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	331	Hide Mask 239	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	332	Hide Mask 240	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	333	Hide Mask 241	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	334	Hide Mask 242	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	335	Hide Mask 243	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	336	Hide Mask 244	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	337	Hide Mask 245	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	338	Hide Mask 246	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	339	Hide Mask 247	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	340	Hide Mask 248	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	341	Hide Mask 249	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	342	Hide Mask 250	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	343	Hide Mask 251	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	344	Hide Mask 252	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	345	Hide Mask 253	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	346	Hide Mask 254	PATH							0x40						unmatched	path	hide-mask-path
+CreateMotionVectors_64	create-vectors	347	Hide Mask 255	PATH							0x40						unmatched	path	hide-mask-path

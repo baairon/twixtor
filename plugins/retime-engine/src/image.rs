@@ -92,6 +92,27 @@ impl Image {
         }
     }
 
+    /// The same image with its rows in reverse order (the last row first).
+    pub fn rows_reversed(&self) -> Image {
+        fn reverse<T: Copy>(out: &mut [T], src: &[T], row_len: usize) {
+            for (o, s) in out.chunks_exact_mut(row_len).zip(src.chunks_exact(row_len).rev()) {
+                o.copy_from_slice(s);
+            }
+        }
+        let mut out = self.clone();
+        let row_len = self.row_len();
+        if row_len == 0 {
+            return out;
+        }
+        match (&mut out.samples, &self.samples) {
+            (Samples::U8(o), Samples::U8(s)) => reverse(o, s, row_len),
+            (Samples::U16(o), Samples::U16(s)) => reverse(o, s, row_len),
+            (Samples::F32(o), Samples::F32(s)) => reverse(o, s, row_len),
+            _ => unreachable!("a clone has the format of its source"),
+        }
+        out
+    }
+
     /// Samples per row.
     pub fn row_len(&self) -> usize {
         self.width * CHANNELS
@@ -112,6 +133,41 @@ impl Image {
             Samples::U16(v) => v.fill(0),
             Samples::F32(v) => v.fill(0.0),
         }
+    }
+
+    /// Engine image from a wire frame read STRAIGHT: the channels as stored, without the premultiply of
+    /// [`Image::from_frame`], in the engine order A, R, G, B; 16 bpc takes every channel from the wire range to
+    /// 0..=32768 (`Frame::u16_to_q15`) and then to the engine range the way [`Image::from_frame`] scales the alpha. The
+    /// FG matte frames of Vectors In are read this way (`host::EnvHost::with_straight_mattes`).
+    pub fn from_frame_straight(frame: &Frame) -> Image {
+        let (w, h) = (frame.width, frame.height);
+        let mut img = Image::new(w, h, Fmt::from_depth(frame.depth()));
+        if w == 0 || h == 0 {
+            return img;
+        }
+        match (&frame.pixels, &mut img.samples) {
+            (Pixels::U8(px), Samples::U8(out)) => par_rows(out, w * CHANNELS, |y, row| {
+                for (x, o) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                    let [r, g, b, a] = px[y * w + x];
+                    o.copy_from_slice(&[a, r, g, b]);
+                }
+            }),
+            (Pixels::U16(px), Samples::U16(out)) => par_rows(out, w * CHANNELS, |y, row| {
+                for (x, o) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                    let [r, g, b, a] = px[y * w + x].map(Frame::u16_to_q15);
+                    let s = |v: u16| q(v as f32 * PREMUL_16_ALPHA) as u16;
+                    o.copy_from_slice(&[s(a), s(r), s(g), s(b)]);
+                }
+            }),
+            (Pixels::F32(px), Samples::F32(out)) => par_rows(out, w * CHANNELS, |y, row| {
+                for (x, o) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                    let [r, g, b, a] = px[y * w + x];
+                    o.copy_from_slice(&[a, r, g, b]);
+                }
+            }),
+            _ => unreachable!("Image::new follows the depth of the frame"),
+        }
+        img
     }
 
     /// Engine image from a straight wire frame: wire range 0..=65535 to the range 0..=32768 (16
@@ -235,7 +291,14 @@ pub(crate) fn premultiply_u16(p: [u16; 4]) -> [u16; 4] {
 
 /// One pixel `[A, R, G, B]`: colour times alpha in f32.
 pub(crate) fn premultiply_f32(p: [f32; 4]) -> [f32; 4] {
-    [p[0], p[0] * p[1], p[0] * p[2], p[0] * p[3]]
+    let r = [p[0], p[0] * p[1], p[0] * p[2], p[0] * p[3]];
+    // a NaN in the result: the products with the NaN rule (`crate::nanrule`); numbers are the same bits
+    if crate::nanrule::any_nan(&r) {
+        use crate::nanrule::mul;
+        [p[0], mul(p[0], p[1]), mul(p[0], p[2]), mul(p[0], p[3])]
+    } else {
+        r
+    }
 }
 
 /// One pixel `[A, R, G, B]`: `s = 255 / A`, colour `q(min(c * s, 255))` (low byte); a pixel with
@@ -267,15 +330,24 @@ pub(crate) fn unpremultiply_u16(p: [u16; 4]) -> [u16; 4] {
     [q(a * UNPREMUL_16_ALPHA) as u16, q(p[1] as f32 * s) as u16, q(p[2] as f32 * s) as u16, q(p[3] as f32 * s) as u16]
 }
 
-/// One pixel `[A, R, G, B]`: `inv = 1 / A` and colour `inv * c` when `A as f64 >= 1e-12`, else
+/// One pixel `[A, R, G, B]`: `inv = 1 / A` and colour `c * inv` when `A as f64 >= 1e-12`, else
 /// all four channels 0. The clear branch is taken when `A as f64 < 1e-12`, so a NaN alpha takes
-/// the divide path.
+/// the divide path. The colour is the first operand of the product: when both the colour and
+/// the alpha are NaN the colour's payload
+/// is kept (MEASURED against the original).
 pub(crate) fn unpremultiply_f32(p: [f32; 4]) -> [f32; 4] {
     if (p[0] as f64) < UNPREMUL_F32_MIN_ALPHA {
         return [0.0; 4];
     }
     let inv = 1.0f32 / p[0];
-    [p[0], inv * p[1], inv * p[2], inv * p[3]]
+    let r = [p[0], p[1] * inv, p[2] * inv, p[3] * inv];
+    if crate::nanrule::any_nan(&r) {
+        // `c * inv` with the colour as the first operand of the product (only the processor rule looks at the order)
+        let m = |c: f32| crate::nanrule::mul(c, inv);
+        [p[0], m(p[1]), m(p[2]), m(p[3])]
+    } else {
+        r
+    }
 }
 
 /// Which of the two plugin error images is shown. Both are written straight into the output in
@@ -551,6 +623,25 @@ mod tests {
         assert_eq!(Image::from_frame(&f).to_frame().pixels, Pixels::U16(want));
     }
 
+    /// The NaN a float conversion returns when two NaNs meet follows `crate::nanrule` (the references carry the emulator's
+    /// rule: the positive NaN of equal fractions wins, whatever the operand order). MEASURED in the original's
+    /// premultiply and unpremultiply loops.
+    #[cfg(feature = "emulator-nan")]
+    #[test]
+    fn float_conversions_keep_the_positive_nan() {
+        let (pos, neg) = (f32::from_bits(0x7fc0_0000), f32::from_bits(0xffc0_0000));
+        // alpha NaN of one sign, colours NaN of both signs and a number: the positive NaN wins, the number takes the alpha's
+        let out = unpremultiply_f32([neg, pos, 1.0, neg]);
+        assert_eq!(out.map(f32::to_bits), [0xffc0_0000, 0x7fc0_0000, 0xffc0_0000, 0xffc0_0000]);
+        let out = unpremultiply_f32([pos, neg, 1.0, pos]);
+        assert_eq!(out.map(f32::to_bits), [0x7fc0_0000, 0x7fc0_0000, 0x7fc0_0000, 0x7fc0_0000]);
+        // premultiply: alpha 0 with an infinite colour is the default NaN; NaN beside NaN keeps the positive one
+        let out = premultiply_f32([0.0, f32::INFINITY, pos, 0.5]);
+        assert_eq!(out.map(f32::to_bits), [0, 0xffc0_0000, 0x7fc0_0000, 0]);
+        let out = premultiply_f32([pos, neg, 1.0, f32::from_bits(0x7fc0_0001)]);
+        assert_eq!(out.map(f32::to_bits), [0x7fc0_0000, 0x7fc0_0000, 0x7fc0_0000, 0x7fc0_0001]);
+    }
+
     #[test]
     fn float_premultiply_and_the_unpremultiply_threshold() {
         assert_eq!(premultiply_f32([0.5, 0.8, 0.4, 1.0]), [0.5, 0.5f32 * 0.8, 0.5f32 * 0.4, 0.5]);
@@ -568,6 +659,10 @@ mod tests {
         assert_eq!(unpremultiply_f32([2e-12, 1e-12, 0.0, 0.0])[1], (1.0f32 / 2e-12f32) * 1e-12f32);
         assert_eq!(unpremultiply_f32([0.0, 1.0, 1.0, 1.0]), [0.0; 4], "alpha 0");
         assert_eq!(unpremultiply_f32([-0.5, 1.0, 1.0, 1.0]), [0.0; 4], "negative alpha");
+        // A NaN alpha (the default NaN of an invalid operation) and a NaN colour of another payload: the colour's
+        // payload survives; a finite colour takes the alpha's.
+        let out = unpremultiply_f32([f32::from_bits(0xffc0_0000), f32::from_bits(0x7fc0_0000), 1.0, f32::from_bits(0x7fc0_0000)]);
+        assert_eq!(out.map(f32::to_bits), [0xffc0_0000, 0x7fc0_0000, 0xffc0_0000, 0x7fc0_0000]);
         // Values above 1 pass through (no clamp), NaN alpha takes the divide path.
         assert_eq!(unpremultiply_f32([2.0, 3.0, 4.0, 5.0]), [2.0, 1.5, 2.0, 2.5]);
         assert!(unpremultiply_f32([f32::NAN, 1.0, 1.0, 1.0])[0].is_nan());

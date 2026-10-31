@@ -102,6 +102,12 @@ fn blend_rows(out: &mut Image, a: &Image, b: &Image, w: f32) {
             for i in 0..row_len {
                 row[i] = (br[i] - ar[i]) * w + ar[i] + 0.0f32;
             }
+            // a NaN in the row: the same arithmetic again with the NaN rule (`crate::nanrule`)
+            if crate::nanrule::any_nan(row) {
+                for i in 0..row_len {
+                    row[i] = crate::nanrule::add(crate::nanrule::lerp(ar[i], br[i], w), 0.0f32);
+                }
+            }
         }),
         _ => unreachable!("shapes were checked"),
     }
@@ -174,24 +180,36 @@ pub fn lerp(first: &mut Image, second: &Image, w: f32) {
 /// One pixel of the f32 case of [`lerp`].
 #[inline(always)]
 fn lerp_pixel_f32(f: &mut [f32], s: &[f32], w: f32) {
-    let mut a = (f[0] - s[0]) * w + s[0];
+    // a NaN among the inputs: the arithmetic with the NaN rule (`crate::nanrule`); numbers are the same bits either way
+    if crate::nanrule::any_nan(f) || crate::nanrule::any_nan(s) {
+        lerp_pixel_f32_with::<crate::nanrule::Rule>(f, s, w)
+    } else {
+        lerp_pixel_f32_with::<crate::nanrule::Plain>(f, s, w)
+    }
+}
+
+#[inline(always)]
+fn lerp_pixel_f32_with<A: crate::nanrule::Arith>(f: &mut [f32], s: &[f32], w: f32) {
+    use crate::nanrule::lerp_g;
+    let nlerp = lerp_g::<A>;
+    let mut a = nlerp(s[0], f[0], w);
     if !(a > 0.0) {
         f.fill(0.0);
         return;
     }
-    let mut r = (f[1] - s[1]) * w + s[1];
-    let mut g = (f[2] - s[2]) * w + s[2];
-    let mut b = (f[3] - s[3]) * w + s[3];
+    let mut r = nlerp(s[1], f[1], w);
+    let mut g = nlerp(s[2], f[2], w);
+    let mut b = nlerp(s[3], f[3], w);
     if a > 1.0 {
-        r = r / a;
-        g = g / a;
-        b = b / a;
+        r = A::div(r, a);
+        g = A::div(g, a);
+        b = A::div(b, a);
         a = 1.0;
     }
-    f[1] = r + 0.0;
-    f[2] = g + 0.0;
-    f[3] = b + 0.0;
-    f[0] = a + 0.0;
+    f[1] = A::add(r, 0.0);
+    f[2] = A::add(g, 0.0);
+    f[3] = A::add(b, 0.0);
+    f[0] = A::add(a, 0.0);
 }
 
 /// One pixel of the integer cases of [`lerp`] (u8 with `scale = 255.0`, u16 with
@@ -1213,5 +1231,21 @@ mod tests {
             };
             assert_eq!(run(1), run(4), "{fmt:?}");
         }
+    }
+
+    /// Two NaNs in one sample of the f32 blend: the emulator rule of `crate::nanrule` decides the payload and sign (the
+    /// references of the special value clips carry it), the order of the operands does not.
+    #[cfg(feature = "emulator-nan")]
+    #[test]
+    fn blend_f32_two_nans_follow_the_nan_rule() {
+        let n = f32::from_bits;
+        let a = f32_image(1, 1, vec![0.5, n(0xffc0_0000), n(0x7fc0_0000), 1.0]);
+        let b = f32_image(1, 1, vec![0.5, n(0x7fc0_0000), n(0xffc0_0000), 2.0]);
+        let mut out = a.clone();
+        blend(&mut out, &a, &b, 0.5);
+        assert_eq!(bits(&out), vec![0x3f00_0000, 0x7fc0_0000, 0x7fc0_0000, 0x3fc0_0000]);
+        let mut out2 = b.clone();
+        blend(&mut out2, &b, &a, 0.5);
+        assert_eq!(bits(&out2)[1..3], [0x7fc0_0000, 0x7fc0_0000]);
     }
 }

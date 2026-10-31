@@ -1,0 +1,64 @@
+{
+ "module": "retime-time",
+ "plugin": "Twixtor_64.aex",
+ "plugin_sha256": "c549c9f67545e5d490cac47394b0252635ecc80b2c718c3240cc99d4467b72b6",
+ "effect": "retime",
+ "status": "in_progress",
+ "blockers": [
+  "2 in-contract cases have no reference",
+  "2 cases did not render in the harness for reasons that are not the original's (see ooc.json unjudged)",
+  "10 out-of-contract candidates rendered in the original and need review"
+ ],
+ "cases": {
+  "in_contract": 462,
+  "compared": 460,
+  "identical": 460,
+  "differing": 0,
+  "out_of_contract": 12,
+  "logic_parity": 46
+ },
+ "values": {
+  "bytes_compared": 11203140,
+  "floats_compared": 3626220,
+  "differing_values": 0,
+  "max_ulp": 0
+ },
+ "call_records": {
+  "compared": 460,
+  "matching": 460
+ },
+ "mutants": {
+  "total": 26,
+  "killed": 21,
+  "survivors": [
+   "m09_exact_tolerance_wider",
+   "m13_k_bias",
+   "m23_planner_second_frame",
+   "m24_blend_weight_f32",
+   "m25_dur_operand_order"
+  ]
+ },
+ "stand_ins": [
+  "keyed curves (speed_percent, frame_num, src_mark_segments with @ keys): host side keyframe interpolation, one labelled stand-in on both sides, cases counted as logic_parity",
+  "46 keyed-parameter cases are logic parity candidates; 46 compared (counted in cases.compared, logic parity only, not full parity)"
+ ],
+ "fixes": [],
+ "commands": [
+  "cp -a ~/twixtor-parity/src/base ~/twixtor-parity/retime-time/src   (inside stage1.sh)",
+  "bash ~/twixtor-parity/retime-time/stage1.sh   (gen_grid.py testset; render_grid.py --check-only; check_oob.py; fx-parity checklist; fx-parity run with no references; render_grid.py --keep base-out --jobs 2)",
+  "bash ~/twixtor-parity/retime-time/mutants_run.sh   (25 mutants plus m00_control built in mut-src with opt-level 1 and no LTO, each rendered with render_grid.py; analyze.py mutants)",
+  "python3 control_check.py --testset testset --base results/base.tsv --control results/mut/m00_control.tsv --base-out base-out --vfx mutbin/m00_control.vfx --out results/control_vs_base.tsv",
+  "python3 analyze.py summary --testset results --mutants-json results/mutants_vs_base.json --plugin-sha-file results/plugin_sha256.txt --commands-file results/commands.txt --out results/summary.json",
+  "B: server folder ~/twixtor-parity/fix-twixtor, harness h/ = cp -a ~/twixtor-parity/harness-seh of 2026-10-30 + readfaults.diff code hunks (FP control state, applied after the grid; 17 of 17 sample cases byte identical)",
+  "B: bash driver1.sh  (stages through h/run_harness.py, tiny sizes last; status/time_all.json from the records with fxstage.py status)",
+  "B: python3 phase_b.py ooc-set --out ooc/time; h/run_harness.py --testset ooc/time ...; python3 phase_b.py ooc --status status/time_all.json --status ooc/status_time.json --param-map h/param_map_Twixtor_64.tsv",
+  "B: supplementary set parity/retime-time/supp480 (2 cases) rendered by the original in ~/twixtor-parity/re/f7-supp: h/run_harness.py --testset supp/time480 -j 1 (h = harness-seh + parity/retime-time/fixes/harness_20_frame_subset.diff + harness_80_input_clip_length.diff); test set ts-time = regress-m3/ts/retime-time + supp/time480 (up/mkcombined.py)",
+  "python3 phase_b.py grade --testset ~/twixtor-parity/re/f7-supp/ts-time --results ~/twixtor-parity/re/f7-supp/tt2/results --phase-a ~/twixtor-parity/re/f7-supp/tt2/phasea --refs ~/twixtor-parity/re/f7-supp/refs/time-all --vfx ~/twixtor-parity/re/f7-supp/state/vfx --fx-parity ~/twixtor-parity/re/f7-supp/state/fx-parity",
+  "python3 phase_b.py ooc --testset ~/twixtor-parity/re/f7-supp/ts-time --results ~/twixtor-parity/re/f7-supp/tt2/results --phase-a ~/twixtor-parity/re/f7-supp/tt2/phasea --status ~/twixtor-parity/fix-twixtor/status/time_all.json --status ~/twixtor-parity/fix-twixtor/ooc/status_time.json --status ~/twixtor-parity/re/f7-supp/state/h_time480.json --param-map ~/twixtor-parity/fix-twixtor/h/param_map_Twixtor_64.tsv",
+  "python3 phase_b.py rewrite-records --testset ~/twixtor-parity/re/f7-supp/ts-time --results ~/twixtor-parity/re/f7-supp/tt2/results --phase-a ~/twixtor-parity/re/f7-supp/tt2/phasea --vfx ~/twixtor-parity/re/f7-supp/state/vfx --out ~/twixtor-parity/re/f7-supp/rw/time-m14",
+  "python3 phase_b.py calls --testset ~/twixtor-parity/re/f7-supp/ts-time --results ~/twixtor-parity/re/f7-supp/tt2/results --phase-a ~/twixtor-parity/re/f7-supp/tt2/phasea --plugin-records ~/twixtor-parity/re/f7-supp/rec/time-all --rewrite-records ~/twixtor-parity/re/f7-supp/rw/time-m14 --param-map ~/twixtor-parity/fix-twixtor/h/param_map_Twixtor_64.tsv",
+  "python3 phase_b.py kills --testset ~/twixtor-parity/re/f7-supp/ts-time --results ~/twixtor-parity/re/f7-supp/tt2/results --phase-a ~/twixtor-parity/re/f7-supp/tt2/phasea --refs ~/twixtor-parity/re/f7-supp/refs/time-all --rerender --mutbin ~/twixtor-parity/re/f7-supp/mutbin",
+  "python3 phase_b.py summary --results ~/twixtor-parity/re/f7-supp/tt2/results --phase-a ~/twixtor-parity/re/f7-supp/tt2/phasea"
+ ],
+ "measured_at": "2026-10-31"
+}

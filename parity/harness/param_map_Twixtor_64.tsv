@@ -1,0 +1,34 @@
+plugin	effect	ae_index	ae_name	ae_type	ae_min	ae_max	ae_slider_min	ae_slider_max	ae_default	ae_choices	ae_flags	vfx_kind	vfx_id	vfx_name	vfx_default	vfx_choices	match	ae_kind	pairing_status
+Twixtor_64	retime	1	Activation	BUTTON							0x40						unmatched	button	plugin-only
+Twixtor_64	retime	2	forcererender	FLOAT_SLIDER	0.0	5000000.0	0.0	5000000.0	0.0		0x2						unmatched	float	plugin-only
+Twixtor_64	retime	3	Display	POPUP					1	Twixtored Output|Source	0x40	popup	display	Display	1	Output|Source	exact	popup	
+Twixtor_64	retime	4	GPU Settings	GROUP_START							0x20						unmatched	group_start	group-marker
+Twixtor_64	retime	5	Use GPU	POPUP					1	OFF|ON	0x0						unmatched	popup	plugin-only
+Twixtor_64	retime	6	Less GPU Mem	CHECKBOX					1		0x0						unmatched	bool	plugin-only
+Twixtor_64	retime	7		GROUP_END							0x0						unmatched	group_end	group-marker
+Twixtor_64	retime	8	Use GPU	POPUP					1	OFF|ON|ON if GPU supported, CPU otherwise	0x0						unmatched	popup	plugin-only
+Twixtor_64	retime	9	SavedInPremiere	CHECKBOX					1		0x40						unmatched	bool	plugin-only
+Twixtor_64	retime	10	Source Control	GROUP_START							0x0						unmatched	group_start	group-marker
+Twixtor_64	retime	11	360 Video	CHECKBOX					0		0x42	checkbox	video_360	360 Video	False		exact	bool	
+Twixtor_64	retime	12	Alt Color Source	LAYER					0		0x40	layer	alt_source_a	Alt Source A			override	layer	by-name-and-evidence
+Twixtor_64	retime	13	Alt Motion Source	LAYER					0		0x40	layer	alt_source_b	Alt Source B			override	layer	by-name-and-evidence
+Twixtor_64	retime	14	Src: Mark Segments	POPUP					1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	0x40	popup	src_mark_segments	Src: Mark Segments	1	Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend	exact	popup	
+Twixtor_64	retime	15	Input: Fields	POPUP					1	None|Upper Field First|Lower Field First	0x40	popup	input_fields	Input: Fields	1	None|Upper Field First|Lower Field First	exact	popup	
+Twixtor_64	retime	16	In FPS is Out FPS	CHECKBOX					1		0x42	checkbox	in_fps_is_out_fps	In FPS is Out FPS	True		exact	bool	
+Twixtor_64	retime	17	Input: Frame Rate	FLOAT_SLIDER	0.1	1000.0	0.1	1000.0	29.969999		0x60	float	input_frame_rate	Input: Frame Rate	29.969999		exact	float	
+Twixtor_64	retime	18	Src Time Offset	FIX_SLIDER	0.0	30000.0	0.0	30000.0	0.0		0x20	float	src_time_offset	Src Time Offset	0.0		exact	float	
+Twixtor_64	retime	19		GROUP_END							0x0						unmatched	group_end	group-marker
+Twixtor_64	retime	20	Track Control	GROUP_START							0x0						unmatched	group_start	group-marker
+Twixtor_64	retime	21	Motion Vectors	POPUP					5	No Motion Vectors|Sloppy|Medium|High|Best	0x40	popup	vectors	Vectors	5	No Vectors|Sloppy|Medium|High|Best	override	popup	by-name-and-evidence
+Twixtor_64	retime	22	Image Prep	POPUP					1	None|Contrast/Edge Enhance|Delinearize	0x40	popup	prep	Prep	1	None|Contrast/Edge Enhance|Delinearize	override	popup	by-name-and-evidence
+Twixtor_64	retime	23	Motion Sensitivity	FIX_SLIDER	0.0	100.0	0.0	100.0	70.0		0x60	float	sensitivity	Sensitivity	70.0		override	float	by-name-and-evidence
+Twixtor_64	retime	24	Plenty Memory?	CHECKBOX					1		0x40	checkbox	plenty_memory	Plenty Memory?	True		exact	bool	
+Twixtor_64	retime	25		GROUP_END							0x0						unmatched	group_end	group-marker
+Twixtor_64	retime	26	Output Control	GROUP_START							0x0						unmatched	group_start	group-marker
+Twixtor_64	retime	27	Time Remap Mode	POPUP					1	Speed|Frame Number	0x40	popup	time_remap_mode	Time Remap Mode	1	Speed|Frame Number	exact	popup	
+Twixtor_64	retime	28	Speed %	FIX_SLIDER	-10000.0	10000.0	-1000.0	1000.0	100.0		0x60	float	speed_percent	Speed %	100.0		exact	float	
+Twixtor_64	retime	29	Frame Num	FLOAT_SLIDER	-200000.0	200000.0	0.0	2000.0	0.0		0x60	float	frame_num	Frame Num	0.0		exact	float	
+Twixtor_64	retime	30	Frame Interp	POPUP					2	Nearest|Blend|Motion Weighted Blend	0x40	popup	frame_interp	Frame Interp	2	Nearest|Blend|Weighted Blend	exact	popup	
+Twixtor_64	retime	31	Smart Blend	CHECKBOX					0		0x40	checkbox	smart_blend	Smart Blend	False		exact	bool	
+Twixtor_64	retime	32	Motion Blur Compensation	FIX_SLIDER	0.0	10.0	0.0	10.0	0.0		0x60	float	blur_compensation	Blur Compensation	0.0		override	float	by-name-and-evidence
+Twixtor_64	retime	33		GROUP_END							0x0						unmatched	group_end	group-marker

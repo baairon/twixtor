@@ -1,0 +1,72 @@
+{
+ "module": "retime-flow",
+ "plugin": "Twixtor_64.aex",
+ "plugin_sha256": "c549c9f67545e5d490cac47394b0252635ecc80b2c718c3240cc99d4467b72b6",
+ "effect": "retime",
+ "status": "in_progress",
+ "blockers": [
+  "7 in-contract cases have no reference",
+  "7 cases have no usable outcome from the harness"
+ ],
+ "cases": {
+  "in_contract": 337,
+  "compared": 330,
+  "identical": 330,
+  "differing": 0,
+  "out_of_contract": 13,
+  "logic_parity": 3
+ },
+ "values": {
+  "bytes_compared": 4977552,
+  "floats_compared": 1174560,
+  "differing_values": 0,
+  "max_ulp": 0
+ },
+ "call_records": {
+  "compared": 330,
+  "matching": 330
+ },
+ "mutants": {
+  "total": 22,
+  "killed": 22,
+  "survivors": []
+ },
+ "stand_ins": [
+  "3 cases with keyed speed_percent (AE keyframe interpolation) are tagged stand_in=keyframe_interpolation; 3 of them compared, counted as logic_parity (not full parity)",
+  "draft quality cases (testsets/draft) need the same quality setting on the host side as vfx --quality draft"
+ ],
+ "fixes": [],
+ "commands": [
+  "cp -a ~/twixtor-parity/src/base ~/twixtor-parity/retime-flow/src",
+  "python3 tools/gen.py --out testsets",
+  "cp src/target/release/vfx bin/vfx-base",
+  "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/grid --out results/base.grid.tsv --keep refs/grid --jobs 2",
+  "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/draft --out results/base.draft.tsv --keep refs/draft --jobs 2",
+  "python3 tools/run_grid.py run --vfx bin/vfx-base --testset testsets/grid --out results/base2.grid.tsv --jobs 2   (determinism rerun, same for draft)",
+  "python3 tools/run_grid.py check --vfx bin/vfx-base --ooc testsets/out_of_contract.json --out results/out_of_contract.tsv",
+  "REUSE=1 REBUILD=\"m12 m14 m17 m20 m21\" bash tools/build_mutants.sh m00 m01 m02 m03 m04 m05 m06 m07 m08 m09 m10 m11 m12 m13 m14 m15 m16 m17 m18 m19 m20 m21   (first pass without REUSE for m00..m19)",
+  "python3 tools/explore_sens.py --testsets testsets --a bin/vfx-base --b bin/vfx-m17   (run once against the first m17, a single precision logarithm: 0 of 100 non-integer sensitivities differed, so it was replaced by the boundary mutant m17 now in the list)",
+  "fx-parity run --testset testsets/grid --refs refs/grid --vfx bin/vfx-base --brief   (format check of the test set against the base outputs, run on the first 299-case grid: 299 pass; draft set with wrapper/vfx-draft: 15 pass)",
+  "python3 tools/compare.py --results results --mutants tools/mutants.json --cases-dir testsets --date 2026-10-30",
+  "B: references rendered by the original in ~/twixtor-parity/fix-twixtor: bash driver1.sh, stages tf-main and tf-tiny through h/run_harness.py ",
+  "B: supplementary set parity/retime-flow/supp (2 cases) rendered by the original in ~/twixtor-parity/re/f7-supp: h/run_harness.py --testset supp/flow -j 1; folded into the grid set of ts-flow (grid + supp/flow, draft)",
+  "python3 tools/phase_b.py grade --testsets ~/twixtor-parity/re/f7-supp/ts-flow --results ~/twixtor-parity/re/f7-supp/tf2/results --phase-a ~/twixtor-parity/re/f7-supp/tf2/phasea --refs ~/twixtor-parity/re/f7-supp/refs/flow-all --vfx ~/twixtor-parity/re/f7-supp/state/vfx --fx-parity ~/twixtor-parity/re/f7-supp/state/fx-parity",
+  "python3 tools/phase_b.py ooc --testsets ~/twixtor-parity/re/f7-supp/ts-flow --results ~/twixtor-parity/re/f8-tiny/tf3/results --phase-a ~/twixtor-parity/re/f8-tiny/tf3/phasea --status ~/twixtor-parity/fix-twixtor/status/flow_all.json --status ~/twixtor-parity/fix-twixtor/ooc/status_flow.json --status ~/twixtor-parity/re/f7-supp/state/h_flow.json --status ~/twixtor-parity/re/f8-tiny/flowrun/status.json --param-map ~/twixtor-parity/fix-twixtor/h/param_map_Twixtor_64.tsv; then the tiny-frame rule (cases of at most 5x5 the original stops on)",
+  "python3 tools/phase_b.py kills --testsets ~/twixtor-parity/re/f7-supp/ts-flow --results ~/twixtor-parity/re/f7-supp/tf2/results --phase-a ~/twixtor-parity/re/f7-supp/tf2/phasea --refs ~/twixtor-parity/re/f7-supp/refs/flow-all --mode rerender --bin-dir ~/twixtor-parity/re/f7-supp/tf2/bin",
+  "python3 tools/phase_b.py calls --testsets ~/twixtor-parity/re/f7-supp/ts-flow --results ~/twixtor-parity/re/f7-supp/tf2/results --phase-a ~/twixtor-parity/re/f7-supp/tf2/phasea --plugin-records ~/twixtor-parity/re/f7-supp/rec/flow-all --rewrite-records ~/twixtor-parity/re/f7-supp/rw/flow-m14 --param-map ~/twixtor-parity/fix-twixtor/h/param_map_Twixtor_64.tsv"
+ ],
+ "measured_at": "2026-10-31",
+ "phase_a": {
+  "grid_cases": 330,
+  "draft_cases": 15,
+  "base_cases_rendered": 345,
+  "base_cases_refused_by_rewrite": [],
+  "base_nondeterministic_cases": [],
+  "cases_reading_outside_clip": 32,
+  "mutants_built_and_run": 21,
+  "mutants_changing_a_base_output": 21,
+  "mutants_changing_nothing_yet": [],
+  "control_m00_cases_changed": 0,
+  "note": "mutants are not killed until compared with the emulator's outputs in phase B"
+ }
+}

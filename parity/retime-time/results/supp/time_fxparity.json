@@ -1,0 +1,65 @@
+{
+  "cases": [
+    {
+      "depth": 8,
+      "effect": "retime",
+      "error": "input supp/time/inputs/alt-1x1.d8.f480.rgba has 1920 bytes, 2 frames of 1x1 at 8 bpc are 8",
+      "fps": "15",
+      "frames": 2,
+      "height": 1,
+      "id": "retime.supp-dur-f32-fn475-at15.alt-1x1.d8",
+      "input": "inputs/alt-1x1.d8.f480.rgba",
+      "input_path": "supp/time/inputs/alt-1x1.d8.f480.rgba",
+      "kind": "temporal",
+      "label": "supp-dur-f32-fn475-at15",
+      "layers": {},
+      "params": [
+        "vectors=1",
+        "time_remap_mode=2",
+        "frame_num=475",
+        "in_fps_is_out_fps=0",
+        "input_frame_rate=29.97"
+      ],
+      "reference": "retime.supp-dur-f32-fn475-at15.alt-1x1.d8.rgba",
+      "reference_path": "refs/time/retime.supp-dur-f32-fn475-at15.alt-1x1.d8.rgba",
+      "repro": "vfx apply retime --width 1 --height 1 --depth 8 --param vectors=1 --param time_remap_mode=2 --param frame_num=475 --param in_fps_is_out_fps=0 --param input_frame_rate=29.97 --fps 15 --frames 2 --in supp/time/inputs/alt-1x1.d8.f480.rgba",
+      "source": "alt",
+      "status": "FAIL",
+      "width": 1
+    },
+    {
+      "depth": 32,
+      "effect": "retime",
+      "error": "input supp/time/inputs/alt-1x1.d32.f480.gbrapf32le has 7680 bytes, 2 frames of 1x1 at 32 bpc are 32",
+      "fps": "15",
+      "frames": 2,
+      "height": 1,
+      "id": "retime.supp-dur-f32-fn475-at15.alt-1x1.d32",
+      "input": "inputs/alt-1x1.d32.f480.gbrapf32le",
+      "input_path": "supp/time/inputs/alt-1x1.d32.f480.gbrapf32le",
+      "kind": "temporal",
+      "label": "supp-dur-f32-fn475-at15",
+      "layers": {},
+      "params": [
+        "vectors=1",
+        "time_remap_mode=2",
+        "frame_num=475",
+        "in_fps_is_out_fps=0",
+        "input_frame_rate=29.97"
+      ],
+      "reference": "retime.supp-dur-f32-fn475-at15.alt-1x1.d32.gbrapf32le",
+      "reference_path": "refs/time/retime.supp-dur-f32-fn475-at15.alt-1x1.d32.gbrapf32le",
+      "repro": "vfx apply retime --width 1 --height 1 --depth 32 --param vectors=1 --param time_remap_mode=2 --param frame_num=475 --param in_fps_is_out_fps=0 --param input_frame_rate=29.97 --fps 15 --frames 2 --in supp/time/inputs/alt-1x1.d32.f480.gbrapf32le",
+      "source": "alt",
+      "status": "FAIL",
+      "width": 1
+    }
+  ],
+  "graded": {},
+  "summary": {
+    "fail": 2,
+    "no_reference": 0,
+    "pass": 0,
+    "total": 2
+  }
+}

@@ -10,7 +10,7 @@ use crate::image::{ErrorKind, Fmt, Image, MissingLayerStyle};
 use crate::planner::{LAYER_ALT_A, LAYER_ALT_B};
 use crate::stages::StageSet;
 use crate::timeline::{Rates, TimeMap};
-use fx_core::{DeviceRequest, Env, FieldOrder, FxError, Layer, Result};
+use fx_core::{DeviceRequest, Env, FieldOrder, Frame, FxError, Layer, Result};
 use std::cell::Cell;
 
 /// Everything the engine reads from the parameters and the time context for one output frame.
@@ -81,6 +81,15 @@ pub struct EngineSettings {
     /// vector path's module documentation in `compose` lists the sites). Only retime-fgbg sets it;
     /// off, every stage is the plain one, bit for bit.
     pub wrap_360: bool,
+    /// The vector path (the solves, the warps and the composition of `compose::vector`) runs on the
+    /// frames with their rows in reverse order, bottom row first, and its output is reversed back.
+    /// MEASURED for plugin 01. Off, every stage
+    /// sees the frames top row first. The other paths are per pixel and do not depend on it.
+    pub motion_rows_reversed: bool,
+    /// The solver's luma adds alpha (`FlowSettings::track_alpha`, `prep::luma`): plugin 03's
+    /// `Track RGB+A`. MEASURED for plugin 03.
+    /// Off for the other plugins; off, the luma is the plain one, bit for bit.
+    pub track_alpha: bool,
     /// The render device the host asked for (`TemporalContext::device`). Carried only; the stages
     /// a render runs on are [`EngineSettings::stages`], and no output depends on the value.
     pub device: DeviceRequest,
@@ -207,6 +216,8 @@ pub struct EnvHost<'a> {
     tracking: Option<&'a dyn Layer>,
     /// The FG matte layers of [`EnvHost::with_mattes`], FG1 first; empty without.
     mattes: Vec<&'a dyn Layer>,
+    /// The FG matte frames are read straight ([`EnvHost::with_straight_mattes`]).
+    straight_mattes: bool,
     size_mismatch: Cell<bool>,
     missing_layer: Cell<bool>,
 }
@@ -251,6 +262,7 @@ impl<'a> EnvHost<'a> {
             main,
             tracking,
             mattes: Vec::new(),
+            straight_mattes: false,
             size_mismatch: Cell::new(false),
             missing_layer: Cell::new(false),
         };
@@ -290,6 +302,17 @@ impl<'a> EnvHost<'a> {
         Ok(self)
     }
 
+    /// The host whose FG matte frames are read STRAIGHT ([`Image::from_frame_straight`]: the channels as stored, not
+    /// premultiplied by the matte layer's own alpha); the retimed and tracking layers are still prepared. Vectors In
+    /// replaces the alpha of an FG layer's plate by the layer's raw matte, and on an exact frame of a single group
+    /// display its output alpha is the STORED matte channel (reference `fg1-display3.16x12.d8` frame 0: matte pixel R 15
+    /// under alpha 87 gives alpha 15, not 15 x 87 / 255 = 5). Set by the vectors-in
+    /// front-end only.
+    pub fn with_straight_mattes(mut self) -> EnvHost<'a> {
+        self.straight_mattes = true;
+        self
+    }
+
     /// Width or height 0 is a missing layer, another size a size mismatch.
     fn check_size(&self, width: usize, height: usize) -> bool {
         if width == 0 || height == 0 {
@@ -308,6 +331,11 @@ impl<'a> EnvHost<'a> {
     }
 
     fn fetch(&self, layer: &dyn Layer, time: i32) -> Result<Image> {
+        self.fetch_with(layer, time, Image::from_frame)
+    }
+
+    /// [`Self::fetch`] with the conversion `convert` of the wire frame.
+    fn fetch_with(&self, layer: &dyn Layer, time: i32, convert: fn(&Frame) -> Image) -> Result<Image> {
         let Some(frame) = layer.frame_at(i64::from(time))? else {
             return Ok(self.blank());
         };
@@ -321,7 +349,7 @@ impl<'a> EnvHost<'a> {
         if !self.check_size(frame.width, frame.height) {
             return Ok(self.blank());
         }
-        Ok(Image::from_frame(&frame))
+        Ok(convert(&frame))
     }
 }
 
@@ -343,6 +371,7 @@ impl EngineHost for EnvHost<'_> {
 
     fn matte_frame_at(&self, k: usize, time: i32) -> Result<Image> {
         match self.mattes.get(k) {
+            Some(&layer) if self.straight_mattes => self.fetch_with(layer, time, Image::from_frame_straight),
             Some(&layer) => self.fetch(layer, time),
             None => Err(FxError::Mismatch(format!(
                 "there is no FG matte layer {k} (0 is FG1) to fetch from: the host has {} matte layers",
@@ -391,6 +420,8 @@ pub(crate) mod test_support {
             no_tracking_layer: true,
             missing_layer_style: MissingLayerStyle::HalfBlue,
             wrap_360: false,
+            motion_rows_reversed: false,
+            track_alpha: false,
             device: DeviceRequest::Cpu,
             stages: StageSet::cpu(),
         }
@@ -609,6 +640,35 @@ mod tests {
             let map = RemapTimeMap::new(&mock, s.rates, 0);
             let host = EnvHost::new(&env, &s, &map, LayerIds::default()).unwrap().with_mattes(&env, &[FG1]).unwrap();
             assert_eq!(samples(&host.matte_frame(0, 0).unwrap()), want, "{depth:?}");
+        }
+    }
+
+    #[test]
+    fn straight_mattes_keep_the_stored_channels() {
+        // the frames of the premultiply test above, read straight: the channels as stored in the engine order A, R, G,
+        // B (16 bpc in the engine range, scaled as the alpha is); the retimed layer is still prepared
+        let mut f8 = Frame::new(1, 1, Depth::U8);
+        f8.pixels = Pixels::U8(vec![[0, 200, 17, 60]]);
+        let mut f16 = Frame::new(1, 1, Depth::U16);
+        f16.pixels = Pixels::U16(vec![[65535, 0, 65535, 32768]]);
+        let mut f32_ = Frame::new(1, 1, Depth::F32);
+        f32_.pixels = Pixels::F32(vec![[0.5, 0.25, 1.0, 0.5]]);
+        for (frame, want) in [(f8, vec![60.0, 0.0, 200.0, 17.0]), (f16, vec![32768.0, 65535.0, 0.0, 65535.0]), (f32_, vec![0.5, 0.5, 0.25, 1.0])] {
+            let depth = frame.depth();
+            let input = MemLayer::new(base(), vec![frame.clone()]).unwrap();
+            let mut layers = LayerSet::new();
+            layers.insert(FG1, Arc::new(MemLayer::new(base(), vec![frame.clone()]).unwrap()));
+            let params = ParamCurves::new(Vec::new());
+            let env = Env { params: &params, input: &input, layers: &layers };
+            let s = settings(1, 1, Fmt::from_depth(depth));
+            let mock = Mock::speed(100.0);
+            let map = RemapTimeMap::new(&mock, s.rates, 0);
+            let host = EnvHost::new(&env, &s, &map, LayerIds::default()).unwrap().with_mattes(&env, &[FG1]).unwrap().with_straight_mattes();
+            assert_eq!(samples(&host.matte_frame(0, 0).unwrap()), want, "{depth:?}");
+            assert_eq!(host.matte_frame(0, 0).unwrap(), Image::from_frame_straight(&frame), "{depth:?}");
+            assert_eq!(host.main_frame(0).unwrap(), Image::from_frame(&frame), "{depth:?}: the retimed layer is prepared");
+            // outside the clip still transparent
+            assert_eq!(host.matte_frame(0, 5).unwrap(), Image::new(1, 1, Fmt::from_depth(depth)), "{depth:?}");
         }
     }
 

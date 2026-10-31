@@ -28,7 +28,9 @@
 //! images wider or taller than `FW_MAX_DIM` or of more than `cl::MAX_WORK_ITEMS` pixels; a
 //! triangle of more than `FW_TRI_CAP` hits; a pixel of more than `FW_PIXEL_CAP` hits; more than
 //! `FW_RECORDS_PER_PIXEL` hits per pixel on average; a texture tap at a negative index; the
-//! degenerate row write outside the image (the CPU refuses it too).
+//! degenerate row write outside the image (the CPU refuses it too); the Gouraud variant
+//! (`ForwardOpts { pyramid: false }`, `forward::gouraud`, vectors-in fix 02), which has no kernel
+//! (the executor keeps it on the CPU before the device is asked, `exec::Exec::forward_warp_with`).
 
 #[cfg(test)]
 mod devtests;
@@ -104,7 +106,7 @@ pub fn plan(out: &Image, src: &Image, flow: &FlowField, amount: f32, opts: Forwa
         return Ok(Plan::Copy { width: w, height: h });
     }
     if !opts.pyramid {
-        return Err(StageError::Unsupported("forward warp without a pyramid (the CPU refuses it)".into()));
+        return Err(StageError::Unsupported("forward warp without a pyramid (the Gouraud variant has no device kernel)".into()));
     }
     if w > k::FW_MAX_DIM || h > k::FW_MAX_DIM || w * h > MAX_WORK_ITEMS {
         return Err(StageError::Unsupported(format!("forward warp: {w}x{h} is above the device bound")));

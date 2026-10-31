@@ -887,13 +887,15 @@ fn model_fixtures_are_reproduced_bit_for_bit() {
                 let sizes: Vec<(usize, usize)> = (0..nlev).map(|_| (r.u32() as usize, r.u32() as usize)).collect();
                 let geo = FlowSettings::new(q, hiq, 1.0).geometry(w, h).unwrap();
                 assert_eq!(geo.sizes, sizes, "{at}: the geometry of the generator");
+                // the fixture holds the per level splat of this project's former rule G2, replaced by the user
+                // displacement read from the original (points::user_displacement_with, tested in points::tests): only the
+                // geometry and the level sizes are checked, the values are read to keep the fixture stream in step
                 let pairs = r.pairs();
                 let ud = points::user_displacement(&pairs, &geo, (w, h));
                 assert_eq!(ud.levels.len(), nlev, "{at}");
                 for (l, &(lw, lh)) in sizes.iter().enumerate() {
                     let (d, wt) = (r.floats(lw * lh * 2), r.floats(lw * lh));
-                    assert_eq!(bits(&ud.levels[l].d), bits(&d), "{at} level {l}, {} pairs", pairs.len());
-                    assert_eq!(bits(&ud.levels[l].w), bits(&wt), "{at} level {l}, {} pairs", pairs.len());
+                    assert_eq!((ud.levels[l].d.len(), ud.levels[l].w.len()), (d.len(), wt.len()), "{at} level {l}, {} pairs", pairs.len());
                 }
             }
             8 => {
@@ -931,4 +933,316 @@ fn model_fixtures_are_reproduced_bit_for_bit() {
     }
     assert_eq!(r.p, blob.len());
     assert_eq!(kinds, [0, 15, 42, 6, 16, 6, 6, 13, 13, 9]);
+}
+
+// ---- the plugin's own kernels (TwixtorPro_64, read from the code) ----
+
+fn px8(a: u8, r: u8, g: u8, b: u8) -> Image {
+    let mut img = Image::new(1, 1, Fmt::U8);
+    if let Samples::U8(s) = &mut img.samples {
+        s.copy_from_slice(&[a, r, g, b]);
+    }
+    img
+}
+
+fn bytes(img: &Image) -> Vec<u8> {
+    match &img.samples {
+        Samples::U8(s) => s.clone(),
+        _ => unreachable!(),
+    }
+}
+
+#[test]
+fn pl_over_u8_multiplies_by_the_constant_and_keeps_the_ends() {
+    // sa = 128: f = 1 - 128 / 255 = 0.49804; rgb = trunc(d * f + s + 0.5) = 110, 65, 35;
+    // alpha = trunc((255 - 200) * 128 / 255 + 200 + 0.5) = 228
+    let mut d = px8(200, 100, 50, 30);
+    over_pl(&mut d, &px8(128, 60, 40, 20)).unwrap();
+    assert_eq!(bytes(&d), [228, 110, 65, 35]);
+    // a transparent source keeps the destination, an opaque one replaces it (colours as they are)
+    let mut d = px8(200, 100, 50, 30);
+    over_pl(&mut d, &px8(0, 9, 9, 9)).unwrap();
+    assert_eq!(bytes(&d), [200, 100, 50, 30]);
+    over_pl(&mut d, &px8(255, 1, 2, 3)).unwrap();
+    assert_eq!(bytes(&d), [255, 1, 2, 3]);
+}
+
+#[test]
+fn pl_over_u8_stays_within_one_level_of_the_smart_blend_over() {
+    // the constant 1/255 of the plugin is an f32 product, the Smart Blend kernels divide: the two kernels agree on the
+    // ends and never differ by more than one level
+    for sa in 1..255u32 {
+        for da in [0u8, 10, 77, 128, 200, 250, 255] {
+            let (mut p, mut q) = (px8(da, 90, 90, 90), px8(da, 90, 90, 90));
+            let s = px8(sa as u8, (sa / 2) as u8, (sa / 3) as u8, 7);
+            over_pl(&mut p, &s).unwrap();
+            over(&mut q, &s).unwrap();
+            for (x, y) in bytes(&p).iter().zip(bytes(&q)) {
+                assert!(x.abs_diff(y) <= 1, "sa {sa} da {da}: {x} against {y}");
+            }
+        }
+    }
+}
+
+#[test]
+fn pl_premultiply_is_the_f32_product_with_the_matte_byte() {
+    // matte byte 128 -> weight 128 * (1/255) = 0.50196; trunc(200 * 0.50196 + 0.5) = 100, 50 (alpha 255 -> 128)
+    let m = Matte { width: 1, height: 1, data: vec![128.0 / 255.0] };
+    let out = premultiply_pl(&px8(255, 200, 100, 0), &m).unwrap();
+    assert_eq!(bytes(&out), [128, 100, 50, 0]);
+    // a hard matte keeps or clears the pixel
+    let one = Matte { width: 1, height: 1, data: vec![1.0] };
+    assert_eq!(bytes(&premultiply_pl(&px8(255, 200, 100, 7), &one).unwrap()), [255, 200, 100, 7]);
+    let zero = Matte { width: 1, height: 1, data: vec![0.0] };
+    assert_eq!(bytes(&premultiply_pl(&px8(255, 200, 100, 7), &zero).unwrap()), [0, 0, 0, 0]);
+}
+
+
+// ---- the planes of a layered Create Vectors solve, read from CreateMotionVectors_64
+
+#[test]
+fn layer_solve_mattes_of_one_fg_layer() {
+    // FG1 alone has nothing above it: visible = its matte, mask 1 everywhere; Main_BG sees 1 - m1 (the integer chain)
+    let m1 = Matte { width: 3, height: 1, data: vec![0.0, 128.0 / 255.0, 1.0] };
+    let (vis, mask) = layer_solve_mattes(std::slice::from_ref(&m1), &[0.0], 0, Fmt::U8, 3, 1).unwrap();
+    assert_eq!(integer_plane(&vis, Fmt::U8), vec![0.0, 128.0, 255.0]);
+    assert_eq!(mask.data, vec![1.0, 1.0, 1.0]);
+    let (vis, mask) = layer_solve_mattes(std::slice::from_ref(&m1), &[0.0], 1, Fmt::U8, 3, 1).unwrap();
+    // p = 128 * f32(1/255) = 0.50196081; (1 - p) * 255 in double = 126.99999...; trunc(t + 0.5) = 127
+    assert_eq!(integer_plane(&vis, Fmt::U8), vec![255.0, 127.0, 0.0]);
+    assert_eq!(integer_plane(&mask, Fmt::U8), vec![255.0, 127.0, 0.0]);
+    // 16 bpc: the same chain on words
+    let m16 = Matte { width: 2, height: 1, data: vec![32768.0 / 65535.0, 1.0] };
+    let (vis, mask) = layer_solve_mattes(std::slice::from_ref(&m16), &[0.0], 1, Fmt::U16, 2, 1).unwrap();
+    assert_eq!(integer_plane(&vis, Fmt::U16), vec![32767.0, 0.0]);
+    assert_eq!(integer_plane(&mask, Fmt::U16), vec![32767.0, 0.0]);
+}
+
+#[test]
+fn layer_solve_mattes_of_a_layer_under_another_is_rounded_per_step() {
+    // FG2 (own 200) under FG1 (128): t = f32((1 - f64(128 * K8)) * 200) = 99.60784, trunc(t + 0.5) = 100;
+    // mask = 255 - (200 - 100) = 155. Main_BG under both: 255 -> 127 (FG2 above, 200: 255 * (1 - 0.78431) -> 55)
+    let m1 = Matte { width: 1, height: 1, data: vec![128.0 / 255.0] };
+    let m2 = Matte { width: 1, height: 1, data: vec![200.0 / 255.0] };
+    let ms = [m1, m2];
+    let (vis, mask) = layer_solve_mattes(&ms, &[0.0, 0.0], 1, Fmt::U8, 1, 1).unwrap();
+    assert_eq!(integer_plane(&vis, Fmt::U8), vec![100.0]);
+    assert_eq!(integer_plane(&mask, Fmt::U8), vec![155.0]);
+    // Main_BG: nearest layer first: 255 * (1 - 200 K8) = 55.000004 -> 55, then 55 * (1 - 128 K8) = 27.39 -> 27
+    let (vis, mask) = layer_solve_mattes(&ms, &[0.0, 0.0], 2, Fmt::U8, 1, 1).unwrap();
+    let p2 = 200.0f32 * PL_K8;
+    let p1 = 128.0f32 * PL_K8;
+    let s1 = ((((1.0f64 - f64::from(p2)) * 255.0) as f32) + 0.5f32) as i64 as f32;
+    let s2 = ((((1.0f64 - f64::from(p1)) * f64::from(s1)) as f32) + 0.5f32) as i64 as f32;
+    assert_eq!((s1, s2), (55.0, 27.0));
+    assert_eq!(integer_plane(&vis, Fmt::U8), vec![s2]);
+    assert_eq!(integer_plane(&mask, Fmt::U8), vec![s2]);
+    // float: no rounding, the product in double narrowed once per step
+    let f1 = Matte { width: 1, height: 1, data: vec![0.3] };
+    let f2 = Matte { width: 1, height: 1, data: vec![0.6] };
+    let (vis, mask) = layer_solve_mattes(&[f1, f2], &[0.0, 0.0], 1, Fmt::F32, 1, 1).unwrap();
+    let want = ((1.0f64 - f64::from(0.3f32)) * f64::from(0.6f32)) as f32;
+    assert_eq!(vis.data[0].to_bits(), want.to_bits());
+    assert_eq!(mask.data[0].to_bits(), (1.0f32 - (0.6f32 - want)).to_bits());
+}
+
+#[test]
+fn layer_solve_mattes_refuses_a_layer_outside_the_stack() {
+    let m = Matte { width: 1, height: 1, data: vec![0.5] };
+    assert!(layer_solve_mattes(std::slice::from_ref(&m), &[0.0], 2, Fmt::U8, 1, 1).is_err());
+    assert!(layer_solve_mattes(std::slice::from_ref(&m), &[], 0, Fmt::U8, 1, 1).is_err());
+    assert!(layer_solve_mattes(std::slice::from_ref(&m), &[0.0], 0, Fmt::U8, 2, 1).is_err());
+}
+
+#[test]
+fn integer_plane_inverts_extract() {
+    for v in 0..=255u32 {
+        let m = Matte { width: 1, height: 1, data: vec![v as f32 / 255.0] };
+        assert_eq!(integer_plane(&m, Fmt::U8), vec![v as f32]);
+    }
+    for v in (0..=65535u32).step_by(97).chain([65535]) {
+        let m = Matte { width: 1, height: 1, data: vec![v as f32 / 65535.0] };
+        assert_eq!(integer_plane(&m, Fmt::U16), vec![v as f32]);
+    }
+}
+#[test]
+fn the_shrink_geometry_of_a_whole_amount_is_one_more_than_the_probe_fit() {
+    // a = 1: 0.01 is added, so r = ceil(2.01) = 3 and wgt = 1 - 0.99 = 0.01 (blur radius 3.01); a = 2: r = 4
+    for (a, r) in [(1.0f32, 3.0f32), (2.0, 4.0), (5.0, 7.0)] {
+        let (got_r, wgt) = choke_geometry(a);
+        assert_eq!(got_r, r, "a {a}");
+        assert!((wgt - 0.01).abs() < 1e-5, "a {a}: {wgt}");
+    }
+    // a fractional amount keeps its own fraction: a = 1.5 -> r = 3, fr = 0.5, wgt = 0.5
+    let (r, wgt) = choke_geometry(1.5);
+    assert_eq!(r, 3.0);
+    assert!((wgt - 0.5).abs() < 1e-6);
+}
+
+#[test]
+fn the_exact_shrink_keeps_flat_planes_and_erodes_an_edge() {
+    let (w, h) = (24usize, 6usize);
+    let mut ones = Matte::filled(w, h, 1.0);
+    choke_with(&mut ones, 2.0, true).unwrap();
+    assert!(ones.data.iter().all(|&v| v == 1.0));
+    let mut zeros = Matte::filled(w, h, 0.0);
+    choke_with(&mut zeros, 2.0, true).unwrap();
+    assert!(zeros.data.iter().all(|&v| v == 0.0));
+    // a straight vertical edge (left half 1): the shrink moves it right, never grows it, and leaves the far side
+    let mut m = Matte::filled(w, h, 0.0);
+    for y in 0..h {
+        for x in 0..w / 2 {
+            m.data[y * w + x] = 1.0;
+        }
+    }
+    let before = m.data.clone();
+    choke_with(&mut m, 2.0, true).unwrap();
+    assert!(m.data.iter().zip(&before).all(|(a, b)| a <= b), "the shrink grew the matte");
+    assert_eq!(m.data[0], 1.0);
+    assert_eq!(m.data[w - 1], 0.0);
+    assert!(m.data[w / 2 - 1] < 1.0, "the pixel next to the edge stays");
+}
+
+/// TRACED (TwixtorPro_64, `retime-fgbg.shrink1-bg.box2-36x24.d8`, frame 0, the plane FG1's cut reads, breakpoints at the
+/// choke and the cut): FG1's matte is a hard 13 x 13 box (x 5..=17, y 2..=14 of the plugin's memory
+/// rows, which are the host rows) and the choke is entered with `-1`. The plane is given here as the layered path gives
+/// it, on the rows of the motion path (the plugin's logical rows from the bottom, `y = 23 - memory row`), where the
+/// plugin's column pass takes the tap above first; the asserted samples are the
+/// plugin's own, the two diagonal corners differing in their last bits.
+fn traced_box(w: usize, h: usize) -> Matte {
+    let mut m = Matte::filled(w, h, 0.0);
+    for ym in 2..=14 {
+        for x in 5..=17 {
+            m.data[(h - 1 - ym) * w + x] = 1.0;
+        }
+    }
+    m
+}
+
+#[test]
+fn the_cut_view_of_a_shrunk_box_is_the_plugins_plane() {
+    let (w, h) = (36usize, 24usize);
+    let m = traced_box(w, h);
+    let v = cut_view(&m, 1.0).unwrap();
+    // (x, memory row) -> the plane's row
+    let at = |x: usize, ym: usize| v.data[(h - 1 - ym) * w + x].to_bits();
+    for (x, y) in [(4usize, 5usize), (5, 5), (6, 5), (5, 2), (17, 14), (16, 7)] {
+        assert_eq!(at(x, y), 1.0f32.to_bits(), "({x}, {y}) grown into the cut");
+    }
+    assert_eq!(at(4, 1), 0x3e8e_2482, "upper left diagonal");
+    assert_eq!(at(18, 15), 0x3e89_c552, "lower right diagonal");
+    assert_eq!(at(0, 23), 0.0f32.to_bits());
+    assert_eq!(cut_view(&m, 0.0).unwrap(), m, "no shrink: the matte itself");
+    assert_eq!(cut_view(&m, -0.0).unwrap(), m);
+}
+
+/// TRACED (TwixtorPro_64, frame 0 of `retime-fgbg.shrink0.5-bg.box2-36x24.d32` and `shrink3-bg.box2-36x24.d32`, the
+/// same FG1 box, the plane after the choke's clamp and the one the cut reads): a fractional amount mixes the two
+/// shrink steps as `(c - m) * t + m` (the old `m * (1 - t) + c * t` gave
+/// 0x3efb1496 at these six samples), and the border rows of the blur take the tap above first (the old order differed in
+/// 7 samples of shrink 3 by up to 3e-6).
+#[test]
+fn the_cut_view_of_fractional_and_wide_shrinks_is_the_plugins_plane() {
+    let (w, h) = (36usize, 24usize);
+    let m = traced_box(w, h);
+    let half = cut_view(&m, 0.5).unwrap();
+    let at = |p: &Matte, x: usize, ym: usize| p.data[(h - 1 - ym) * w + x].to_bits();
+    for (x, y) in [(4usize, 3usize), (18, 3), (4, 13), (18, 13), (6, 15), (16, 15)] {
+        assert_eq!(at(&half, x, y), 0x3efb_1494, "shrink 0.5 at ({x}, {y})");
+    }
+    let three = cut_view(&m, 3.0).unwrap();
+    for (x, y, b) in [
+        (20usize, 1usize, 0x3ed9_863cu32),
+        (21, 1, 0x3d8d_8ea8),
+        (22, 1, 0x3bda_8800),
+        (1, 2, 0x3e02_e204),
+        (20, 2, 0x3f2c_f6d8),
+        (2, 3, 0x3f69_8f66),
+        (21, 3, 0x3e12_89fc),
+    ] {
+        assert_eq!(at(&three, x, y), b, "shrink 3 at ({x}, {y})");
+    }
+}
+
+/// READ (the plugin's choke and its kernels): the inversion snaps a
+/// result above the f32 0.999 to 1.0, the final clamp of a float plane keeps NaN and `-0` (and runs for a zero amount),
+/// the mix and the shrink threshold keep a NaN.
+#[test]
+fn the_plugins_choke_inverts_clamps_and_keeps_nan_as_its_kernels_do() {
+    // (f32)(1.0 - (double)v): 1 - 0.001f32 rounds to the f32 0.999 itself, which is not above it; 0.0009 snaps
+    assert_eq!(invert_pl_value(0.001), 0.999f32);
+    assert_eq!(invert_pl_value(0.0009), 1.0);
+    assert_eq!(invert_pl_value(0.25), 0.75);
+    assert!(invert_pl_value(f32::NAN).is_nan());
+    // the clamp: below 0 -> 0, from 1 up -> 1, NaN and -0 kept
+    assert_eq!(clamp_pl(-0.5), 0.0);
+    assert_eq!(clamp_pl(f32::NEG_INFINITY), 0.0);
+    assert_eq!(clamp_pl(f32::INFINITY), 1.0);
+    assert_eq!(clamp_pl(1.5), 1.0);
+    assert_eq!(clamp_pl(0.5), 0.5);
+    assert_eq!(clamp_pl(-0.0).to_bits(), (-0.0f32).to_bits());
+    assert!(clamp_pl(f32::NAN).is_nan());
+    // a zero amount clamps (no shrink): the cut of a raw float matte reads 2.0 as 1.0 and keeps NaN
+    let m = Matte { width: 4, height: 1, data: vec![2.0, f32::NAN, -1.0, 0.5] };
+    let v = cut_view(&m, 0.0).unwrap();
+    assert_eq!(v.data[0], 1.0);
+    assert!(v.data[1].is_nan());
+    assert_eq!(v.data[2], 0.0);
+    assert_eq!(v.data[3], 0.5);
+    // a NaN inside a shrunk plane spreads through the blur and survives the threshold and the mix
+    let mut p = Matte::filled(12, 12, 1.0);
+    p.data[6 * 12 + 6] = f32::NAN;
+    let q = cut_view(&p, 1.5).unwrap();
+    assert!(q.data[6 * 12 + 6].is_nan());
+    assert!(q.data[6 * 12 + 8].is_nan(), "within the blur radius");
+    assert_eq!(q.data[0], 1.0, "far from the NaN the plane stays white");
+}
+
+#[test]
+fn the_raw_extraction_keeps_float_specials_and_equals_extract_at_8_and_16_bpc() {
+    let vals = [-0.5f32, 1.5, f32::NAN, -0.0, f32::INFINITY, 0.25];
+    let mut img = Image::new(vals.len(), 1, Fmt::F32);
+    if let Samples::F32(s) = &mut img.samples {
+        for (p, &v) in vals.iter().enumerate() {
+            s[p * 4 + 3] = v;
+        }
+    }
+    let m = extract_raw(&img, 3);
+    assert_eq!(bits(&m.data), bits(&vals));
+    let mut img = Image::new(2, 1, Fmt::U8);
+    if let Samples::U8(s) = &mut img.samples {
+        s.copy_from_slice(&[255, 51, 0, 7, 128, 255, 1, 0]);
+    }
+    assert_eq!(extract_raw(&img, 1), extract(&img, 1));
+    let mut img = Image::new(1, 1, Fmt::U16);
+    if let Samples::U16(s) = &mut img.samples {
+        s.copy_from_slice(&[65535, 32768, 0, 1]);
+    }
+    assert_eq!(extract_raw(&img, 1), extract(&img, 1));
+}
+
+/// The plugin's float OVER takes the NaN of two NaN operands by the NaN rule the references carry (the emulator's,
+/// `crate::nanrule`): with the processor's own `+` the destination's
+/// `0xffc00000` would win over the source's `0x7fc00000`.
+#[cfg(feature = "emulator-nan")]
+#[test]
+fn the_float_layer_over_picks_a_nan_by_the_nan_rule() {
+    let neg = f32::from_bits(0xffc0_0000);
+    let pos = f32::from_bits(0x7fc0_0000);
+    let mut d = Image::new(1, 1, Fmt::F32);
+    let mut s = Image::new(1, 1, Fmt::F32);
+    if let (Samples::F32(dv), Samples::F32(sv)) = (&mut d.samples, &mut s.samples) {
+        dv.copy_from_slice(&[neg, neg, 0.25, neg]);
+        sv.copy_from_slice(&[0.5, pos, 0.5, 0.125]);
+    }
+    over_pl(&mut d, &s).unwrap();
+    if let Samples::F32(dv) = &d.samples {
+        // alpha: (1 - NaN) * 0.5 + NaN: one NaN operand at a time, the destination's
+        assert_eq!(dv[0].to_bits(), 0xffc0_0000);
+        // colour: 0.5 * NaN(-) + NaN(+): two NaNs with equal fractions, the positive one
+        assert_eq!(dv[1].to_bits(), 0x7fc0_0000);
+        // numbers are the plain results
+        assert_eq!(dv[2], 0.5 * 0.25 + 0.5);
+        assert_eq!(dv[3].to_bits(), 0xffc0_0000);
+    }
 }

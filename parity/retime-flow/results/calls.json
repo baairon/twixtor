@@ -1,0 +1,83 @@
+{
+ "command": "python3 tools/phase_b.py calls --testsets ~/twixtor-parity/re/f7-supp/ts-flow --results ~/twixtor-parity/re/f7-supp/tf2/results --phase-a ~/twixtor-parity/re/f7-supp/tf2/phasea --plugin-records ~/twixtor-parity/re/f7-supp/rec/flow-all --rewrite-records ~/twixtor-parity/re/f7-supp/rw/flow-m14 --param-map ~/twixtor-parity/fix-twixtor/h/param_map_Twixtor_64.tsv",
+ "measured_at": "2026-10-31",
+ "mode": "sets per output frame",
+ "plugin_records": "~/twixtor-parity/re/f7-supp/rec/flow-all",
+ "rewrite_records": "~/twixtor-parity/re/f7-supp/rw/flow-m14",
+ "compared": 330,
+ "matching": 330,
+ "mismatching": 0,
+ "skipped": 17,
+ "skipped_cases": [
+  {
+   "id": "retime.size-default.shift-1x1.d8.5c606309",
+   "why": "plugin record is incomplete (fault)"
+  },
+  {
+   "id": "retime.size-default.disc-1x1.d16.2f5f3554",
+   "why": "plugin record is incomplete (fault)"
+  },
+  {
+   "id": "retime.size-default.alpha-1x1.d32.621a333c",
+   "why": "plugin record is incomplete (fault)"
+  },
+  {
+   "id": "retime.size-default.disc-1x6.d8.094c98d0",
+   "why": "plugin record is incomplete (fault)"
+  },
+  {
+   "id": "retime.size-default.alpha-1x6.d16.542de920",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.noise-1x6.d32.2a45baca",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.alpha-7x1.d8.f33838df",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.noise-7x1.d16.3cefe003",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.shift-7x1.d32.276ca9c6",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.noise-2x2.d8.427ca099",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.shift-2x2.d16.748f806a",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.disc-2x2.d32.01cccd59",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.shift-3x3.d8.3a6b6ea5",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.disc-3x3.d16.0d9c36b4",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.size-default.alpha-3x3.d32.3f275f95",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.sb-tiny.shift-3x3.d32.3d6b8ec8",
+   "why": "no plugin record"
+  },
+  {
+   "id": "retime.draft-tiny.shift-7x9.d8.ef9c1654",
+   "why": "plugin record is incomplete (fault)"
+  }
+ ],
+ "mismatches": [],
+ "limit": "parameter sample times are not recorded by the rewrite; plugin parameter samples are only checked against the frame time"
+}

@@ -19,6 +19,7 @@ use crate::compose::{self, Flows};
 use crate::flow::extras::{solve_pyramids_with, SolveExtras};
 use crate::flow::{self, FlowField, FlowPair, FlowSettings, Pyramid};
 use crate::forward::{self, ForwardOpts};
+use crate::holefill::VerticalTaps;
 use crate::host::EngineSettings;
 use crate::image::Image;
 use crate::timeline::Selection;
@@ -59,6 +60,15 @@ pub trait Stages: Send + Sync {
     fn compose_vectors(&self, settings: &EngineSettings, sel: &Selection, a: &Image, b: &Image, flows: &Flows) -> Result<Image> {
         compose::compose_vectors(settings, sel, a, b, flows)
     }
+
+    /// The vertical tap order (`holefill::VerticalTaps`) of the separable filters of the render:
+    /// every pull-push hole fill (the image fills of the forward warps and of the Smart Blend
+    /// compositions, the flow fills of the vector layers and of the flow inversion) and the blur of
+    /// the Weighted Blend sharpening (`filters::sharpen_step_with`). The default is the engine's
+    /// order.
+    fn vertical_taps(&self) -> VerticalTaps {
+        VerticalTaps::BelowFirst
+    }
 }
 
 /// The CPU: every stage is the CPU function, unchanged.
@@ -80,6 +90,80 @@ impl Stages for Cpu {
 
     fn forward_warp_with(&self, out: &mut Image, src: &Image, flow: &FlowField, amount: f32, opts: ForwardOpts, want_coverage: bool) -> Result<Option<Coverage>> {
         forward::forward_warp_with(out, src, flow, amount, opts, want_coverage)
+    }
+}
+
+/// The stages of another set with every forward warp taken as the Gouraud variant
+/// (`ForwardOpts { pyramid: false }`, [`forward::forward_warp_with`]); the solves are the inner
+/// set's, and `compose_vectors` is the CPU composition, whose forward warps come back here through
+/// `settings.stages`. A plugin whose forward warps interpolate the vertex colours puts it in its
+/// settings ([`GouraudForward::wrap`]).
+pub struct GouraudForward(pub StageSet);
+
+impl GouraudForward {
+    /// `inner` with its forward warps taken as the Gouraud variant.
+    pub fn wrap(inner: StageSet) -> StageSet {
+        StageSet::new(Arc::new(GouraudForward(inner)))
+    }
+}
+
+impl Stages for GouraudForward {
+    fn solve(&self, x: &Image, y: &Image, s: &FlowSettings) -> Result<FlowField> {
+        self.0.get().solve(x, y, s)
+    }
+
+    fn solve_pair(&self, a: &Image, b: &Image, s: &FlowSettings) -> Result<FlowPair> {
+        self.0.get().solve_pair(a, b, s)
+    }
+
+    fn solve_pyramids_with(&self, x: &Pyramid, y: &Pyramid, s: &FlowSettings, e: SolveExtras<'_>) -> Result<FlowField> {
+        self.0.get().solve_pyramids_with(x, y, s, e)
+    }
+
+    fn forward_warp_with(&self, out: &mut Image, src: &Image, flow: &FlowField, amount: f32, _opts: ForwardOpts, want_coverage: bool) -> Result<Option<Coverage>> {
+        self.0.get().forward_warp_with(out, src, flow, amount, ForwardOpts { pyramid: false }, want_coverage)
+    }
+
+    fn vertical_taps(&self) -> VerticalTaps {
+        self.0.get().vertical_taps()
+    }
+}
+
+/// The stages of another set whose separable filters ([`Stages::vertical_taps`]: the pull-push
+/// hole fills and the Weighted Blend blur) take the tap above first in the border rows of their
+/// vertical passes (`holefill::VerticalTaps::AboveFirst`); everything else is the inner set's,
+/// and `compose_vectors` is the CPU composition, whose filters read the order back through
+/// `settings.stages`. A plugin whose filters add their taps that way puts it in its settings
+/// ([`AboveFirstTaps::wrap`]). The device fill and blur kernels follow the engine's order only,
+/// so the device composition is not used under this set (the CPU composition runs).
+pub struct AboveFirstTaps(pub StageSet);
+
+impl AboveFirstTaps {
+    /// `inner` with its hole fills taking the tap above first.
+    pub fn wrap(inner: StageSet) -> StageSet {
+        StageSet::new(Arc::new(AboveFirstTaps(inner)))
+    }
+}
+
+impl Stages for AboveFirstTaps {
+    fn solve(&self, x: &Image, y: &Image, s: &FlowSettings) -> Result<FlowField> {
+        self.0.get().solve(x, y, s)
+    }
+
+    fn solve_pair(&self, a: &Image, b: &Image, s: &FlowSettings) -> Result<FlowPair> {
+        self.0.get().solve_pair(a, b, s)
+    }
+
+    fn solve_pyramids_with(&self, x: &Pyramid, y: &Pyramid, s: &FlowSettings, e: SolveExtras<'_>) -> Result<FlowField> {
+        self.0.get().solve_pyramids_with(x, y, s, e)
+    }
+
+    fn forward_warp_with(&self, out: &mut Image, src: &Image, flow: &FlowField, amount: f32, opts: ForwardOpts, want_coverage: bool) -> Result<Option<Coverage>> {
+        self.0.get().forward_warp_with(out, src, flow, amount, opts, want_coverage)
+    }
+
+    fn vertical_taps(&self) -> VerticalTaps {
+        VerticalTaps::AboveFirst
     }
 }
 
@@ -150,6 +234,16 @@ mod tests {
         assert!(set.is_cpu());
         assert_eq!(set, StageSet::cpu());
         assert_eq!(format!("{set:?}"), "StageSet(cpu)");
+    }
+
+    #[test]
+    fn the_vertical_taps_follow_the_wrappers() {
+        assert_eq!(StageSet::cpu().get().vertical_taps(), VerticalTaps::BelowFirst);
+        assert_eq!(GouraudForward::wrap(StageSet::cpu()).get().vertical_taps(), VerticalTaps::BelowFirst);
+        let both = AboveFirstTaps::wrap(GouraudForward::wrap(StageSet::cpu()));
+        assert_eq!(both.get().vertical_taps(), VerticalTaps::AboveFirst);
+        // a Gouraud set around it passes the order on
+        assert_eq!(GouraudForward::wrap(AboveFirstTaps::wrap(StageSet::cpu())).get().vertical_taps(), VerticalTaps::AboveFirst);
     }
 
     #[test]

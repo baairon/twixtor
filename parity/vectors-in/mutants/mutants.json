@@ -1,0 +1,194 @@
+[
+ {
+  "id": "m01",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "kind": "decode scale",
+  "desc": "8 bpc red decode divides by 255 instead of 254",
+  "old": "o[0] = dec_int(p[1] as f32, 254.0, md);",
+  "new": "o[0] = dec_int(p[1] as f32, 255.0, md);"
+ },
+ {
+  "id": "m02",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "kind": "decode scale",
+  "desc": "16 bpc green decode divides by 65535 instead of 65534",
+  "old": "o[1] = dec_int(p[2] as f32, 65534.0, md);",
+  "new": "o[1] = dec_int(p[2] as f32, 65535.0, md);"
+ },
+ {
+  "id": "m03",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "kind": "channel order",
+  "desc": "32 bpc horizontal motion read from the green channel",
+  "old": "o[0] = (p[1] * 2.0f32 - 1.0f32) * max_displace;",
+  "new": "o[0] = (p[2] * 2.0f32 - 1.0f32) * max_displace;"
+ },
+ {
+  "id": "m04",
+  "file": "plugins/retime-engine/src/holefill.rs",
+  "kind": "hole threshold",
+  "desc": "a 32 bpc hole mask value below 0.5 no longer counts as a hole",
+  "old": "HoleMaskRef::F32(m) => !(WIDE_EPS > f64::from(m[i])),",
+  "new": "HoleMaskRef::F32(m) => !(0.5 > f64::from(m[i])),"
+ },
+ {
+  "id": "m05",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "kind": "wrong axis scale",
+  "desc": "Vec Scale Y multiplies by the X scale",
+  "old": "p[1] = sy * p[1];",
+  "new": "p[1] = sx * p[1];"
+ },
+ {
+  "id": "m06",
+  "file": "plugins/retime-engine/src/vectors.rs",
+  "kind": "hole mask offset",
+  "desc": "8 bpc hole mask loses its low bit",
+  "old": "0xffu8.wrapping_sub(p[0])",
+  "new": "(0xffu8.wrapping_sub(p[0])) & 0xfe"
+ },
+ {
+  "id": "m07",
+  "file": "plugins/retime-engine/src/image.rs",
+  "kind": "error fill colour",
+  "desc": "8 bpc size mismatch fill has alpha 127 instead of 128",
+  "old": "(SizeMismatch, Depth::U8) => ErrorFill::U8([0x80, 0xff, 0, 0]),",
+  "new": "(SizeMismatch, Depth::U8) => ErrorFill::U8([0x7f, 0xff, 0, 0]),"
+ },
+ {
+  "id": "m08",
+  "file": "plugins/retime-engine/src/image.rs",
+  "kind": "error fill colour",
+  "desc": "16 bpc size mismatch fill has green 1",
+  "old": "(SizeMismatch, Depth::U16) => ErrorFill::U16([0x4000, 0x8000, 0, 0]),",
+  "new": "(SizeMismatch, Depth::U16) => ErrorFill::U16([0x4000, 0x8000, 1, 0]),"
+ },
+ {
+  "id": "m09",
+  "file": "plugins/retime-engine/src/image.rs",
+  "kind": "error fill colour",
+  "desc": "32 bpc size mismatch fill has alpha 1.0 instead of 0.5",
+  "old": "(SizeMismatch, Depth::F32) => ErrorFill::F32([0.5, 1.0, 0.0, 0.0]),",
+  "new": "(SizeMismatch, Depth::F32) => ErrorFill::F32([1.0, 1.0, 0.0, 0.0]),"
+ },
+ {
+  "id": "m10",
+  "file": "plugins/vectors-in/src/vectorin.rs",
+  "kind": "frame off by one",
+  "desc": "Vectors Next is fetched one source frame late (single layer path)",
+  "old": "let time = map.frame_time(sel.a as f32);\n        flows.f_ab = Some(load_flow(",
+  "new": "let time = map.frame_time(sel.a as f32 + 1.0);\n        flows.f_ab = Some(load_flow("
+ },
+ {
+  "id": "m11",
+  "file": "plugins/vectors-in/src/vectorin.rs",
+  "kind": "frame off by one",
+  "desc": "Vectors Prev is fetched one source frame early (FG matte path)",
+  "old": "let time = map.frame_time(sel.b as f32);\n        flows.f_ba = Some(load_layer_flow(",
+  "new": "let time = map.frame_time(sel.b as f32 - 1.0);\n        flows.f_ba = Some(load_layer_flow("
+ },
+ {
+  "id": "m12",
+  "file": "plugins/vectors-in/src/vectorin.rs",
+  "kind": "swapped prev/next",
+  "desc": "the forward flow is loaded from the Prev layer (single layer path)",
+  "old": "if has_next {\n        let layer = env.layer(LAYER_VECTORS_NEXT).ok_or_else(|| missing(LAYER_VECTORS_NEXT))?;\n        let time = map.frame_time(sel.a as f32);\n        flows.f_ab = Some(load_flow(",
+  "new": "if has_next {\n        let layer = env.layer(LAYER_VECTORS_PREV).ok_or_else(|| missing(LAYER_VECTORS_NEXT))?;\n        let time = map.frame_time(sel.a as f32);\n        flows.f_ab = Some(load_flow("
+ },
+ {
+  "id": "m13",
+  "file": "plugins/vectors-in/src/glue.rs",
+  "kind": "popup mapping",
+  "desc": "Warping Inverse is served as Smart Blend warp code 1",
+  "old": "match popup_value {\n        1 => 0,",
+  "new": "match popup_value {\n        1 => 1,"
+ },
+ {
+  "id": "m14",
+  "file": "plugins/vectors-in/src/glue.rs",
+  "kind": "rate",
+  "desc": "In FPS is Out FPS reads the clip as 29.97 fps instead of 30",
+  "old": "let input_rate = if in_is_out { 30.0 } else { typed_input };",
+  "new": "let input_rate = if in_is_out { 29.97 } else { typed_input };"
+ },
+ {
+  "id": "m15",
+  "file": "plugins/vectors-in/src/timemap.rs",
+  "kind": "label mapping",
+  "desc": "Src: Mark Segments 4 and 5 are swapped",
+  "old": "Ok(if (1..=5).contains(&v) { v - 1 } else { 0 })",
+  "new": "Ok(if (1..=5).contains(&v) { match v { 4 => 4, 5 => 3, _ => v - 1 } } else { 0 })"
+ },
+ {
+  "id": "m16",
+  "file": "plugins/vectors-in/src/timemap.rs",
+  "kind": "rounding",
+  "desc": "frame to time conversion truncates instead of adding 0.5",
+  "old": "cvtt_i32((self.dur as f64) * (n as f64) + HALF)",
+  "new": "cvtt_i32((self.dur as f64) * (n as f64))"
+ },
+ {
+  "id": "m17",
+  "file": "plugins/vectors-in/src/vectorin.rs",
+  "kind": "param time",
+  "desc": "Max Displace is read at time 0 instead of the current time",
+  "old": "let value = fixed_reader(curves.fixed_at(\"vectors_max_displace\", t0), 1.0f32);",
+  "new": "let value = fixed_reader(curves.fixed_at(\"vectors_max_displace\", 0), 1.0f32);"
+ },
+ {
+  "id": "m18",
+  "file": "plugins/vectors-in/src/vectorin.rs",
+  "kind": "wrong param",
+  "desc": "Vec Scale Y is read from the Vec Scale X slider",
+  "old": "fixed_reader(curves.fixed_at(\"vec_scale_y\", time), 1.0f32))",
+  "new": "fixed_reader(curves.fixed_at(\"vec_scale_x\", time), 1.0f32))"
+ },
+ {
+  "id": "m19",
+  "file": "plugins/vectors-in/src/vectorin.rs",
+  "kind": "threshold",
+  "desc": "the FG matte step threshold is 0.5 instead of 0.95",
+  "old": "pub const MATTE_STEP_ON: f32 = 0.95;",
+  "new": "pub const MATTE_STEP_ON: f32 = 0.5;"
+ },
+ {
+  "id": "m20",
+  "file": "plugins/retime-engine/src/compose/vector.rs",
+  "kind": "sign",
+  "desc": "flow inversion (one vector layer) keeps the sign of the x component",
+  "old": "px[1] = -1.0f32 * f[0];",
+  "new": "px[1] = 1.0f32 * f[0];"
+ },
+ {
+  "id": "m21",
+  "file": "crates/fx-core/src/fixed.rs",
+  "kind": "rounding",
+  "desc": "16.16 conversion truncates instead of rounding half away from zero",
+  "old": "(f * 65536.0 + if f < 0.0 { -0.5 } else { 0.5 }) as i32",
+  "new": "(f * 65536.0) as i32"
+ },
+ {
+  "id": "m22",
+  "file": "plugins/vectors-in/src/glue.rs",
+  "kind": "presence",
+  "desc": "one vector layer present counts as no vector layer",
+  "old": "if prev.is_none() && next.is_none() && failure.is_none() {",
+  "new": "if (prev.is_none() || next.is_none()) && failure.is_none() {"
+ },
+ {
+  "id": "m23",
+  "file": "plugins/vectors-in/src/glue.rs",
+  "kind": "popup mapping",
+  "desc": "the Source display is Display 3 instead of 2",
+  "old": "display_source: popup(curves, \"display\", t)? == 2,",
+  "new": "display_source: popup(curves, \"display\", t)? == 3,"
+ },
+ {
+  "id": "m24",
+  "file": "plugins/vectors-in/src/glue.rs",
+  "kind": "dropped term",
+  "desc": "the FG layer inverse matte shrink is not passed on",
+  "old": "shrink: fixed_reader(fixed(curves, FG_SHRINK_IDS[k], t)?, 1.0f32),",
+  "new": "shrink: 0.0f32,"
+ }
+]

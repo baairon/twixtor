@@ -181,9 +181,9 @@ fn the_groups_of_the_display_and_layers_output_popups() {
     assert_eq!(LayerJob::output_group(5, 2), (2, 2), "MAIN_BG");
     // a job's checks
     assert!(job(2, 0.7, 1).check().is_ok());
-    assert!(LayerJob { nfg: 1, layers: vec![layer(0.7)], first: 0, last: 1 }.check().is_err());
-    assert!(LayerJob { nfg: 1, layers: vec![layer(0.7); 2], first: 1, last: 0 }.check().is_err());
-    assert!(LayerJob { nfg: 4, layers: vec![layer(0.7); 5], first: 0, last: 4 }.check().is_err());
+    assert!(LayerJob { nfg: 1, layers: vec![layer(0.7)], first: 0, last: 1, rebuild_group: false, full_group_reads_no_matte: false, pl_kernels: false, plates: false }.check().is_err());
+    assert!(LayerJob { nfg: 1, layers: vec![layer(0.7); 2], first: 1, last: 0, rebuild_group: false, full_group_reads_no_matte: false, pl_kernels: false, plates: false }.check().is_err());
+    assert!(LayerJob { nfg: 4, layers: vec![layer(0.7); 5], first: 0, last: 4, rebuild_group: false, full_group_reads_no_matte: false, pl_kernels: false, plates: false }.check().is_err());
 }
 
 /// A textured clip of 32 x 24 moving by (2.6, -1.3) per frame.
@@ -278,9 +278,10 @@ fn a_black_fg_matte_gives_the_single_layer_render_for_the_warping_codes_without_
 
 #[test]
 fn one_moving_point_sets_the_flow_at_its_pixel_in_the_solvers_output_convention() {
-    // Sensitivity 100 has no damping: the user displacement consumer writes d / w at the point's pixel at the end of level 0, and the
-    // solver negates its internal displacement, so F_AB at the pixel of the point's position in A is exactly
-    // (to - from) * k_0 and F_BA at its pixel in B is (from - to) * k_0, k_0 = (w_0 - 1) / (W - 1) per axis
+    // Sensitivity 100 has no damping: the user displacement consumer writes d / w at the point's pixel at the end of level 0
+    // (one point: w = 1 and d = -(to * k_0 - from * k_0), points::user_displacement_with), and the solver negates its
+    // internal displacement, so F_AB at the pixel of the point's position in A is exactly to * k_0 - from * k_0 and F_BA
+    // at its pixel in B is from * k_0 - to * k_0, k_0 = (w_0 - 1) / (W - 1) per axis
     let clip = moving_clip(Depth::U8);
     let (a, b) = (Image::from_frame(&clip[1]), Image::from_frame(&clip[2]));
     let mut s = settings(32, 24, Fmt::U8);
@@ -298,8 +299,8 @@ fn one_moving_point_sets_the_flow_at_its_pixel_in_the_solvers_output_convention(
     let (bx, by) = px(pt.at_b);
     let f_ab = flows.f_ab.unwrap();
     let f_ba = flows.f_ba.unwrap();
-    assert_eq!(f_ab.at(ax, ay), [-((12.0f32 - 17.0) * kx), -((9.0f32 - 6.0) * ky)]);
-    assert_eq!(f_ba.at(bx, by), [-((17.0f32 - 12.0) * kx), -((6.0f32 - 9.0) * ky)]);
+    assert_eq!(f_ab.at(ax, ay), [17.0f32 * kx - 12.0f32 * kx, 6.0f32 * ky - 9.0f32 * ky]);
+    assert_eq!(f_ba.at(bx, by), [12.0f32 * kx - 17.0f32 * kx, 9.0f32 * ky - 6.0f32 * ky]);
     // the motion the point names, about 5 px to the right and 3 up, in working pixels
     assert!(f_ab.at(ax, ay)[0] > 2.0 && f_ab.at(ax, ay)[1] < -1.0);
     // no point is the plain solve
@@ -729,4 +730,151 @@ fn the_fill_of_a_forward_warped_layer_wraps_its_seam_holes() {
     // without the flag the same render fills plain
     s.wrap_360 = false;
     assert_eq!(compose_layers(&s, &sel, &j, &a, &b, &mattes, &flows).unwrap(), composite(false, false));
+}
+
+/// The same wire frame with its rows in reverse order.
+fn mirrored(f: &Frame) -> Frame {
+    let (w, h) = (f.width, f.height);
+    let mut out = f.clone();
+    fn rev<T: Copy>(dst: &mut [T], src: &[T], w: usize, h: usize) {
+        for y in 0..h {
+            dst[y * w..(y + 1) * w].copy_from_slice(&src[(h - 1 - y) * w..(h - y) * w]);
+        }
+    }
+    match (&mut out.pixels, &f.pixels) {
+        (Pixels::U8(d), Pixels::U8(s)) => rev(d, s, w, h),
+        (Pixels::U16(d), Pixels::U16(s)) => rev(d, s, w, h),
+        (Pixels::F32(d), Pixels::F32(s)) => rev(d, s, w, h),
+        _ => unreachable!(),
+    }
+    out
+}
+
+#[test]
+fn the_layered_vector_path_runs_on_bottom_up_rows_when_the_wiring_says_so() {
+    // `motion_rows_reversed` (TwixtorPro_64 runs its motion path on bottom-up rows): the layered render of the frames
+    // is the vertical mirror of the unreversed render of the mirrored frames and mattes
+    let scene = Scene { w: 64, h: 48, c0: (30.0, 24.0), r: 14.0, vf: (2.0, 1.0), vb: (-1.0, 1.0) };
+    let clip: Vec<Frame> = (0..5).map(|k| scene.frame(Depth::U8, k as f64)).collect();
+    let m1: Vec<Frame> = (0..5).map(|k| scene.matte(Depth::U8, k as f64)).collect();
+    let rig = Rig::new(clip.clone(), vec![m1.clone()]);
+    let flipped = Rig::new(clip.iter().map(mirrored).collect(), vec![m1.iter().map(mirrored).collect()]);
+    let pts = vec![Vec::new(); 2];
+    for (code, interp) in [(0, 1), (1, 1), (3, 0)] {
+        let mut s = rig.settings(3);
+        s.warp_mode = code;
+        s.interp = interp;
+        let j = job(1, 0.8, 1);
+        let mut s_rev = s.clone();
+        s_rev.motion_rows_reversed = true;
+        let (Rendered::Image(a), Rendered::Image(b)) = (rig.layered(&s_rev, 75.0, &j, &pts).unwrap(), flipped.layered(&s, 75.0, &j, &pts).unwrap()) else {
+            panic!("an image is expected");
+        };
+        assert_eq!(a, b.rows_reversed(), "code {code}");
+    }
+}
+
+#[test]
+fn the_single_layer_point_path_runs_on_bottom_up_rows_when_the_wiring_says_so() {
+    // no FG layer, one tracking point: with `motion_rows_reversed` the render is the vertical mirror of the unreversed
+    // render of the mirrored frames with the point at H - 1 - y, as the vector path without points
+    let scene = Scene { w: 64, h: 48, c0: (30.0, 24.0), r: 14.0, vf: (2.0, 1.0), vb: (-1.0, 1.0) };
+    let clip: Vec<Frame> = (0..5).map(|k| scene.frame(Depth::U8, k as f64)).collect();
+    let rig = Rig::new(clip.clone(), Vec::new());
+    let flipped = Rig::new(clip.iter().map(mirrored).collect(), Vec::new());
+    let pt = UserPoint { at_a: [30.0, 20.0], at_b: [33.0, 22.5] };
+    let up = UserPoint { at_a: [30.0, 47.0 - 20.0], at_b: [33.0, 47.0 - 22.5] };
+    for (code, interp) in [(0, 1), (1, 1), (3, 0)] {
+        let mut s = rig.settings(3);
+        s.warp_mode = code;
+        s.interp = interp;
+        let j = job(0, 0.8, 1);
+        let mut s_rev = s.clone();
+        s_rev.motion_rows_reversed = true;
+        let a = image(rig.layered(&s_rev, 75.0, &j, &[vec![pt]]).unwrap());
+        let b = image(flipped.layered(&s, 75.0, &j, &[vec![up]]).unwrap());
+        assert_eq!(a, b.rows_reversed(), "code {code}");
+        // and the point is used: without it the render differs
+        assert_ne!(image(rig.layered(&s_rev, 75.0, &j, &[Vec::new()]).unwrap()), a, "code {code}");
+    }
+}
+
+/// The fill of the single group rebuild runs in the frame of the motion path: with the rows reversed and the tap above
+/// first it is the fill of the reversed image turned back (the frame of TwixtorPro_64's single channel fill, which
+/// reproduces the plugin's filled plates bit for bit); the known pixels
+/// keep their values, and the frame changes the last bits of the filled ones.
+#[test]
+fn the_rebuild_fill_runs_on_the_rows_of_the_motion_path() {
+    let (w, h) = (24usize, 16usize);
+    let mut img = Image::new(w, h, Fmt::F32);
+    if let Samples::F32(s) = &mut img.samples {
+        for (i, p) in s.chunks_exact_mut(CHANNELS).enumerate() {
+            let c = tex((i % w) as f64, (i / w) as f64, 0.37);
+            p.copy_from_slice(&[1.0, c[0] as f32, c[1] as f32, c[2] as f32]);
+        }
+    }
+    let boxed = |x: usize, y: usize| ((3..10).contains(&x) && (1..9).contains(&y)) || ((12..20).contains(&x) && (5..13).contains(&y));
+    let holes: Vec<f32> = (0..w * h).map(|i| if boxed(i % w, i / w) { 1.0 } else { 0.0 }).collect();
+    let mut host = img.clone();
+    FillFrame { is360: false, taps: VerticalTaps::BelowFirst, reversed: false }.fill(&mut host, &holes).unwrap();
+    let mut plain = img.clone();
+    fill_holes_masked(&mut plain, HoleMaskRef::F32(&holes), false).unwrap();
+    assert_eq!(host, plain, "host rows and the engine's order are the plain fill");
+    let mut want = img.rows_reversed();
+    let rev: Vec<f32> = holes.chunks(w).rev().flatten().copied().collect();
+    fill_holes_masked_with(&mut want, HoleMaskRef::F32(&rev), false, VerticalTaps::AboveFirst).unwrap();
+    let want = want.rows_reversed();
+    let mut got = img.clone();
+    FillFrame { is360: false, taps: VerticalTaps::AboveFirst, reversed: true }.fill(&mut got, &holes).unwrap();
+    assert_eq!(got, want);
+    let (Samples::F32(g), Samples::F32(o), Samples::F32(p)) = (&got.samples, &img.samples, &plain.samples) else { unreachable!() };
+    let mut moved = 0;
+    for i in 0..w * h {
+        for c in 0..CHANNELS {
+            if holes[i] == 0.0 {
+                assert_eq!(g[i * CHANNELS + c].to_bits(), o[i * CHANNELS + c].to_bits(), "known pixel {i} channel {c}");
+            } else {
+                moved += usize::from(g[i * CHANNELS + c].to_bits() != p[i * CHANNELS + c].to_bits());
+            }
+        }
+    }
+    assert!(moved > 0, "the bottom-up frame changes filled values");
+}
+
+/// The plate rebuild of the fast path ([`rebuilt_plate`], a render with plates): on an opaque frame with hard mattes it
+/// gives the old rebuild's bytes (FG2 and Background displays); a frame pixel that is not opaque is a hole of the plate
+/// (filled, its alpha the frame's on the Background display), where the old rebuild kept it as it was.
+#[test]
+fn the_plate_rebuild_of_the_fast_path_keeps_hard_mattes_and_fills_partial_alpha() {
+    let (w, h) = (12usize, 8usize);
+    let mut img = Image::from_frame(&frame(Depth::U8, w, h, |x, y| tex(x as f64, y as f64, 0.2)));
+    let band = |x0: usize, x1: usize| Matte {
+        width: w,
+        height: h,
+        data: (0..w * h).map(|i| if (x0..x1).contains(&(i % w)) { 1.0 } else { 0.0 }).collect(),
+    };
+    let mattes = vec![band(2, 6), band(4, 9)];
+    let fill = FillFrame { is360: false, taps: VerticalTaps::BelowFirst, reversed: false };
+    let eff = matte::effective(&mattes, &[0.0, 0.0], w, h).unwrap();
+    for d in [4, 6] {
+        let mut j = job(2, 0.7, d);
+        j.plates = true;
+        let k = j.first;
+        let old = reconstructed_layer(&img, &mattes, &eff[k], k, 2, fill).unwrap();
+        assert_eq!(rebuilt_plate(&img, &mattes, &j, fill).unwrap(), old, "display {d}");
+    }
+    let at = (10usize, 3usize);
+    if let Samples::U8(s) = &mut img.samples {
+        s[(at.1 * w + at.0) * CHANNELS + A] = 128;
+    }
+    let mut j = job(2, 0.7, 6);
+    j.plates = true;
+    let old = reconstructed_layer(&img, &mattes, &eff[2], 2, 2, fill).unwrap();
+    let new = rebuilt_plate(&img, &mattes, &j, fill).unwrap();
+    let px = |i: &Image| match &i.samples {
+        Samples::U8(s) => s[(at.1 * w + at.0) * CHANNELS..(at.1 * w + at.0 + 1) * CHANNELS].to_vec(),
+        _ => unreachable!(),
+    };
+    assert_eq!(px(&new)[A], 128, "the frame's alpha");
+    assert_ne!(px(&new), px(&old), "filled and premultiplied, not kept");
 }

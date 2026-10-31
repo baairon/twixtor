@@ -31,7 +31,7 @@ pub const POINT_COUNT: usize = 12;
 pub(crate) const FG_CHAN_IDS: [&str; FG_COUNT] = ["fg1_matte_chan", "fg2_matte_chan", "fg3_matte_chan"];
 const FG_CHAN_NAMES: [&str; FG_COUNT] = ["FG1 Matte Chan", "FG2 Matte Chan", "FG3 Matte Chan"];
 pub(crate) const FG_SENS_IDS: [&str; FG_COUNT] = ["fg1_sensitivity", "fg2_sensitivity", "fg3_sensitivity"];
-const FG_SENS_NAMES: [&str; FG_COUNT] = ["FG1 Sensitivity", "FG2 Sensitivity", "FG3 Sensitivity"];
+const FG_SENS_NAMES: [&str; FG_COUNT] = ["FG1 Motion Sensitivity", "FG2 Motion Sensitivity", "FG3 Motion Sensitivity"];
 pub(crate) const FG_SHRINK_IDS: [&str; FG_COUNT] =
     ["fg1_inv_matte_shrink", "fg2_inv_matte_shrink", "fg3_inv_matte_shrink"];
 const FG_SHRINK_NAMES: [&str; FG_COUNT] =
@@ -58,8 +58,8 @@ pub(crate) const PT_COLOR_IDS: [&str; POINT_COUNT] = [
     "pt8_color", "pt9_color", "pt10_color", "pt11_color", "pt12_color",
 ];
 const PT_COLOR_NAMES: [&str; POINT_COUNT] = [
-    "Pt 1:", "Pt 2:", "Pt 3:", "Pt 4:", "Pt 5:", "Pt 6:", "Pt 7:", "Pt 8:", "Pt 9:", "Pt 10:",
-    "Pt 11:", "Pt 12:",
+    "Pt 1: Color", "Pt 2: Color", "Pt 3: Color", "Pt 4: Color", "Pt 5: Color", "Pt 6: Color",
+    "Pt 7: Color", "Pt 8: Color", "Pt 9: Color", "Pt 10: Color", "Pt 11: Color", "Pt 12: Color",
 ];
 
 /// Default color of each tracking point.
@@ -128,7 +128,7 @@ impl Effect for RetimeFgBg {
         p.push(popup(
             "display",
             "Display",
-            &["Output", "Source", "FG1", "FG2", "FG3", "Background"],
+            &["Twixtored Output", "Source", "FG1 Twixtored", "FG2 Twixtored", "FG3 Twixtored", "Background Twixtored"],
             1,
         ));
         // Default is All.
@@ -158,13 +158,13 @@ impl Effect for RetimeFgBg {
         ));
         p.push(popup(
             "vectors",
-            "Vectors",
-            &["No Vectors", "Sloppy", "Medium", "High", "Best"],
+            "Motion Vectors",
+            &["No Motion Vectors", "Sloppy", "Medium", "High", "Best"],
             5,
         ));
         p.push(popup(
             "prep",
-            "Prep",
+            "Image Prep",
             &["None", "Contrast/Edge Enhance", "Delinearize"],
             1,
         ));
@@ -178,7 +178,7 @@ impl Effect for RetimeFgBg {
         p.push(popup(
             "frame_interp",
             "Frame Interp",
-            &["Nearest", "Blend", "Weighted Blend"],
+            &["Nearest", "Blend", "Motion Weighted Blend"],
             2,
         ));
         p.push(popup(
@@ -187,7 +187,7 @@ impl Effect for RetimeFgBg {
             &["Inverse", "Inverse w/ Smart Blend", "Forward", "Forward, no Smart Blend"],
             1,
         ));
-        p.push(slider("blur_compensation", "Blur Compensation", (0.0, 10.0), (0.0, 10.0), 0.0, 2));
+        p.push(slider("blur_compensation", "Motion Blur Compensation", (0.0, 10.0), (0.0, 10.0), 0.0, 2));
         p.push(slider("main_bg_sensitivity", "Main_BG Sensitivity", (0.0, 100.0), (0.0, 100.0), 70.0, 2));
 
         // FG1 to FG3 groups: the channel, sensitivity and shrink parameters of each.
@@ -229,14 +229,15 @@ impl Effect for RetimeFgBg {
         EffectKind::Temporal
     }
 
-    /// The five optional layer parameters: Alt Source A replaces the input as the retimed footage,
-    /// Alt Source B is the separate source for the vector estimation (the same ids as plugin 01),
+    /// The five optional layer parameters: "Alt Color Source" (`alt_source_a`) replaces the input as
+    /// the retimed footage, "Alt Motion Source" (`alt_source_b`) is the separate source for the
+    /// vector estimation (the same ids as plugin 01),
     /// and the three FG Matte layers feed the n-layer path (the consecutive layers with pixels from
     /// FG1 on; their sizes are probed for the error fills).
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
-            LayerSpec { id: LAYER_ALT_A, name: "Alt Source A", optional: true },
-            LayerSpec { id: LAYER_ALT_B, name: "Alt Source B", optional: true },
+            LayerSpec { id: LAYER_ALT_A, name: "Alt Color Source", optional: true },
+            LayerSpec { id: LAYER_ALT_B, name: "Alt Motion Source", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[0], name: "FG1 Matte", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[1], name: "FG2 Matte", optional: true },
             LayerSpec { id: LAYER_FG_MATTE[2], name: "FG3 Matte", optional: true },
@@ -254,10 +255,10 @@ impl Effect for RetimeFgBg {
         glue::dependencies(cx, env)
     }
 
-    /// Time Remap Mode Speed and Frame Number, Nearest, Blend and Weighted Blend, the four Warping
-    /// codes with every Vectors quality, Blur Compensation, Prep, the FG Matte layers with the
-    /// Display groups, the tracking points, Track RGB+A (the wrap-around flag) and the Source
-    /// display with the Draw Geom overlay.
+    /// Time Remap Mode Speed and Frame Number, Nearest, Blend and Motion Weighted Blend, the four
+    /// Warping codes with every Motion Vectors quality, Motion Blur Compensation, Image Prep, the
+    /// FG Matte layers with the Display groups, the tracking points, Track RGB+A (the wrap-around
+    /// flag) and the Source display with the Draw Geom overlay.
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
         glue::render_temporal(cx, env, output)
     }
@@ -319,7 +320,10 @@ mod tests {
     #[test]
     fn display_and_draw_geom() {
         let (c, d) = popup_of("display");
-        assert_eq!(c.len(), 6);
+        assert_eq!(
+            c,
+            ["Twixtored Output", "Source", "FG1 Twixtored", "FG2 Twixtored", "FG3 Twixtored", "Background Twixtored"]
+        );
         assert_eq!(d, 1);
         let (c, d) = popup_of("draw_geom");
         assert_eq!(c, ["None", "All", "FG1", "FG2", "FG3", "Main_BG"]);
@@ -347,7 +351,7 @@ mod tests {
     fn track_control_group() {
         let (c, d) = popup_of("vectors");
         assert_eq!(c.len(), 5);
-        assert_eq!(c[0], "No Vectors");
+        assert_eq!(c, ["No Motion Vectors", "Sloppy", "Medium", "High", "Best"]);
         assert_eq!(d, 5, "default is Best");
         let (c, d) = popup_of("prep");
         assert_eq!(c, ["None", "Contrast/Edge Enhance", "Delinearize"]);
@@ -364,7 +368,7 @@ mod tests {
         assert_eq!(float_of("speed_percent"), (-10000.0, 10000.0, -1000.0, 1000.0, 100.0, 3));
         assert_eq!(float_of("frame_num"), (-200000.0, 200000.0, 0.0, 2000.0, 0.0, 2));
         let (c, d) = popup_of("frame_interp");
-        assert_eq!(c, ["Nearest", "Blend", "Weighted Blend"]);
+        assert_eq!(c, ["Nearest", "Blend", "Motion Weighted Blend"]);
         assert_eq!(d, 2, "default is Blend");
         let (c, d) = popup_of("warping");
         assert_eq!(c, ["Inverse", "Inverse w/ Smart Blend", "Forward", "Forward, no Smart Blend"]);
@@ -398,6 +402,65 @@ mod tests {
         }
         assert_eq!(PT_DEFAULT_COLORS[0], [0, 255, 0]);
         assert_eq!(PT_DEFAULT_COLORS[11], [128, 64, 255]);
+    }
+
+    /// The display names as the original registers
+    /// them in PARAMS_SETUP (`TwixtorPro_64`, captured
+    /// under the emulator; the pairing is in `parity/retime-fgbg-params/pairing.tsv`).
+    #[test]
+    fn names_match_the_registered_interface() {
+        let mut want: Vec<(String, String)> = [
+            ("display", "Display"),
+            ("draw_geom", "Draw Geom"),
+            ("video_360", "360 Video"),
+            ("src_mark_segments", "Src: Mark Segments"),
+            ("input_fields", "Input: Fields"),
+            ("in_fps_is_out_fps", "In FPS is Out FPS"),
+            ("input_frame_rate", "Input: Frame Rate"),
+            ("vectors", "Motion Vectors"),
+            ("prep", "Image Prep"),
+            ("track_rgb_a", "Track RGB+A"),
+            ("plenty_memory", "Plenty Memory?"),
+            ("time_remap_mode", "Time Remap Mode"),
+            ("speed_percent", "Speed %"),
+            ("frame_num", "Frame Num"),
+            ("frame_interp", "Frame Interp"),
+            ("warping", "Warping"),
+            ("blur_compensation", "Motion Blur Compensation"),
+            ("main_bg_sensitivity", "Main_BG Sensitivity"),
+        ]
+        .iter()
+        .map(|(i, n)| (i.to_string(), n.to_string()))
+        .collect();
+        for k in 1..=FG_COUNT {
+            want.push((format!("fg{k}_matte_chan"), format!("FG{k} Matte Chan")));
+            want.push((format!("fg{k}_sensitivity"), format!("FG{k} Motion Sensitivity")));
+            want.push((format!("fg{k}_inv_matte_shrink"), format!("FG{k} Inv Matte Shrink")));
+        }
+        for n in 1..=POINT_COUNT {
+            want.push((format!("pt{n}_use"), format!("Pt {n}: Use")));
+            want.push((format!("pt{n}_pos"), format!("Pt {n}: Pos")));
+            want.push((format!("pt{n}_color"), format!("Pt {n}: Color")));
+        }
+        let got: Vec<(String, String)> =
+            RetimeFgBg.params().iter().map(|p| (p.id.to_string(), p.name.to_string())).collect();
+        assert_eq!(got, want);
+    }
+
+    #[test]
+    fn layers_follow_the_registered_names() {
+        let layers: Vec<(&str, &str, bool)> =
+            RetimeFgBg.layers().iter().map(|l| (l.id, l.name, l.optional)).collect();
+        assert_eq!(
+            layers,
+            [
+                ("alt_source_a", "Alt Color Source", true),
+                ("alt_source_b", "Alt Motion Source", true),
+                ("fg1_matte", "FG1 Matte", true),
+                ("fg2_matte", "FG2 Matte", true),
+                ("fg3_matte", "FG3 Matte", true),
+            ]
+        );
     }
 
     #[test]

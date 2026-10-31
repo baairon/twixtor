@@ -251,7 +251,7 @@ fn alt_src_through_the_binary_replaces_the_input() {
     let bin = vfx().expect("fx-cli builds");
     let dir = Scratch::new("alt");
     let clip = make_moving_clip(&dir, Depth::U8);
-    // the input is a still black clip, Alt Src carries the motion: the output equals running the moving clip as the input
+    // the input is a still black clip, Alt Motion Src carries the motion: the output equals running the moving clip as the input
     let black = dir.path("black.raw");
     std::fs::write(&black, vec![0u8; W * H * 4 * SOURCE_FRAMES]).unwrap();
     let (a, b) = (dir.path("a.raw"), dir.path("b.raw"));
@@ -308,13 +308,15 @@ fn the_layered_paths_render_through_the_binary_and_note_each_gap_once() {
         (&["display=1", "pt1_use=2", "pt1_pos=20,15", "draw_geom=1"], &[], &[]),
         (&["display=3", "debug_view_method=1"], &[], &[]),
         (&["fg1_track=0", "fg2_sensitivity=10"], &[], &[]),
-        (&[], one, &["G1", "G1b", "G1d"]),
-        (&["fg1_inv_matte_shrink=2"], one, &["G1", "G1b", "G1d"]),
-        (&["layers_output=3"], two, &["G1", "G1b", "G1c", "G1d"]),
-        // no layer of the group tracks: no solve, so neither the masks nor the visibility order run
-        (&["fg1_track=0", "fg2_track=0", "main_bg_track=0"], two, &["G1", "G1d", "G5"]),
+        // the layered solve, its masks and visibility order, the output composite and the Debug composition are
+        // read from the original's code: only the layered frame itself (G1) is noted
+        (&[], one, &["G1"]),
+        (&["fg1_inv_matte_shrink=2"], one, &["G1"]),
+        (&["layers_output=3"], two, &["G1"]),
+        // no layer of the group tracks: no solve, the second tracker runs
+        (&["fg1_track=0", "fg2_track=0", "main_bg_track=0"], two, &["G1", "G5"]),
         (&["display=3"], &[], &["G4"]),
-        (&["display=3", "debug_view_method=3"], one, &["G1", "G1b", "G1d", "G4"]),
+        (&["display=3", "debug_view_method=3"], one, &["G1", "G4"]),
         (&["main_bg_track=0"], &[], &["G5"]),
         (&["main_bg_track=0", "pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &["G5"]),
         (&["pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &["G2"]),

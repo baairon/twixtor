@@ -4,6 +4,7 @@
 //! invariance and a ground truth sanity test on a synthetic moving scene.
 
 use super::*;
+use crate::holefill::fill_holes;
 use crate::flow::{solve_pair, FlowSettings};
 use crate::holefill::tests::{as_f64, first_diff, image_from, in_pool, load_cases, same_bits, Rng};
 use crate::image::Fmt;
@@ -742,7 +743,7 @@ fn weighted_variants_ignore_the_options() {
     };
     let flagged = {
         let mut out = Image::new(26, 16, Fmt::U8);
-        weighted_blend_smart(&mut out, &a, &flow, &b, &flow, 0.4, SmartOpts { binary_alpha: true, is360: true }).unwrap();
+        weighted_blend_smart(&mut out, &a, &flow, &b, &flow, 0.4, SmartOpts { binary_alpha: true, is360: true, ..SmartOpts::default() }).unwrap();
         out
     };
     assert!(same_bits(&plain, &flagged));
@@ -820,7 +821,7 @@ fn blend_tail_picks_the_variant_and_finishes() {
     let c2 = Coverage::new(w, h, 255);
     c1.data[0] = 0; // not a hole after the combine
     for binary in [false, true] {
-        let opts = SmartOpts { binary_alpha: binary, is360: false };
+        let opts = SmartOpts { binary_alpha: binary, is360: false, ..SmartOpts::default() };
         let mut out = Image::new(w, h, Fmt::U8);
         let mut c1m = c1.clone();
         blend_tail(&mut out, &a, &b, 0.4, Some((&mut c1m, &c2)), opts).unwrap();
@@ -839,7 +840,7 @@ fn blend_tail_picks_the_variant_and_finishes() {
     assert!(!same_bits(&p, &q), "translucent input: the variants differ");
     // no coverage: the plain blend
     let mut out = Image::new(w, h, Fmt::U8);
-    blend_tail(&mut out, &a, &b, 0.4, None, SmartOpts { binary_alpha: true, is360: true }).unwrap();
+    blend_tail(&mut out, &a, &b, 0.4, None, SmartOpts { binary_alpha: true, is360: true, ..SmartOpts::default() }).unwrap();
     let mut want = Image::new(w, h, Fmt::U8);
     blend(&mut want, &a, &b, 0.4);
     assert!(same_bits(&out, &want));
@@ -926,7 +927,7 @@ fn the_360_compositions_wrap_their_warps_and_leave_no_hole_to_fill() {
         let frac = 1.0f32 - wa;
         for binary in [false, true] {
             let mut out = Image::new(w, h, fmt);
-            blend_smart(&mut out, &a, &fba, &b, &fab, wa, SmartOpts { binary_alpha: binary, is360: true }).unwrap();
+            blend_smart(&mut out, &a, &fba, &b, &fab, wa, SmartOpts { binary_alpha: binary, is360: true, ..SmartOpts::default() }).unwrap();
             let mut ta = Image::new(w, h, fmt);
             let ca = inv_warp_coverage(&mut ta, &a, &fba, frac, wopts).unwrap();
             let mut tb = Image::new(w, h, fmt);
@@ -941,11 +942,11 @@ fn the_360_compositions_wrap_their_warps_and_leave_no_hole_to_fill() {
             assert!(same_bits(&out, &want), "{fmt:?} binary {binary}");
             // and it is not the plain composition: the samples wrap instead of fading
             let mut plain = Image::new(w, h, fmt);
-            blend_smart(&mut plain, &a, &fba, &b, &fab, wa, SmartOpts { binary_alpha: binary, is360: false }).unwrap();
+            blend_smart(&mut plain, &a, &fba, &b, &fab, wa, SmartOpts { binary_alpha: binary, is360: false, ..SmartOpts::default() }).unwrap();
             assert!(!same_bits(&out, &plain), "{fmt:?} binary {binary}");
         }
         let mut out = Image::new(w, h, fmt);
-        nearest_smart(&mut out, &a, &b, &fab, 0.3, SmartOpts { binary_alpha: false, is360: true }).unwrap();
+        nearest_smart(&mut out, &a, &b, &fab, 0.3, SmartOpts { binary_alpha: false, is360: true, ..SmartOpts::default() }).unwrap();
         let mut want = Image::new(w, h, fmt);
         inv_warp(&mut want, &b, &fab, 0.3, wopts).unwrap();
         assert!(same_bits(&out, &want), "{fmt:?} nearest");

@@ -1,0 +1,62 @@
+{
+ "state": "all four plugins boot and render; the references of the six module grids were made with this harness",
+ "plugins": {
+  "Twixtor_64": {"effect": "retime", "modules": ["retime-time", "retime-flow"], "renders": true},
+  "TwixtorPro_64": {"effect": "retime-fgbg", "modules": ["fgbg-core", "fgbg-layers"], "renders": true},
+  "CreateMotionVectors_64": {"effect": "create-vectors", "modules": ["create-vectors"], "renders": true},
+  "TwixtorProVectorsIn_64": {"effect": "vectors-in", "modules": ["vectors-in"], "renders": true}
+ },
+ "dlls_copied": [
+  "ntdll.dll",
+  "kernel32.dll",
+  "mscoree.dll",
+  "ucrtbase.dll",
+  "WS2_32.dll",
+  "RPCRT4.dll",
+  "WINMM.dll",
+  "OPENGL32.dll",
+  "USER32.dll",
+  "GDI32.dll",
+  "ADVAPI32.dll",
+  "SHELL32.dll",
+  "ole32.dll",
+  "OLEAUT32.dll",
+  "MSVCR120.dll",
+  "MSVCP120.dll",
+  "IPHLPAPI.dll",
+  "WINHTTP.dll",
+  "CRYPT32.dll",
+  "SHLWAPI.dll",
+  "VERSION.dll",
+  "KERNELBASE.dll",
+  "msvcrt.dll",
+  "SECHOST.dll",
+  "win32u.dll",
+  "GLU32.dll",
+  "msvcp_win.dll",
+  "combase.dll"
+ ],
+ "stand_ins": [
+  "keyframe interpolation (keys.py): linear, hold, ease; Bezier handles refused",
+  "PF_IsRenderEngine answers false, as an interactive After Effects does",
+  "a checkout outside the clip: empty result_rect, max_result_rect at the layer's size",
+  "an unset layer whose registered default is the effect's own layer gets the case's input clip",
+  "FG matte layers handed in as ordinary layer params",
+  "floating point control state at the Windows x64 start values",
+  "a 1 MiB main guest stack and per-thread stack bounds; cooperative guest threads",
+  "C++ exception dispatch done as Windows does it; the language handlers are the C runtime's own code",
+  "empty registry hives; one Python heap allocator; a deterministic CryptGenRandom",
+  "exports of Windows libraries other than msvcr120, msvcp120 and ucrtbase that Qiling has no Python version of return 0"
+ ],
+ "assumptions": [
+  "time base: integer fps F gives time_scale F*100 and time_step 100; N/D gives time_scale N and time_step D",
+  "16 bpc worlds use the rewrite's conversions between 0..65535 and 0..32768",
+  "no GPU: GPU suites answered 'suite not found'"
+ ],
+ "callrecord_check": {
+  "ok": true,
+  "cases": 12,
+  "all_stdout_and_stderr_equal": true
+ },
+ "unit_tests": "the harness unit tests (test_*.py) pass: 115 run, 5 skipped"
+}

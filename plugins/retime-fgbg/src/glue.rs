@@ -7,9 +7,9 @@
 //! job of the FG matte layers, the tracking points and the Draw Geom overlay.
 //!
 //! The render of a frame, after the error fills of the probes:
-//! * the Source display (`Display == 2`) shows Alt Source A at the current time `X`, or the input
-//!   layer when there is no Alt Source A, then draws the tracking points of the Draw Geom group
-//!   over it ([`draw_geom_points`]; rule G3);
+//! * the Source display (`Display == 2`) shows Alt Color Source at the current time `X`, then
+//!   draws the tracking points of the Draw Geom group over it ([`draw_geom_points`]; rule G3);
+//!   without Alt Color Source it shows the missing layer fill and draws nothing;
 //! * every other display runs `compose::retime_layers` with the layer job of the FG matte layers
 //!   ([`layer_job`]: the count `n` of the probe loop, which stops at the first empty one, the per
 //!   layer controls and the group of the Display popup) and the tracking points in use at the
@@ -17,8 +17,24 @@
 //!   single layer core of today, byte for byte, and the Display values 3 to 6 all
 //!   select the one group `0..=0`, so they render exactly like the processed output.
 //!
-//! `Track RGB+A` is the engine's wrap-around (360) flag (`EngineSettings::wrap_360`, rule G6): the solver, the inverse warps, the hole fill and the blur tail wrap horizontally;
-//! it does not add alpha to the luma. Mask paths (First/Last Mask, layer masks) feed the same
+//! The motion path works on bottom-up rows and pushes frames with the Gouraud forward warp, as the
+//! other plugins of the family do: `Wiring::motion_rows_reversed` is set (the single layer vector
+//! path reverses the rows of its frames and tracking frames, runs, and turns its output back) and
+//! [`read_settings`] puts `retime_engine::stages::GouraudForward` in the settings, so every forward
+//! warp interpolates the vertex colours over the mesh triangles. MEASURED against the original
+//! under the emulator: an impulse pushed half
+//! a pixel along a diagonal lands on two pixels of the main diagonal (the anti-diagonal of the
+//! bottom-up frame), and the core grid's forward and inverse warp cases this reaches become bit
+//! identical. The layered paths (FG mattes, tracking points) do not reverse their rows here.
+//!
+//! Image Prep differs from plugin 01's reading (MEASURED):
+//! "Contrast/Edge Enhance" runs the solver's Contrast/Edge Enhance and its Delinearize, and "Delinearize" renders
+//! byte for byte as None, so [`read_settings`] sets `prep_delinearize` to `prep_contrast_edge`.
+//!
+//! `Track RGB+A` is not the engine's wrap-around (360) flag: the original does not wrap with it (MEASURED),
+//! so `EngineSettings::wrap_360` stays off. It adds alpha to the
+//! solver's luma (`EngineSettings::track_alpha`, MEASURED), except with 360 Video
+//! on, where the solver keeps its video range luma (that combination is not measured). Mask paths (First/Last Mask, layer masks) feed the same
 //! solver input as the points but are parameter kinds `fx-core` cannot express, so they are not
 //! part of this crate's input.
 
@@ -30,7 +46,7 @@ use retime_engine::compose::{self, Rendered};
 use retime_engine::frontend::{self, fixed_reader, SettingIds, TimeParamIds, Wiring};
 use retime_engine::geom::draw_points;
 use retime_engine::host::{layer_is_set, EngineHost, EngineSettings, EnvHost, LayerIds};
-use retime_engine::image::{error_frame, MissingLayerStyle};
+use retime_engine::image::{error_frame, ErrorKind, MissingLayerStyle};
 use retime_engine::layers::{LayerJob, LayerParams};
 use retime_engine::planner::{LAYER_ALT_A, LAYER_ALT_B};
 use retime_engine::points::{point_layer, read_pos, UserPoint};
@@ -69,6 +85,8 @@ pub const WIRING: Wiring = Wiring {
     layers: LayerIds { alt_a: LAYER_ALT_A, alt_b: LAYER_ALT_B },
     missing_layer: MissingLayerStyle::BlueAlphaSlip,
     register_layers: true,
+    // the original's motion path works on bottom-up rows, as plugin 01's does (fgbg-core fix 06)
+    motion_rows_reversed: true,
 };
 
 /// The Warping popup as the warp code of the engine: 1 Inverse is 0, 2 Inverse w/ Smart Blend 1, 3
@@ -115,12 +133,25 @@ pub fn points_in_use(curves: &ParamCurves, time1: i32, time2: i32) -> Vec<usize>
 }
 
 /// The settings of the engine for plugin 03: the shared reader plus the warp code of the Warping
-/// popup and `Track RGB+A` as the engine's wrap-around flag, both read at `current_time`
-/// (all popups and checkboxes are sampled there).
+/// popup, read at `current_time` (all popups and checkboxes are sampled there). `Track RGB+A` does
+/// not set the wrap-around flag (fix 05); it sets alpha in the solver's luma (fix 07). Image Prep 2 sets
+/// both Prep flags and 3 none (fix 09).
 pub fn read_settings(cx: &TemporalContext, env: &Env<'_>) -> Result<EngineSettings> {
     let mut settings = frontend::read_settings(&WIRING, cx, env)?;
     settings.warp_mode = warp_code(env.params.int_at("warping", cx.current_time) as i32);
-    settings.wrap_360 = env.params.bool_at("track_rgb_a", cx.current_time);
+    // every forward warp of the render is the Gouraud variant (fgbg-core fix 06)
+    settings.stages = retime_engine::stages::GouraudForward::wrap(settings.stages.clone());
+    // Track RGB+A adds alpha to the solver's luma (MEASURED). With 360 Video on, the solver
+    // reads the video range luma, which has no alpha term; what the original does with both is not
+    // measured, so that combination keeps the plain video range luma.
+    // 360 Video (read from the original's code): TwixtorPro runs the wrap variants of its filters, samplers, gradient and
+    // block matching (coverage of v360-w1 against alpha-w1; no luma routine differs), so the checkbox is the engine's
+    // wrap-around flag here, not the video range luma or the binary alpha Smart Blend of plugin 01
+    settings.wrap_360 = settings.video_360;
+    settings.video_360 = false;
+    settings.track_alpha = env.params.bool_at("track_rgb_a", cx.current_time);
+    // Image Prep (fgbg-core fix 09): "Contrast/Edge Enhance" (2) runs both Prep stages, "Delinearize" (3) none
+    settings.prep_delinearize = settings.prep_contrast_edge;
     Ok(settings)
 }
 
@@ -146,7 +177,16 @@ pub fn layer_job(settings: &EngineSettings, curves: &ParamCurves, fg_count: usiz
     let t = i64::from(settings.current_time);
     let fg: Vec<LayerParams> = (0..fg_count).map(|k| fg_layer(curves, t, k)).collect();
     let main_bg = LayerParams { matte_chan: 0, sensitivity: settings.sensitivity, shrink: 0.0, track: true };
-    LayerJob::for_display(&fg, main_bg, curves.int_at("display", t) as i32)
+    let mut job = LayerJob::for_display(&fg, main_bg, curves.int_at("display", t) as i32);
+    // a single group display rebuilds what the layers above cover (fix 03), the fast path of the full group reads
+    // no matte (fix 04); both measured on plugin 03
+    job.rebuild_group = true;
+    job.full_group_reads_no_matte = true;
+    // the layers are composed with the plugin's own OVER kernels (read from the code)
+    job.pl_kernels = true;
+    // the vector path interpolates every layer on its own from its plates (read from the code)
+    job.plates = true;
+    job
 }
 
 /// The tracking points of the pair of `sel`: every point in use at the layer times
@@ -270,6 +310,18 @@ fn render<'e>(
     }
     let curves = env.params;
     if settings.display_source {
+        // The Source display reads Alt Color Source at `X` (the pre-render checks it out even
+        // when it is empty) and never falls back to the input layer: without Alt Color Source
+        // the original shows its missing layer fill, with no Draw Geom overlay (MEASURED under
+        // the emulator).
+        if !settings.alt_a_present {
+            return Ok(Rendered::Error(error_frame(
+                ErrorKind::MissingLayer(settings.missing_layer_style),
+                settings.width,
+                settings.height,
+                settings.fmt.depth(),
+            )));
+        }
         // 6.4: the Draw Geom overlay runs after the copy of the source; with no geometry it draws nothing
         let mut rendered = compose::render(settings, &host)?;
         let pts = draw_geom_points(curves, map, settings, fg_count);
@@ -278,7 +330,9 @@ fn render<'e>(
         }
         return Ok(rendered);
     }
-    let host = host.with_mattes(env, &LAYER_FG_MATTE[..fg_count])?;
+    // the FG mattes are read as stored, not premultiplied by the matte layer's alpha (the shared render function's raw
+    // matte plane; MEASURED: `chan1-alpha` and `chan4-alpha` of the layers grid have different references)
+    let host = host.with_mattes(env, &LAYER_FG_MATTE[..fg_count])?.with_straight_mattes();
     let job = layer_job(settings, curves, fg_count);
     compose::retime_layers(settings, &host, &job, |sel| Ok(user_points(curves, map, sel, fg_count)))
 }

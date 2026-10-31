@@ -1,8 +1,8 @@
 //! The pointwise matte operations on the device: `matte::extract`, `premultiply`, `over`,
 //! `effective` (shrinks of zero only: the choke needs the Gaussian blur and stays on the CPU),
-//! `over_weights` and `alpha_holes` (kernels `mt_*`, and `vc_holes_*` for the holes). The
-//! kernels read every matte value through `mt_clamp_matte` where the CPU reads it through
-//! `matte::clamp_matte` (premultiply, effective, over_weights). The wrappers check sizes first
+//! `over_weights`, `stack_weights` and `alpha_holes` (kernels `mt_*`, and `vc_holes_*` for the
+//! holes). The kernels read every matte value through `mt_clamp_matte` where the CPU reads it
+//! through `matte::clamp_matte` (premultiply, effective, over_weights, stack_weights). The wrappers check sizes first
 //! and answer `Unsupported` where the CPU function returns `FxError::Mismatch`, before anything
 //! is uploaded or queued.
 
@@ -153,42 +153,68 @@ pub fn effective_gpu(session: &Session, mattes: &[Matte], shrinks: &[f32], width
     download_all(session, &out)
 }
 
-/// Queues `mt_over_weights`: `out` (`last - first + 1` planes) receives the OVER weights of the
-/// layers `first..=last` of `matte::over_weights` over the `mattes.len()` FG mattes.
-pub fn over_weights_enqueue(session: &Session, mattes: &[&DevicePlane], first: usize, last: usize, w: usize, h: usize, out: &[&DevicePlane]) -> Result<(), StageError> {
+/// Queues the weights kernel `kernel` (`mt_over_weights` or `mt_stack_weights`) over the
+/// `mattes.len()` FG mattes into `out` (`last - first + 1` planes).
+#[allow(clippy::too_many_arguments)]
+fn weights_enqueue(session: &Session, kernel: &str, what: &str, mattes: &[&DevicePlane], first: usize, last: usize, w: usize, h: usize, out: &[&DevicePlane]) -> Result<(), StageError> {
     let nfg = mattes.len();
     if nfg > MAX_FG || first > last || last > nfg || out.len() != last - first + 1 {
-        return Err(StageError::Unsupported(format!("over_weights: group {first}..={last} of {nfg} FG layers, {} outputs", out.len())));
+        return Err(StageError::Unsupported(format!("{what}: group {first}..={last} of {nfg} FG layers, {} outputs", out.len())));
     }
     let n = check_pixels(w, h)?;
-    check_mattes(mattes, w, h, "over_weights")?;
-    check_mattes(out, w, h, "over_weights")?;
+    check_mattes(mattes, w, h, what)?;
+    check_mattes(out, w, h, what)?;
     // with no FG matte every slot repeats the first output (the loop never reads a matte)
     let m = |k: usize| mattes.get(k).or(mattes.first()).map(|p| p.data.arg()).unwrap_or_else(|| out[0].data.arg());
     let o = |k: usize| out.get(k).unwrap_or(&out[0]).data.arg();
     let args = [m(0), m(1), m(2), o(0), o(1), o(2), o(3), Arg::U32(first as u32), Arg::U32(last as u32), Arg::U32(nfg as u32), count(n)];
-    launch(session, "mt_over_weights", Range::D1(n), &args)
+    launch(session, kernel, Range::D1(n), &args)
+}
+
+/// The CPU's `Mismatch` cases of the weights (a group outside the layers, a matte that is not
+/// `w x h` or holds another number of values, an overflowing size) are `Unsupported`, as is an
+/// empty size, all checked before anything is uploaded.
+#[allow(clippy::too_many_arguments)]
+fn weights_gpu(session: &Session, kernel: &str, what: &str, mattes: &[Matte], first: usize, last: usize, w: usize, h: usize) -> Result<Vec<Matte>, StageError> {
+    let nfg = mattes.len();
+    if first > last || last > nfg {
+        return Err(StageError::Unsupported(format!("{what}: group {first}..={last} of {nfg} FG layers")));
+    }
+    if mattes.iter().any(|m| !matte_is(m, w, h)) {
+        return Err(StageError::Unsupported(format!("{what}: a matte of another size")));
+    }
+    check_pixels(w, h)?;
+    if nfg > MAX_FG {
+        return Err(StageError::Unsupported(format!("{what}: {nfg} FG mattes (at most {MAX_FG} run on the device)")));
+    }
+    let up = upload_mattes(session, mattes)?;
+    let out = (first..=last).map(|_| DevicePlane::output(session, w, h)).collect::<Result<Vec<_>, _>>()?;
+    weights_enqueue(session, kernel, what, &up.iter().collect::<Vec<_>>(), first, last, w, h, &out.iter().collect::<Vec<_>>())?;
+    download_all(session, &out)
+}
+
+/// Queues `mt_over_weights`: `out` (`last - first + 1` planes) receives the OVER weights of the
+/// layers `first..=last` of `matte::over_weights` over the `mattes.len()` FG mattes.
+pub fn over_weights_enqueue(session: &Session, mattes: &[&DevicePlane], first: usize, last: usize, w: usize, h: usize, out: &[&DevicePlane]) -> Result<(), StageError> {
+    weights_enqueue(session, "mt_over_weights", "over_weights", mattes, first, last, w, h, out)
 }
 
 /// `matte::over_weights` on the device; the CPU's `Mismatch` cases (a group outside the layers,
 /// a matte that is not `w x h` or holds another number of values, an overflowing size) are
 /// `Unsupported`, as is an empty size, all checked before anything is uploaded.
 pub fn over_weights_gpu(session: &Session, mattes: &[Matte], first: usize, last: usize, w: usize, h: usize) -> Result<Vec<Matte>, StageError> {
-    let nfg = mattes.len();
-    if first > last || last > nfg {
-        return Err(StageError::Unsupported(format!("over_weights: group {first}..={last} of {nfg} FG layers")));
-    }
-    if mattes.iter().any(|m| !matte_is(m, w, h)) {
-        return Err(StageError::Unsupported("over_weights: a matte of another size".into()));
-    }
-    check_pixels(w, h)?;
-    if nfg > MAX_FG {
-        return Err(StageError::Unsupported(format!("over_weights: {nfg} FG mattes (at most {MAX_FG} run on the device)")));
-    }
-    let up = upload_mattes(session, mattes)?;
-    let out = (first..=last).map(|_| DevicePlane::output(session, w, h)).collect::<Result<Vec<_>, _>>()?;
-    over_weights_enqueue(session, &up.iter().collect::<Vec<_>>(), first, last, w, h, &out.iter().collect::<Vec<_>>())?;
-    download_all(session, &out)
+    weights_gpu(session, "mt_over_weights", "over_weights", mattes, first, last, w, h)
+}
+
+/// Queues `mt_stack_weights`: `out` (`last - first + 1` planes) receives the weights of the
+/// layers `first..=last` inside the whole stack of `matte::stack_weights` (create-vectors fix 03).
+pub fn stack_weights_enqueue(session: &Session, mattes: &[&DevicePlane], first: usize, last: usize, w: usize, h: usize, out: &[&DevicePlane]) -> Result<(), StageError> {
+    weights_enqueue(session, "mt_stack_weights", "stack_weights", mattes, first, last, w, h, out)
+}
+
+/// `matte::stack_weights` on the device, with the refusals of [`over_weights_gpu`].
+pub fn stack_weights_gpu(session: &Session, mattes: &[Matte], first: usize, last: usize, w: usize, h: usize) -> Result<Vec<Matte>, StageError> {
+    weights_gpu(session, "mt_stack_weights", "stack_weights", mattes, first, last, w, h)
 }
 
 /// `matte::alpha_holes` on the device (the hole mask of `vectors::vector_hole_mask`).

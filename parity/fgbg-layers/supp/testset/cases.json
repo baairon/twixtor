@@ -1,0 +1,1766 @@
+{
+ "format": 1,
+ "ffmpeg": "none (raw inputs written by gen_supp.py)",
+ "inputs": [
+  {
+   "file": "inputs/box1-16x12.d16.f3.rgba64le",
+   "source": "box1",
+   "width": 16,
+   "height": 12,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-16x12.d32.f3.gbrapf32le",
+   "source": "box1",
+   "width": 16,
+   "height": 12,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-16x12.d8.f3.rgba",
+   "source": "box1",
+   "width": 16,
+   "height": 12,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-23x17.d16.f3.rgba64le",
+   "source": "box1",
+   "width": 23,
+   "height": 17,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-23x17.d32.f3.gbrapf32le",
+   "source": "box1",
+   "width": 23,
+   "height": 17,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-23x17.d8.f3.rgba",
+   "source": "box1",
+   "width": 23,
+   "height": 17,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-32x24.d16.f3.rgba64le",
+   "source": "box1",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "source": "box1",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1-32x24.d8.f3.rgba",
+   "source": "box1",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1a-16x12.d16.f3.rgba64le",
+   "source": "box1a",
+   "width": 16,
+   "height": 12,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1a-16x12.d32.f3.gbrapf32le",
+   "source": "box1a",
+   "width": 16,
+   "height": 12,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box1a-16x12.d8.f3.rgba",
+   "source": "box1a",
+   "width": 16,
+   "height": 12,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/box2-32x24.d8.f3.rgba",
+   "source": "box2",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/m-hard-0-32x24.d8.f3.rgba",
+   "source": "hard",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/m-hard-1-32x24.d8.f3.rgba",
+   "source": "hard",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  },
+  {
+   "file": "inputs/pan-32x24.d16.f3.rgba64le",
+   "source": "pan",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/pan-32x24.d32.f3.gbrapf32le",
+   "source": "pan",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 3
+  },
+  {
+   "file": "inputs/pan-32x24.d8.f3.rgba",
+   "source": "pan",
+   "width": 32,
+   "height": 24,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 3
+  }
+ ],
+ "cases": [
+  {
+   "id": "retime-fgbg.supp-int.box1-16x12.d8.0953491f",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-int.box1-16x12.d8.0953491f.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-16x12.d8.cd2dc553",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=3.25,3.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=8.5,6.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=12.1,8.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-sub.box1-16x12.d8.cd2dc553.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-16x12.d8.0fc231d4",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=9,6.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-overlap.box1-16x12.d8.0fc231d4.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-16x12.d8.5fee73b8",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=15,11",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=15.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,6",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-edge.box1-16x12.d8.5fee73b8.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-23x17.d8.faf6ad6e",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11,8"
+   ],
+   "depth": 8,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-int.box1-23x17.d8.faf6ad6e.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-23x17.d8.81829947",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=6.25,5.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=11.5,8.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=15.1,10.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 8,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-sub.box1-23x17.d8.81829947.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-23x17.d8.aa938171",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11,8",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=12,8.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 8,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-overlap.box1-23x17.d8.aa938171.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-23x17.d8.8ed0328f",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=22,16",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=22.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,8",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 8,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-edge.box1-23x17.d8.8ed0328f.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-32x24.d8.de39f085",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=16,12"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-int.box1-32x24.d8.de39f085.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-32x24.d8.ec741f26",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11.25,9.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=16.5,12.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=20.1,14.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-sub.box1-32x24.d8.ec741f26.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-32x24.d8.274f3311",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=16,12",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=17,12.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-overlap.box1-32x24.d8.274f3311.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-32x24.d8.80e63ad0",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=31,23",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=31.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,12",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-edge.box1-32x24.d8.80e63ad0.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-alpha-src.box1a-16x12.d8.290f974e",
+   "effect": "retime-fgbg",
+   "label": "supp-alpha-src",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6",
+    "pt2_use=5",
+    "pt2_pos=3.4,2.6",
+    "pt2_color=10,100,200"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-alpha-src.box1a-16x12.d8.290f974e.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1a-16x12.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-colours.pan-32x24.d8.6602507f",
+   "effect": "retime-fgbg",
+   "label": "supp-colours",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=5,5",
+    "pt1_color=1,2,3",
+    "pt2_use=5",
+    "pt2_pos=12,6",
+    "pt2_color=254,128,127",
+    "pt3_use=5",
+    "pt3_pos=20,8",
+    "pt3_color=77,200,13",
+    "pt4_use=5",
+    "pt4_pos=26,18",
+    "pt4_color=255,255,255",
+    "pt5_use=5",
+    "pt5_pos=8,17",
+    "pt5_color=0,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-colours.pan-32x24.d8.6602507f.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/pan-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-all12.box1-32x24.d8.5f3ca6a1",
+   "effect": "retime-fgbg",
+   "label": "supp-all12",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=2.5,10",
+    "pt2_use=5",
+    "pt2_pos=5,17",
+    "pt3_use=5",
+    "pt3_pos=7.5,5",
+    "pt4_use=5",
+    "pt4_pos=10,12",
+    "pt5_use=5",
+    "pt5_pos=12.5,19",
+    "pt6_use=5",
+    "pt6_pos=15,7",
+    "pt7_use=5",
+    "pt7_pos=17.5,14",
+    "pt8_use=5",
+    "pt8_pos=20,21",
+    "pt9_use=5",
+    "pt9_pos=22.5,9",
+    "pt10_use=5",
+    "pt10_pos=25,16",
+    "pt11_use=5",
+    "pt11_pos=27.5,4",
+    "pt12_use=5",
+    "pt12_pos=30,11"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-all12.box1-32x24.d8.5f3ca6a1.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-16x12.d16.19943fca",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-int.box1-16x12.d16.19943fca.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-16x12.d16.0b865631",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=3.25,3.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=8.5,6.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=12.1,8.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-sub.box1-16x12.d16.0b865631.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-16x12.d16.859ad8fd",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=9,6.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-overlap.box1-16x12.d16.859ad8fd.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-16x12.d16.5bdcf45e",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=15,11",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=15.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,6",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-edge.box1-16x12.d16.5bdcf45e.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-23x17.d16.91bf104b",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11,8"
+   ],
+   "depth": 16,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-int.box1-23x17.d16.91bf104b.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-23x17.d16.e4b3fb59",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=6.25,5.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=11.5,8.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=15.1,10.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 16,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-sub.box1-23x17.d16.e4b3fb59.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-23x17.d16.0ee57b72",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11,8",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=12,8.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 16,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-overlap.box1-23x17.d16.0ee57b72.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-23x17.d16.100f631a",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=22,16",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=22.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,8",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 16,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-edge.box1-23x17.d16.100f631a.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-32x24.d16.356f2984",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=16,12"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-int.box1-32x24.d16.356f2984.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-32x24.d16.a0b33117",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11.25,9.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=16.5,12.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=20.1,14.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-sub.box1-32x24.d16.a0b33117.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-32x24.d16.056a16e5",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=16,12",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=17,12.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-overlap.box1-32x24.d16.056a16e5.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-32x24.d16.1c2e6254",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=31,23",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=31.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,12",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-edge.box1-32x24.d16.1c2e6254.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-alpha-src.box1a-16x12.d16.8c39e02d",
+   "effect": "retime-fgbg",
+   "label": "supp-alpha-src",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6",
+    "pt2_use=5",
+    "pt2_pos=3.4,2.6",
+    "pt2_color=10,100,200"
+   ],
+   "depth": 16,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-alpha-src.box1a-16x12.d16.8c39e02d.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1a-16x12.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-colours.pan-32x24.d16.be7e7c0d",
+   "effect": "retime-fgbg",
+   "label": "supp-colours",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=5,5",
+    "pt1_color=1,2,3",
+    "pt2_use=5",
+    "pt2_pos=12,6",
+    "pt2_color=254,128,127",
+    "pt3_use=5",
+    "pt3_pos=20,8",
+    "pt3_color=77,200,13",
+    "pt4_use=5",
+    "pt4_pos=26,18",
+    "pt4_color=255,255,255",
+    "pt5_use=5",
+    "pt5_pos=8,17",
+    "pt5_color=0,0,0"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-colours.pan-32x24.d16.be7e7c0d.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/pan-32x24.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-all12.box1-32x24.d16.a5c76fb0",
+   "effect": "retime-fgbg",
+   "label": "supp-all12",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=2.5,10",
+    "pt2_use=5",
+    "pt2_pos=5,17",
+    "pt3_use=5",
+    "pt3_pos=7.5,5",
+    "pt4_use=5",
+    "pt4_pos=10,12",
+    "pt5_use=5",
+    "pt5_pos=12.5,19",
+    "pt6_use=5",
+    "pt6_pos=15,7",
+    "pt7_use=5",
+    "pt7_pos=17.5,14",
+    "pt8_use=5",
+    "pt8_pos=20,21",
+    "pt9_use=5",
+    "pt9_pos=22.5,9",
+    "pt10_use=5",
+    "pt10_pos=25,16",
+    "pt11_use=5",
+    "pt11_pos=27.5,4",
+    "pt12_use=5",
+    "pt12_pos=30,11"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d16.f3.rgba64le",
+   "reference": "retime-fgbg.supp-all12.box1-32x24.d16.a5c76fb0.rgba64le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d16.f3.rgba64le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-16x12.d32.d0d38b51",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-int.box1-16x12.d32.d0d38b51.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-16x12.d32.92ffd849",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=3.25,3.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=8.5,6.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=12.1,8.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-sub.box1-16x12.d32.92ffd849.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-16x12.d32.502e4d88",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=9,6.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-overlap.box1-16x12.d32.502e4d88.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-16x12.d32.79f9f706",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=15,11",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=15.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,6",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-edge.box1-16x12.d32.79f9f706.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-16x12.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-23x17.d32.6d19ae01",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11,8"
+   ],
+   "depth": 32,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-int.box1-23x17.d32.6d19ae01.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-23x17.d32.5b477183",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=6.25,5.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=11.5,8.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=15.1,10.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 32,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-sub.box1-23x17.d32.5b477183.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-23x17.d32.7d81e189",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11,8",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=12,8.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 32,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-overlap.box1-23x17.d32.7d81e189.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-23x17.d32.0628923a",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=22,16",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=22.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,8",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 32,
+   "width": 23,
+   "height": 17,
+   "source": "box1",
+   "input": "inputs/box1-23x17.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-edge.box1-23x17.d32.0628923a.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-23x17.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-int.box1-32x24.d32.640a6f34",
+   "effect": "retime-fgbg",
+   "label": "supp-int",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=16,12"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-int.box1-32x24.d32.640a6f34.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-sub.box1-32x24.d32.13b0eccf",
+   "effect": "retime-fgbg",
+   "label": "supp-sub",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=11.25,9.5",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=16.5,12.5",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=20.1,14.3",
+    "pt3_color=0,0,255"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-sub.box1-32x24.d32.13b0eccf.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-overlap.box1-32x24.d32.52fe458a",
+   "effect": "retime-fgbg",
+   "label": "supp-overlap",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=16,12",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=17,12.5",
+    "pt2_color=0,0,255"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-overlap.box1-32x24.d32.52fe458a.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-edge.box1-32x24.d32.8f6762e3",
+   "effect": "retime-fgbg",
+   "label": "supp-edge",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=0,0",
+    "pt1_color=255,0,0",
+    "pt2_use=5",
+    "pt2_pos=31,23",
+    "pt2_color=0,255,0",
+    "pt3_use=5",
+    "pt3_pos=-0.5,-0.5",
+    "pt3_color=0,0,255",
+    "pt4_use=5",
+    "pt4_pos=31.5,3",
+    "pt4_color=255,255,0",
+    "pt5_use=5",
+    "pt5_pos=-2.6,12",
+    "pt5_color=255,0,255"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-edge.box1-32x24.d32.8f6762e3.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-alpha-src.box1a-16x12.d32.d9eb2c12",
+   "effect": "retime-fgbg",
+   "label": "supp-alpha-src",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=8,6",
+    "pt2_use=5",
+    "pt2_pos=3.4,2.6",
+    "pt2_color=10,100,200"
+   ],
+   "depth": 32,
+   "width": 16,
+   "height": 12,
+   "source": "box1",
+   "input": "inputs/box1-16x12.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-alpha-src.box1a-16x12.d32.d9eb2c12.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1a-16x12.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-colours.pan-32x24.d32.3b5da9ea",
+   "effect": "retime-fgbg",
+   "label": "supp-colours",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=5,5",
+    "pt1_color=1,2,3",
+    "pt2_use=5",
+    "pt2_pos=12,6",
+    "pt2_color=254,128,127",
+    "pt3_use=5",
+    "pt3_pos=20,8",
+    "pt3_color=77,200,13",
+    "pt4_use=5",
+    "pt4_pos=26,18",
+    "pt4_color=255,255,255",
+    "pt5_use=5",
+    "pt5_pos=8,17",
+    "pt5_color=0,0,0"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-colours.pan-32x24.d32.3b5da9ea.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/pan-32x24.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-all12.box1-32x24.d32.5eecc16b",
+   "effect": "retime-fgbg",
+   "label": "supp-all12",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=2.5,10",
+    "pt2_use=5",
+    "pt2_pos=5,17",
+    "pt3_use=5",
+    "pt3_pos=7.5,5",
+    "pt4_use=5",
+    "pt4_pos=10,12",
+    "pt5_use=5",
+    "pt5_pos=12.5,19",
+    "pt6_use=5",
+    "pt6_pos=15,7",
+    "pt7_use=5",
+    "pt7_pos=17.5,14",
+    "pt8_use=5",
+    "pt8_pos=20,21",
+    "pt9_use=5",
+    "pt9_pos=22.5,9",
+    "pt10_use=5",
+    "pt10_pos=25,16",
+    "pt11_use=5",
+    "pt11_pos=27.5,4",
+    "pt12_use=5",
+    "pt12_pos=30,11"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d32.f3.gbrapf32le",
+   "reference": "retime-fgbg.supp-all12.box1-32x24.d32.5eecc16b.gbrapf32le",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d32.f3.gbrapf32le"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg1-n2.box2-32x24.d8.74c3c4ee",
+   "effect": "retime-fgbg",
+   "label": "supp-dg1-n2",
+   "params": [
+    "display=2",
+    "draw_geom=1",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box2",
+   "input": "inputs/box2-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg1-n2.box2-32x24.d8.74c3c4ee.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box2-32x24.d8.f3.rgba",
+    "fg1_matte": "inputs/m-hard-0-32x24.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg2-n2.box2-32x24.d8.aed19923",
+   "effect": "retime-fgbg",
+   "label": "supp-dg2-n2",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box2",
+   "input": "inputs/box2-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg2-n2.box2-32x24.d8.aed19923.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box2-32x24.d8.f3.rgba",
+    "fg1_matte": "inputs/m-hard-0-32x24.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg3-n2.box2-32x24.d8.bf74b929",
+   "effect": "retime-fgbg",
+   "label": "supp-dg3-n2",
+   "params": [
+    "display=2",
+    "draw_geom=3",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box2",
+   "input": "inputs/box2-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg3-n2.box2-32x24.d8.bf74b929.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box2-32x24.d8.f3.rgba",
+    "fg1_matte": "inputs/m-hard-0-32x24.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg4-n2.box2-32x24.d8.b7094c57",
+   "effect": "retime-fgbg",
+   "label": "supp-dg4-n2",
+   "params": [
+    "display=2",
+    "draw_geom=4",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box2",
+   "input": "inputs/box2-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg4-n2.box2-32x24.d8.b7094c57.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box2-32x24.d8.f3.rgba",
+    "fg1_matte": "inputs/m-hard-0-32x24.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg5-n2.box2-32x24.d8.7dba4536",
+   "effect": "retime-fgbg",
+   "label": "supp-dg5-n2",
+   "params": [
+    "display=2",
+    "draw_geom=5",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box2",
+   "input": "inputs/box2-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg5-n2.box2-32x24.d8.7dba4536.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box2-32x24.d8.f3.rgba",
+    "fg1_matte": "inputs/m-hard-0-32x24.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg6-n2.box2-32x24.d8.ad526403",
+   "effect": "retime-fgbg",
+   "label": "supp-dg6-n2",
+   "params": [
+    "display=2",
+    "draw_geom=6",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box2",
+   "input": "inputs/box2-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg6-n2.box2-32x24.d8.ad526403.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box2-32x24.d8.f3.rgba",
+    "fg1_matte": "inputs/m-hard-0-32x24.d8.f3.rgba",
+    "fg2_matte": "inputs/m-hard-1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-dg2-n0.box1-32x24.d8.c966145b",
+   "effect": "retime-fgbg",
+   "label": "supp-dg2-n0",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=2",
+    "pt1_pos=6.3,5.6",
+    "pt2_use=3",
+    "pt2_pos=14.5,9.5",
+    "pt3_use=5",
+    "pt3_pos=24,12.25",
+    "pt3_color=255,0,0"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-dg2-n0.box1-32x24.d8.c966145b.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  },
+  {
+   "id": "retime-fgbg.supp-keyed.box1-32x24.d8.0fa721e7",
+   "effect": "retime-fgbg",
+   "label": "supp-keyed",
+   "params": [
+    "display=2",
+    "draw_geom=2",
+    "pt1_use=5",
+    "pt1_pos=10,8@0;14,10@2"
+   ],
+   "depth": 8,
+   "width": 32,
+   "height": 24,
+   "source": "box1",
+   "input": "inputs/box1-32x24.d8.f3.rgba",
+   "reference": "retime-fgbg.supp-keyed.box1-32x24.d8.0fa721e7.rgba",
+   "kind": "temporal",
+   "frames": 3,
+   "fps": "24",
+   "layers": {
+    "alt_source_a": "inputs/box1-32x24.d8.f3.rgba"
+   }
+  }
+ ]
+}

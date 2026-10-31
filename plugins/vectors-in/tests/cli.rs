@@ -328,10 +328,12 @@ fn testsrc2_clip_with_zero_vectors_at_8_bpc() {
 
 #[test]
 fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_display() {
-    // gaps.rs: G1 is noted on every frame rendered with an FG matte layer present, on any display but Source. vfx
-    // prints a gap once per run, so each run here renders ONE frame (Frame Number mode): an in-between frame (the
-    // layered Vectors In path, which also notes G1e) and an exact frame (the layered fast path); the Source display
-    // composes no layer and notes nothing
+    // gaps.rs: G1 is noted on every frame rendered by the layered path. vfx prints a gap once per run, so each run here
+    // renders ONE frame (Frame Number mode): an in-between frame (the layered Vectors In path, which also notes G1e), an
+    // exact frame of a single group display (the layered fast path, which also loads the layer's flows through the matte
+    // cap, G1e, and drops them, as the original does), and an exact frame of the full group, which reads no FG matte and
+    // is the single layer fast path (`LayerJob::full_group_reads_no_matte`, plugin 03's flags),
+    // so it notes nothing; the Source display composes no layer and notes nothing
     let bin = vfx().expect("fx-cli builds");
     let dir = Scratch::new("g1-note");
     let (clip, prev, next) = moving_files(&dir, Depth::U8);
@@ -343,7 +345,8 @@ fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_
     let (g1, g1e) = (line(&retime_engine::gaps::G1), line(&retime_engine::gaps::G1E));
     for (params, want_g1, want_g1e) in [
         (vec!["time_remap_mode=2", "frame_num=2.5"], true, true),
-        (vec!["time_remap_mode=2", "frame_num=3"], true, false),
+        (vec!["time_remap_mode=2", "frame_num=3", "display=3"], true, true),
+        (vec!["time_remap_mode=2", "frame_num=3"], false, false),
         (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false, false),
     ] {
         let r = apply(bin, Depth::U8, &clip, &out, 1, &params, &layers);
@@ -353,7 +356,7 @@ fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_
         assert_eq!(count(&g1), usize::from(want_g1), "{params:?}: {stderr}");
         assert_eq!(count(&g1e), usize::from(want_g1e), "{params:?}: {stderr}");
         if !want_g1 {
-            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display notes nothing: {stderr}");
+            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display and the full group's exact frame note nothing: {stderr}");
         }
     }
 }

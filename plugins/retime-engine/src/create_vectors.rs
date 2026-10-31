@@ -4,7 +4,7 @@
 //!
 //! * [`frame_index`], [`frame_pair`], [`frame_time`]: the frame arithmetic;
 //! * [`CreateVectorsSettings`] and [`create_vectors`]: solve the flow of one layer and encode it
-//!   (the single layer case: no FG matte layer, no point in use, `Main_BG: Track` checked);
+//!   (the single layer case: no FG matte layer, no point in use, `Main_BG: Image Track` checked);
 //! * [`CreateVectorsJob`], [`layer_flows`], [`job_flow`] and [`create_vectors_job`]: the layered
 //!   case: one flow per layer of the Layers Output group, with the masks of
 //!   the tracking mattes, the user displacement of the tracking points or the second tracker,
@@ -334,16 +334,12 @@ pub fn layer_flows_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVec
         fx_core::gaps::record(&crate::gaps::G1);
     }
     let tracks = (first..=last).any(|k| job.layers[k].track);
-    // the tracking mattes only feed the masks of the solves, so a group without one has none
     let shrinks: Vec<f32> = job.layers[..nfg].iter().map(|l| l.shrink).collect();
-    let (eff_x, eff_y) = if nfg >= 1 && tracks {
-        (matte::effective(&job.mattes_x, &shrinks, w, h)?, matte::effective(&job.mattes_y, &shrinks, w, h)?)
-    } else {
-        (Vec::new(), Vec::new())
-    };
     let base = job.flow_settings(first);
     let geo = base.geometry(w, h)?;
-    let pyramids = if tracks {
+    // the single layer solve reads the frames themselves; a layer of a stack with FG mattes solves on
+    // its own layer images (below), so only nfg = 0 builds these
+    let pyramids = if tracks && nfg == 0 {
         let (px, py) = rayon::join(|| flow::build_pyramid(x, &base), || flow::build_pyramid(y, &base));
         Some((px?, py?))
     } else {
@@ -355,14 +351,22 @@ pub fn layer_flows_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVec
         let (layer, fs) = (&job.layers[k], job.flow_settings(k));
         let f = match &pyramids {
             Some((px, py)) if layer.track => {
-                let masks = if nfg >= 1 {
-                    Some((MaskPyramid::build(&eff_x[k], &fs)?, MaskPyramid::build(&eff_y[k], &fs)?))
-                } else {
-                    None
-                };
                 let user = (!pairs.is_empty()).then(|| points::user_displacement(&pairs, px.geometry(), (w, h)));
-                let extras = SolveExtras { masks: masks.as_ref().map(|(a, b)| (a, b)), user: user.as_ref() };
+                let extras = SolveExtras { masks: None, user: user.as_ref() };
                 stages.solve_pyramids_with(px, py, &fs, extras)?
+            }
+            None if layer.track && nfg >= 1 => {
+                // read from the code (`matte::layer_solve_mattes`): the frames times the layer's visible
+                // matte at X and at Y, and the mask pyramids of `white - (own - visible)`
+                let (vis_x, mask_x) = matte::layer_solve_mattes(&job.mattes_x, &shrinks, k, x.fmt(), w, h)?;
+                let (vis_y, mask_y) = matte::layer_solve_mattes(&job.mattes_y, &shrinks, k, y.fmt(), w, h)?;
+                let (lx, ly) = (matte::premultiply_pl(x, &vis_x)?, matte::premultiply_pl(y, &vis_y)?);
+                let (px, py) = rayon::join(|| flow::build_pyramid(&lx, &fs), || flow::build_pyramid(&ly, &fs));
+                let (px, py) = (px?, py?);
+                let masks = (MaskPyramid::build_ungated(&mask_x, &fs)?, MaskPyramid::build_ungated(&mask_y, &fs)?);
+                let user = (!pairs.is_empty()).then(|| points::user_displacement(&pairs, px.geometry(), (w, h)));
+                let extras = SolveExtras { masks: Some((&masks.0, &masks.1)), user: user.as_ref() };
+                stages.solve_pyramids_with(&px, &py, &fs, extras)?
             }
             _ => points::second_tracker(&pairs, &geo, (w, h))?,
         };
@@ -393,6 +397,62 @@ pub fn job_flow_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVector
     let weights = matte::over_weights(&job.mattes_x, job.first, job.last, w, h)?;
     let layers: Vec<(&FlowField, &Matte)> = flows.iter().zip(weights.iter()).collect();
     vectors::merge_flows(w, h, &layers)
+}
+
+/// The Debug display of a job, view `code` (the engine codes of `crate::debug`), with the solves on
+/// `stages` and the Debug forward warp on `warp`. Without FG mattes it is [`crate::debug::debug_view_on`]
+/// with the flow of [`job_flow_on`]. With FG mattes (READ in `CreateMotionVectors_64`, the Debug branch of
+/// the per frame driver): the output starts transparent
+/// and the layers of the group are visited from the bottom one up; per layer `k` its layer images
+/// `X_k = premultiply_pl(x, visible_k at X)` and `Y_k` (the solve's, [`matte::layer_solve_mattes`]) and
+/// the forward warp `W_k` of `X_k` by the layer's own flow ([`layer_flows_on`]); the output takes `Y_k`
+/// OVER it, then `W_k` OVER it ([`matte::over_pl`], the image OVER of the plugin). The Warp view of a one
+/// layer group is `W_k` alone. The other views compare the result (as `W'`) with `y` for a group of
+/// several layers, with `Y_k` for a one layer group (whose Diff, Detail and Edge first run
+/// [`crate::debug::match_alpha`] on the two; its Blend view runs a step that was not read, U: the plain
+/// `lerp` here). Errors as [`layer_flows`] and the forward warp's.
+pub fn debug_job_view_on(stages: &dyn Stages, warp: &dyn Stages, x: &Image, y: &Image, job: &CreateVectorsJob, code: i32) -> Result<Image> {
+    use crate::debug::{self, VIEW_WARP};
+    check_pair(x, y)?;
+    let (w, h, fmt) = (x.width, x.height, x.fmt());
+    job.check(w, h)?;
+    if job.nfg() == 0 || !crate::prep::searchable(w, h) {
+        let flow = job_flow_on(stages, x, y, job)?;
+        return debug::debug_view_on(warp, x, y, &flow, code);
+    }
+    let flows = layer_flows_on(stages, x, y, job)?;
+    let shrinks: Vec<f32> = job.layers[..job.nfg()].iter().map(|l| l.shrink).collect();
+    let single = job.first == job.last;
+    let mut out = Image::new(w, h, fmt);
+    let mut y_layer = None;
+    for k in (job.first..=job.last).rev() {
+        let flow = &flows[k - job.first];
+        let (vx, _) = matte::layer_solve_mattes(&job.mattes_x, &shrinks, k, fmt, w, h)?;
+        let (vy, _) = matte::layer_solve_mattes(&job.mattes_y, &shrinks, k, fmt, w, h)?;
+        let (lx, ly) = (matte::premultiply_pl(x, &vx)?, matte::premultiply_pl(y, &vy)?);
+        if code == VIEW_WARP && single {
+            warp.forward_warp(&mut out, &lx, flow, 1.0f32)?;
+        } else {
+            matte::over_pl(&mut out, &ly)?;
+            let mut wk = Image::new(w, h, fmt);
+            warp.forward_warp(&mut wk, &lx, flow, 1.0f32)?;
+            matte::over_pl(&mut out, &wk)?;
+        }
+        y_layer = Some(ly);
+    }
+    if code == VIEW_WARP {
+        return Ok(out);
+    }
+    fx_core::gaps::record(&crate::gaps::G4);
+    match (single, y_layer) {
+        (true, Some(mut yk)) => {
+            if code != debug::VIEW_BLEND {
+                debug::match_alpha(&mut yk, &mut out);
+            }
+            Ok(debug::views_of(&out, &yk, code))
+        }
+        _ => Ok(debug::views_of(&out, y, code)),
+    }
 }
 
 /// The Create Vectors pass of one frame with every layered input: the
@@ -435,9 +495,27 @@ pub fn create_vectors_job_on(stages: &dyn Stages, x: &Image, y: &Image, job: &Cr
     if job.nfg() == 0 {
         return vectors::encode_vectors_image(w, h, fmt, &flows[0], scale);
     }
-    let weights = matte::over_weights(&job.mattes_x, job.first, job.last, w, h)?;
-    let layers: Vec<(&FlowField, &Matte)> = flows.iter().zip(weights.iter()).collect();
-    vectors::encode_vectors_merged_image(w, h, fmt, &layers, scale)
+    // the weights inside the whole stack (layers above the group occlude it), and a single layer
+    // output carries its weight in the blue channel (MEASURED, `matte::stack_weights`,
+    // `vectors::encode_vectors_merged_blue`)
+    let mut img = Image::new(w, h, fmt);
+    if job.first == job.last {
+        // READ: a group of one layer is that layer's own flow, not weighted, and the blue channel
+        // its visible matte plane at X (`vectors::encode_vectors_blue`, `matte::layer_solve_mattes`)
+        let shrinks: Vec<f32> = job.layers[..job.nfg()].iter().map(|l| l.shrink).collect();
+        let (visible, _) = matte::layer_solve_mattes(&job.mattes_x, &shrinks, job.first, fmt, w, h)?;
+        vectors::encode_vectors_blue(&mut img, &flows[0], scale, &visible)?;
+    } else {
+        // READ: the group is composited from its bottom layer up: the bottom layer's flow encoded
+        // plainly, every layer above it laid over with its raw matte at X (`vectors::composite_vectors`)
+        let n = flows.len();
+        vectors::encode_vectors(&mut img, &flows[n - 1], scale)?;
+        for i in (0..n - 1).rev() {
+            let m = matte::integer_plane(&job.mattes_x[job.first + i], fmt);
+            vectors::composite_vectors(&mut img, &flows[i], scale, &m)?;
+        }
+    }
+    Ok(img)
 }
 
 #[cfg(test)]

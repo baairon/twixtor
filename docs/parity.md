@@ -1,149 +1,256 @@
 # Parity
 
-What has and has not been compared with the original plugin, how every figure of the README's [Parity](../README.md#parity) table is counted, and what is not shown yet. Every figure on this page and in that table sits in a marker that `tools/gen_docs.py` fills from the snapshots in `docs/data/` and from scans of the tree, except the Interface check, which is written by hand; `python -I tools/gen_docs.py --check` fails when a generated figure drifts, and `docs/data/facts.json` lists every key with its value and source.
+What parity means for this rewrite, how it is checked against the original Twixtor plugins, and what the checks found. The README has the [short version](../README.md#parity), and the [parity log](parity-log.md) has the dated story of how the results were reached.
 
-The port has never been verified frame by frame against the original plugin. Parity with the original could only be checked from the supplied plugin builds alone, by comparing the controls they register; no rendered frames were compared, so output parity has never been verified frame by frame. That comparison is the [Interface check](#interface-check). The fixtures show that modelled steps follow their written rules, and the lock that locked settings still give the baseline's bytes; neither compares with the original.
+## Summary
 
-## The unit counted
+**<!--f:modules_match-->6<!--/f--> of <!--f:modules_total-->6<!--/f--> modules match the original on the emulator run.** The original plugins, run in the emulator, and this rewrite render the same test cases, and their outputs are compared bit for bit. The cases are split into six modules, each one part of one plugin's behavior, checked on its own. In all six, every case that the original defines and that could be rendered gives identical output on both sides, and every call record is the same. The [status table](#status) has the counts.
 
-A control: one parameter or one layer of one of the four effects, as `vfx list --json` lists them. There are <!--f:controls_total-->176<!--/f--> controls (<!--f:controls_params-->159<!--/f--> parameters and <!--f:controls_layers-->17<!--/f--> layers of <!--f:effects_total-->4<!--/f--> effects), one row each in `docs/data/controls.tsv`. The hidden `selftest` effects are not counted. A row of the Parity table that counts something else names its unit in [Standards](#standards).
+**The exceptions are known.**
+- **No reference output.** Some in-contract cases have none yet: frames the emulated original stops on that the tiny-frame rule's 5x5 bound does not reach, cases that crashed in the emulator, and two cases too long to render in full ([cases without a reference](#what-the-results-do-not-cover)).
+- **Out of contract.** Thirteen cases are out of contract because the original leaves one value in them uninitialised ([out of contract](#out-of-contract)).
+- **One known difference outside the grid.** `retime-fgbg` draws its Draw Geom points as a disc where the original draws a cross ([G3](#stated-rules)).
 
-## Tiers
+**Verified is the stricter step after Matches.** It also needs every in-contract case compared and every deliberately broken copy of the rewrite caught ([status rule](#the-status-rule)). A module that is not there yet misses one of the two, as its Cases compared and Mutants killed columns show. A second, independent run of the whole check comes after; it has not started.
 
-| Tier | Means | Shown by |
-|---|---|---|
-| Graded | `vfx` renders a case of the checklist like the original plugin: bit for bit at 8 and 16 bpc, within one unit in the last place at 32 bpc | `fx-parity run --strict` against reference renders of the same cases made in the original ([Comparing with reference renders](../README.md#comparing-with-reference-renders)); the results in `docs/data/references.tsv` |
-| Model | a stage of the engine (or the keyframe curves of `fx-core`) equals an independent model of its documented arithmetic, bit for bit | the hex model fixtures, which the Rust tests decode and compare, and the numpy or Python generators that reproduce them byte for byte ([Tests](../README.md#tests)) |
-| Rule | where the original's behaviour is not established, a stated rule of this project stands in; a render that uses it prints one note, and the rule waits for a graded reference | the gaps register in `docs/data/gaps.tsv`, from the `gaps` of each effect in `vfx list --json` ([Gaps register](#gaps-register)) |
-| Defined | behaviour that belongs to this tool and not to the plugin, so there is nothing in the original to grade it against | tests |
+## Status
 
-Defined covers the wrapper's own features in `tools/apply.py` (audio, a new size or frame rate, HDR input and odd frame sizes), Bezier key handles (keyframe interpolation, which the host does for the original), the motion search on tiny frames (where no result of the original is established) and the `--device` choice. Their stated rules are in [Rules without a note](#rules-without-a-note).
+<!--f:modules_match-->6<!--/f--> of <!--f:modules_total-->6<!--/f--> modules match the original on the emulator run. Verified: <!--f:modules_verified-->1<!--/f--> of <!--f:modules_total-->6<!--/f-->. The table is generated from each module's result file, `parity/<id>/results/summary.json`, and from `parity/<id>/results/verify.json` when an independent re-run has written one.
 
-A model fixture is no comparison with the original. It shows that the code computes what its precision contract says; where the modelled step is a rule, it shows that the code follows the rule. Only a graded case compares with the original.
+<!--gen:modules-->
+| Module | Plugin | Status | Cases compared (in contract) | Out of contract (candidates) | Values compared (bytes / floats) | Differing | Max ULP | Call records matching | Mutants killed | Re-run verified | Source |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `retime-time` | `Twixtor_64.aex` | Matches | 460 of 462 | 12 | 11,203,140 / 3,626,220 | 0 / 0 | 0 | 460 of 460 | 21 of 26 | - | `parity/retime-time/results/summary.json` |
+| `retime-flow` | `Twixtor_64.aex` | Matches | 330 of 337 | 13 | 4,977,552 / 1,174,560 | 0 / 0 | 0 | 330 of 330 | 22 of 22 | - | `parity/retime-flow/results/summary.json` |
+| `create-vectors` | `CreateMotionVectors_64.aex` | Matches | 418 | 48 | 892,476 / 335,208 | 0 / 0 | 0 | 418 of 418 | 47 of 51 | - | `parity/create-vectors/results/summary.json` |
+| `vectors-in` | `TwixtorProVectorsIn_64.aex` | Verified | 443 | 38 | 1,384,032 / 370,960 | 0 / 0 | 0 | 443 of 443 | 29 of 29 | - | `parity/vectors-in/results/summary.json` |
+| `fgbg-core` | `TwixtorPro_64.aex` | Matches | 353 of 367 | 55 | 2,413,984 / 565,200 | 0 / 0 | 0 | 360 of 360 | 29 of 31 | - | `parity/fgbg-core/results/summary.json` |
+| `fgbg-layers` | `TwixtorPro_64.aex` | Matches | 353 | 65 | 1,952,316 / 248,016 | 0 / 0 | - | 353 of 353 | 42 of 50 | - | `parity/fgbg-layers/results/summary.json` |
+| Total | - | 6 of 6 match, 1 of 6 verified | 2,357 of 2,380 | 231 | 22,823,500 / 6,320,164 | 0 / 0 | 0 | 2,364 of 2,364 | 190 of 209 | 0 of 6 | - |
+<!--/gen:modules-->
 
-## Standards
+How to read a row:
 
-Every figure of this page, with its unit:
+- **Cases compared** reads `compared of in-contract`. The gap between the two is the in-contract cases with no reference output ([what the results do not cover](#what-the-results-do-not-cover)).
+- **Out of contract** counts cases the original does not define. They are listed apart and never counted as passes.
+- **Values compared** is bytes / floats; **Differing** is cases / values; **Max ULP** is the largest distance between two floats, 0 when every float is identical.
+- **Call records matching** and **Mutants killed** read `matched of compared` and `killed of total`. Every surviving mutant is listed in the [per-module notes](#per-module-notes), and the module's `results/kills.json` records what each mutant changes.
+- **Re-run verified** is the answer of the independent re-run. A dash means it has not run.
+- A row says Matches or Verified only when the [status rule](#the-status-rule) holds for its numbers.
 
-| Row | Unit | Count | Share |
-|---|---|---|---|
-| Graded against the original plugin (bit exact): never verified frame by frame | a checklist case of the reference families, one row of `docs/data/references.tsv` | <!--f:graded_cases-->0<!--/f--> of <!--f:family_cases-->117<!--/f--> cases | <!--f:graded_pct-->0.0<!--/f-->% of the cases |
-| Rule pending a reference (a note is printed) | a gap, one row of `docs/data/gaps.tsv`, and the controls it names | <!--f:gaps_open-->13<!--/f--> gaps over <!--f:gap_controls-->57<!--/f--> controls | <!--f:gap_controls_pct-->32.4<!--/f-->% of the controls |
-| Model exact (independent model fixtures) | a fixture file, and the cases its header counts | <!--f:model_fixtures-->11<!--/f--> fixtures, <!--f:model_cases-->794<!--/f--> cases | none: a fixture is no share of the controls |
-| Regression lock | an invocation: one case of a lock corpus, run by `vfx` | <!--f:lock_identical-->13,073<!--/f--> of <!--f:lock_total-->13,073<!--/f--> | <!--f:lock_pct-->100.0<!--/f-->% |
-| Unproven | a control | <!--f:unproven-->176<!--/f--> of <!--f:controls_total-->176<!--/f--> | <!--f:unproven_pct-->100.0<!--/f-->% of the controls |
+## The bar
 
-- **Graded.** A case counts when its result is `pass`; `fail` and `missing` (no reference render) do not. Of the <!--f:family_cases-->117<!--/f--> cases, <!--f:graded_failed-->0<!--/f--> failed and <!--f:graded_missing-->117<!--/f--> have no reference render.
-- **Rule.** A control counts once per effect, also when several gaps name it.
-- **Model.** A fixture is a model fixture when a generator beside it documents its header as `b"MAGIC", u32 ncases`; its cases are the count in that header. The model fixtures hold <!--f:model_bytes-->4,322,375<!--/f--> decoded bytes, each listed in [Model fixtures](#model-fixtures). The <!--f:differential_fixtures-->6<!--/f--> flow fixtures `flow_a.hex` to `flow_f.hex` come from a differential model that is not bit exact, so they are listed and not counted.
-- **Regression lock** and **Unproven**: their own sections below.
+Parity is defined by one check and by nothing else on this page.
 
-## Unproven
+- **The setup.** The four original plugin files run unmodified in a CPU emulator (Unicorn through Qiling, on Linux) behind a mock After Effects host. They are Windows x64 After Effects plugins: `Twixtor_64`, `TwixtorPro_64`, `CreateMotionVectors_64` and `TwixtorProVectorsIn_64`.
+- **The same inputs** go to the original and to this rewrite.
+- **The outputs must be identical.** Bytes and integers match exactly, and floats match bit for bit (0 ULP), so -0 differs from 0 and the bits of a NaN count.
+- **Three checks per module:**
+  - a [grid](#the-grid-and-the-out-of-contract-rule) of at least 150 in-contract cases with edge values;
+  - the [call records](#the-call-record-check);
+  - the [mutants](#mutation-checks).
+- **Stand-ins.** Where the original reads something the harness cannot supply the way After Effects would, both sides read the same labelled [stand-in](#stand-ins-and-logic-parity). A match that rests on one is called logic parity.
 
-A control is graded when at least one checklist case that sets it (as a param or as a layer) passed and no checklist case that sets it failed. Every other control is unproven: today <!--f:unproven-->176<!--/f--> of <!--f:controls_total-->176<!--/f-->, because nothing has been compared frame by frame with the original: no checklist case has a graded reference render. The model fixtures and the lock do not lower the figure. The fixtures show that modelled steps follow their written rules, and the lock that locked settings still give the baseline's bytes; neither compares with the original. A control that a failing case sets is unproven again.
+The reference is the original running in the emulator, which follows the CPU manual. Real hardware and real After Effects output are not part of the bar.
 
-## Gaps register
+## How parity is measured
 
-Where the original's behaviour is not established, each open point has one stated rule, one id and one family of reference cases that settles it. A frame that uses the rule prints, once per gap and run, `vfx: note: <effect>: <id> <open point>: a stated rule that no Twixtor reference render has graded yet (README: limits)` on stderr; `--check` prints none, and the exit code does not change. `vfx list --json` lists the open gaps of each effect as `gaps`, and `docs/data/gaps.tsv` keeps them. The rule of each gap, its reference family and when its note prints are in [Stated rules](#stated-rules); the README's summary is [README: limits](../README.md#limits).
+1. **Test cases.** Each module has its own test set in `parity/<id>/`: `cases.json` plus raw input frames in the rewrite's formats ([raw frame format](reference.md#raw-frame-format)), written by a deterministic generator. A module's grid has at least 150 in-contract cases with edge values, and a separate list of out-of-contract candidates.
+2. **The original side.** The harness in `parity/harness/` loads the original plugin unmodified in the emulator. It drives the plugin through the After Effects command sequence: global setup, params setup, sequence setup, then a render for each output frame. It converts the case's frames and parameters in and the output back out. That output is the case's reference.
+3. **The rewrite side.** `vfx` renders the same case.
+4. **The output check.** `fx-parity run --max-ulp 0` compares the two outputs: bytes at 8 and 16 bits per channel, bits at 32.
+5. **The call-record check.** What the original asks the host for is compared with what the rewrite reads ([below](#the-call-record-check)).
+6. **Mutants.** Deliberately wrong copies of the rewrite must each change at least one compared case ([below](#mutation-checks)).
+7. **Out of contract.** Cases the original does not define are judged and listed apart ([below](#the-grid-and-the-out-of-contract-rule)).
+8. **Finding causes.** A difference is traced to its cause before anything changes.
+   - First comes the harness, meaning a host answer or an emulator setting.
+   - Then comes the rewrite, which changes only to do what the original does.
+   - A difference without a shown cause stays counted.
+   - Most causes were found by running the original on crafted inputs. Where that reached its limit, the original's code was read and its execution traced ([root causes](#root-causes-found)).
+9. **Verification.** A module is Verified when the [status rule](#the-status-rule) holds. A separate, independent re-run on fresh copies then confirms it in the Re-run verified column.
 
-<!--gen:gaps-->
-| Gap | Open point | Effects | Controls | Graded reference cases |
-|---|---|---|---|---|
-| G1 | matte shrink tail | `create-vectors`, `retime-fgbg`, `vectors-in` | `fg1_inv_matte_shrink` to `fg3_inv_matte_shrink` | 0 of 10 |
-| G1b | mask-aware block matching cost | `create-vectors`, `retime-fgbg` | `fg1_matte` to `fg3_matte` | 0 of 2 |
-| G1c | layer visibility direction | `create-vectors`, `retime-fgbg`, `vectors-in` | `fg2_matte`, `fg3_matte` | 0 of 10 |
-| G1d | create-vectors merge | `create-vectors` | `fg1_matte` to `fg3_matte`, `layers_output` | 0 of 5 |
-| G1e | vectors-in per-layer matte step | `vectors-in` | `fg1_matte` to `fg3_matte` | 0 of 3 |
-| G1f | blur tail flow of a layered render | `retime-fgbg`, `vectors-in` | `blur_compensation` | 0 of 2 |
-| G1g | hole fill of a single group display | `retime-fgbg`, `vectors-in` | `display`, `warping` | 0 of 10 |
-| G1h | fast path group display | `retime-fgbg`, `vectors-in` | `display` | 0 of 10 |
-| G2 | tracking point displacement | `create-vectors`, `retime-fgbg` | `pt1_use` to `pt12_use` | 0 of 6 |
-| G3 | Draw Geom drawing | `create-vectors`, `retime-fgbg` | `draw_geom` | 0 of 18 |
-| G4 | four Debug view compositions | `create-vectors` | `debug_view_method` | 0 of 10 |
-| G5 | second tracker arithmetic | `create-vectors` | `main_bg_track`, `fg1_track` to `fg3_track` | 0 of 6 |
-| G6 | solver, hole fill and blur wrap variants | `retime-fgbg` | `track_rgb_a` | 0 of 8 |
-<!--/gen:gaps-->
+Builds, emulation and grids run on a Linux server. The reference outputs and raw frames stay there; the repository holds the test set definitions, the tools and the small result files.
 
-When a family is graded bit exact, its gap leaves the register: the note and the `gaps` entry go, `--refresh-data` rewrites `docs/data/gaps.tsv`, its row of [Stated rules](#stated-rules) goes, and its controls leave the Rule row.
+### The grid and the out-of-contract rule
 
-The reference families, from `docs/data/references.tsv` (written by `--refresh-data --testset` from a set of `fx-parity gen --families all`; with no reference renders recorded, every case is `missing`):
+A grid has at least 150 compared in-contract cases per module, with edge values in the parameters, the pixels and the times: 0, -0, denormals, inf, NaN and the extremes. It covers sizes from 1x1 to 129x71 (odd sizes included), 8, 16 and 32 bits per channel, every popup choice and real-motion clips.
 
-<!--gen:families-->
-| Family | Gap | Cases | Pass | Fail | Missing |
-|---|---|---|---|---|---|
-| `gap-blurflow` | G1f | 2 | 0 | 0 | 2 |
-| `gap-debug` | G4 | 10 | 0 | 0 | 10 |
-| `gap-drawgeom` | G3 | 18 | 0 | 0 | 18 |
-| `gap-groups` | G1g,G1h | 10 | 0 | 0 | 10 |
-| `gap-keys` | K1a,K1b,K1c,K1d,K1e | 7 | 0 | 0 | 7 |
-| `gap-maskbm` | G1b | 2 | 0 | 0 | 2 |
-| `gap-merge` | G1d | 5 | 0 | 0 | 5 |
-| `gap-order` | G1c | 10 | 0 | 0 | 10 |
-| `gap-points` | G2 | 6 | 0 | 0 | 6 |
-| `gap-shrink` | G1 | 10 | 0 | 0 | 10 |
-| `gap-tiny` | G7 | 20 | 0 | 0 | 20 |
-| `gap-tracker2` | G5 | 6 | 0 | 0 | 6 |
-| `gap-vecmatte` | G1e | 3 | 0 | 0 | 3 |
-| `gap-wrap` | G6 | 8 | 0 | 0 | 8 |
-<!--/gen:families-->
+A case is in contract when the original defines its behavior. A case outside that contract is reported under Out of contract. It is never counted as a pass or as a failure, and it does not count toward the 150. A case leaves the contract only by what the original does: it refuses it, it stops on it at a tiny size, the value lies outside the range the plugin registers, or the output is not defined by the original at all.
+
+### The call-record check
+
+The mock host records every request the original makes: which frames and layers it checks out, at which times, and which parameters it reads. `vfx` lists the rewrite's reads the same way under `VFX_CALL_RECORD` ([reference: call record](reference.md#call-record)). The module check compares the pixels each side reads, frame by frame. A stricter comparison of every recorded host call was also run for each module.
+
+The strict comparison found a few kinds of difference, and none of them reaches an output. They are listed in each module's notes as items to accept or fix:
+- the order of the reads;
+- an input the original registers one more time;
+- parameters the rewrite has no counterpart for (mask paths, Use GPU);
+- in a few displays, a layer one side declares but neither side reads.
+
+It matters because an output match can hide a wrong input. A rewrite that reads a different frame can give the same bytes on a grid that never separates the two.
+
+### Mutation checks
+
+A grid that never fails proves nothing about its own strength. A mutant is a copy of the rewrite changed on purpose in a way that is wrong, for example an operand order, a rounding, a dropped term or a swapped weight. The grid must catch it: at least one compared case must then differ from the original. Mutants are rebuilt from the current code before they are counted. A mutant the grid does not catch is a survivor. A survivor is either provably equivalent (it can never change an output), or it shows a gap in the grid, and the gap gets a supplementary case.
+
+### Stand-ins and logic parity
+
+Some data the original reads cannot be provided the way After Effects would. After Effects' own keyframe interpolation is the standing example: the host computes the value of a keyframed parameter at a time. For such data both sides read the same labelled stand-in, the module lists it under `stand_ins`, and a match that rests on it is called logic parity. It shows that the plugin's logic and the rewrite's logic agree on that input, not what a real host would have supplied.
+
+### The status rule
+
+| Status | Means |
+|---|---|
+| Verified | every in-contract case compared (at least 150), 0 differing (cases and values), every call record matching, every mutant killed |
+| Matches | the emulator run passes: at least 150 cases compared, 0 differing (cases and values), every call record matching. In-contract cases without a reference and surviving mutants are listed, not counted |
+| In progress | the module has a result file and meets neither rule yet |
+| Blocked | something outside the module stops it, named in `blockers` |
+| Not started | no `summary.json` |
+
+The generator applies the rule to the numbers and counts a check with nothing in it as unmet. It reads `verify.json` separately: Verified plus a Yes in Re-run verified means a second, independent run reproduced the result.
+
+## What the results do not cover
+
+- **The grid is a sample.** About 2,500 chosen cases are not every input. A match is strong evidence for those inputs, not a proof for all.
+- **The reference is the original in the emulator.** Where the original depends on the real After Effects host, both sides use a [stand-in](#harness-stand-ins-and-assumptions).
+- **Cases without a reference.** Some in-contract cases have no reference output, so they are not compared. The per-module notes list them. They are:
+  - seven `retime-flow` frames the original stops on that the tiny-frame rule does not reach: a side of 1 with the other side above 5 (1x6, 7x1), and a 7x9 frame at draft quality;
+  - `fgbg-core` cases that crashed in the emulator for reasons not shown to be the original's;
+  - two 6000-frame `retime-time` cases. The original rebuilds its speed curve from the first frame at every call, so a full run costs about seven hours each. 26 selected frames of each are identical.
+- **The GPU path.** Only the CPU path is compared. The GPU (OpenCL) kernels were written for the earlier rules, and several no longer match the CPU path. A `vfx --device gpu` render is not covered until they are ported.
+
+### Out of contract
+
+- **Tiny frames.** Sizes from 1x1 to 5x5 enter a grid only if the original renders them. The original stops on frames one pixel wide and on the smallest motion search sizes, so a case it stops on goes out of contract once its module records the judgement. Every module records it. In `retime-flow` the original also stops on frames with a side of 1 and the other side above 5 (1x6, 7x1) and on a 7x9 frame at draft quality. The 5x5 bound does not reach those, so they stay in contract with no reference.
+- **Values the plugin does not register.** A value outside a registered range, or a popup choice that does not exist, is never handed over by After Effects.
+- **An uninitialised value.** In the Source display at 32 bits per channel without an Alt Color Source, the original fills the frame with a colour whose alpha it never writes.
+  - The alpha holds whatever an earlier call left in that place on the stack, part of a return address, so it would change with the host's memory layout.
+  - The rewrite writes 0. The 13 cases differ only in that one value.
+  - They are listed in `parity/fgbg-core/ooc_judged.tsv` and `parity/fgbg-layers/ooc_judged.tsv`. The modules' `phase_b.py ooc` without `--judged` puts them back.
+
+### Harness stand-ins and assumptions
+
+The harness supplies some things that After Effects or Windows would. The full table, with the reason for each line, is in the [harness README](../parity/harness/README.md). The ones that matter for reading the results:
+
+- **Keyframe interpolation** is done by the harness (linear, hold, ease; Bezier refused), so keyed cases reach logic parity at most.
+- **FG matte layers** are handed to `TwixtorPro_64` as ordinary layers. That matches how it reads them, for mattes of the frame's size, unmasked and not time remapped.
+- **Host answers** come from the SDK headers: an interactive (not render engine) host; for a checkout outside a short clip, an empty result at the layer's size; for an unset layer whose registered default is the effect's own layer, the case's input clip.
+- **The emulated CPU** starts with the Windows floating point state. Threads switch only when one waits, and the main thread's stack is 1 MiB.
+- **Windows functions** without a hook in the emulator (outside the C runtime DLLs) return 0. That is a fidelity risk.
+
+### The NaN rule
+
+When an operation gets two NaNs, the emulator keeps the one with the larger fraction, while a real x86 processor keeps the first operand. The references were made in the emulator, so the rewrite reproduces the emulator's rule by default (cargo feature `emulator-nan` of `retime-engine`). Building without default features gives the processor's rule; the cases that depend on it then differ by the bits of a NaN only. Which rule the shipped build uses is a choice, and it touches nothing but NaN payloads.
+
+### Caveats
+
+- **Platform math library.** A few steps take a value from a math library. The original's runs inside the emulator; the rewrite carries a port of the C runtime's `powf` where it matters and uses the host's elsewhere. A difference there would show up as a differing value. It is not hidden.
+- **Threads.** The rewrite's bytes do not depend on its thread count (`fx-parity selfcheck --threads` and the `threads` tests of each plugin).
+- **16 bit range.** At 16 bits per channel the effects work on 0 to 32768, so an unchanged sample can come back 1 off in 65535 ([reference: raw frame format](reference.md#raw-frame-format)). There is no tolerance for it: the output is compared with the original's as it is.
+- **32 bit float.** `fx-parity run` passes floats within 1 ULP unless `--max-ulp 0` is given, so every graded run gives it.
+
+## Root causes found
+
+Every difference found between the original and the rewrite had a cause in one of two places.
+
+**The harness.** Our emulator setup, not the plugin:
+- the main thread's stack size and each thread's stack bounds;
+- the floating point state at start;
+- the answer to "is this a render engine";
+- the answer for a checkout outside the clip;
+- the default of an unset layer;
+- the emulator's NaN rule.
+
+**The rewrite.** Each of these was fixed to do what the original does:
+
+| What the original does | Where it showed |
+|---|---|
+| Its motion path works on frames bottom row first. | every motion module |
+| At the edge of a frame, the vertical pass of every separable filter adds the tap above before the tap below, so floats round differently there. | the flow, the hole fill and the blurs: the last differences of `retime-flow`, the 32 bit vectors of `create-vectors`, the fills of `vectors-in` |
+| The forward warp of `TwixtorPro_64` and `TwixtorProVectorsIn_64` is a mesh of triangles shaded by their corner colours, not a textured mesh. | `fgbg-core`, `vectors-in` |
+| Each FG layer is interpolated on its own from two plates (the layer over the other frame's warp) and the layers are composed over each other from the bottom up; each layer's motion is solved on its own layer images, and block matching ignores the masks. | `fgbg-layers`, `vectors-in`, `create-vectors` |
+| A matte shrink uses the plugin's own choke kernel, and a shrink makes exact frames take the motion path. | `fgbg-layers` |
+| Tracking points move the motion at the finest level only; the coarser levels take it from the image pyramid. | `fgbg-layers`, `create-vectors` |
+| Track RGB+A switches the filters of the layered motion search to their 360 variants; 360 Video wraps the whole motion search around the sphere. | `fgbg-layers`, `fgbg-core` |
+| The Debug views, and the Draw Geom glyph of `create-vectors` (an antialiased cross), have their own arithmetic. | `create-vectors` |
+| FG matte channels are read as stored, and in Vectors In each layer's vector alpha is capped by its matte. | `vectors-in`, `fgbg-layers` |
+| The Delinearize step of Image Prep takes `powf` from the C runtime; the time model rounds frame times and parameter samples with a bias of 0.05 where the rewrite had assumed 0.1. | `retime-flow`, `retime-time` |
+
+The rewrite takes only the rule and the arithmetic it has to match. It contains no code, binaries or documentation of the original.
+
+## Reproducing the results
+
+The original plugins, the Windows runtime DLLs for the emulator's file system and Adobe's After Effects SDK are not in the repository. Take them from your own installation; the harness README says how to prepare them. Then:
+
+1. Build the rewrite: `cargo build --release -p fx-cli -p fx-parity` ([build](reference.md#build)).
+2. Render a module's test set with the original under the harness to get the references ([harness README](../parity/harness/README.md)).
+3. Render the same cases with `vfx`, with `VFX_CALL_RECORD=<file>` set for the call records.
+4. Grade with the module's `phase_b.py` (each module's README has the commands), which runs `fx-parity run --max-ulp 0`.
+5. `python -I tools/gen_docs.py` writes the tables on this page from the result files; `--check` fails when they are stale.
+
+## Interface
+
+Every parameter and layer of the four effects pairs with one the plugins register, with the same id, kind, range, default and choices. The pairing tables are `parity/retime-params/pairing.tsv`, `parity/retime-fgbg-params/pairing.tsv`, `parity/create-vectors-params/pairing.tsv` and `parity/vectors-in-params/pairing.tsv`. Interface agreement is not output parity: two controls with the same name and range can still render differently, which is what the grids test.
+
+| Plugin | Rewrite effect | Registered | Paired | Host-side | Group markers | Mask paths |
+|---|---|---|---|---|---|---|
+| `Twixtor_64` | `retime` | 33 | 19 | 6 | 8 | 0 |
+| `TwixtorPro_64` | `retime-fgbg` | 356 | 68 | 6 | 18 | 264 |
+| `CreateMotionVectors_64` | `create-vectors` | 347 | 63 | 6 | 14 | 264 |
+| `TwixtorProVectorsIn_64` | `vectors-in` | 43 | 25 | 6 | 12 | 0 |
+
+- **Host-side controls** (Activation, a forced re-render, two Use GPU popups, Less GPU Mem, SavedInPremiere) stay at their registered defaults. There is no license handling of any kind.
+- **Mask paths** (256 Hide Mask paths and 8 First/Last Mask paths) are not offered ([README: not offered](../README.md#not-offered)).
 
 ## Stated rules
 
-The rule each gap stands on, the frames whose render prints its note, and the reference family that settles it:
+A render that reaches one of these points prints a `vfx: note:` line ending `(README: limits)`. The notes come from the gap register in `plugins/retime-engine/src/gaps.rs`, which `vfx list --json` lists under `gaps` and `docs/data/gaps.tsv` mirrors. The register was written when the original's behavior at these points was not known. Since then, every point except one follows the original or matches it on every compared grid case that reaches it. Retiring the notes from the code is still to do.
 
-| Gap | Stated rule | The note prints for | Family |
+| Gap | Open point | What the code does now | On the grid |
 |---|---|---|---|
-| G1 | A shrink of 0 changes nothing. A shrink of n pixels blurs the layer's inverse matte with a Gaussian of radius n + 1.99 and rescales it so that a straight edge erodes by exactly n pixels; a fraction mixes the two nearest whole shrinks, a negative value grows. Only the inverse matte, the part a layer leaves to the layers below, is shrunk. | every frame rendered with an FG matte layer, on any display but Source | `gap-shrink` |
-| G1b | The block matching step of a layer's search runs only where the layer's mask of the first frame is set; its cost reads the unmasked images. | a frame with an FG matte layer that searches motion | `gap-maskbm` |
-| G1c | FG1 is on top. The tracking matte of FG k is its matte times the inverse mattes of the layers above it; the background's is the product of all inverses. | two or more FG matte layers | `gap-order` |
-| G1d | Each pixel stores the sum of every layer's vector times its OVER weight (its matte times what the layers above leave free; the background's weight is 1 times that), over the layers `layers_output` selects, then the single layer clip and store; blue 0, alpha opaque. | a `create-vectors` frame with an FG matte layer | `gap-merge` |
-| G1e | Each layer's read of the vector images sets alpha to 0 where the layer's tracking matte is below 0.95, then decodes and fills as without layers. | a `vectors-in` frame with an FG matte layer | `gap-vecmatte` |
-| G1f | The blur compensation tail of a layered render uses the motion of the last layer of the displayed group. | a layered frame whose `blur_compensation` tail changes pixels | `gap-blurflow` |
-| G1g | The hole fill runs whatever the displayed group, so a single layer display is filled like the full output. | `display` 3 to 6 with an FG matte layer, on a warping code that fills holes | `gap-groups` |
-| G1h | The fast path (an exact position, `vectors=1`, a segment marker that turns the search off) composes the displayed group, with no warp and no fill. | `display` 3 to 6 with an FG matte layer, on a fast path frame | `gap-groups` |
-| G2 | At every pyramid level each point in use moves the nearest pixel of its layer's starting motion by the point's own motion, in point order, and points on one pixel average; a point outside the frame is skipped. | a point in use on a frame that searches motion | `gap-points` |
-| G3 | Each point in use is drawn as an opaque disc of radius 1.5 pixels in its `ptN_color`, later points on top. | Draw Geom drawing a point | `gap-drawgeom` |
-| G4 | Blend mixes the pushed frame and the other frame half and half; Diff is their absolute difference; Detail Compare and Edge Compare overlay a band pass and an edge measure of the two lumas in red and green. Warp (`1`) is no gap. | `display=3` with `debug_view_method` 2 to 5 | `gap-debug` |
-| G5 | A layer whose Track is off takes the motion of its tracking points, spread over the frame by the pull-push hole fill with no further blur; no point gives no motion. | a layer's Track off on the Vectors or Debug display | `gap-tracker2` |
-| G6 | The motion search, the inverse warps, the hole fill and the blur tail wrap horizontally (columns taken modulo the width; rows never wrap); the forward warp itself does not wrap, and Track RGB+A adds no alpha to the search. | `track_rgb_a=1` on a frame that searches motion | `gap-wrap` |
+| G1 | matte shrink tail | The original's own choke kernel. A fraction mixes the two nearest whole shrinks, and a negative shrink grows the matte. A shrink makes exact frames take the motion path. | matches (54 grid cases with a shrink) |
+| G1b | mask-aware block matching cost | No gate: block matching never reads the masks, which reach the solve through each layer's own images. | matches (every FG matte case) |
+| G1c | layer visibility direction | FG1 is on top. Each layer is interpolated on its own and composed from the bottom up. A layer's matte is cut by the layers above with the exact choke. | matches |
+| G1d | create-vectors merge | The vectors of a group are composited from the bottom up with the raw mattes. A one-layer output is that layer's own flow, with its visible matte in blue. | matches (85 FG cases, 48 with Layers Output) |
+| G1e | vectors-in per-layer matte step | Each layer's vector alpha is capped by its matte, and the matte channel is read as stored. | matches (22 FG cases) |
+| G1f | blur tail flow of a layered render | The original's per-layer path: every layer's blur compensation uses that layer's own motion. This project's earlier rule is left only on a path no effect takes. | matches (22 grid cases) |
+| G1g | hole fill of a single group display | The original's per-layer path: a single group display rebuilds and fills its layer from its own plates. This project's earlier rule is left only on a path no effect takes. | matches (94 group display cases) |
+| G1h | fast path group display | The group is composed without warp or fill, and rebuilt where the layers above cover it. | matches (the same cases) |
+| G2 | tracking point displacement | The original's rule: the points move the motion at the finest level only, and the coarser levels take it from the image pyramid. | matches (114 point cases) |
+| G3 | Draw Geom drawing | `create-vectors` draws the original's antialiased cross. `retime-fgbg` still draws an opaque disc of radius 1.5 on the Source display. | `create-vectors` matches; `retime-fgbg` differs on a supplementary set (the original draws the cross), and a fix is written but not merged |
+| G4 | four Debug view compositions | The original's arithmetic for all five views. | matches (60 Debug display cases) |
+| G5 | second tracker arithmetic | This project's rule: a layer with Track off takes the motion of its tracking points, spread by the pull-push hole fill. | matches (13 cases with Track off); the rule was not read in the original |
+| G6 | solver, hole fill and blur wrap variants | Track RGB+A switches the filters of the layered motion search to their 360 variants and adds no alpha; 360 Video wraps the whole motion search around the sphere. | matches (59 Track RGB+A cases, 16 360 Video cases) |
 
 ## Rules without a note
 
-Some points have a stated rule but print no note. Tiny frames and key handles have nothing inside the plugin to grade them against (no result of the original is established at those sizes, and the host computes keyframe interpolation), and the rest belong to the wrapper or to how a host hands footage to the plugin. Each names the render that would test it.
+Some points have a stated rule but print no note. The original's behavior there is host behavior, or it belongs to the wrapper, so there is nothing in the plugin to compare.
 
-| Point | Stated rule | What would test it |
+| Point | Stated rule | How the bar treats it |
 |---|---|---|
-| tiny frames | the motion search never halves below 2x2; a frame with a side of 1 has no search and renders as `vectors=1` (`create-vectors`: the zero vector) | `gap-tiny`: sizes 1x1 to 5x5, observe only |
-| a plain key next to a handle | the plain end is a handle of the straight line's speed at an influence of 1/3 | `gap-keys`: keyed `frame_num` with `vectors=1` and Blend, whose blend weights show the progress |
-| an eased key's influence | exactly 1/3 | `gap-keys`: the eased cases at 16 bpc |
-| overshoot | a float is held inside its valid range; an angle is not | `gap-keys`: handles that overshoot `sensitivity` |
-| the curve solve | 64 bisection steps in f64, in the operation order of [timing: key shapes](timing.md#key-shapes) | `gap-keys`, compared bit for bit |
-| a point's path | the straight line between its keys at S pixels a second; a segment of length 0 stays put | only together with gaps G2 and G3 |
-| retimed audio | varispeed along the effect's time map ([timing: audio](timing.md#audio)) | nothing in the plugin; `tools/test_apply.py` holds the sync |
-| a checkout between two composition frames | the footage frame at that exact time (`vfx --clip-fps`) | 24 fps footage in a 60 fps composition, In FPS is Out FPS off, Input Frame Rate 24, No Vectors, Nearest, 100%: output frames 2 and 7 show footage frames 1 and 3 under this rule, 0 and 2 if the host quantises to its frames |
-| a new size | the footage is scaled before the effect, which renders at the new size | `create-vectors` on footage at twice the composition's size: vector values in footage or in composition pixels |
-| the default length at another clip rate | the composition frames that start inside the layer, ceil(C x F / R) (25 frames at 24 fps give 63 at 60) | the length a host gives such a layer |
-| HDR input | the signal as stored, no tone mapping ([ffmpeg: HDR](ffmpeg.md#hdr)) | a 16 bpc render of PQ code values in an unmanaged project |
+| tiny frames | the motion search never halves below 2x2; a frame with a side of 1 has no search and renders as `vectors=1` (`create-vectors`: the zero vector) | sizes 1x1 to 5x5 enter a grid only if the original renders them; otherwise out of contract |
+| a plain key next to a handle | the plain end is a handle of the straight line's speed at an influence of 1/3 | keyframe interpolation is the host's work: a stand-in, logic parity at most |
+| an eased key's influence | exactly 1/3 | the same |
+| overshoot | a float is held inside its valid range; an angle is not | the same |
+| the curve solve | 64 bisection steps in f64, in the operation order of [timing: key shapes](timing.md#key-shapes) | the same |
+| a point's path | the straight line between its keys at S pixels a second; a segment of length 0 stays put | the same, together with G2 and G3 |
+| retimed audio | varispeed along the effect's time map ([timing: audio](timing.md#audio)) | outside the original's contract; `tools/test_apply.py` holds the sync |
+| a checkout between two composition frames | the footage frame at that exact time (`vfx --clip-fps`) | host behavior; the call record shows which frame the original asks for |
+| a new size | the footage is scaled before the effect, which renders at the new size | host behavior; the call record shows what the original is given |
+| the default length at another clip rate | the composition frames that start inside the layer, ceil(C x F / R) (25 frames at 24 fps give 63 at 60) | host behavior; not asked of the plugin |
+| HDR input | the signal as stored, no tone mapping ([ffmpeg: HDR](ffmpeg.md#hdr)) | outside the original's contract |
 
-The `--device` choice has no rule: a device is used only where the gate shows it gives the CPU's bytes ([engine: device](engine.md#device)).
+The `--device` choice has no rule: the CPU path is the reference ([engine: device](engine.md#device)).
 
-## Interface check
+## Secondary evidence
 
-The record of 2026-10-28. The controls of the four effects were compared with the controls that four supplied plugin builds register when set up, recorded through a filter that normalizes names, so each match is after normalization, not exact.
+These do not compare the rewrite with the original. They catch regressions inside the rewrite.
 
-| Controls of the four effects | Count |
-|---|---|
-| with a counterpart in the builds | 175 of 176 |
-| of those, matching after normalization | 122 |
-| of those, paired by a similar name (unverified) | 46 |
-| of those, differing in popup text | 7 |
-| with no counterpart in the builds | 1: `vectors-in` "Output: Frame Rate" (`output_frame_rate`) |
+### Model fixtures
 
-The builds also register mask path parameters, which this project lists as not offered ([README: not offered](../README.md#not-offered)), and group markers, which hold no setting. This compares control tables only: no rendered frames were compared, and it does not move any figure above.
+Some engine stages are compared bit for bit with independent models of their arithmetic (numpy float32 scripts, or the standard library for the Bezier handles), stored as hex fixtures that the Rust tests decode. A model of a stage that is itself a stated rule shows that the code follows the rule, not that the rule is right.
 
-## Model fixtures
-
-Every `*.hex` fixture of the tree, with the cases its header counts and its decoded size:
+There are <!--f:model_fixtures-->11<!--/f--> model fixtures with <!--f:model_cases-->794<!--/f--> cases and <!--f:model_bytes-->4,322,375<!--/f--> decoded bytes. The <!--f:differential_fixtures-->6<!--/f--> flow fixtures come from a differential model that is not bit exact, so they are listed and not counted. The generators of each fixture are listed in [reference: tests](reference.md#tests).
 
 <!--gen:fixtures-->
 | Fixture | Magic | Kind | Cases | Bytes |
@@ -167,17 +274,15 @@ Every `*.hex` fixture of the tree, with the cases its header counts and its deco
 | `plugins/retime-engine/tests/fixtures/wrap_cases.hex` | `WRA1` | model | 160 | 611,181 |
 <!--/gen:fixtures-->
 
-## Regression lock
+### Regression lock
 
-The lock shows that every setting that rendered on a baseline build renders the same bytes now. A baseline `vfx` and `fx-parity`, built from commit <!--f:lock_ref-->d74f402<!--/f-->, generate the corpora and render every case; a new build must then give, for every case the baseline rendered (exit 0), exit 0, the same SHA-256 and size of stdout, and the same SHA-256 of stderr, so an empty stderr must stay empty and a new note on such a setting is a difference. The bytes are hashed because the 32 bpc pass rule of `fx-parity run` counts -0.0 and 0.0 as equal, and the lock does not. The cases the baseline refused are run on the new build as well, and those that now render are counted.
+`docs/data/lock.json`, recorded <!--f:lock_date-->2026-10-28<!--/f--> against baseline commit <!--f:lock_ref-->d74f402<!--/f-->: every setting that rendered on the baseline build renders the same bytes on the build of that day, <!--f:lock_identical-->13,073<!--/f--> of <!--f:lock_total-->13,073<!--/f--> cases. It compares two builds of this rewrite on one machine; the original is not involved. The parity fixes changed the engine since, so the lock has to be recorded again.
 
 | Corpus | Cases |
 |---|---|
 | L1 | `fx-parity gen` with its defaults for the four effects and `selftest-invert`, `selftest-shift`, `selftest-integrate` and `selftest-threads` |
 | L2 | `fx-parity gen` of the four effects at sizes 2x2, 3x2, 4x4, 5x4, 8x8, 9x8, 16x16 and 17x16, 6 frames, every case (`--max-cases-per-effect 0`) |
 | L3 | the temporal L2 cases of `retime`, `retime-fgbg` and `create-vectors`, run with `--quality draft` |
-
-Every `fg1_matte` to `fg3_matte` layer is removed from the cases, because the baseline refused them. Each case runs with the arguments `fx-parity` gives it, at the default thread count (`RAYON_NUM_THREADS` unset). The record of <!--f:lock_date-->2026-10-28<!--/f-->, `docs/data/lock.json`:
 
 <!--gen:lock-->
 | Corpus | Rendered at the baseline | Identical now | Differ | Refused at the baseline | Of those, render now |
@@ -188,7 +293,7 @@ Every `fg1_matte` to `fg3_matte` layer is removed from the cases, because the ba
 | all | 13,073 | 13,073 | 0 | 1,010 | 1,010 |
 <!--/gen:lock-->
 
-To reproduce it, from the repository root after [Build](../README.md#build), with REF the recorded baseline (<!--f:lock_ref-->d74f402<!--/f-->); the lock folder defaults to `target/parity-lock`, which git ignores, and nothing in it is committed:
+To reproduce it, from the repository root after [building](reference.md#build), with REF the recorded baseline (<!--f:lock_ref-->d74f402<!--/f-->):
 
 ```sh
 python tools/parity_lock.py base --ref REF
@@ -200,75 +305,29 @@ python tools/parity_lock.py record
 python -I tools/gen_docs.py
 ```
 
-`base` builds both tools of the ref in a temporary detached worktree, with the CI profile, and removes the worktree afterwards; `check` exits 1 on any difference and `refused` exits 1 while a refused case still fails; `record` writes `docs/data/lock.json` from a complete `check` (and the last `refused`). `python tools/parity_lock.py --help` lists the flags (`--toolchain`, `--jobs`, `--sets`, `--out`).
+`base` builds both tools of the ref in a temporary worktree; `check` exits 1 on any difference and `refused` while a refused case still fails; `record` writes `docs/data/lock.json`. `python tools/parity_lock.py --help` lists the flags.
 
-## Caveats
+### Test counts
 
-- **Platform math library.** A few steps take a value from the platform's math library: the `pow` of Delinearize and the logarithm that picks the forward warp's mip level. Those results can differ in the last bit between platforms, so the bytes of a setting that reaches them are fixed per platform, not across platforms. The lock compares two builds on one machine, and a case is graded on the platform that rendered it.
-- **Threads.** The bytes do not depend on the thread count: `fx-parity selfcheck --threads` and the `threads` tests of every plugin check it. The lock runs at the default thread count.
-- **16 bit range.** At 16 bpc the effects work on 0 to 32768, so a sample of a frame shown unchanged can come back 1 off in 65535 ([raw frame format](../README.md#raw-frame-format)). A graded 16 bpc case compares that output as it is; there is no tolerance at 16 bpc.
-- **32 bit float.** At 32 bpc a sample passes within one unit in the last place, so a graded 32 bpc case is within one ULP of the original, not bit for bit.
-- **NaN bits.** Where a NaN comes from NaN inputs (a NaN weight, or a NaN sample in 32 bpc footage), IEEE 754 does not fix its sign and payload: the CPU picks one operand's, and the compiler may swap the operands of an add or a multiply. Those bits are therefore fixed per platform and build, not across them. A graded 32 bpc case and the lock compare them as bits, so such a case is graded on the platform that rendered it.
-- **GPU.** Every figure is of the CPU path. A device backend counts only where a byte comparison gate shows it identical to the CPU path (`fx-parity devcheck`, [engine: device](engine.md#device)), and adds no figure of its own.
-
-## Terms
-
-| Term | Meaning |
-|---|---|
-| control | one parameter or layer of one of the four effects, a row of `docs/data/controls.tsv` |
-| reference render | the output of the original plugin for one case of the checklist, converted to the raw format by the checklist's commands |
-| reference family | the cases `fx-parity gen --families` makes for one gap, listed with their settings in the checklist |
-| checklist case | one case of a reference family, a row of `docs/data/references.tsv` |
-| graded | a case whose reference render `fx-parity run --strict` found bit exact (at 32 bpc within one ULP); a control set by such a case and by no failing one |
-| gap | an open point of the original's behaviour, with its stated rule and its note |
-| note | the stderr line `vfx: note: ...` a render prints once per gap it used |
-| model fixture | hex text of the inputs and expected outputs of an independent model of one engine stage, which the Rust tests reproduce bit for bit |
-| differential fixture | a fixture of a model that is not bit exact, which the tests compare within a tolerance |
-| baseline | the build of the commit the lock compares against |
-| corpus | the cases of one lock set, L1, L2 or L3 |
-| identical | exit 0 with the same stdout bytes and the same stderr bytes as the baseline |
-| refused | a case the baseline did not render (a nonzero exit) |
-| unproven | a control that no graded case has shown to match the original |
-
-## Moving the numbers
-
-A reference render of the original moves the Graded and Unproven rows. From the repository root:
-
-```sh
-target/release/fx-parity gen --out target/refpack --families all
-target/release/fx-parity checklist --testset target/refpack
-target/release/fx-parity run --testset target/refpack --refs target/refpack/refs --strict
-python -I tools/gen_docs.py --refresh-data --vfx target/release/vfx --testset target/refpack --refs target/refpack/refs
-python -I tools/gen_docs.py --check
-```
-
-1. `gen` writes the cases of every family, and `checklist` the instructions for rendering each in the original and converting its export into `refs/`.
-2. `run` grades every case that has a reference.
-3. `--refresh-data` rebuilds `docs/data/controls.tsv` and `docs/data/gaps.tsv` from `vfx list --json --all`, and `docs/data/references.tsv` from the cases and the grades, then fills every figure; `--check` confirms that nothing drifted. With `--testset` and no `--refs` every case is recorded as `missing`, which is the record today. Commit the snapshots with the change that moved them.
-
-A change to the engine moves the lock: run the lock against the last recorded baseline, and record it again once it shows no difference. A new fixture or test moves the Model row and the test counts on the next `python -I tools/gen_docs.py`.
-
-## Test counts
-
-The tests the figures rest on, counted in the source:
+A scan of the source files: a `#[test]` line is one test of `cargo test`, a `def test_` line one test of its `unittest` suite, and an `#[ignore]` test runs only on request ([reference: tests](reference.md#tests)). Counting a test says nothing about whether it passes.
 
 <!--gen:tests-->
 | Suite | Counted | Tests |
 |---|---|---|
-| `fx-cli` | `#[test]` | 133 |
+| `fx-cli` | `#[test]` | 134 |
 | `fx-core` | `#[test]` | 52 |
-| `fx-parity` | `#[test]` | 170 |
+| `fx-parity` | `#[test]` | 175 |
 | `create-vectors` | `#[test]` | 91 |
-| `retime` | `#[test]` | 67 (2 ignored) |
-| `retime-engine` | `#[test]` | 755 (12 ignored) |
-| `retime-fgbg` | `#[test]` | 101 (1 ignored) |
-| `vectors-in` | `#[test]` | 100 |
+| `retime` | `#[test]` | 70 (2 ignored) |
+| `retime-engine` | `#[test]` | 843 (36 ignored) |
+| `retime-fgbg` | `#[test]` | 104 (1 ignored) |
+| `vectors-in` | `#[test]` | 104 |
 | `tools/test_apply.py` | `def test_` | 110 |
 | `tools/test_apply_geometry.py` | `def test_` | 22 |
 | `tools/test_apply_hdr.py` | `def test_` | 38 |
 | `tools/test_audio_map.py` | `def test_` | 26 |
 | `tools/test_conformance.py` | `def test_` | 47 |
-| `tools/test_docgen.py` | `def test_` | 38 |
+| `tools/test_docgen.py` | `def test_` | 46 |
 | `tools/test_ffstage.py` | `def test_` | 25 |
 | `tools/test_handoff.py` | `def test_` | 154 |
 | `tools/test_parity_lock.py` | `def test_` | 21 |
@@ -277,4 +336,91 @@ The tests the figures rest on, counted in the source:
 | `tools/test_stages.py` | `def test_` | 70 |
 <!--/gen:tests-->
 
-A `#[test]` line is one test of `cargo test`, and a `def test_` line one test of its `unittest` suite; an `#[ignore]` test runs only on request ([Tests](../README.md#tests)).
+## Terms
+
+| Term | Meaning |
+|---|---|
+| module | one part of one plugin's behavior, checked on its own: an id, a plugin, a rewrite effect |
+| in contract | a case whose behavior the original defines |
+| out of contract | a case the original does not define; reported apart, never a pass or a failure |
+| reference | the original's output for a case, rendered in the emulator |
+| call record | the host calls an original makes, against the reads of the rewrite |
+| mutant | a deliberately wrong copy of the rewrite that the grid must catch |
+| survivor | a mutant the grid did not catch |
+| kill | a mutant whose output differs from the original's on at least one compared case |
+| stand-in | labelled data fed to both sides where the original reads something the harness cannot supply as a host would |
+| logic parity | a match that rests on a stand-in |
+| model fixture | the inputs and expected outputs of an independent model of one engine stage, which the Rust tests reproduce bit for bit |
+| differential fixture | a fixture of a model that is not bit exact, which the tests compare within a tolerance |
+
+## Per-module notes
+
+What each module's result file states about blockers, stand-ins, logic parity and surviving mutants:
+
+<!--gen:notes-->
+| Module | Kind | Text |
+|---|---|---|
+| `retime-time` | blocker | 2 in-contract cases have no reference |
+| `retime-time` | blocker | 2 cases did not render in the harness for reasons that are not the original's (see ooc.json unjudged) |
+| `retime-time` | blocker | 10 out-of-contract candidates rendered in the original and need review |
+| `retime-time` | stand-in | keyed curves (speed_percent, frame_num, src_mark_segments with @ keys): host side keyframe interpolation, one labelled stand-in on both sides, cases counted as logic_parity |
+| `retime-time` | stand-in | 46 keyed-parameter cases are logic parity candidates; 46 compared (counted in cases.compared, logic parity only, not full parity) |
+| `retime-time` | logic parity | 46 compared cases use a stand-in on both sides |
+| `retime-time` | surviving mutant | m09_exact_tolerance_wider |
+| `retime-time` | surviving mutant | m13_k_bias |
+| `retime-time` | surviving mutant | m23_planner_second_frame |
+| `retime-time` | surviving mutant | m24_blend_weight_f32 |
+| `retime-time` | surviving mutant | m25_dur_operand_order |
+| `retime-flow` | blocker | 7 in-contract cases have no reference |
+| `retime-flow` | blocker | 7 cases have no usable outcome from the harness |
+| `retime-flow` | stand-in | 3 cases with keyed speed_percent (AE keyframe interpolation) are tagged stand_in=keyframe_interpolation; 3 of them compared, counted as logic_parity (not full parity) |
+| `retime-flow` | stand-in | draft quality cases (testsets/draft) need the same quality setting on the host side as vfx --quality draft |
+| `retime-flow` | logic parity | 3 compared cases use a stand-in on both sides |
+| `create-vectors` | blocker | mutants: 47 of 51 killed; survivors m05, m06, m29, m41 |
+| `create-vectors` | blocker | 2 cases hit emulator or harness problems and are unresolved |
+| `create-vectors` | stand-in | 5 cases with keyed params use the vfx keyframe syntax as the shared stand-in for AE keyframe interpolation (keyframe interpolation of the host: eased end key; keyframe interpolation of the host: linear; keyframe interpolation of the host: point, linear) |
+| `create-vectors` | stand-in | 5 keyed-parameter cases are logic parity, not full parity: 5 compared, 5 identical |
+| `create-vectors` | logic parity | 5 compared cases use a stand-in on both sides |
+| `create-vectors` | surviving mutant | m05 |
+| `create-vectors` | surviving mutant | m06 |
+| `create-vectors` | surviving mutant | m29 |
+| `create-vectors` | surviving mutant | m41 |
+| `vectors-in` | stand-in | AE keyframe interpolation: 19 grid cases key a parameter (tag keyframe_interpolation); both sides read the same labelled interpolation of the keys, and those cases count as logic_parity (19 compared, 19 identical) |
+| `vectors-in` | logic parity | 19 compared cases use a stand-in on both sides |
+| `fgbg-core` | blocker | 14 of 367 in-contract cases have no reference |
+| `fgbg-core` | blocker | 14 cases failed in the emulation (not the original's behaviour) and have no reference |
+| `fgbg-core` | blocker | 39 cases have no complete plugin call record |
+| `fgbg-core` | blocker | mutants survive: M05, M30 |
+| `fgbg-core` | stand-in | 5 keyed cases (tag standin in testset/grid.tsv) use the harness's labelled keyframe interpolation on both sides; 5 of them compared, counted as logic_parity and not as full parity |
+| `fgbg-core` | logic parity | 5 compared cases use a stand-in on both sides |
+| `fgbg-core` | surviving mutant | M05 |
+| `fgbg-core` | surviving mutant | M30 |
+| `fgbg-layers` | blocker | 2 out of contract candidates were rendered by the original and are within registered ranges: review for promotion into the grid |
+| `fgbg-layers` | blocker | mutant survivors: M20, M21, M22, M23, M24, M25, M29, M43 |
+| `fgbg-layers` | stand-in | 33 cases (tag standin in testset/grid.tsv) use keyframed ptN_pos or ptN_use values: AE keyframe interpolation is replaced by the harness's labelled linear stand-in on both sides |
+| `fgbg-layers` | stand-in | 362 cases hand matte layers (fg1_matte to fg3_matte) to the plugin as raw clips through the harness, which is a stand-in for how AE hands a hidden layer over |
+| `fgbg-layers` | stand-in | logic_parity counts compared cases that depend on either stand-in (341 of 353 compared); they are not full parity |
+| `fgbg-layers` | logic parity | 341 compared cases use a stand-in on both sides |
+| `fgbg-layers` | surviving mutant | M20 |
+| `fgbg-layers` | surviving mutant | M21 |
+| `fgbg-layers` | surviving mutant | M22 |
+| `fgbg-layers` | surviving mutant | M23 |
+| `fgbg-layers` | surviving mutant | M24 |
+| `fgbg-layers` | surviving mutant | M25 |
+| `fgbg-layers` | surviving mutant | M29 |
+| `fgbg-layers` | surviving mutant | M43 |
+<!--/gen:notes-->
+
+The harness's own statement, `parity/harness/results/summary.json`, shown as it stands:
+
+<!--gen:harness-->
+| Entry | Stated |
+|---|---|
+| `state` | all four plugins boot and render; the references of the six module grids were made with this harness |
+| `plugins` | 4 entries, see the file |
+| `dlls_copied` | 28 entries, see the file |
+| `stand_ins` | 10 entries, see the file |
+| `assumptions` | 3 entries, see the file |
+| `callrecord_check` | {"ok":true,"cases":12,"all_stdout_and_stderr_equal":true} |
+| `unit_tests` | the harness unit tests (test_*.py) pass: 115 run, 5 skipped |
+<!--/gen:harness-->

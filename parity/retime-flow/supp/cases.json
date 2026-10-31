@@ -1,0 +1,55 @@
+{
+ "format": 1,
+ "ffmpeg": "none (raw frames written by gen.py)",
+ "inputs": [
+  {
+   "file": "inputs/disc-40x30.d8.f4.rgba",
+   "source": "disc",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  }
+ ],
+ "cases": [
+  {
+   "id": "retime.supp-exact-tol-s99.disc-40x30.d8",
+   "effect": "retime",
+   "label": "supp-exact-tol-s99",
+   "params": [
+    "speed_percent=99"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.supp-exact-tol-s99.disc-40x30.d8.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "supp",
+   "note": "output frame 1 sits 0.01 from a whole frame: the vector path in the rewrite, the fast path with EXACT_TOLERANCE 0.01 (mutant m09 of retime-time); see the docstring of gen_supp_flow.py"
+  },
+  {
+   "id": "retime.supp-exact-tol-s101.disc-40x30.d8",
+   "effect": "retime",
+   "label": "supp-exact-tol-s101",
+   "params": [
+    "speed_percent=101"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.supp-exact-tol-s101.disc-40x30.d8.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "supp",
+   "note": "output frame 1 sits 0.01 from a whole frame: the vector path in the rewrite, the fast path with EXACT_TOLERANCE 0.01 (mutant m09 of retime-time); see the docstring of gen_supp_flow.py"
+  }
+ ]
+}

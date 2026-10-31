@@ -6,6 +6,7 @@ mod clip;
 mod devices;
 mod error;
 mod list;
+mod record;
 mod registry;
 mod selftest;
 mod temporal;

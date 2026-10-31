@@ -1,0 +1,338 @@
+{
+ "ok": true,
+ "cases": [
+  {
+   "id": "retime.all-default.testsrc2-64x48.d8.ff8435ac",
+   "effect": "retime",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "alt_source_b"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "6db8a964c65955fc14a5078ccda958d79ad69ce2127c9beb8fde9a32c91ee37f",
+   "stdout_sha256_with_record": "6db8a964c65955fc14a5078ccda958d79ad69ce2127c9beb8fde9a32c91ee37f",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 13,
+   "record_reads": 8,
+   "record_layers": [
+    "alt_source_a"
+   ]
+  },
+  {
+   "id": "retime.all-min.testsrc2-64x48.d8.014ca6b9",
+   "effect": "retime",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "alt_source_b"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_sha256_with_record": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 13,
+   "record_reads": 8,
+   "record_layers": [
+    "alt_source_a"
+   ]
+  },
+  {
+   "id": "retime.all-max.testsrc2-64x48.d8.9bda8b29",
+   "effect": "retime",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "alt_source_b"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_sha256_with_record": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 9,
+   "record_reads": 4,
+   "record_layers": [
+    "alt_source_a"
+   ]
+  },
+  {
+   "id": "create-vectors.all-default.testsrc2-64x48.d8.0d49143b",
+   "effect": "create-vectors",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "cf49282b88b5f3738f87d6547f6216f1822f067855819ace810324b2f8b21d01",
+   "stdout_sha256_with_record": "cf49282b88b5f3738f87d6547f6216f1822f067855819ace810324b2f8b21d01",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 37,
+   "record_reads": 32,
+   "record_layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ]
+  },
+  {
+   "id": "create-vectors.all-min.testsrc2-64x48.d8.4775fa3f",
+   "effect": "create-vectors",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "6db8a964c65955fc14a5078ccda958d79ad69ce2127c9beb8fde9a32c91ee37f",
+   "stdout_sha256_with_record": "6db8a964c65955fc14a5078ccda958d79ad69ce2127c9beb8fde9a32c91ee37f",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 9,
+   "record_reads": 4,
+   "record_layers": [
+    "alt_source_a"
+   ]
+  },
+  {
+   "id": "create-vectors.all-max.testsrc2-64x48.d8.ed0a023e",
+   "effect": "create-vectors",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "954dcb3ec872f1f364b12f2122000d26b3b4691ae97a9e29529a463b6282bcb7",
+   "stdout_sha256_with_record": "954dcb3ec872f1f364b12f2122000d26b3b4691ae97a9e29529a463b6282bcb7",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 37,
+   "record_reads": 32,
+   "record_layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ]
+  },
+  {
+   "id": "retime-fgbg.all-default.testsrc2-64x48.d8.8d5c4b48",
+   "effect": "retime-fgbg",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "alt_source_b",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "6db8a964c65955fc14a5078ccda958d79ad69ce2127c9beb8fde9a32c91ee37f",
+   "stdout_sha256_with_record": "6db8a964c65955fc14a5078ccda958d79ad69ce2127c9beb8fde9a32c91ee37f",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 37,
+   "record_reads": 32,
+   "record_layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ]
+  },
+  {
+   "id": "retime-fgbg.all-min.testsrc2-64x48.d8.1ca97166",
+   "effect": "retime-fgbg",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "alt_source_b",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "25bf848a0106cea9fa771f841db80c73d629bb2cf931a705aa97d9d4499307e2",
+   "stdout_sha256_with_record": "25bf848a0106cea9fa771f841db80c73d629bb2cf931a705aa97d9d4499307e2",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 37,
+   "record_reads": 32,
+   "record_layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ]
+  },
+  {
+   "id": "retime-fgbg.all-max.testsrc2-64x48.d8.f37e9514",
+   "effect": "retime-fgbg",
+   "depth": 8,
+   "layers": [
+    "alt_source_a",
+    "alt_source_b",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_sha256_with_record": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 37,
+   "record_reads": 32,
+   "record_layers": [
+    "alt_source_a",
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte"
+   ]
+  },
+  {
+   "id": "vectors-in.all-default.testsrc2-64x48.d8.57b0ddc5",
+   "effect": "vectors-in",
+   "depth": 8,
+   "layers": [
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte",
+    "source",
+    "vectors_next",
+    "vectors_prev"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "ac27ce11cbb6fba518ffe0ce7d316d359f86c44e3b53f1f7f1694b67fd5d59a0",
+   "stdout_sha256_with_record": "ac27ce11cbb6fba518ffe0ce7d316d359f86c44e3b53f1f7f1694b67fd5d59a0",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 69,
+   "record_reads": 64,
+   "record_layers": [
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte",
+    "source",
+    "vectors_next",
+    "vectors_prev"
+   ]
+  },
+  {
+   "id": "vectors-in.all-min.testsrc2-64x48.d8.9481d35b",
+   "effect": "vectors-in",
+   "depth": 8,
+   "layers": [
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte",
+    "source",
+    "vectors_next",
+    "vectors_prev"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "25bf848a0106cea9fa771f841db80c73d629bb2cf931a705aa97d9d4499307e2",
+   "stdout_sha256_with_record": "25bf848a0106cea9fa771f841db80c73d629bb2cf931a705aa97d9d4499307e2",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 69,
+   "record_reads": 64,
+   "record_layers": [
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte",
+    "source",
+    "vectors_next",
+    "vectors_prev"
+   ]
+  },
+  {
+   "id": "vectors-in.all-max.testsrc2-64x48.d8.49e8cce1",
+   "effect": "vectors-in",
+   "depth": 8,
+   "layers": [
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte",
+    "source",
+    "vectors_next",
+    "vectors_prev"
+   ],
+   "exit": [
+    0,
+    0
+   ],
+   "stdout_sha256": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_sha256_with_record": "2aae7dc846aaf25f1cadf55f1666862046c6db9d65d84bdc07fa039dac405606",
+   "stdout_equal": true,
+   "stderr_equal": true,
+   "bytes": 49152,
+   "record_lines": 45,
+   "record_reads": 40,
+   "record_layers": [
+    "fg1_matte",
+    "fg2_matte",
+    "fg3_matte",
+    "source",
+    "vectors_next",
+    "vectors_prev"
+   ]
+  }
+ ]
+}

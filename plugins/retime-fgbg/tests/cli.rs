@@ -392,10 +392,14 @@ fn a_fg_matte_layer_file_renders_end_to_end_as_the_engine_does_and_notes_its_rul
     let matte = write_raw(dir.path("matte.raw"), &matte_frames);
     let out = dir.path("out.raw");
     for (params, notes) in [
-        (vec!["speed_percent=50"], vec!["G1", "G1b"]),
-        // frame 0 is exact: the fast path of the FG1 group notes G1h first; the notes of a frame come in id order
-        (vec!["speed_percent=50", "track_rgb_a=1", "warping=2", "display=3"], vec!["G1", "G1h", "G1b", "G1g", "G6"]),
-        (vec!["speed_percent=50", "pt1_use=2", "pt1_pos=24,24@0;30,24@6", "blur_compensation=1"], vec!["G1", "G1b", "G1f", "G2"]),
+        (vec!["speed_percent=50"], vec!["G1"]),
+        // frame 0 is exact: the fast path of the FG1 group notes G1h first; Track RGB+A does not wrap (fix 05), so no
+        // G6; the notes of a frame come in id order. The layer plates (fgbg-layers fix 30, read from the code) fill and blur
+        // every layer on its own: no G1g (the fill of a single group) and no G1f (one blur tail) any more; FG1 alone
+        // solves its own layer images without a mask and the masks of the other layers do not gate the block matching
+        // (fixes 34, 35): no G1b
+        (vec!["speed_percent=50", "track_rgb_a=1", "warping=2", "display=3"], vec!["G1", "G1h"]),
+        (vec!["speed_percent=50", "pt1_use=2", "pt1_pos=24,24@0;30,24@6", "blur_compensation=1"], vec!["G1", "G2"]),
         (vec!["vectors=1", "display=6"], vec!["G1", "G1h"]),
     ] {
         let frames = 6;
@@ -446,7 +450,8 @@ fn note_line(g: &fx_core::OpenGap) -> String {
 fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_display() {
     // gaps.rs: G1 is noted on every frame rendered with an FG matte layer present, on any display but Source. vfx
     // prints a gap once per run, so each run here renders ONE frame (Frame Number mode): an in-between frame (the
-    // layered vector path, which also notes G1b), an exact frame and a No Vectors frame (the layered fast path), and
+    // layered vector path; its masked solves do not gate the block matching, so G1b is not noted), an exact frame and
+    // a No Vectors frame (the layered fast path), and
     // the Source display, which composes no layer and notes nothing
     let bin = vfx().expect("fx-cli builds");
     let dir = Scratch::new("g1-note");
@@ -455,9 +460,10 @@ fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_
     let out = dir.path("out.raw");
     let (g1, g1b) = (note_line(&retime_engine::gaps::G1), note_line(&retime_engine::gaps::G1B));
     for (params, want_g1, want_g1b) in [
-        (vec!["time_remap_mode=2", "frame_num=2.5"], true, true),
-        (vec!["time_remap_mode=2", "frame_num=3"], true, false),
-        (vec!["time_remap_mode=2", "frame_num=2.5", "vectors=1"], true, false),
+        (vec!["time_remap_mode=2", "frame_num=2.5"], true, false),
+        // an exact frame and No Vectors take the fast path of the full group, which is the single layer one (fix 04)
+        (vec!["time_remap_mode=2", "frame_num=3"], false, false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "vectors=1"], false, false),
         (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false, false),
     ] {
         let mut cmd = Command::new(bin);
@@ -477,7 +483,7 @@ fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_
         assert_eq!(count(&g1), usize::from(want_g1), "{params:?}: {stderr}");
         assert_eq!(count(&g1b), usize::from(want_g1b), "{params:?}: {stderr}");
         if !want_g1 {
-            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display notes nothing: {stderr}");
+            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display and the full group fast path note nothing: {stderr}");
         }
     }
 }

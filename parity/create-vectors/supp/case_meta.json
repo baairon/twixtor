@@ -1,0 +1,30 @@
+{
+ "create-vectors.supp-side1.ramp-1x8.d8": {
+  "group": "supplementary",
+  "tags": [
+   "side-of-1"
+  ],
+  "standin": null
+ },
+ "create-vectors.supp-side1.ramp-1x8.d32": {
+  "group": "supplementary",
+  "tags": [
+   "side-of-1"
+  ],
+  "standin": null
+ },
+ "create-vectors.supp-side1.ramp-8x1.d8": {
+  "group": "supplementary",
+  "tags": [
+   "side-of-1"
+  ],
+  "standin": null
+ },
+ "create-vectors.supp-side1.ramp-8x1.d32": {
+  "group": "supplementary",
+  "tags": [
+   "side-of-1"
+  ],
+  "standin": null
+ }
+}

@@ -12,6 +12,7 @@
 pub mod blend;
 pub mod compose;
 pub mod create_vectors;
+pub mod crt_powf;
 pub mod debug;
 pub mod device;
 pub mod filters;
@@ -27,6 +28,7 @@ pub mod host;
 pub mod image;
 pub mod layers;
 pub mod matte;
+pub mod nanrule;
 pub mod planner;
 pub mod points;
 pub mod prep;

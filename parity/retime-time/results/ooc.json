@@ -1,0 +1,533 @@
+{
+ "measured_at": "2026-10-31",
+ "status_files": [
+  "~/twixtor-parity/fix-twixtor/status/time_all.json",
+  "~/twixtor-parity/fix-twixtor/ooc/status_time.json",
+  "~/twixtor-parity/re/f7-supp/state/h_time480.json"
+ ],
+ "moved_when_status_is": [
+  "plugin_error",
+  "refused",
+  "timeout"
+ ],
+ "counts": {
+  "testset_cases": 462,
+  "status_entries": 484,
+  "rendered": 460,
+  "moved_out": 0,
+  "unjudged": 2,
+  "in_contract": 462,
+  "candidates": 22,
+  "candidates_out_of_contract": 12,
+  "candidates_to_review": 10
+ },
+ "moved": [],
+ "candidates": [
+  {
+   "id": "retime.ooc00-speed_above_max.alphaslide-3x2.d8.68ce7d56",
+   "source": "candidate",
+   "label": "speed above max",
+   "params": [
+    "vectors=1",
+    "speed_percent=10001"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  },
+  {
+   "id": "retime.ooc01-speed_below_min.alphaslide-3x2.d8.88a78d3c",
+   "source": "candidate",
+   "label": "speed below min",
+   "params": [
+    "vectors=1",
+    "speed_percent=-10001"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  },
+  {
+   "id": "retime.ooc02-frame_num_above_max.alphaslide-3x2.d8.59c8ff9b",
+   "source": "candidate",
+   "label": "frame_num above max",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=200001"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  },
+  {
+   "id": "retime.ooc03-frame_num_below_min.alphaslide-3x2.d8.020734f5",
+   "source": "candidate",
+   "label": "frame_num below min",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=-200001"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  },
+  {
+   "id": "retime.ooc04-input_frame_rate_below_min.alphaslide-3x2.d8.330d2ba5",
+   "source": "candidate",
+   "label": "input_frame_rate below min",
+   "params": [
+    "vectors=1",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=0.05"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  },
+  {
+   "id": "retime.ooc05-input_frame_rate_double_0_1.alphaslide-3x2.d8.5f558949",
+   "source": "candidate",
+   "label": "input_frame_rate double 0.1",
+   "params": [
+    "vectors=1",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=0.1"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": false,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is inside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc06-input_frame_rate_above_max.alphaslide-3x2.d8.8f17386c",
+   "source": "candidate",
+   "label": "input_frame_rate above max",
+   "params": [
+    "vectors=1",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=1000.5"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  },
+  {
+   "id": "retime.ooc07-time_remap_mode_0.alphaslide-3x2.d8.a9fa7e76",
+   "source": "candidate",
+   "label": "time_remap_mode 0",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc08-time_remap_mode_3.alphaslide-3x2.d8.cc200983",
+   "source": "candidate",
+   "label": "time_remap_mode 3",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=3"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc09-frame_interp_0.alphaslide-3x2.d8.0693b768",
+   "source": "candidate",
+   "label": "frame_interp 0",
+   "params": [
+    "vectors=1",
+    "frame_interp=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc10-frame_interp_4.alphaslide-3x2.d8.bd7c440a",
+   "source": "candidate",
+   "label": "frame_interp 4",
+   "params": [
+    "vectors=1",
+    "frame_interp=4"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc11-input_fields_0.alphaslide-3x2.d8.fbc21639",
+   "source": "candidate",
+   "label": "input_fields 0",
+   "params": [
+    "vectors=1",
+    "input_fields=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc12-input_fields_4.alphaslide-3x2.d8.6483d118",
+   "source": "candidate",
+   "label": "input_fields 4",
+   "params": [
+    "vectors=1",
+    "input_fields=4"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc13-src_mark_segments_0.alphaslide-3x2.d8.c22178cb",
+   "source": "candidate",
+   "label": "src_mark_segments 0",
+   "params": [
+    "vectors=1",
+    "src_mark_segments=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc14-src_mark_segments_6.alphaslide-3x2.d8.305548aa",
+   "source": "candidate",
+   "label": "src_mark_segments 6",
+   "params": [
+    "vectors=1",
+    "src_mark_segments=6"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc15-in_fps_is_out_fps_2.alphaslide-3x2.d8.01a4baf9",
+   "source": "candidate",
+   "label": "in_fps_is_out_fps 2",
+   "params": [
+    "vectors=1",
+    "in_fps_is_out_fps=2"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": null,
+   "verdict": "review",
+   "reason": "the original rendered it and the value is not known to be outside its registered range, while the rewrite refuses it: a possible difference"
+  },
+  {
+   "id": "retime.ooc16-popup_by_name.alphaslide-3x2.d8.fe0f1563",
+   "source": "candidate",
+   "label": "popup by name",
+   "params": [
+    "vectors=1",
+    "frame_interp=Blend"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "error",
+    "class": "emulator_error",
+    "error": "ValueError: could not convert string to float: 'Blend'"
+   },
+   "outside_registered_range": null,
+   "verdict": "out_of_contract",
+   "reason": "the emulator failed on the case (not necessarily the original)"
+  },
+  {
+   "id": "retime.ooc17-key_without_frame.alphaslide-3x2.d8.f00aaebd",
+   "source": "candidate",
+   "label": "key without frame",
+   "params": [
+    "vectors=1",
+    "speed_percent=100@0;50"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "unsupported",
+    "class": "unsupported",
+    "error": "key `50`"
+   },
+   "outside_registered_range": false,
+   "verdict": "out_of_contract",
+   "reason": "the harness could not set the case up (stand-in limit, not the original)"
+  },
+  {
+   "id": "retime.ooc18-two_keys_one_tick.alphaslide-3x2.d8.f9df8db9",
+   "source": "candidate",
+   "label": "two keys one tick",
+   "params": [
+    "vectors=1",
+    "speed_percent=100@0;50@0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "unsupported",
+    "class": "unsupported",
+    "error": "two keys on one tick"
+   },
+   "outside_registered_range": false,
+   "verdict": "out_of_contract",
+   "reason": "the harness could not set the case up (stand-in limit, not the original)"
+  },
+  {
+   "id": "retime.ooc19-held_and_eased_key.alphaslide-3x2.d8.108524bb",
+   "source": "candidate",
+   "label": "held and eased key",
+   "params": [
+    "vectors=1",
+    "speed_percent=100@0he"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "unsupported",
+    "class": "unsupported",
+    "error": "key suffix `he`"
+   },
+   "outside_registered_range": false,
+   "verdict": "out_of_contract",
+   "reason": "the harness could not set the case up (stand-in limit, not the original)"
+  },
+  {
+   "id": "retime.ooc20-keyed_popup_with_handle.alphaslide-3x2.d8.67c51169",
+   "source": "candidate",
+   "label": "keyed popup with handle",
+   "params": [
+    "vectors=1",
+    "frame_interp=1@0i0/50;2@5"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "unsupported",
+    "class": "unsupported",
+    "error": "Bezier handles in `1@0i0/50`"
+   },
+   "outside_registered_range": null,
+   "verdict": "out_of_contract",
+   "reason": "the harness could not set the case up (stand-in limit, not the original)"
+  },
+  {
+   "id": "retime.ooc21-keyed_speed_above_max.alphaslide-3x2.d8.43793d36",
+   "source": "candidate",
+   "label": "keyed speed above max",
+   "params": [
+    "vectors=1",
+    "speed_percent=100@0;10001@5"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "render_exit": null,
+    "message": null
+   },
+   "plugin": {
+    "status": "rendered",
+    "class": "rendered",
+    "error": null
+   },
+   "outside_registered_range": true,
+   "verdict": "out_of_contract",
+   "reason": "outside the parameter range the plugin registers"
+  }
+ ],
+ "unjudged": [
+  {
+   "id": "retime.long6000-rate29_97.ident-1x1.d8.d634b990",
+   "plugin_status": "not_run",
+   "class": "not_run",
+   "reason": "the harness did not run the case",
+   "error": ""
+  },
+  {
+   "id": "retime.long6000-rate29_97003.ident-1x1.d8.9b45a592",
+   "plugin_status": "not_run",
+   "class": "not_run",
+   "reason": "the harness did not run the case",
+   "error": ""
+  }
+ ],
+ "unknown_ids": []
+}

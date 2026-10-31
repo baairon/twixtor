@@ -4,7 +4,7 @@
 mod common;
 
 use common::*;
-use fx_core::{Depth, FieldOrder, Frame, Quality, Rational};
+use fx_core::{Depth, FieldOrder, Frame, ParamCurves, Quality, Rational};
 use vectors_in::glue::{self, Settings};
 use retime_engine::image::{ErrorKind, Fmt, MissingLayerStyle};
 
@@ -94,10 +94,10 @@ fn rate_model_swaps_the_order_of_the_checkbox_and_the_composition_rate() {
     r = rig(&[("in_fps_is_out_fps", "0"), ("input_frame_rate", "12")]);
     let e = glue::read_settings(&cx, &r.env()).unwrap().engine;
     assert_eq!((e.rates.in_fps, e.rates.out_fps, e.rates.dur), (12.0, 24.0, 200.0));
-    // Output: Frame Rate is read and overridden on every host modelled
-    r = rig(&[("in_fps_is_out_fps", "0"), ("input_frame_rate", "12"), ("output_frame_rate", "50")]);
-    let again = glue::read_settings(&cx, &r.env()).unwrap().engine;
-    assert_eq!((again.rates.in_fps, again.rates.out_fps, again.rates.dur), (12.0, 24.0, 200.0));
+    // the plugin registers no Output: Frame Rate, so the id is refused
+    use fx_core::Effect;
+    let mut c = ParamCurves::new(vectors_in::VectorsIn.params());
+    assert!(c.parse_cli("output_frame_rate", "50", time()).is_err());
 }
 
 #[test]
@@ -166,11 +166,12 @@ fn the_probe_reports_presence_failures_and_the_fg_count() {
     // the first problem decides: a wrong size Source before a wrong size vector layer, both red here
     let r = rig(&[]).with_layer("vectors_next", layer(W + 1, H));
     assert_eq!(glue::probe(&r.env(), &r.cx(2)).unwrap().failure, Some(ErrorKind::SizeMismatch));
-    // a vector layer with no frame at the current time (a layer that is shorter than the clip) is absent
+    // a vector layer with no frame at the current time (a layer that is shorter than the clip) keeps its size
+    // outside its clip: present
     let short: Vec<Frame> = layer(W, H).into_iter().take(2).collect();
     let r = rig(&[]).with_layer("vectors_next", short).with_layer("vectors_prev", layer(W, H));
     assert!(glue::probe(&r.env(), &r.cx(1)).unwrap().has_next);
-    assert!(!glue::probe(&r.env(), &r.cx(2)).unwrap().has_next);
+    assert!(glue::probe(&r.env(), &r.cx(2)).unwrap().has_next);
 }
 
 #[test]
@@ -181,7 +182,6 @@ fn the_wiring_names_exist_in_params() {
         "display",
         "in_fps_is_out_fps",
         "input_frame_rate",
-        "output_frame_rate",
         "frame_interp",
         "warping",
         "blur_compensation",
@@ -208,11 +208,17 @@ fn the_wrap_flag_is_off_and_the_device_request_is_carried() {
     let e = read(&r, 2).engine;
     assert!(!e.wrap_360);
     assert_eq!(e.device, fx_core::DeviceRequest::Cpu);
+    // every hole fill takes the tap above first in its vertical border rows
+    assert_eq!(e.stages.get().vertical_taps(), retime_engine::holefill::VerticalTaps::AboveFirst);
     for device in [fx_core::DeviceRequest::Gpu, fx_core::DeviceRequest::GpuIndex(4)] {
         let mut cx = r.cx(2);
         cx.device = device;
         let got = glue::read_settings(&cx, &r.env()).unwrap();
-        assert_eq!(got.engine, retime_engine::host::EngineSettings { device, ..e.clone() });
+        // the stages are the above-first fill around the Gouraud forward warp over the context's set, a new
+        // handle per read
+        assert!(!got.engine.stages.is_cpu());
+        assert_eq!(got.engine.stages.get().vertical_taps(), retime_engine::holefill::VerticalTaps::AboveFirst);
+        assert_eq!(got.engine, retime_engine::host::EngineSettings { device, stages: got.engine.stages.clone(), ..e.clone() });
         assert!(!got.rate_error);
     }
 }

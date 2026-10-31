@@ -14,11 +14,11 @@
 
 use super::{issue_fill, Rendered};
 use crate::blend::blend;
-use crate::filters::sharpen_step;
+use crate::filters::sharpen_step_with;
 use crate::flow::{FlowField, FlowPair, FlowSettings};
 use crate::forward::{blend_forward_fill_on, blend_forward_on, nearest_forward_fill_on, nearest_forward_on, weighted_forward_fill_on, weighted_forward_on};
 use crate::stages::{Cpu, Stages};
-use crate::holefill::{fill_flow_holes, HoleMaskRef};
+use crate::holefill::{fill_flow_holes_with, HoleMaskRef, VerticalTaps};
 use crate::host::{EngineHost, EngineSettings};
 use crate::image::{Fmt, Image, Samples, CHANNELS};
 use crate::smartblend::{blend_smart, nearest_smart, weighted_blend_smart, SmartOpts};
@@ -66,8 +66,8 @@ pub fn nearest_uses_f_ab(wa: f32, code: i32) -> bool {
 /// The settings that reach the solver for this render: the quality after the segment override,
 /// the render quality flag, the sensitivity, the two Prep flags, the "360 Video" checkbox as
 /// the video range luma and the engine's wrap-around flag `wrap_360` as `FlowSettings::wrap`
-/// (off it is the plain solve). `Track RGB+A` is never alpha in the luma in the retime
-/// (`track_alpha` false).
+/// (off it is the plain solve) and `EngineSettings::track_alpha` (plugin 03's `Track RGB+A`) as
+/// `FlowSettings::track_alpha`, alpha in the solver's luma.
 pub fn flow_settings(settings: &EngineSettings, sel: &Selection) -> FlowSettings {
     let quality = u8::try_from(sel.vectors_quality).unwrap_or(u8::MAX);
     FlowSettings {
@@ -75,6 +75,7 @@ pub fn flow_settings(settings: &EngineSettings, sel: &Selection) -> FlowSettings
         prep_delinearize: settings.prep_delinearize,
         video_range_luma: settings.video_360,
         wrap: settings.wrap_360,
+        track_alpha: settings.track_alpha,
         ..FlowSettings::new(quality, settings.quality_high, settings.sensitivity)
     }
 }
@@ -109,15 +110,15 @@ pub fn check_supported(settings: &EngineSettings, sel: &Selection) -> Result<()>
 /// The pushed frame uses its OWN flow: `A` with `F_AB`, `B` with `F_BA`, Nearest the one flow
 /// [`nearest_uses_f_ab`] names (with code 2 or 3 it is `F_AB` for `wA >= 0.5`, the opposite of
 /// the inverse warps). Code 2 passes
-/// `SmartOpts { binary_alpha: "360 Video" checkbox (Blend only), is360: wrap_360 }` (the forward
+/// `SmartOpts { binary_alpha: "360 Video" checkbox (Blend only), is360: wrap_360, taps: the stage set's vertical_taps }` (the forward
 /// warp itself never wraps, its hole fill does; the weighted variant keeps the fill off); code 3
 /// has no options. The blur compensation tail of [`compose_vectors`] follows as for the inverse
 /// warps.
 fn compose_forward(settings: &EngineSettings, sel: &Selection, a: &Image, b: &Image, flows: &Flows, out: &mut Image) -> Result<()> {
     let wa = sel.wa;
     let fill = settings.warp_mode == 2;
-    let opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360 };
     let stages = settings.stages.get();
+    let opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360, taps: stages.vertical_taps() };
     match sel.interp {
         0 => {
             let flow = if nearest_uses_f_ab(wa, settings.warp_mode) {
@@ -216,7 +217,7 @@ pub fn compose_vectors(settings: &EngineSettings, sel: &Selection, a: &Image, b:
     // The Smart Blend compositions take the "360 Video" checkbox as `binary_alpha` (the binary
     // alpha composite, Blend only) and the engine's wrap flag as `is360` (the weighted variant
     // ignores it).
-    let smart_opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360 };
+    let smart_opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360, taps: settings.stages.get().vertical_taps() };
     if settings.warp_mode >= 2 {
         compose_forward(settings, sel, a, b, flows, &mut out)?;
     } else if smart {
@@ -267,8 +268,8 @@ pub fn compose_vectors(settings: &EngineSettings, sel: &Selection, a: &Image, b:
                 if sel.interp == 2 {
                     // the sharpening step of each warped frame against the unwarped frame, the
                     // strength position being frac for A and wA for B
-                    sharpen_step(&mut ta, a, frac);
-                    sharpen_step(&mut tb, b, wa);
+                    sharpen_step_with(&mut ta, a, frac, settings.stages.get().vertical_taps());
+                    sharpen_step_with(&mut tb, b, wa, settings.stages.get().vertical_taps());
                 }
                 blend(&mut out, &ta, &tb, frac);
             }
@@ -299,6 +300,18 @@ pub(super) fn vector_path(settings: &EngineSettings, host: &dyn EngineHost, sel:
     if let Some(fill) = issue_fill(settings, host) {
         return Ok(fill);
     }
+    if settings.motion_rows_reversed {
+        // the whole motion path on bottom-up rows, its output turned back (EngineSettings::motion_rows_reversed)
+        let (a, b) = (a.rows_reversed(), b.rows_reversed());
+        let tracking = tracking.map(|(ta, tb)| (ta.rows_reversed(), tb.rows_reversed()));
+        let (xa, xb) = match &tracking {
+            Some((ta, tb)) => (ta, tb),
+            None => (&a, &b),
+        };
+        let flows = solve_flows(settings, sel, xa, xb)?;
+        let out = settings.stages.get().compose_vectors(settings, sel, &a, &b, &flows)?;
+        return Ok(Rendered::Image(out.rows_reversed()));
+    }
     let (xa, xb) = match &tracking {
         Some((ta, tb)) => (ta, tb),
         None => (&a, &b),
@@ -314,13 +327,19 @@ pub(super) fn vector_path(settings: &EngineSettings, host: &dyn EngineHost, sel:
 /// applied even for 1.0). `vec` is the premultiplied engine image of the layer (opaque except
 /// alpha 0 holes) and has the output size; the flow comes out at that size, in output pixels.
 pub fn flow_from_vector_image(vec: &Image, max_displace: f32, scale: (f32, f32)) -> Result<FlowField> {
+    flow_from_vector_image_with(vec, max_displace, scale, VerticalTaps::BelowFirst)
+}
+
+/// [`flow_from_vector_image`] whose hole fill takes the vertical tap order `taps`
+/// (`holefill::VerticalTaps`; the Vectors In loaders pass `settings.stages.get().vertical_taps()`).
+pub fn flow_from_vector_image_with(vec: &Image, max_displace: f32, scale: (f32, f32), taps: VerticalTaps) -> Result<FlowField> {
     let (mut flow, mask) = decode_vectors_with_holes(vec, max_displace);
     let mask_ref = match &mask {
         HoleMask::U8(m) => HoleMaskRef::U8(m),
         HoleMask::U16(m) => HoleMaskRef::U16(m),
         HoleMask::F32(m) => HoleMaskRef::F32(m),
     };
-    fill_flow_holes(&mut flow, mask_ref, false)?;
+    fill_flow_holes_with(&mut flow, mask_ref, false, taps)?;
     apply_vec_scale(&mut flow, scale.0, scale.1);
     Ok(flow)
 }
@@ -346,7 +365,8 @@ pub fn invert_flow(flow: &FlowField) -> Result<FlowField> {
     invert_flow_on(&Cpu, flow)
 }
 
-/// [`invert_flow`] with the forward warp on `stages`.
+/// [`invert_flow`] with the forward warp on `stages` and the tap order of its hole fill from
+/// `stages.vertical_taps()`.
 pub fn invert_flow_on(stages: &dyn Stages, flow: &FlowField) -> Result<FlowField> {
     let (w, h) = (flow.width, flow.height);
     if flow.data.len() != w * h * 2 {
@@ -372,7 +392,7 @@ pub fn invert_flow_on(stages: &dyn Stages, flow: &FlowField) -> Result<FlowField
             o[1] = px[2];
         }
     }
-    fill_flow_holes(&mut out, HoleMaskRef::U8(&cov.data), false)?;
+    fill_flow_holes_with(&mut out, HoleMaskRef::U8(&cov.data), false, stages.vertical_taps())?;
     Ok(out)
 }
 

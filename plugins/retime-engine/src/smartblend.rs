@@ -46,9 +46,10 @@
 //! no reciprocal estimates.
 
 use crate::blend::{blend, cvtt};
-use crate::filters::sharpen_step;
+use crate::nanrule as nr;
+use crate::filters::{sharpen_step, sharpen_step_with};
 use crate::flow::FlowField;
-use crate::holefill::fill_holes;
+use crate::holefill::{fill_holes_with, VerticalTaps};
 use crate::image::{Image, Samples, CHANNELS};
 use crate::warp::{inv_warp, inv_warp_coverage, Coverage, WarpOpts};
 use fx_core::{par_rows, FxError, Result};
@@ -67,6 +68,9 @@ pub struct SmartOpts {
     /// and the wrap-around hole fill wherever a holes mask has holes. Ignored by the weighted
     /// variants.
     pub is360: bool,
+    /// The vertical tap order of the hole fill (`holefill::VerticalTaps`, the engine's order by
+    /// default); every composition with a hole fill uses it, the weighted ones included.
+    pub taps: VerticalTaps,
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -151,27 +155,49 @@ impl Px for f32 {
 /// `white`).
 #[inline(always)]
 pub(crate) fn over(a: [f32; 4], b: [f32; 4], white: f32) -> [f32; 4] {
+    let r = over_with::<nr::Plain>(a, b, white);
+    // a NaN in the result: the same arithmetic again with the NaN rule (`crate::nanrule`); numbers are the same bits
+    if nr::any_nan(&r) {
+        over_with::<nr::Rule>(a, b, white)
+    } else {
+        r
+    }
+}
+
+/// [`over`] over a set of operations.
+#[inline(always)]
+pub(crate) fn over_with<A: nr::Arith>(a: [f32; 4], b: [f32; 4], white: f32) -> [f32; 4] {
     if a[0] == 0.0 {
         return b;
     }
     if a[0] == white {
         return a;
     }
-    let ia = 1.0f32 - a[0] / white;
-    let alpha = (white - b[0]) * (a[0] / white) + b[0];
-    [alpha, b[1] * ia + a[1], b[2] * ia + a[2], b[3] * ia + a[3]]
+    let ia = A::sub(1.0f32, A::div(a[0], white));
+    let alpha = A::add(A::mul(A::sub(white, b[0]), A::div(a[0], white)), b[0]);
+    [alpha, A::add(A::mul(b[1], ia), a[1]), A::add(A::mul(b[2], ia), a[2]), A::add(A::mul(b[3], ia), a[3])]
 }
 
 /// One pixel of the Smart Blend composite. Returns the four values and whether they take the raw
 /// store (the "result alpha is 0" fallback).
-#[inline(always)]
+/// Runs with the processor's own operations and again with the NaN rule (`crate::nanrule`) when the result holds a NaN.
 fn smart_pixel(p1: [f32; 4], p2: [f32; 4], w: f32, white: f32) -> ([f32; 4], bool) {
-    let c1 = over(p1, p2, white);
-    let c2 = over(p2, p1, white);
+    let r = smart_pixel_with::<nr::Plain>(p1, p2, w, white);
+    if nr::any_nan(&r.0) {
+        smart_pixel_with::<nr::Rule>(p1, p2, w, white)
+    } else {
+        r
+    }
+}
+
+#[inline(always)]
+fn smart_pixel_with<A: nr::Arith>(p1: [f32; 4], p2: [f32; 4], w: f32, white: f32) -> ([f32; 4], bool) {
+    let c1 = over_with::<A>(p1, p2, white);
+    let c2 = over_with::<A>(p2, p1, white);
     let amax = if p1[0] > p2[0] { p1[0] } else { p2[0] };
     let mut v = [0.0f32; 4];
     for i in 0..4 {
-        v[i] = (c2[i] - c1[i]) * w + c1[i];
+        v[i] = nr::lerp_g::<A>(c1[i], c2[i], w);
     }
     if v[0] == amax {
         return (v, false);
@@ -181,27 +207,36 @@ fn smart_pixel(p1: [f32; 4], p2: [f32; 4], w: f32, white: f32) -> ([f32; 4], boo
         return (if c1[0] > c2[0] { c1 } else { c2 }, true);
     }
     let alpha = v[0];
-    v[1] = (v[1] * amax) / alpha;
-    v[2] = (v[2] * amax) / alpha;
-    v[3] = (v[3] * amax) / alpha;
+    v[1] = A::div(A::mul(v[1], amax), alpha);
+    v[2] = A::div(A::mul(v[2], amax), alpha);
+    v[3] = A::div(A::mul(v[3], amax), alpha);
     v[0] = amax;
     (v, false)
 }
 
 /// One pixel of the binary alpha composite (see the module documentation).
-#[inline(always)]
 fn binary_pixel(p1: [f32; 4], p2: [f32; 4], w: f32, white: f32) -> ([f32; 4], bool) {
+    let r = binary_pixel_with::<nr::Plain>(p1, p2, w, white);
+    if nr::any_nan(&r.0) {
+        binary_pixel_with::<nr::Rule>(p1, p2, w, white)
+    } else {
+        r
+    }
+}
+
+#[inline(always)]
+fn binary_pixel_with<A: nr::Arith>(p1: [f32; 4], p2: [f32; 4], w: f32, white: f32) -> ([f32; 4], bool) {
     let x: [f32; 4] = if p2[0] == white {
-        let ia = 1.0f32 - p1[0] / white;
-        [p2[0], p2[1] * ia + p1[1], p2[2] * ia + p1[2], p2[3] * ia + p1[3]]
+        let ia = A::sub(1.0f32, A::div(p1[0], white));
+        [p2[0], A::add(A::mul(p2[1], ia), p1[1]), A::add(A::mul(p2[2], ia), p1[2]), A::add(A::mul(p2[3], ia), p1[3])]
     } else if p1[0] == white {
         p1
     } else {
         [0.0; 4]
     };
     let y: [f32; 4] = if p1[0] == white {
-        let ia = 1.0f32 - p2[0] / white;
-        [p1[0], p1[1] * ia + p2[1], p1[2] * ia + p2[2], p1[3] * ia + p2[3]]
+        let ia = A::sub(1.0f32, A::div(p2[0], white));
+        [p1[0], A::add(A::mul(p1[1], ia), p2[1]), A::add(A::mul(p1[2], ia), p2[2]), A::add(A::mul(p1[3], ia), p2[3])]
     } else if p2[0] == white {
         p2
     } else {
@@ -209,7 +244,7 @@ fn binary_pixel(p1: [f32; 4], p2: [f32; 4], w: f32, white: f32) -> ([f32; 4], bo
     };
     let mut v = [0.0f32; 4];
     for i in 0..4 {
-        v[i] = (y[i] - x[i]) * w + x[i];
+        v[i] = nr::lerp_g::<A>(x[i], y[i], w);
     }
     (v, false)
 }
@@ -293,6 +328,11 @@ fn smart_composite(out: &mut Image, p1: &Image, p2: &Image, w: f32, opts: SmartO
 /// (`255 - b`), then the hole fill of the composited output with `is360`. `cov1` is left
 /// holding the holes mask (255 = nothing was warped there).
 pub fn smart_finish(out: &mut Image, cov1: &mut Coverage, cov2: &Coverage, is360: bool) -> Result<()> {
+    smart_finish_with(out, cov1, cov2, is360, VerticalTaps::BelowFirst)
+}
+
+/// [`smart_finish`] with the vertical tap order `taps` of the hole fill.
+pub fn smart_finish_with(out: &mut Image, cov1: &mut Coverage, cov2: &Coverage, is360: bool, taps: VerticalTaps) -> Result<()> {
     if cov1.width != cov2.width || cov1.height != cov2.height {
         return Err(FxError::Mismatch(format!(
             "coverage images of {}x{} and {}x{}",
@@ -301,7 +341,7 @@ pub fn smart_finish(out: &mut Image, cov1: &mut Coverage, cov2: &Coverage, is360
     }
     cov1.combine_max(cov2);
     cov1.invert();
-    fill_holes(out, cov1, is360)
+    fill_holes_with(out, cov1, is360, taps)
 }
 
 fn warp_opts(opts: SmartOpts) -> WarpOpts {
@@ -328,7 +368,7 @@ pub fn nearest_smart(
         inv_warp_coverage(out, b, flow, wa, warp_opts(opts))?
     };
     cov.invert();
-    fill_holes(out, &cov, opts.is360)
+    fill_holes_with(out, &cov, opts.is360, opts.taps)
 }
 
 /// Warp code 1 with Frame Interp Blend: `tA = W(A, F_BA, frac)`, `tB = W(B, F_AB, wa)` with
@@ -349,7 +389,7 @@ pub fn blend_smart(
     let mut tb = Image::new(b.width, b.height, b.fmt());
     let cov2 = inv_warp_coverage(&mut tb, b, flow_ab, wa, warp_opts(opts))?;
     smart_composite(out, &ta, &tb, frac, opts)?;
-    smart_finish(out, &mut cov1, &cov2, opts.is360)
+    smart_finish_with(out, &mut cov1, &cov2, opts.is360, opts.taps)
 }
 
 /// Warp code 1 with Frame Interp Weighted Blend: `A' = W(A, F_BA, frac)` and
@@ -382,7 +422,8 @@ pub fn weighted_blend_smart(
 ///    binary kernel here) then [`smart_finish`] with the flag `false`; without coverage (the
 ///    forward variant with code 3): `out = blend(ta, tb, frac)`.
 ///
-/// `opts` is ignored: neither a binary alpha selector nor a 360 flag reaches this code.
+/// Of `opts` only the tap order (`opts.taps`, of the sharpening blurs and of the hole fill) is
+/// used: neither a binary alpha selector nor a 360 flag reaches this code.
 pub fn weighted_tail(
     out: &mut Image,
     ta: &mut Image,
@@ -393,16 +434,15 @@ pub fn weighted_tail(
     cov: Option<(&mut Coverage, &Coverage)>,
     opts: SmartOpts,
 ) -> Result<()> {
-    let _ = opts;
     check_shapes3("weighted blend tail", out, ta, tb)?;
     check_shapes3("weighted blend tail", out, a, b)?;
     let frac = 1.0f32 - wa;
-    sharpen_step(ta, a, frac);
-    sharpen_step(tb, b, wa);
+    sharpen_step_with(ta, a, frac, opts.taps);
+    sharpen_step_with(tb, b, wa, opts.taps);
     match cov {
         Some((cov1, cov2)) => {
             smart_blend(out, ta, tb, frac)?;
-            smart_finish(out, cov1, cov2, false)
+            smart_finish_with(out, cov1, cov2, false, opts.taps)
         }
         None => {
             blend(out, ta, tb, frac);
@@ -427,7 +467,7 @@ pub fn blend_tail(
     match cov {
         Some((cov1, cov2)) => {
             smart_composite(out, ta, tb, frac, opts)?;
-            smart_finish(out, cov1, cov2, opts.is360)
+            smart_finish_with(out, cov1, cov2, opts.is360, opts.taps)
         }
         None => {
             blend(out, ta, tb, frac);

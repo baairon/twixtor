@@ -20,7 +20,8 @@ const W: usize = 48;
 const H: usize = 32;
 const MARGIN: usize = 8;
 
-/// The output frame `n` of plugin 01 on a clip, with CLI style parameters (plugin 01's ids).
+/// The output frame `n` of plugin 01 on a clip, with CLI style parameters (plugin 01's ids). Both plugins run their
+/// vector path on reversed rows (`EngineSettings::motion_rows_reversed`), so their outputs compare directly.
 fn render01(clip: &[Frame], tracking: Option<&[Frame]>, params: &[(&str, &str)], n: u64, frames: u64) -> Frame {
     let mut curves = ParamCurves::new(Retime.params());
     for (id, text) in params {
@@ -62,11 +63,13 @@ fn pairs() -> Vec<(String, Pair)> {
         out.push((format!("{name}"), (base(&[("frame_interp", interp)]), base(&[("frame_interp", interp)]))));
     }
     out.push(("blur compensation".into(), (base(&[("blur_compensation", "1")]), base(&[("blur_compensation", "1")]))));
-    out.push(("prep contrast".into(), (base(&[("prep", "2")]), base(&[("prep", "2")]))));
-    out.push(("prep delinearize weighted".into(), (base(&[("prep", "3"), ("frame_interp", "3")]), base(&[("prep", "3"), ("frame_interp", "3")]))));
+    // plugin 03's Prep = Delinearize renders as Prep = None (fix 09); its Contrast/Edge Enhance (both stages) has no
+    // plugin 01 setting to compare with
+    out.push(("prep delinearize weighted".into(), (base(&[("frame_interp", "3")]), base(&[("prep", "3"), ("frame_interp", "3")]))));
     // plugin 01's Sensitivity is plugin 03's Main_BG Sensitivity on the single layer path
     out.push(("sensitivity".into(), (base(&[("sensitivity", "20")]), base(&[("main_bg_sensitivity", "20")]))));
-    out.push(("video range".into(), (base(&[("video_360", "1")]), base(&[("video_360", "1")]))));
+    // 360 Video is not paired: plugin 01 reads it as
+    // the video range luma, TwixtorPro as its wrap mode
     out.push(("lower quality".into(), (base(&[("vectors", "3")]), base(&[("vectors", "3")]))));
     out.push(("speed curve".into(), (base(&[]).into_iter().filter(|p| p.0 != "speed_percent").chain([("speed_percent", "40@0;120@4")]).collect(), vec![("speed_percent", "40@0;120@4")])));
     out.push(("frame number".into(), (vec![("time_remap_mode", "2"), ("frame_num", "0@0;5@7")], vec![("time_remap_mode", "2"), ("frame_num", "0@0;5@7")])));

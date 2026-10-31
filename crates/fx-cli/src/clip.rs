@@ -10,6 +10,7 @@
 //! rate both formulas give the same frame for every tick, so the default path is the old one.
 
 use crate::error::CliError;
+use crate::record::CallRecord;
 use fx_core::{Depth, Frame, FxError, Layer, Rational, TimeBase};
 use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Seek, SeekFrom, Write};
@@ -67,6 +68,8 @@ pub struct RawClip {
     rate: Option<Rational>,
     note: IoNote,
     reads: AtomicU64,
+    /// `VFX_CALL_RECORD`: the id this clip logs its reads under, and the log.
+    tap: Option<(String, Arc<CallRecord>)>,
     inner: Mutex<Inner>,
 }
 
@@ -100,6 +103,7 @@ impl RawClip {
             rate: None,
             note,
             reads: AtomicU64::new(0),
+            tap: None,
             inner: Mutex::new(Inner { file, cache: Vec::new(), capacity }),
         })
     }
@@ -113,6 +117,12 @@ impl RawClip {
     /// base's keeps the output rate path, which maps every tick to the same frame.
     pub fn with_rate(mut self, rate: Rational) -> RawClip {
         self.rate = (rate != self.time.fps()).then_some(rate);
+        self
+    }
+
+    /// Logs every `frame_at` of this clip to `record` as the layer `id`.
+    pub fn with_record(mut self, id: &str, record: Option<&Arc<CallRecord>>) -> RawClip {
+        self.tap = record.map(|r| (id.to_string(), r.clone()));
         self
     }
 
@@ -158,10 +168,11 @@ impl Layer for RawClip {
     }
 
     fn frame_at(&self, time: i64) -> fx_core::Result<Option<Arc<Frame>>> {
-        let Ok(index) = u64::try_from(self.index_of(time)) else { return Ok(None) };
-        if index >= self.frames {
-            return Ok(None);
+        let found = u64::try_from(self.index_of(time)).ok().filter(|i| *i < self.frames);
+        if let Some((id, record)) = &self.tap {
+            record.read(id, time, found, self.frames);
         }
+        let Some(index) = found else { return Ok(None) };
         let mut inner = lock(&self.inner);
         if let Some(pos) = inner.cache.iter().position(|(i, _)| *i == index) {
             let entry = inner.cache.remove(pos);

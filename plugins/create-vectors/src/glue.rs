@@ -23,8 +23,23 @@
 //! Vectors and the Debug displays are the zero vector image whatever the FG layers, points,
 //! Track, Layers Output and Debug settings; the Source display is the plain copy with its overlay.
 //!
-//! The single layer case (no FG matte, no point in use, `Main_BG: Track` checked, Vectors
+//! The single layer case (no FG matte, no point in use, `Main_BG: Image Track` checked, Vectors
 //! display) is today's `create_vectors::create_vectors` call, byte for byte.
+//!
+//! Row order: the plugin works on its images bottom row first. Every image the passes read (the
+//! pair, the FG mattes) is turned upside down before the engine sees it, a point's `y` becomes
+//! `(H - 1) - y` (pixel centres at whole numbers), and the image the pass returns (the encoded
+//! vectors, the Debug view, the Source display with its overlay) is turned back. The encoder
+//! therefore stores the vertical component of the upside down flow, which is `-dy` of the frame as
+//! the host sees it. MEASURED against `CreateMotionVectors_64` under the emulator: with the inputs
+//! of a case turned upside down, the rewrite's output turned back is bit identical to the plugin's
+//! on cases where the plain
+//! render differs in every pixel.
+//!
+//! Debug warp: the forward warp of the Debug views is the Gouraud variant, the vertex colours
+//! interpolated over the mesh triangles (`retime_engine::stages::GouraudForward`), as in
+//! `TwixtorProVectorsIn_64` (MEASURED there; here 2 Debug grid cases more are bit identical and
+//! none fewer).
 
 use crate::prerender::{PreRender02, LAYER_ALT_SRC, LAYER_FG_MATTE};
 use fx_core::{Checkout, Depth, Env, Frame, FxError, Layer, ParamCurves, Quality, Result, TemporalContext};
@@ -33,11 +48,11 @@ use retime_engine::create_vectors::{
 };
 use retime_engine::frontend::{fixed_reader, ticks_i32};
 use retime_engine::host::{layer_is_set, LayerIssues};
-use retime_engine::image::{error_frame, Fmt, Image, MissingLayerStyle};
+use retime_engine::image::{error_frame, Fmt, Image, MissingLayerStyle, Samples, CHANNELS};
 use retime_engine::matte::{self, Matte};
 use retime_engine::points::{point_layer, read_pos, UserPoint};
-use retime_engine::stages::StageSet;
-use retime_engine::{debug, geom, prep, vectors};
+use retime_engine::stages::{GouraudForward, StageSet};
+use retime_engine::{geom, prep, vectors};
 use std::cell::Cell;
 
 /// The fill of the missing layer error of plugin 02: grey.
@@ -63,7 +78,7 @@ pub struct Settings02 {
     pub fmt: Fmt,
     /// Full quality render (`Quality::High`).
     pub hiq: bool,
-    /// `Display`: 1 Source, 2 Vectors, 3 Debug.
+    /// `Display`: 1 Source, 2 Motion Vectors, 3 Debug.
     pub display: i32,
     /// `Vector Resolution`: 1 Normal (half res), 2 Full res.
     pub vector_resolution: i32,
@@ -75,13 +90,13 @@ pub struct Settings02 {
     pub max_displace: f32,
     /// `Track Frame`: 1 Previous, 2 Next.
     pub track_frame: i32,
-    /// `Prep`: 1 None, 2 Contrast/Edge Enhance, 3 Delinearize.
+    /// `Image Prep`: 1 None, 2 Contrast/Edge Enhance, 3 Delinearize.
     pub prep: i32,
     /// `Track RGB+A`.
     pub track_rgb_a: bool,
     /// `Main_BG: Sensitivity` through the 16.16 reader, divided by `100.0f`.
     pub main_bg_sensitivity: f32,
-    /// `Main_BG: Track`.
+    /// `Main_BG: Image Track`.
     pub main_bg_track: bool,
     /// `Layers Output`: 1 All, 2 FG1, 3 FG2, 4 FG3, 5 MAIN_BG.
     pub layers_output: i32,
@@ -136,7 +151,7 @@ impl Settings02 {
         out
     }
 
-    /// The pre-render inputs for `fg_count` active FG matte layers and whether `Alt Src` has pixels.
+    /// The pre-render inputs for `fg_count` active FG matte layers and whether `Alt Motion Src` has pixels.
     pub fn pre_render(&self, alt_present: bool, fg_count: usize) -> PreRender02 {
         PreRender02 {
             current_time: self.current_time,
@@ -274,12 +289,13 @@ pub fn layer_points(curves: &ParamCurves, time_a: i32, time_b: i32, nfg: usize) 
     out
 }
 
-/// The Draw Geom overlay (rule G3) over `img`, the Source display after
+/// The Draw Geom overlay (rule G3) over the upside down `img` (row order), the Source display after
 /// the source copy or the Debug display after its view: the points in use at the frame time
 /// (`frame_time` of the current frame number, the rounded frame time) whose layer is in the
 /// group `Draw Geom` names ([`overlay_layers`]), at their position at that time and in their
-/// `Pt k:` colour, through `geom::draw_points` with the downsample ratio (1 here). Draws nothing
-/// for None or without such a point.
+/// `Pt k:` colour, through `geom::draw_crosses` (the plugin's antialiased cross, read from its code)
+/// with the downsample ratio (1 here). Draws nothing for None
+/// or without such a point.
 fn draw_geom(img: &mut Image, s: &Settings02, curves: &ParamCurves, layer_count: usize) {
     let Some((first, last)) = overlay_layers(s.draw_geom, layer_count) else {
         return;
@@ -290,8 +306,41 @@ fn draw_geom(img: &mut Image, s: &Settings02, curves: &ParamCurves, layer_count:
         return;
     }
     let pts: Vec<([f32; 2], [u8; 3])> =
-        used.iter().map(|&n| (read_pos(curves, PT_POS_IDS[n - 1], t), curves.color_at(PT_COLOR_IDS[n - 1], i64::from(t)))).collect();
-    geom::draw_points(img, &pts, DOWNSAMPLE.0 as f32 / DOWNSAMPLE.1 as f32);
+        used.iter().map(|&n| (flip_pos(read_pos(curves, PT_POS_IDS[n - 1], t), img.height), curves.color_at(PT_COLOR_IDS[n - 1], i64::from(t)))).collect();
+    geom::draw_crosses(img, &pts, DOWNSAMPLE.0 as f32 / DOWNSAMPLE.1 as f32);
+}
+
+/// Reverses the order of the rows of `v`, rows of `row` samples (see the module docs, row order).
+fn flip_rows<T>(v: &mut [T], row: usize) {
+    if row == 0 {
+        return;
+    }
+    let h = v.len() / row;
+    for r in 0..h / 2 {
+        let (top, bottom) = v.split_at_mut((h - 1 - r) * row);
+        top[r * row..(r + 1) * row].swap_with_slice(&mut bottom[..row]);
+    }
+}
+
+/// `img` upside down (row order).
+pub fn flip_image(img: &mut Image) {
+    let row = img.width * CHANNELS;
+    match &mut img.samples {
+        Samples::U8(v) => flip_rows(v, row),
+        Samples::U16(v) => flip_rows(v, row),
+        Samples::F32(v) => flip_rows(v, row),
+    }
+}
+
+/// `m` upside down (row order).
+pub fn flip_matte(m: &mut Matte) {
+    let row = m.width;
+    flip_rows(&mut m.data, row);
+}
+
+/// A position in the upside down image of height `h`: `y` becomes `(h - 1) - y` (f32).
+pub fn flip_pos(p: [f32; 2], h: usize) -> [f32; 2] {
+    [p[0], (h as f32 - 1.0f32) - p[1]]
 }
 
 /// The layers `(first, last)` the Draw Geom overlay draws: `None` draws nothing, `All` every layer,
@@ -317,7 +366,7 @@ struct Source<'a> {
 }
 
 impl<'a> Source<'a> {
-    /// `layer` is `Alt Src` when it has pixels, else the input layer. Its size is probed first:
+    /// `layer` is `Alt Motion Src` when it has pixels, else the input layer. Its size is probed first:
     /// width or height 0 is a missing layer, another size a size mismatch.
     fn new(settings: &'a Settings02, layer: &'a dyn Layer) -> Result<Source<'a>> {
         if layer.depth() != settings.fmt.depth() {
@@ -376,6 +425,23 @@ impl<'a> Source<'a> {
     }
 }
 
+/// The reads of the probes at the current time, as the plugin makes them (the checkout list of
+/// `prerender::probes`): layer 0 at `X` even when `Alt Motion Src` replaces it, and every active FG
+/// matte at `X`. The pixels are not used (the probes only need the sizes, which the layers give);
+/// the reads make the call record the plugin's. MEASURED against `CreateMotionVectors_64` under the
+/// emulator: the call records of the `alt-src` and the Display Source FG cases had these checkouts on
+/// the plugin's side only.
+fn probe_reads(env: &Env<'_>, current_time: i32, fg_count: usize) -> Result<()> {
+    let t = i64::from(current_time);
+    env.input.frame_at(t)?;
+    for id in LAYER_FG_MATTE.iter().take(fg_count) {
+        if let Some(l) = env.layer(id) {
+            l.frame_at(t)?;
+        }
+    }
+    Ok(())
+}
+
 /// The error image for the flags set so far (red before grey), a wire frame that skips the finish.
 fn error_image(issues: LayerIssues, s: &Settings02) -> Option<Frame> {
     issues
@@ -430,6 +496,7 @@ fn render(s: &Settings02, env: &Env<'_>, stages: &StageSet) -> Result<Frame> {
     if fg_mismatch {
         src.size_mismatch.set(true);
     }
+    probe_reads(env, s.current_time, fg_count)?;
     if let Some(f) = error_image(src.issues(), s) {
         return Ok(f);
     }
@@ -441,14 +508,18 @@ fn render(s: &Settings02, env: &Env<'_>, stages: &StageSet) -> Result<Frame> {
         if let Some(f) = error_image(src.issues(), s) {
             return Ok(f);
         }
+        flip_image(&mut img);
         draw_geom(&mut img, s, curves, layer_count);
+        flip_image(&mut img);
         return Ok(img.to_frame());
     }
     let frame = frame_index(s.current_time, s.time_step);
     let (a, b) = frame_pair(frame, s.track_frame, s.debug());
     let (ta, tb) = (frame_time(a, s.time_step), frame_time(b, s.time_step));
-    let x = src.fetch(ta)?;
-    let y = src.fetch(tb)?;
+    let mut x = src.fetch(ta)?;
+    let mut y = src.fetch(tb)?;
+    flip_image(&mut x);
+    flip_image(&mut y);
     // the mattes at the layer times of the pair, FG1 first
     let mut mattes_x: Vec<Matte> = Vec::with_capacity(fg_count);
     let mut mattes_y: Vec<Matte> = Vec::with_capacity(fg_count);
@@ -457,8 +528,11 @@ fn render(s: &Settings02, env: &Env<'_>, stages: &StageSet) -> Result<Frame> {
             return Err(FxError::Mismatch(format!("the matte layer `{id}` was probed but the environment has none")));
         };
         let chan = s.fg[k].matte_chan;
-        mattes_x.push(matte::extract(&src.fetch_from(m, ta)?, chan));
-        mattes_y.push(matte::extract(&src.fetch_from(m, tb)?, chan));
+        let (mut mx, mut my) = (matte::extract(&src.fetch_from(m, ta)?, chan), matte::extract(&src.fetch_from(m, tb)?, chan));
+        flip_matte(&mut mx);
+        flip_matte(&mut my);
+        mattes_x.push(mx);
+        mattes_y.push(my);
     }
     if let Some(f) = error_image(src.issues(), s) {
         return Ok(f);
@@ -473,16 +547,23 @@ fn render(s: &Settings02, env: &Env<'_>, stages: &StageSet) -> Result<Frame> {
         layers: s.layers(fg_count),
         mattes_x,
         mattes_y,
-        points: layer_points(curves, ta, tb, fg_count),
+        points: layer_points(curves, ta, tb, fg_count)
+            .into_iter()
+            .map(|l| l.into_iter().map(|p| UserPoint { at_a: flip_pos(p.at_a, s.height), at_b: flip_pos(p.at_b, s.height) }).collect())
+            .collect(),
         first,
         last,
     };
     if s.debug() {
-        let flow = create_vectors::job_flow_on(stages.get(), &x, &y, &job)?;
-        let mut img = debug::debug_view_on(stages.get(), &x, &y, &flow, s.debug_view_code())?;
+        // the forward warp of the Debug views is the Gouraud variant (module docs, Debug warp); with FG
+        // mattes the display composes the layers, as the original's code does
+        let gouraud = GouraudForward::wrap(stages.clone());
+        let mut img = create_vectors::debug_job_view_on(stages.get(), gouraud.get(), &x, &y, &job, s.debug_view_code())?;
         draw_geom(&mut img, s, curves, layer_count);
+        flip_image(&mut img);
         return Ok(img.to_frame());
     }
-    let encoded = create_vectors::create_vectors_job_on(stages.get(), &x, &y, &job)?;
+    let mut encoded = create_vectors::create_vectors_job_on(stages.get(), &x, &y, &job)?;
+    flip_image(&mut encoded);
     Ok(encoded.to_frame())
 }

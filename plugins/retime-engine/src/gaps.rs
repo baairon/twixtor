@@ -46,9 +46,11 @@ pub static G1C: OpenGap = OpenGap::new("G1c", "layer visibility direction", &["f
 /// blue 0. Noted by create-vectors with `nfg >= 1`. Family `gap-merge`.
 pub static G1D: OpenGap = OpenGap::new("G1d", "create-vectors merge", &["fg1_matte", "fg2_matte", "fg3_matte", "layers_output"]);
 
-/// G1e (flow V, step U). Rule: each per layer load sets alpha to 0 where the layer's
-/// effective matte is below 0.95, then decodes as the single layer path does. Noted by
-/// vectors-in with `nfg >= 1`. Family `gap-vecmatte`.
+/// G1e (flow V, cap READ). Rule: each per layer load caps the alpha of the vector image by the
+/// layer's composition matte (`min`, in the units of the depth), then decodes, fills and scales
+/// as the single layer path does (READ in TwixtorProVectorsIn_64; the grid's FG cases are bit
+/// identical with it). Noted by vectors-in with
+/// `nfg >= 1`. Family `gap-vecmatte`.
 pub static G1E: OpenGap = OpenGap::new("G1e", "vectors-in per-layer matte step", MATTES);
 
 /// G1f (not established). Rule: the blur compensation tail of a layered render uses the flow of

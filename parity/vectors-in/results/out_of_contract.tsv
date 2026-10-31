@@ -1,0 +1,34 @@
+id	params	why	rewrite_check_exit	message
+ooc00	speed_percent=10001	speed above 10000	3	vfx: error: bad value for `speed_percent`: 10001 outside -10000..=10000
+ooc01	speed_percent=-10001	speed below -10000	3	vfx: error: bad value for `speed_percent`: -10001 outside -10000..=10000
+ooc02	frame_num=200001	frame number above 200000	3	vfx: error: bad value for `frame_num`: 200001 outside -200000..=200000
+ooc03	frame_num=-200001	frame number below -200000	3	vfx: error: bad value for `frame_num`: -200001 outside -200000..=200000
+ooc04	vec_scale_x=10.01	scale x above 10	3	vfx: error: bad value for `vec_scale_x`: 10.01 outside -10..=10
+ooc05	vec_scale_x=-10.01	scale x below -10	3	vfx: error: bad value for `vec_scale_x`: -10.01 outside -10..=10
+ooc06	vec_scale_y=10.01	scale y above 10	3	vfx: error: bad value for `vec_scale_y`: 10.01 outside -10..=10
+ooc07	vec_scale_y=-10.01	scale y below -10	3	vfx: error: bad value for `vec_scale_y`: -10.01 outside -10..=10
+ooc08	vectors_max_displace=-1	max displace below 0	3	vfx: error: bad value for `vectors_max_displace`: -1 outside 0..=10000
+ooc09	vectors_max_displace=10001	max displace above 10000	3	vfx: error: bad value for `vectors_max_displace`: 10001 outside 0..=10000
+ooc10	input_frame_rate=0.1	input rate below the 32 bit minimum	3	vfx: error: bad value for `input_frame_rate`: 0.1 outside 0.10000000149011612..=1000
+ooc11	input_frame_rate=1000.5	input rate above 1000	3	vfx: error: bad value for `input_frame_rate`: 1000.5 outside 0.10000000149011612..=1000
+ooc12	output_frame_rate=0.1	output rate below the 32 bit minimum	3	vfx: error: bad value for `output_frame_rate`: 0.1 outside 0.10000000149011612..=1000
+ooc13	output_frame_rate=1001	output rate above 1000	3	vfx: error: bad value for `output_frame_rate`: 1001 outside 0.10000000149011612..=1000
+ooc14	blur_compensation=10.01	blur above 10	3	vfx: error: bad value for `blur_compensation`: 10.01 outside 0..=10
+ooc15	blur_compensation=-0.01	blur below 0	3	vfx: error: bad value for `blur_compensation`: -0.01 outside 0..=10
+ooc16	frame_interp=0	popup 0	3	vfx: error: bad value for `frame_interp`: 0 outside 1..=3
+ooc17	frame_interp=4	popup above 3	3	vfx: error: bad value for `frame_interp`: 4 outside 1..=3
+ooc18	warping=0	popup 0	3	vfx: error: bad value for `warping`: 0 outside 1..=2
+ooc19	warping=3	popup above 2	3	vfx: error: bad value for `warping`: 3 outside 1..=2
+ooc20	display=0	popup 0	3	vfx: error: bad value for `display`: 0 outside 1..=6
+ooc21	display=7	popup above 6	3	vfx: error: bad value for `display`: 7 outside 1..=6
+ooc22	src_mark_segments=0	popup 0	3	vfx: error: bad value for `src_mark_segments`: 0 outside 1..=5
+ooc23	src_mark_segments=6	popup above 5	3	vfx: error: bad value for `src_mark_segments`: 6 outside 1..=5
+ooc24	time_remap_mode=0	popup 0	3	vfx: error: bad value for `time_remap_mode`: 0 outside 1..=2
+ooc25	time_remap_mode=3	popup above 2	3	vfx: error: bad value for `time_remap_mode`: 3 outside 1..=2
+ooc26	fg1_matte_chan=5	popup above 4	3	vfx: error: bad value for `fg1_matte_chan`: 5 outside 1..=4
+ooc27	fg1_inv_matte_shrink=10.01	shrink above 10	3	vfx: error: bad value for `fg1_inv_matte_shrink`: 10.01 outside 0..=10
+ooc28	fg2_inv_matte_shrink=-0.01	shrink below 0	3	vfx: error: bad value for `fg2_inv_matte_shrink`: -0.01 outside 0..=10
+ooc29	src_time_offset=1	param the effect does not have	3	vfx: error: unknown param `src_time_offset`
+ooc30	vectors=2	param the effect does not have	3	vfx: error: unknown param `vectors`
+ooc31	sensitivity=70	param the effect does not have	3	vfx: error: unknown param `sensitivity`
+ooc32	smart_blend=1	param the effect does not have	3	vfx: error: unknown param `smart_blend`

@@ -1,0 +1,28 @@
+id	file	status_vs_base	cases_changed_vs_base	what
+M01	plugins/retime-engine/src/matte.rs	changed-cases	21	shrink radius larger by half a pixel (G1)
+M02	plugins/retime-engine/src/matte.rs	changed-cases	6	shrink threshold T drops the k[n+1] term (G1)
+M03	plugins/retime-engine/src/matte.rs	changed-cases	5	fractional shrink mixes the two whole shrinks with swapped weights (G1)
+M04	plugins/retime-engine/src/matte.rs	changed-cases	8	matte channel 3 reads green instead of blue
+M05	plugins/retime-engine/src/matte.rs	changed-cases	160	layer OVER with source and destination swapped
+M06	plugins/retime-engine/src/matte.rs	changed-cases	15	8 bpc layer premultiply truncates instead of rounding
+M07	plugins/retime-engine/src/matte.rs	changed-cases	236	visibility of the layers below never reduced: layer order lost (G1c)
+M08	plugins/retime-engine/src/layers.rs	changed-cases	155	layers composed top down instead of bottom up (both compositions)
+M09	plugins/retime-engine/src/layers.rs	changed-cases	149	frame B premultiplied by the matte of frame A
+M10	plugins/retime-engine/src/layers.rs	changed-cases	30	display group off by one layer
+M11	plugins/retime-engine/src/layers.rs	changed-cases	156	forward warp code 2 takes the inverse flow assignment of the sides
+M12	plugins/retime-engine/src/layers.rs	changed-cases	174	reverse solve keeps the mask pyramids in A, B order
+M13	plugins/retime-engine/src/layers.rs	changed-cases	26	reverse solve uses the forward point pairs (G2)
+M14	plugins/retime-engine/src/points.rs	changed-cases	31	point lands one pixel to the right (G2)
+M15	plugins/retime-engine/src/points.rs	changed-cases	1	in_frame excludes a point at x = -0.5 (G2)
+M16	plugins/retime-engine/src/points.rs	changed-cases	27	point weight 2 instead of 1 (G2)
+M17	plugins/retime-engine/src/points.rs	changed-cases	27	point displacement x with the wrong sign (G2)
+M18	plugins/retime-engine/src/points.rs	changed-cases	18	Pt Use value 2 (FG 1) treated as Don't Use
+M19	plugins/retime-engine/src/points.rs	changed-cases	27	level scale of a point uses the width instead of width - 1 (G2)
+M20	plugins/retime-engine/src/geom.rs	changed-cases	32	Draw Geom disc radius 2.0 instead of 1.5 (G3)
+M21	plugins/retime-engine/src/geom.rs	changed-cases	12	Draw Geom disc edge exclusive (G3)
+M22	plugins/retime-engine/src/geom.rs	changed-cases	5	Draw Geom 16 bpc colour scale 256 (G3)
+M23	plugins/retime-engine/src/geom.rs	changed-cases	8	Draw Geom float colour divided by 256 (G3)
+M24	plugins/retime-engine/src/geom.rs	changed-cases	10	Draw Geom draws later points first, so earlier points end on top (G3)
+M25	plugins/retime-engine/src/flow/extras.rs	changed-cases	13	mask binarize threshold exclusive at 0.95 (G1b)
+M26	plugins/retime-engine/src/flow/extras.rs	changed-cases	27	user displacement y takes the x component (G2)
+M27	plugins/retime-engine/src/flow/extras.rs	changed-cases	31	user displacement never applied to the flow (G2)

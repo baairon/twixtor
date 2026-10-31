@@ -1,6 +1,6 @@
 //! Tests of the tracking point primitives: the `Pt N: Use` table against create-vectors'
-//! `point_belongs`, the 16.16 position reader, hand goldens of the per level splat (rule G2: the
-//! pixel, the scale, the skip of points outside the frame, two points on one pixel), the second
+//! `point_belongs`, the 16.16 position reader, the user displacement read from TwixtorPro_64 (the
+//! level 0 splat, its mean and sign, the level bounds, a coarser level against a traced one), the second
 //! tracker (rule G5: the exact zero field, a near uniform field from one point, exact values at the
 //! points, the sign of the output convention) and thread count invariance.
 
@@ -81,102 +81,85 @@ fn positions_are_read_through_the_16_16_reader() {
     assert_eq!(read_pos(&c, "pt1_pos", 10), third);
 }
 
+/// The geometry of the traced case `pt-use2-n2` (32x24 at Best: levels 16x12, 8x6, 4x3).
+fn traced_geometry() -> FlowGeometry {
+    let geo = geometry(4, 32, 24);
+    assert_eq!(geo.sizes, vec![(16, 12), (8, 6), (4, 3)]);
+    geo
+}
+
 #[test]
-fn the_splat_puts_each_point_on_its_nearest_pixel_at_every_level() {
-    // 64x48 at full resolution: levels 64x48, 32x24, 16x12, 8x6, 4x3
+fn level_0_holds_the_normalised_splat_scaled_by_minus_one() {
+    // 64x48 at full resolution: k = 1 on level 0
     let geo = geometry(5, 64, 48);
-    assert_eq!(geo.sizes, vec![(64, 48), (32, 24), (16, 12), (8, 6), (4, 3)]);
     let ud = user_displacement(&[([40.0, 30.0], [46.0, 32.0])], &geo, (64, 48));
     assert_eq!(ud.levels.len(), 5);
-    // the pixel of (40, 30) at each level: cvtt(40 * kx + 0.5), cvtt(30 * ky + 0.5)
-    let pixels = [(40, 30), (20, 15), (10, 7), (4, 3), (2, 1)];
-    for (l, (&(wl, hl), &(px, py))) in geo.sizes.iter().zip(&pixels).enumerate() {
-        let lvl = &ud.levels[l];
-        assert_eq!((lvl.d.len(), lvl.w.len()), (wl * hl * 2, wl * hl), "level {l}");
-        let kx = (wl - 1) as f32 / 63.0f32;
-        let ky = (hl - 1) as f32 / 47.0f32;
-        let i = py * wl + px;
-        assert_eq!(lvl.w[i], 1.0, "level {l}");
-        assert_eq!([lvl.d[2 * i], lvl.d[2 * i + 1]], [-6.0f32 * kx, -2.0f32 * ky], "level {l}");
-        // nothing anywhere else
-        assert_eq!(lvl.w.iter().filter(|&&v| v != 0.0).count(), 1, "level {l}");
-        assert_eq!(lvl.d.iter().filter(|&&v| v != 0.0).count(), 2, "level {l}");
-    }
-    // level 0 scale is 1; level 1 is (31/63, 23/47)
-    assert_eq!([ud.levels[0].d[(30 * 64 + 40) * 2], ud.levels[0].d[(30 * 64 + 40) * 2 + 1]], [-6.0, -2.0]);
-    assert_eq!(ud.levels[1].d[(15 * 32 + 20) * 2], -6.0f32 * (31.0f32 / 63.0f32));
-    // a sub pixel position rounds to the nearest pixel: (40.4, 30.6) lands on (40, 31)
+    let i = 30 * 64 + 40;
+    let lvl = &ud.levels[0];
+    assert_eq!(lvl.w[i], 1.0);
+    assert_eq!([lvl.d[2 * i], lvl.d[2 * i + 1]], [-1.0f32 * (46.0f32 - 40.0f32), -1.0f32 * (32.0f32 - 30.0f32)]);
+    assert_eq!(lvl.w.iter().filter(|&&v| v != 0.0).count(), 1);
+    // the pixel is (int)((double)(from * k) + 0.5): (40.4, 30.6) lands on (40, 31)
     let ud = user_displacement(&[([40.4, 30.6], [46.0, 32.0])], &geo, (64, 48));
     let i = 31 * 64 + 40;
     assert_eq!(ud.levels[0].w[i], 1.0);
-    assert_eq!(ud.levels[0].d[2 * i], 40.4f32 - 46.0);
-    assert_eq!(ud.levels[0].d[2 * i + 1], 30.6f32 - 32.0);
+    assert_eq!(ud.levels[0].d[2 * i], -1.0f32 * (46.0f32 - 40.4f32));
+    // the difference of the two scaled positions, not the scaled difference: at Best k = (31/63, 23/47)
+    let geo = geometry(4, 64, 48);
+    let ud = user_displacement(&[([40.0, 30.0], [46.0, 32.0])], &geo, (64, 48));
+    let (kx, ky) = (31.0f32 / 63.0f32, 23.0f32 / 47.0f32);
+    let i = 15 * 32 + 20;
+    assert_eq!(ud.levels[0].d[2 * i], -1.0f32 * (46.0f32 * kx - 40.0f32 * kx));
+    assert_eq!(ud.levels[0].d[2 * i + 1], -1.0f32 * (32.0f32 * ky - 30.0f32 * ky));
 }
 
 #[test]
-fn two_points_on_one_pixel_add_up_to_their_mean() {
+fn points_on_one_pixel_give_their_mean_and_a_weight_of_one() {
     let geo = geometry(5, 64, 48);
-    // a half rounds up on both axes: (10.5, 20.5) lands on (11, 21), (10.49, 20.49) on (10, 20)
-    let ud = user_displacement(&[([10.5, 20.5], [9.5, 20.5]), ([10.49, 20.49], [10.49, 19.49])], &geo, (64, 48));
-    assert_eq!((ud.levels[0].w[21 * 64 + 11], ud.levels[0].d[(21 * 64 + 11) * 2]), (1.0, 1.0));
-    assert_eq!((ud.levels[0].w[20 * 64 + 10], ud.levels[0].d[(20 * 64 + 10) * 2 + 1]), (1.0, 1.0));
     let pairs = [([40.0, 30.0], [46.0, 32.0]), ([40.2, 29.8], [44.2, 29.8]), ([10.0, 10.0], [11.0, 9.0])];
     let ud = user_displacement(&pairs, &geo, (64, 48));
-    let i = 30 * 64 + 40;
     let lvl = &ud.levels[0];
-    assert_eq!(lvl.w[i], 2.0);
-    let dx = -6.0f32 + (40.2f32 - 44.2f32);
-    let dy = -2.0f32 + (29.8f32 - 29.8f32);
-    assert_eq!([lvl.d[2 * i], lvl.d[2 * i + 1]], [dx, dy]);
-    // the consumer's d / w is the mean of the two displacements
-    assert!((lvl.d[2 * i] / lvl.w[i] + 5.0).abs() < 1e-6);
+    let i = 30 * 64 + 40;
+    assert_eq!(lvl.w[i], 1.0);
+    let sx = (46.0f32 - 40.0f32) + 0.0f32;
+    let sx = (44.2f32 - 40.2f32) + sx;
+    let sy = ((32.0f32 - 30.0f32) + 0.0f32) + (29.8f32 - 29.8f32);
+    assert_eq!([lvl.d[2 * i], lvl.d[2 * i + 1]], [-1.0f32 * (sx / 2.0f32), -1.0f32 * (sy / 2.0f32)]);
     let j = 10 * 64 + 10;
     assert_eq!((lvl.w[j], lvl.d[2 * j], lvl.d[2 * j + 1]), (1.0, -1.0, 1.0));
-    // the order of the points is the order of the accumulation
-    let rev = [pairs[1], pairs[0], pairs[2]];
-    let ud2 = user_displacement(&rev, &geo, (64, 48));
-    assert_eq!(ud2.levels[0].w, lvl.w);
-    assert_eq!(ud2.levels[0].d[2 * i], (40.2f32 - 44.2f32) + -6.0f32);
 }
 
 #[test]
-fn points_outside_the_frame_are_skipped() {
+fn only_the_level_bounds_of_the_start_pixel_drop_a_point() {
     let geo = geometry(5, 64, 48);
-    let skipped = [
-        ([-0.6f32, 10.0f32], [0.0f32, 10.0f32]), // nearest pixel would be -1 (cvtt alone gives 0)
-        ([63.6, 10.0], [60.0, 10.0]),             // nearest pixel 64
-        ([10.0, -0.51], [10.0, 0.0]),
-        ([10.0, 47.5], [10.0, 40.0]),
+    let pairs = [
+        ([-0.6f32, 10.0f32], [0.0f32, 10.0f32]), // (int)(-0.1) is 0: lands on the first column
+        ([63.6, 10.0], [60.0, 10.0]),             // pixel 64
+        ([10.0, 47.5], [10.0, 40.0]),             // pixel 48
+        ([-1.6, 10.0], [0.0, 10.0]),              // pixel -1
         ([f32::NAN, 3.0], [1.0, 1.0]),
         ([3.0, f32::INFINITY], [1.0, 1.0]),
-        ([5.0, 5.0], [f32::INFINITY, 1.0]), // a target that is not a position
-        ([5.0, 5.0], [1.0, f32::NAN]),
     ];
-    for (k, p) in skipped.iter().enumerate() {
-        let ud = user_displacement(std::slice::from_ref(p), &geo, (64, 48));
-        for (l, lvl) in ud.levels.iter().enumerate() {
-            assert!(lvl.w.iter().all(|&v| v == 0.0) && lvl.d.iter().all(|&v| v == 0.0), "pair {k}, level {l}");
-        }
-    }
-    // just inside: the first and the last pixel
-    let inside = [([-0.4f32, 47.4f32], [0.6f32, 47.4f32]), ([63.4, -0.5], [63.4, 0.5])];
-    let ud = user_displacement(&inside, &geo, (64, 48));
-    let lvl = &ud.levels[0];
-    assert_eq!((lvl.w[47 * 64], lvl.d[47 * 64 * 2]), (1.0, -1.0));
-    assert_eq!((lvl.w[63], lvl.d[63 * 2 + 1]), (1.0, -1.0));
-    for (l, lvl) in ud.levels.iter().enumerate() {
-        assert_eq!(lvl.w.iter().filter(|&&v| v != 0.0).count(), 2, "level {l}: in frame points land on every level");
-    }
+    let landed: Vec<bool> = pairs
+        .iter()
+        .map(|p| user_displacement(std::slice::from_ref(p), &geo, (64, 48)).levels[0].w.iter().any(|&v| v != 0.0))
+        .collect();
+    assert_eq!(landed, vec![true, false, false, false, false, false]);
+    // the end position is not tested: an infinite end lands and gives an infinite displacement
+    let ud = user_displacement(&[([5.0, 5.0], [f32::INFINITY, 1.0])], &geo, (64, 48));
+    let i = 5 * 64 + 5;
+    assert_eq!(ud.levels[0].w[i], 1.0);
+    assert_eq!(ud.levels[0].d[2 * i], f32::NEG_INFINITY);
 }
 
 #[test]
-fn no_points_give_empty_levels_of_the_pyramid_sizes() {
+fn no_points_give_zero_levels_of_the_pyramid_sizes() {
     let geo = geometry(4, 50, 34);
     let ud = user_displacement(&[], &geo, (50, 34));
     assert_eq!(ud.levels.len(), geo.levels);
     for (lvl, &(wl, hl)) in ud.levels.iter().zip(&geo.sizes) {
         assert_eq!((lvl.d.len(), lvl.w.len()), (wl * hl * 2, wl * hl));
-        assert!(lvl.d.iter().chain(&lvl.w).all(|v| v.to_bits() == 0));
+        assert!(lvl.d.iter().chain(&lvl.w).all(|&v| v == 0.0));
     }
     // an output that is never searched (a side below 2) lands nothing
     let ud = user_displacement(&[([0.0, 0.0], [1.0, 0.0])], &geo, (1, 34));
@@ -184,15 +167,40 @@ fn no_points_give_empty_levels_of_the_pyramid_sizes() {
 }
 
 #[test]
-fn the_working_resolution_scales_the_points() {
-    // Best (R = 1): 64x48 is searched at 32x24, k = (31/63, 23/47) on level 0
-    let geo = geometry(4, 64, 48);
-    assert_eq!((geo.width, geo.height), (32, 24));
-    let ud = user_displacement(&[([40.0, 30.0], [46.0, 32.0])], &geo, (64, 48));
-    let i = 15 * 32 + 20;
-    assert_eq!(ud.levels[0].w[i], 1.0);
-    assert_eq!(ud.levels[0].d[2 * i], -6.0f32 * (31.0f32 / 63.0f32));
-    assert_eq!(ud.levels[0].d[2 * i + 1], -2.0f32 * (23.0f32 / 47.0f32));
+fn the_coarser_levels_are_the_blurred_pyramid_of_level_0_as_traced() {
+    // TwixtorPro_64, retime-fgbg.pt-use2-n2.box2-32x24.d8, frame 1, layer FG1, the solve with X = B: the point at
+    // (12, 14) in B and (10, 15) in A (rows from the bottom, H - 1 - y). Level 1 (8x6) as the plugin's applier
+    // received it, rows from the bottom: the nine samples of w and d around the point, nothing elsewhere.
+    let geo = traced_geometry();
+    let ud = user_displacement(&[([12.0, 14.0], [10.0, 15.0])], &geo, (32, 24));
+    let l1 = &ud.levels[1];
+    let w_want: [[u32; 3]; 3] = [
+        [0x3b3e2be3, 0x3c03a83d, 0x3a2f8b03], // row 2
+        [0x3d1a83a8, 0x3dd5f162, 0x3c0ea0f1], // row 3
+        [0x3c3e2bdc, 0x3d03a838, 0x3b2f8afc], // row 4
+    ];
+    let d_want: [[[u32; 2]; 3]; 3] = [
+        [[0x3aabc48c, 0xba255dd3], [0x3b6dd515, 0xbae4f816], [0x399e8e14, 0xb918a56a]],
+        [[0x3c8b8fb1, 0xbc065c3c], [0x3d413d20, 0xbcba0990], [0x3b80d36f, 0xbaf80cca]],
+        [[0x3babc485, 0xbb255dcd], [0x3c6dd50c, 0xbbe4f80c], [0x3a9e8e0c, 0xba18a565]],
+    ];
+    for y in 0..6usize {
+        for x in 0..8usize {
+            let i = y * 8 + x;
+            if (2..=4).contains(&y) && (2..=4).contains(&x) {
+                let (wv, dv) = (w_want[y - 2][x - 2], d_want[y - 2][x - 2]);
+                assert_eq!(l1.w[i].to_bits(), wv, "w ({x}, {y})");
+                assert_eq!([l1.d[2 * i].to_bits(), l1.d[2 * i + 1].to_bits()], dv, "d ({x}, {y})");
+            } else {
+                assert_eq!(l1.w[i], 0.0, "w ({x}, {y})");
+                assert_eq!([l1.d[2 * i], l1.d[2 * i + 1]], [0.0, 0.0], "d ({x}, {y})");
+            }
+        }
+    }
+    // the consumer's d / w is the point's displacement at that level's scale where the weight reaches
+    let i = 3 * 8 + 3;
+    let want = [(7.0f32 / 15.0) * 2.0 * (15.0 / 31.0), (5.0f32 / 11.0) * -1.0 * (11.0 / 23.0)];
+    assert!((l1.d[2 * i] / l1.w[i] - want[0]).abs() < 1e-5 && (l1.d[2 * i + 1] / l1.w[i] - want[1]).abs() < 1e-5);
 }
 
 #[test]
@@ -235,9 +243,8 @@ fn the_second_tracker_interpolates_between_points_and_keeps_them_exact() {
     let geo = geometry(5, 48, 32);
     let pairs = [([8.0, 8.0], [12.0, 8.0]), ([40.0, 24.0], [38.0, 25.0]), ([40.2, 24.1], [38.2, 23.1])];
     let f = second_tracker(&pairs, &geo, (48, 32)).unwrap();
-    // the splat of level 0, negated: one point at (8, 8), two averaged at (40, 24)
-    let ud = user_displacement(&pairs, &geo, (48, 32));
-    let lvl = &ud.levels[0];
+    // the splat of level 0 (rule G5's splat), negated: one point at (8, 8), two averaged at (40, 24)
+    let lvl = splat(&pairs, 48, 32, (48, 32));
     for (x, y) in [(8usize, 8usize), (40, 24)] {
         let i = y * 48 + x;
         let want = [-1.0f32 * (lvl.d[2 * i] / lvl.w[i]), -1.0f32 * (lvl.d[2 * i + 1] / lvl.w[i])];

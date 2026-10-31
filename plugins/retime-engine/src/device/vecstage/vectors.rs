@@ -1,5 +1,6 @@
 //! Vector image coding on the device: `vectors::encode_vectors`, `encode_vectors_image`,
-//! `encode_vectors_merged`, `encode_vectors_merged_image`, `merge_flows`, `decode_vectors`,
+//! `encode_vectors_merged`, `encode_vectors_merged_image`, `encode_vectors_merged_blue`,
+//! `merge_flows`, `decode_vectors`,
 //! `vector_hole_mask`, `decode_vectors_with_holes`, `apply_vec_scale` and `zero_vectors_image`
 //! (kernels `vc_*`). The per launch constants (`sx`, `sy`, `kx`, `ky` per layer) are computed on
 //! the host by the CPU's own expressions ([`constants`]), so every kernel sees the CPU's values.
@@ -162,6 +163,34 @@ pub fn encode_vectors_merged_image_gpu(session: &Session, width: usize, height: 
     let mut img = Image::new(width, height, fmt);
     encode_vectors_merged_gpu(session, &mut img, layers, scale)?;
     Ok(img)
+}
+
+/// Queues `vc_merge_*` and then `vc_blue_*`: `dst` receives the merged encoded image of `layers`
+/// with the weight plane `blue` (the output size) in its blue channel.
+pub fn encode_vectors_merged_blue_enqueue(session: &Session, dst: &DeviceImage, layers: &[(&DeviceFlow, &DevicePlane)], scale: f32, blue: &DevicePlane) -> Result<(), StageError> {
+    let n = check_pixels(dst.width, dst.height)?;
+    same_size((dst.width, dst.height), (blue.width, blue.height), "vector merge blue")?;
+    encode_vectors_merged_enqueue(session, dst, layers, scale)?;
+    let args = [samples_arg(&dst.samples), blue.data.arg(), count(n)];
+    launch(session, &format!("vc_blue_{}", suffix(dst.fmt())), Range::D1(n), &args)
+}
+
+/// `vectors::encode_vectors_merged_blue` on the device (create-vectors fix 03: a single layer
+/// output carries its weight in the blue channel). A `blue` of another size is `Unsupported`
+/// (the CPU's `Mismatch`), checked before anything is uploaded, as are the refusals of
+/// [`encode_vectors_merged_gpu`]. On an error `dst` is unchanged.
+pub fn encode_vectors_merged_blue_gpu(session: &Session, dst: &mut Image, layers: &[(&FlowField, &Matte)], scale: f32, blue: &Matte) -> Result<(), StageError> {
+    if blue.width != dst.width || blue.height != dst.height || blue.data.len() != dst.width * dst.height {
+        return Err(StageError::Unsupported(format!("vector merge: a {}x{} blue weight for an output of {}x{}", blue.width, blue.height, dst.width, dst.height)));
+    }
+    check_layers(dst.width, dst.height, layers, "vector merge")?;
+    let up = upload_layers(session, layers)?;
+    let refs: Vec<(&DeviceFlow, &DevicePlane)> = up.iter().map(|(f, m)| (f, m)).collect();
+    let db = DevicePlane::upload(session, blue.width, blue.height, &blue.data)?;
+    let out = image_output(session, dst.width, dst.height, dst.fmt())?;
+    encode_vectors_merged_blue_enqueue(session, &out, &refs, scale, &db)?;
+    *dst = download_image(session, &out)?;
+    Ok(())
 }
 
 /// Queues `vc_merge_flow`: `out` (the output size) receives the merged flow of `layers`.

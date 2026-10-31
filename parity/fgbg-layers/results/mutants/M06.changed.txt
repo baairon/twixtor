@@ -1,0 +1,15 @@
+retime-fgbg.chan2-chan.box1-24x16.d8.cf4f1785
+retime-fgbg.exact-soft.box2-24x16.d8.1a92c0ff
+retime-fgbg.m-grey.box1-24x16.d8.4c58db7b
+retime-fgbg.m-noise.box1-24x16.d8.e4d4537e
+retime-fgbg.m-ramp.box1-24x16.d8.2d3b735d
+retime-fgbg.m-soft.box1-24x16.d8.decd7a59
+retime-fgbg.m-thr-n2.box2-24x16.d8.54851bc7
+retime-fgbg.m-thrA.box1-24x16.d8.656442b8
+retime-fgbg.m-thrB.box1-24x16.d8.add5ee17
+retime-fgbg.mix09.box2-24x16.d8.913923e3
+retime-fgbg.order-soft-overlap.box3-24x16.d8.6d9f6967
+retime-fgbg.perm123.box3-24x16.d8.2dbda95d
+retime-fgbg.perm213.box3-24x16.d8.5015fe8b
+retime-fgbg.perm222.box3-24x16.d8.750b50cb
+retime-fgbg.perm321.box3-24x16.d8.784a3fce

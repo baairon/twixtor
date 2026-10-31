@@ -2,29 +2,33 @@
 //! composes with.
 //!
 //! 1. Presence is decided once per call at `t0 = current_time`: a vector layer counts as present
-//!    when its checkout has a width and a height above 0. [`present_at`] is that probe (a layer
-//!    that has no frame at `t0` is absent for the whole render).
+//!    when its checkout has a width and a height above 0. [`present_at`] is that probe. A layer
+//!    keeps its size outside its clip (there its frames are transparent), so a set layer is present
+//!    at every time.
 //! 2. The core asks for the flows only on the vector path (`vectors_quality != 0 && !exact` after
 //!    the segment override). It loads, in this order, `F_AB` from the layer `Vectors: Next` at
 //!    frame `A` and `F_BA` from `Vectors: Prev` at frame `B = A + 1`. The fetch time of frame `k`
 //!    is `T(k) = trunc(dur * k + 0.5)` ([`crate::timemap`]).
 //! 3. Each loader decodes its image with `Max Displace` (read once at `t0`, scaled by the
 //!    horizontal downsample ratio, which is 1 here), fills the alpha 0 holes of the flow with the
-//!    pull push fill and multiplies by `Vec Scale X / Y` read at the same `T(k)`
-//!    ([`retime_engine::compose::flow_from_vector_image`]).
+//!    pull push fill (its vertical taps in the order of `settings.stages`, the tap above first
+//!    for this plugin, see `glue.rs`) and multiplies by `Vec Scale X / Y` read at the same `T(k)`
+//!    ([`retime_engine::compose::flow_from_vector_image_with`]).
 //! 4. With exactly one layer present the other flow is its inversion; with none the render writes
 //!    the error fill before any engine call (`glue.rs`).
-//! 5. With FG matte layers (flow V, step U; rule G1e) the loaders run once per layer of the
-//!    displayed group ([`load_layer_flows`]): each load first sets alpha to 0 wherever the layer's
-//!    tracking matte at the load's frame is below 0.95 ([`matte_step`]), then decodes, fills and
-//!    scales as above, so the layer's flow outside its matte is the hole fill of the flow inside.
+//! 5. With FG matte layers (rule G1e) the loaders run once per layer of the displayed group
+//!    ([`load_layer_flows`]), as the original's per layer vector loader does: each load first
+//!    caps the alpha of the vector image by the layer's composition matte at the load's frame
+//!    ([`matte_step`], `min(alpha, c)`), then decodes, fills and scales as above, so the layer's
+//!    flow outside its matte (and in part where the matte is soft) is the hole fill of the flow
+//!    inside (READ in the original's code).
 //!
 //! The vector image goes through the premultiplying prepare like a source frame
 //! (`Image::from_frame`), so a vector layer has to be opaque except for alpha 0 holes: for alpha
 //! below full the premultiply scales the encoded values and the decode is wrong.
 
 use fx_core::{Env, FxError, Layer, ParamCurves, Result};
-use retime_engine::compose::{flow_from_vector_image, Flows};
+use retime_engine::compose::{flow_from_vector_image_with, Flows};
 use retime_engine::flow::FlowField;
 use retime_engine::frontend::fixed_reader;
 use retime_engine::host::{layer_is_set, EngineSettings};
@@ -35,15 +39,27 @@ use retime_engine::timeline::{Selection, TimeMap};
 
 use crate::prerender::{LAYER_VECTORS_NEXT, LAYER_VECTORS_PREV};
 
-/// The probe of a vector layer at `t0`: the size of the checkout, `None` when the layer is not set,
-/// has no pixels or has no frame at `time`. A layer that returns `None` here is absent for the
-/// whole render, whatever it holds at other times.
+/// The probe of a vector layer at `t0`: the size of the checkout, `None` when the layer is not set or
+/// has no pixels. A layer that returns `None` here is absent for the whole render, whatever it holds
+/// at other times.
+///
+/// Outside its clip a layer keeps its size: the checkout reports the layer's size with transparent
+/// pixels, so the layer is present and its loads decode to the zero flow ([`load_flow`]). That is
+/// the plugin's behaviour under the harness's answer for a checkout outside a clip
+/// (`max_result_rect` at the layer size, an empty `result_rect`; a documented assumption of the
+/// harness): MEASURED against `TwixtorProVectorsIn_64` under the emulator, past the end of short
+/// vector clips the plugin renders the frames
+/// with a zero flow, not the error fill.
 pub fn present_at(layer: Option<&dyn Layer>, time: i64) -> Result<Option<(usize, usize)>> {
     if !layer_is_set(layer) {
         return Ok(None);
     }
     let Some(layer) = layer else { return Ok(None) };
-    Ok(layer.frame_at(time)?.filter(|f| f.width > 0 && f.height > 0).map(|f| (f.width, f.height)))
+    let size = match layer.frame_at(time)? {
+        Some(f) => (f.width, f.height),
+        None => (layer.width(), layer.height()),
+    };
+    Ok(Some(size).filter(|&(w, h)| w > 0 && h > 0))
 }
 
 /// `Vectors: Max Displace` at `t0` as the loaders see it: the 16.16 reader (scale 1.0f) times the
@@ -73,7 +89,7 @@ pub fn load_flow(
     max_displace: f32,
     scale: (f32, f32),
 ) -> Result<FlowField> {
-    flow_from_vector_image(&load_image(layer, name, time, settings)?, max_displace, scale)
+    flow_from_vector_image_with(&load_image(layer, name, time, settings)?, max_displace, scale, settings.stages.get().vertical_taps())
 }
 
 /// The engine image of the vector layer `layer` at `time` (see [`load_flow`]).
@@ -99,15 +115,16 @@ fn load_image(layer: &dyn Layer, name: &str, time: i32, settings: &EngineSetting
     })
 }
 
-/// The threshold of the per layer matte step: the binarize threshold of the solver's mask
-/// pyramids (`v >= 0.95`), compared in f32.
-pub const MATTE_STEP_ON: f32 = 0.95;
-
-/// The per layer matte step of a vector load (step U; rule G1e): alpha becomes 0 at every pixel
-/// where the layer's tracking matte `m` is below [`MATTE_STEP_ON`] (`!(m >= 0.95)`, so a NaN is
-/// below), the colour stays; the decode then reads those pixels as holes and the zero vector, and
-/// the hole fill gives them the flow of the layer's own region. `m` has the size of `img`
-/// (otherwise `FxError::Mismatch`). Records gap G1e.
+/// The per layer matte of a vector load (rule G1e;
+/// READ, TwixtorProVectorsIn_64: the per layer
+/// vector loader, its two loads and its row kernels at 8 bit, 16 bit and float): per pixel the
+/// alpha of the vector image becomes `c` where `c < alpha`, with `c` the layer's matte `m` in the
+/// units of the depth (`trunc(m * 255 + 0.5)`, `trunc(m * 65535 + 0.5)`, the float itself); a NaN
+/// `c` keeps the alpha; the colour stays. The layered path hands the layer's composition matte
+/// (`retime_engine::layers::LayerMattes`), whose units come back exactly. The decode then takes
+/// `white - alpha` as the hole mask of the flow fill: whole holes where the layer is absent,
+/// partial ones where its matte is soft. `m` has the size of `img` (otherwise
+/// `FxError::Mismatch`). Records gap G1e.
 pub fn matte_step(img: &mut Image, m: &Matte) -> Result<()> {
     if (m.width, m.height) != (img.width, img.height) || m.data.len() != img.width * img.height {
         return Err(FxError::Mismatch(format!(
@@ -117,9 +134,23 @@ pub fn matte_step(img: &mut Image, m: &Matte) -> Result<()> {
     }
     fx_core::gaps::record(&retime_engine::gaps::G1E);
     match &mut img.samples {
-        Samples::U8(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).filter(|(_, &v)| !(v >= MATTE_STEP_ON)).for_each(|(px, _)| px[A] = 0),
-        Samples::U16(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).filter(|(_, &v)| !(v >= MATTE_STEP_ON)).for_each(|(px, _)| px[A] = 0),
-        Samples::F32(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).filter(|(_, &v)| !(v >= MATTE_STEP_ON)).for_each(|(px, _)| px[A] = 0.0),
+        Samples::U8(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).for_each(|(px, &v)| {
+            let c = ((v * 255.0f32 + 0.5f32) as i64).clamp(0, 255) as u8;
+            if c < px[A] {
+                px[A] = c;
+            }
+        }),
+        Samples::U16(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).for_each(|(px, &v)| {
+            let c = ((v * 65535.0f32 + 0.5f32) as i64).clamp(0, 65535) as u16;
+            if c < px[A] {
+                px[A] = c;
+            }
+        }),
+        Samples::F32(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).for_each(|(px, &v)| {
+            if v < px[A] {
+                px[A] = v;
+            }
+        }),
     }
     Ok(())
 }
@@ -137,11 +168,11 @@ pub fn load_layer_flow(
 ) -> Result<FlowField> {
     let mut image = load_image(layer, name, time, settings)?;
     matte_step(&mut image, m)?;
-    flow_from_vector_image(&image, max_displace, scale)
+    flow_from_vector_image_with(&image, max_displace, scale, settings.stages.get().vertical_taps())
 }
 
 /// The loaders of one layer of a layered render: as [`load_flows`], with `F_AB` from
-/// `Vectors: Next` at `T(A)` stepped by the layer's matte at `A` (`mattes.at_a`) and `F_BA` from
+/// `Vectors: Next` at `T(A)` capped by the layer's matte at `A` (`mattes.at_a`) and `F_BA` from
 /// `Vectors: Prev` at `T(B)` by its matte at `B` ([`load_layer_flow`]).
 pub fn load_layer_flows(
     env: &Env<'_>,

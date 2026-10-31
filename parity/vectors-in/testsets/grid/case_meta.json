@@ -1,0 +1,3686 @@
+{
+ "vectors-in.backm100.16x12.d8.07552f": {
+  "flags": [
+   "reads_before_start"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.backm10000.16x12.d8.32f42d": {
+  "flags": [
+   "reads_before_start"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.backm200.16x12.d8.470d45": {
+  "flags": [
+   "reads_before_start"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.backm50.16x12.d8.8f1f26": {
+  "flags": [
+   "reads_before_start"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur-0.16x12.d8.93f8d7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur0p01.16x12.d8.415b98": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur0p5.16x12.d8.68ce0b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur1-fast.16x12.d8.7cd72c": {
+  "flags": [
+   "long_source"
+  ],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur1-inv.16x12.d8.58631a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur1.16x12.d8.c82fd9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur10-fast.16x12.d8.50e4a2": {
+  "flags": [
+   "long_source"
+  ],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur10.16x12.d8.d7b203": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur2p5.16x12.d16.a8b6c8": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur2p5.16x12.d32.d31f29": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur2p5.16x12.d8.11d5be": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur5-inv.16x12.d8.d79507": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.blur5.16x12.d8.179208": {
+  "flags": [],
+  "foot": "tex",
+  "group": "blur",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.both-source-layer.16x12.d16.c7c991": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.both-source-layer.16x12.d32.eee609": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.both-source-layer.16x12.d8.40e6d5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.display1.16x12.d8.11e7b4": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display2-d16.16x12.d16.d874d5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display2-d32.16x12.d32.f96f2a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display2-source-layer.16x12.d8.e825a9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display2.16x12.d8.4283da": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display3.16x12.d8.584672": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display4.16x12.d8.0859e3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display5.16x12.d8.cf34ea": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.display6.16x12.d8.e2918c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "display",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fast1000.16x12.d8.4f854d": {
+  "flags": [
+   "long_source",
+   "reads_past_end"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fast10000.16x12.d8.8e6bc9": {
+  "flags": [
+   "long_source",
+   "reads_past_end"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fast120.16x12.d8.f5a227": {
+  "flags": [
+   "long_source"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fast150.16x12.d8.db76aa": {
+  "flags": [
+   "long_source"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fast200.16x12.d8.a3c022": {
+  "flags": [
+   "long_source"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fast300.16x12.d8.15ffd3": {
+  "flags": [
+   "long_source"
+  ],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fg1-chan1.16x12.d8.50c8f9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-chan2.16x12.d8.44d9a5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-chan3.16x12.d8.55e2eb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-chan4.16x12.d8.668f39": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-display1.16x12.d8.50e11f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-display3.16x12.d16.c3486e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-display3.16x12.d32.7af19b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-display3.16x12.d8.11976b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-display6.16x12.d8.8141db": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-prev-only.16x12.d8.1b10c7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-short-matte.16x12.d8.3554f3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-shrink10.16x12.d8.5b7141": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-shrink1p5.16x12.d8.baa739": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-source-display.16x12.d8.b6c08f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg1-warp-inverse.16x12.d8.dbdd4b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg2-display1.16x12.d16.153b6d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "holes"
+ },
+ "vectors-in.fg2-display1.16x12.d32.5eaec5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "holes"
+ },
+ "vectors-in.fg2-display1.16x12.d8.d80b13": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg2-display4.16x12.d8.f8d8c5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg3-display1.16x12.d8.3302ce": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg3-display5.16x12.d8.df9e95": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fg3-display6.16x12.d8.1f1a1a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "fg",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fnum-keys-0at0_1at1_3at3.16x12.d8.e12318": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.fnum-keys-0at0_2p5at3e.16x12.d8.a7ccd1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.fnum-keys-0at0_3at3.16x12.d8.c178b5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.fnum-keys-3at0_0at3.16x12.d8.09310a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.fnum0.16x12.d8.1570b1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum0p5.16x12.d16.d4de4f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum0p5.16x12.d32.686512": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum0p5.16x12.d8.721b29": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum1p25.16x12.d8.244e17": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum200000.16x12.d8.bbeea9": {
+  "flags": [
+   "reads_past_end"
+  ],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum2p25.16x12.d16.773eeb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum2p25.16x12.d32.ba73f6": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum2p75.16x12.d8.e0a2cc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum3.16x12.d8.c1cf32": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnum7.16x12.d8.27cc87": {
+  "flags": [
+   "reads_past_end"
+  ],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnumm0.16x12.d8.a2e37b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnumm1.16x12.d8.73f7fe": {
+  "flags": [
+   "reads_before_start"
+  ],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fnumm200000.16x12.d8.d24333": {
+  "flags": [
+   "reads_before_start"
+  ],
+  "foot": "tex",
+  "group": "framenum",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.foot-alpha.16x12.d16.6938ae": {
+  "flags": [],
+  "foot": "alpha",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-alpha.16x12.d32.f50a20": {
+  "flags": [],
+  "foot": "alpha",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-alpha.16x12.d8.fe2b00": {
+  "flags": [],
+  "foot": "alpha",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-checker.16x12.d16.15b2fe": {
+  "flags": [],
+  "foot": "checker",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-checker.16x12.d32.fdce11": {
+  "flags": [],
+  "foot": "checker",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-checker.16x12.d8.a9e6fb": {
+  "flags": [],
+  "foot": "checker",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-disc.16x12.d16.185653": {
+  "flags": [],
+  "foot": "disc",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-disc.16x12.d32.7ae360": {
+  "flags": [],
+  "foot": "disc",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-disc.16x12.d8.c1fe74": {
+  "flags": [],
+  "foot": "disc",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-edge.16x12.d16.d4a4a2": {
+  "flags": [],
+  "foot": "edge",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-edge.16x12.d32.5e518e": {
+  "flags": [],
+  "foot": "edge",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-edge.16x12.d8.9a4753": {
+  "flags": [],
+  "foot": "edge",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-flat.16x12.d16.d1afcf": {
+  "flags": [],
+  "foot": "flat",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-flat.16x12.d32.f88230": {
+  "flags": [],
+  "foot": "flat",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-flat.16x12.d8.508881": {
+  "flags": [],
+  "foot": "flat",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-hdr.16x12.d32.5bcaab": {
+  "flags": [],
+  "foot": "hdr",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-multi.16x12.d16.130fb7": {
+  "flags": [],
+  "foot": "multi",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-multi.16x12.d32.a80afa": {
+  "flags": [],
+  "foot": "multi",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-multi.16x12.d8.c21f13": {
+  "flags": [],
+  "foot": "multi",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-noise.16x12.d16.83e35c": {
+  "flags": [],
+  "foot": "noise",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-noise.16x12.d32.1c937e": {
+  "flags": [],
+  "foot": "noise",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.foot-noise.16x12.d8.458592": {
+  "flags": [],
+  "foot": "noise",
+  "group": "footage",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.fps12.16x12.d8.ea6da5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fps23p976.16x12.d8.ed75b9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fps24000_1001.16x12.d8.194c7f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.fps60.16x12.d8.2dbf87": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.frames1.16x12.d8.dd9eb4": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.frames2.16x12.d8.e07ae8": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.frames8.16x12.d8.66af9a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.ftime-fps10-fnum3p4-grad.16x12.d8.5841eb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.ftime-fps10-fnum3p4-tvar.16x12.d8.d2a856": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.ftime-fps10-fnum6p4-grad.16x12.d8.0f8df6": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.ftime-fps10-fnum6p4-tvar.16x12.d8.03c1fe": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.ftime-fps10-speed110.16x12.d8.e8e650": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.ftime-fps15-fnum3p5-grad.16x12.d8.92f962": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.ftime-fps15-fnum3p5-tvar.16x12.d8.91f961": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.ftime-fps15-fnum6p5-grad.16x12.d8.4fbdbd": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.ftime-fps15-fnum6p5-tvar.16x12.d8.ade28f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.ftime-fps7p5-fnum3p4-grad.16x12.d8.dfaf19": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.ftime-fps7p5-fnum3p4-tvar.16x12.d8.b948dd": {
+  "flags": [],
+  "foot": "tex",
+  "group": "ftime",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.inrate-ignored.16x12.d8.bae8b3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate0p10000000149011612.16x12.d8.75dbe5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate100.16x12.d8.2d3603": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate1000.16x12.d8.9e3138": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate12.16x12.d8.50d81c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate15.16x12.d8.b77d85": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate23p976.16x12.d8.935a02": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate24-fps30.16x12.d8.9f6608": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate24-fps30000_1001.16x12.d8.1ff444": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate24.16x12.d8.4cf6d5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p969999313354492.16x12.d8.1740bb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p97-fps30.16x12.d8.86fb6c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p97-fps30000_1001.16x12.d8.89ecda": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p97.16x12.d8.7677f5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p97003-fps30.16x12.d8.83f067": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p97003-fps30000_1001.16x12.d8.41dd59": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate29p97003.16x12.d8.fd0d88": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate30.16x12.d8.c1d05f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate59p94.16x12.d8.034527": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate60.16x12.d8.01250b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.inrate7p5.16x12.d8.527736": {
+  "flags": [],
+  "foot": "tex",
+  "group": "inrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.key-blur_compensation.16x12.d8.e0daa0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-display.16x12.d8.d1e331": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-frame_interp.16x12.d8.8c11c3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-input_frame_rate.16x12.d8.ff93bf": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-speed_percent.16x12.d8.2f9d2c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-speed_percent.16x12.d8.663e75": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-time_remap_mode.16x12.d8.ce9eb0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-vec_scale_x.16x12.d8.dca825": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-vec_scale_y.16x12.d8.1fe60b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-vectors_max_displace.16x12.d8.8a2470": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.key-warping.16x12.d8.80b4f4": {
+  "flags": [],
+  "foot": "tex",
+  "group": "keyed",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.mark-keys-1at0_2at2.16x12.d8.4a7c86": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.mark-keys-2at0_3at1_1at2.16x12.d8.f86cd2": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.mark-keys-4at0_1at3.16x12.d8.30fa52": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.mark-keys-5at0_2at2.16x12.d8.ada6d5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": "keyframe_interpolation",
+  "vec": "coh"
+ },
+ "vectors-in.mark1.16x12.d8.21a9db": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.mark2.16x12.d8.30f325": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.mark3.16x12.d8.b03a01": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.mark4.16x12.d8.5a3ae6": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.mark5.16x12.d8.510520": {
+  "flags": [],
+  "foot": "tex",
+  "group": "mark",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md-0.16x12.d8.6f4379": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md0.16x12.d8.a25b4e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md0p0001.16x12.d8.f232e5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md1.16x12.d8.52996d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md100.16x12.d8.042121": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md10000.16x12.d8.59d445": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md16.16x12.d16.947edb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md16.16x12.d32.e7027c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md16.16x12.d8.4f2180": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md2048-big.16x12.d16.bdf547": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "big"
+ },
+ "vectors-in.md2048-big.16x12.d32.d15538": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "big"
+ },
+ "vectors-in.md2048-big.16x12.d8.fc34e6": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "big"
+ },
+ "vectors-in.md2048-med.16x12.d16.dca777": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "med"
+ },
+ "vectors-in.md2048-med.16x12.d32.ee98b1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "med"
+ },
+ "vectors-in.md2048-med.16x12.d8.ae1391": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "med"
+ },
+ "vectors-in.md2048.16x12.d8.ea23a1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md24.16x12.d8.219170": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md31p99999.16x12.d8.31e387": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md4.16x12.d8.5c7cf9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md40.16x12.d8.df116a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md48.16x12.d8.586dc7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md64.16x12.d8.7bd759": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md7p505.16x12.d8.e3552f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.md8.16x12.d8.20f7f5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "maxdisp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.next-only-w1-i1.16x12.d8.772c1e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.next-only-w1-i2.16x12.d8.32568d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.next-only-w1-i3.16x12.d8.5dbd3f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.next-only-w2-i1.16x12.d8.6f5bc1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.next-only-w2-i2.16x12.d8.e371d4": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.next-only-w2-i3.16x12.d8.3f00f5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.next-only.16x12.d16.2148be": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.next-only.16x12.d32.bd1982": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.next-only.16x12.d8.30de79": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.no-vectors.16x12.d16.f0e6bf": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.no-vectors.16x12.d32.c0995b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.no-vectors.16x12.d8.438d7f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.outrate0p10000000149011612.16x12.d8.eba43f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "outrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.outrate1000.16x12.d8.ae3aad": {
+  "flags": [],
+  "foot": "tex",
+  "group": "outrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.outrate12p5.16x12.d8.a4a6f1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "outrate",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.prev-only-w1-i1.16x12.d8.09598c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.prev-only-w1-i2.16x12.d8.874a11": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.prev-only-w1-i3.16x12.d8.066bfc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.prev-only-w2-i1.16x12.d8.29d671": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.prev-only-w2-i2.16x12.d8.db1233": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.prev-only-w2-i3.16x12.d8.81eebc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.prev-only.16x12.d16.d963dc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.prev-only.16x12.d32.6bbc14": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.prev-only.16x12.d8.9bfafb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.prev-short-next-full.16x12.d8.9ea76b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.pure-defaults.64x48.d16.8ee4ef": {
+  "flags": [],
+  "foot": "tex",
+  "group": "defaults",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "px20"
+ },
+ "vectors-in.pure-defaults.64x48.d32.775cc2": {
+  "flags": [],
+  "foot": "tex",
+  "group": "defaults",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "px20"
+ },
+ "vectors-in.pure-defaults.64x48.d8.c031f3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "defaults",
+  "md_img": 2048.0,
+  "stand_in": null,
+  "vec": "px20"
+ },
+ "vectors-in.scalex0.16x12.d8.f1538b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex0p01.16x12.d8.80b79e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex0p5.16x12.d8.4c608e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex10.16x12.d8.672cb1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex2.16x12.d16.d8b59f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex2.16x12.d32.def570": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex2.16x12.d8.0da228": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalex3p3.16x12.d8.2b00a3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalexm0.16x12.d8.9efdb3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalexm1.16x12.d8.211903": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalexm10.16x12.d8.7a0873": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalexy-flip.16x12.d8.1c4a2e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scalexy-mid.16x12.d8.48665d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaley0.16x12.d8.b344ca": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaley0p01.16x12.d8.2805d7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaley0p5.16x12.d8.e1c795": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaley10.16x12.d8.8154ae": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaley2.16x12.d8.507881": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaley3p3.16x12.d8.b0dd5b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaleym0.16x12.d8.32e060": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaleym1.16x12.d8.c22b72": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.scaleym10.16x12.d8.b6aa6c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecscale",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.short-next-only.16x12.d8.9e18f9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.short-vectors.16x12.d16.7752cd": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.short-vectors.16x12.d32.a575e0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.short-vectors.16x12.d8.8db962": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.size-16x12.16x12.d16.e84d74": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-16x12.16x12.d32.5729bc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-16x12.16x12.d8.6baa8b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-17x13.17x13.d16.e143e7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-17x13.17x13.d32.71b4d3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-17x13.17x13.d8.9eb946": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-1x1.1x1.d16.29769c": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-1x1.1x1.d32.430cf7": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-1x1.1x1.d8.df556d": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-24x16.24x16.d16.0a5bef": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-24x16.24x16.d32.0e991a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-24x16.24x16.d8.4bc726": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-2x2.2x2.d16.a2e51f": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-2x2.2x2.d32.34096e": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-2x2.2x2.d8.03591b": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-37x23.37x23.d16.a2d3de": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-37x23.37x23.d32.5a184f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-37x23.37x23.d8.5870aa": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-3x2.3x2.d16.70bcea": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-3x2.3x2.d32.440491": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-3x2.3x2.d8.403be6": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-48x32.48x32.d16.ca9f45": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-48x32.48x32.d32.dde86d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-48x32.48x32.d8.2dfd07": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-5x4.5x4.d16.5b2586": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-5x4.5x4.d32.99a2e2": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-5x4.5x4.d8.94cf41": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-7x6.7x6.d16.4aa10b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-7x6.7x6.d32.dbc6c1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-7x6.7x6.d8.90311d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-9x7.9x7.d16.5144bd": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-9x7.9x7.d32.0ed9f9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.size-9x7.9x7.d8.01775a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "size",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed-0.16x12.d8.010de7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed0.16x12.d8.b3e131": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed0p5.16x12.d8.dd5159": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed1.16x12.d8.07f333": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed100-fps24.16x12.d8.bf4a87": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed100-fps25.16x12.d8.404e2d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed100-fps30.16x12.d8.a638cc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed100-fps30000_1001.16x12.d8.126c4b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed100-n1.16x12.d8.9c1792": {
+  "flags": [],
+  "foot": "tex",
+  "group": "misc",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed12p5.16x12.d8.42fd39": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed25.16x12.d8.3f8af7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed33p3333.16x12.d8.87cad2": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed50-fps24.16x12.d8.c0274c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed50-fps25.16x12.d8.ea8e5c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed50-fps30.16x12.d8.dd1bef": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed50-fps30000_1001.16x12.d8.99a70d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed66p6667.16x12.d8.593a7a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed75.16x12.d8.cc2b92": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.speed99p99.16x12.d8.147329": {
+  "flags": [],
+  "foot": "tex",
+  "group": "speed",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.spsrc-above1.12x9.d32.bfb027": {
+  "flags": [],
+  "foot": "sp_above1",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-denorm_max.12x9.d32.b830c0": {
+  "flags": [],
+  "foot": "sp_denorm_max",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-denorm_min.12x9.d32.1b9043": {
+  "flags": [],
+  "foot": "sp_denorm_min",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-flt_max.12x9.d32.cbd956": {
+  "flags": [],
+  "foot": "sp_flt_max",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-flt_min.12x9.d32.04338a": {
+  "flags": [],
+  "foot": "sp_flt_min",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-inf.12x9.d32.0e1dc3": {
+  "flags": [],
+  "foot": "sp_inf",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-nan.12x9.d32.6ced48": {
+  "flags": [],
+  "foot": "sp_nan",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-negzero.12x9.d32.3fa719": {
+  "flags": [],
+  "foot": "sp_negzero",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-ninf.12x9.d32.76dbd6": {
+  "flags": [],
+  "foot": "sp_ninf",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-nnan.12x9.d32.7f1e65": {
+  "flags": [],
+  "foot": "sp_nnan",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-one.12x9.d32.47570d": {
+  "flags": [],
+  "foot": "sp_one",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrc-zero.12x9.d32.21e6c5": {
+  "flags": [],
+  "foot": "sp_zero",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-above1.12x9.d32.de2381": {
+  "flags": [],
+  "foot": "spa_above1",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-denorm_max.12x9.d32.bc6a62": {
+  "flags": [],
+  "foot": "spa_denorm_max",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-denorm_min.12x9.d32.eca490": {
+  "flags": [],
+  "foot": "spa_denorm_min",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-flt_max.12x9.d32.275486": {
+  "flags": [],
+  "foot": "spa_flt_max",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-flt_min.12x9.d32.c965f8": {
+  "flags": [],
+  "foot": "spa_flt_min",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-inf.12x9.d32.18f155": {
+  "flags": [],
+  "foot": "spa_inf",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-nan.12x9.d32.1b4a99": {
+  "flags": [],
+  "foot": "spa_nan",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-negzero.12x9.d32.91004d": {
+  "flags": [],
+  "foot": "spa_negzero",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-ninf.12x9.d32.f15818": {
+  "flags": [],
+  "foot": "spa_ninf",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-nnan.12x9.d32.5cf091": {
+  "flags": [],
+  "foot": "spa_nnan",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-one.12x9.d32.01ec75": {
+  "flags": [],
+  "foot": "spa_one",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spsrcA-zero.12x9.d32.544e88": {
+  "flags": [],
+  "foot": "spa_zero",
+  "group": "sp_src",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.spvecA-above1.12x9.d32.ccb4b2": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_above1"
+ },
+ "vectors-in.spvecA-denorm_max.12x9.d32.92a7c6": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_denorm_max"
+ },
+ "vectors-in.spvecA-denorm_min.12x9.d32.5e6514": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_denorm_min"
+ },
+ "vectors-in.spvecA-flt_max.12x9.d32.8f4468": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_flt_max"
+ },
+ "vectors-in.spvecA-flt_min.12x9.d32.c2f27b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_flt_min"
+ },
+ "vectors-in.spvecA-inf.12x9.d32.d0212c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_inf"
+ },
+ "vectors-in.spvecA-nan.12x9.d32.818572": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_nan"
+ },
+ "vectors-in.spvecA-negzero.12x9.d32.14078a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_negzero"
+ },
+ "vectors-in.spvecA-ninf.12x9.d32.2bb89f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_ninf"
+ },
+ "vectors-in.spvecA-nnan.12x9.d32.b9e5f2": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_nnan"
+ },
+ "vectors-in.spvecA-one.12x9.d32.4bc655": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_one"
+ },
+ "vectors-in.spvecA-zero.12x9.d32.dabc5e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecA",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spA_zero"
+ },
+ "vectors-in.spvecB-flt_max.12x9.d32.88d5e5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecB",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spB_flt_max"
+ },
+ "vectors-in.spvecB-inf.12x9.d32.9bb2bb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecB",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spB_inf"
+ },
+ "vectors-in.spvecB-nan.12x9.d32.16c786": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecB",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spB_nan"
+ },
+ "vectors-in.spvecB-negzero.12x9.d32.3b31cf": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecB",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spB_negzero"
+ },
+ "vectors-in.spvecB-one.12x9.d32.f5855a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecB",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spB_one"
+ },
+ "vectors-in.spvecB-zero.12x9.d32.e9bbe3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecB",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spB_zero"
+ },
+ "vectors-in.spvecG-above1.12x9.d32.2dab9c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_above1"
+ },
+ "vectors-in.spvecG-denorm_max.12x9.d32.dff3a0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_denorm_max"
+ },
+ "vectors-in.spvecG-denorm_min.12x9.d32.deffcc": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_denorm_min"
+ },
+ "vectors-in.spvecG-flt_max.12x9.d32.772e25": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_flt_max"
+ },
+ "vectors-in.spvecG-flt_min.12x9.d32.1f3e38": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_flt_min"
+ },
+ "vectors-in.spvecG-inf.12x9.d32.2f4bbe": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_inf"
+ },
+ "vectors-in.spvecG-nan.12x9.d32.baf786": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_nan"
+ },
+ "vectors-in.spvecG-negzero.12x9.d32.7d50b5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_negzero"
+ },
+ "vectors-in.spvecG-ninf.12x9.d32.95504e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_ninf"
+ },
+ "vectors-in.spvecG-nnan.12x9.d32.067ed8": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_nnan"
+ },
+ "vectors-in.spvecG-one.12x9.d32.a39fb9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_one"
+ },
+ "vectors-in.spvecG-zero.12x9.d32.fc3f33": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecG",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spG_zero"
+ },
+ "vectors-in.spvecR-above1.12x9.d32.2d84b5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_above1"
+ },
+ "vectors-in.spvecR-denorm_max.12x9.d32.fe8812": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_denorm_max"
+ },
+ "vectors-in.spvecR-denorm_min.12x9.d32.4fec6b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_denorm_min"
+ },
+ "vectors-in.spvecR-flt_max.12x9.d32.06e76a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_flt_max"
+ },
+ "vectors-in.spvecR-flt_min.12x9.d32.8f058b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_flt_min"
+ },
+ "vectors-in.spvecR-inf.12x9.d32.43a55b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_inf"
+ },
+ "vectors-in.spvecR-inv-denorm_min.12x9.d32.f9ae76": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_denorm_min"
+ },
+ "vectors-in.spvecR-inv-flt_max.12x9.d32.e1a439": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_flt_max"
+ },
+ "vectors-in.spvecR-inv-nan.12x9.d32.963079": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_nan"
+ },
+ "vectors-in.spvecR-inv-negzero.12x9.d32.8971a1": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_negzero"
+ },
+ "vectors-in.spvecR-inv-zero.12x9.d32.da5de7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_zero"
+ },
+ "vectors-in.spvecR-nan.12x9.d32.807913": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_nan"
+ },
+ "vectors-in.spvecR-negzero.12x9.d32.55a685": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_negzero"
+ },
+ "vectors-in.spvecR-ninf.12x9.d32.0ed212": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_ninf"
+ },
+ "vectors-in.spvecR-nnan.12x9.d32.03a6bb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_nnan"
+ },
+ "vectors-in.spvecR-one.12x9.d32.8cae0b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_one"
+ },
+ "vectors-in.spvecR-zero.12x9.d32.a67aeb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "sp_vecR",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "spR_zero"
+ },
+ "vectors-in.tiny-inv-2x2.2x2.d16.114377": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-2x2.2x2.d32.e0be52": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-2x2.2x2.d8.0b7073": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-3x2.3x2.d16.2041cb": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-3x2.3x2.d32.e79bb9": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-3x2.3x2.d8.3d48ae": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-5x4.5x4.d16.8e28e7": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-5x4.5x4.d32.0813c8": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.tiny-inv-5x4.5x4.d8.4e4c5f": {
+  "flags": [
+   "tiny"
+  ],
+  "foot": "tex",
+  "group": "tiny",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.vec-allhole.16x12.d16.a802a6": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "allhole"
+ },
+ "vectors-in.vec-allhole.16x12.d32.b14cfd": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "allhole"
+ },
+ "vectors-in.vec-allhole.16x12.d8.5b7757": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "allhole"
+ },
+ "vectors-in.vec-clipped.16x12.d16.0f2d01": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "clipped"
+ },
+ "vectors-in.vec-clipped.16x12.d32.8a5752": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "clipped"
+ },
+ "vectors-in.vec-clipped.16x12.d8.5e55a8": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "clipped"
+ },
+ "vectors-in.vec-coh-big-frame.37x23.d8.a49e75": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.vec-edgeval.16x12.d16.364308": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "edgeval"
+ },
+ "vectors-in.vec-edgeval.16x12.d32.1e8d5e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "edgeval"
+ },
+ "vectors-in.vec-edgeval.16x12.d8.5e6d41": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "edgeval"
+ },
+ "vectors-in.vec-gall.16x12.d16.30e4e0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gall"
+ },
+ "vectors-in.vec-gall.16x12.d32.fa38ed": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gall"
+ },
+ "vectors-in.vec-gall.16x12.d8.60aef5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gall"
+ },
+ "vectors-in.vec-galpha.16x12.d16.534091": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "galpha"
+ },
+ "vectors-in.vec-galpha.16x12.d32.2d88f5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "galpha"
+ },
+ "vectors-in.vec-galpha.16x12.d8.0acd2b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "galpha"
+ },
+ "vectors-in.vec-gholes.16x12.d16.1ce361": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gholes"
+ },
+ "vectors-in.vec-gholes.16x12.d32.9f7fee": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gholes"
+ },
+ "vectors-in.vec-gholes.16x12.d8.20dc4e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gholes"
+ },
+ "vectors-in.vec-gpartial.16x12.d16.c2325c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gpartial"
+ },
+ "vectors-in.vec-gpartial.16x12.d32.4044c5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gpartial"
+ },
+ "vectors-in.vec-gpartial.16x12.d8.d14ed4": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "gpartial"
+ },
+ "vectors-in.vec-grad-big-frame.37x23.d8.001115": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.vec-grad.16x12.d16.911f29": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.vec-grad.16x12.d32.ffb79b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.vec-grad.16x12.d8.eccca5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "grad"
+ },
+ "vectors-in.vec-holes.16x12.d16.91ef54": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "holes"
+ },
+ "vectors-in.vec-holes.16x12.d32.a08a4c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "holes"
+ },
+ "vectors-in.vec-holes.16x12.d8.de27e3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "holes"
+ },
+ "vectors-in.vec-large.16x12.d16.fa9482": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "large"
+ },
+ "vectors-in.vec-large.16x12.d32.0aebd0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "large"
+ },
+ "vectors-in.vec-large.16x12.d8.04e84a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "large"
+ },
+ "vectors-in.vec-med.16x12.d16.b4ffd3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "med"
+ },
+ "vectors-in.vec-med.16x12.d32.d0a14d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "med"
+ },
+ "vectors-in.vec-med.16x12.d8.eabc8a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "med"
+ },
+ "vectors-in.vec-noisef-big-frame.37x23.d8.bf72c4": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.vec-noisef.16x12.d16.7c491e": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.vec-noisef.16x12.d32.8167f7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.vec-noisef.16x12.d8.c2c11a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "noisef"
+ },
+ "vectors-in.vec-partial.16x12.d16.ed0415": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "partial"
+ },
+ "vectors-in.vec-partial.16x12.d32.39d6be": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "partial"
+ },
+ "vectors-in.vec-partial.16x12.d8.d50a21": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "partial"
+ },
+ "vectors-in.vec-rot.16x12.d16.2350de": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "rot"
+ },
+ "vectors-in.vec-rot.16x12.d32.513230": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "rot"
+ },
+ "vectors-in.vec-rot.16x12.d8.02c1d5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "rot"
+ },
+ "vectors-in.vec-small.16x12.d16.3b2984": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "small"
+ },
+ "vectors-in.vec-small.16x12.d32.a1b381": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "small"
+ },
+ "vectors-in.vec-small.16x12.d8.6c6d87": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "small"
+ },
+ "vectors-in.vec-stripes.16x12.d16.13af25": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "stripes"
+ },
+ "vectors-in.vec-stripes.16x12.d32.523551": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "stripes"
+ },
+ "vectors-in.vec-stripes.16x12.d8.bda9b7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "stripes"
+ },
+ "vectors-in.vec-sub.16x12.d16.141af5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "sub"
+ },
+ "vectors-in.vec-sub.16x12.d32.26afd3": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "sub"
+ },
+ "vectors-in.vec-sub.16x12.d8.dbd911": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "sub"
+ },
+ "vectors-in.vec-sub2.16x12.d16.8c2c1f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "sub2"
+ },
+ "vectors-in.vec-sub2.16x12.d32.f2f8fb": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "sub2"
+ },
+ "vectors-in.vec-sub2.16x12.d8.b38c53": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "sub2"
+ },
+ "vectors-in.vec-tvar.16x12.d16.c79168": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.vec-tvar.16x12.d32.9d9a62": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.vec-tvar.16x12.d8.c3a1b9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "tvar"
+ },
+ "vectors-in.vec-zero.16x12.d16.ec094f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "zero"
+ },
+ "vectors-in.vec-zero.16x12.d32.81b31d": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "zero"
+ },
+ "vectors-in.vec-zero.16x12.d8.f6df42": {
+  "flags": [],
+  "foot": "tex",
+  "group": "vecfield",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "zero"
+ },
+ "vectors-in.vectors-1-frame.16x12.d8.fb0c73": {
+  "flags": [],
+  "foot": "tex",
+  "group": "layers",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp1-irregular.17x13.d8.460f9f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp1.16x12.d16.e34192": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp1.16x12.d32.cf7145": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp1.16x12.d8.8ba316": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp2-irregular.17x13.d8.f72bee": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp2.16x12.d16.4b426a": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp2.16x12.d32.a905e7": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp2.16x12.d8.e02309": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp3-irregular.17x13.d8.6ddb9b": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp3.16x12.d16.fb34a8": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp3.16x12.d32.dcc0c0": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp1-interp3.16x12.d8.f88779": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp1-irregular.17x13.d8.25dde5": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp1.16x12.d16.c07a1f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp1.16x12.d32.23b9e8": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp1.16x12.d8.c09ec9": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp2-irregular.17x13.d8.dc6d4f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp3-irregular.17x13.d8.99c80c": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp3.16x12.d16.35c0ad": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp3.16x12.d32.25448f": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ },
+ "vectors-in.warp2-interp3.16x12.d8.ce94ce": {
+  "flags": [],
+  "foot": "tex",
+  "group": "warp",
+  "md_img": 32.0,
+  "stand_in": null,
+  "vec": "coh"
+ }
+}

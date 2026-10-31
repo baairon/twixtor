@@ -1,0 +1,161 @@
+[
+ {
+  "label": "speed above max",
+  "params": [
+   "vectors=1",
+   "speed_percent=10001"
+  ]
+ },
+ {
+  "label": "speed below min",
+  "params": [
+   "vectors=1",
+   "speed_percent=-10001"
+  ]
+ },
+ {
+  "label": "frame_num above max",
+  "params": [
+   "vectors=1",
+   "time_remap_mode=2",
+   "frame_num=200001"
+  ]
+ },
+ {
+  "label": "frame_num below min",
+  "params": [
+   "vectors=1",
+   "time_remap_mode=2",
+   "frame_num=-200001"
+  ]
+ },
+ {
+  "label": "input_frame_rate below min",
+  "params": [
+   "vectors=1",
+   "in_fps_is_out_fps=0",
+   "input_frame_rate=0.05"
+  ]
+ },
+ {
+  "label": "input_frame_rate double 0.1",
+  "params": [
+   "vectors=1",
+   "in_fps_is_out_fps=0",
+   "input_frame_rate=0.1"
+  ]
+ },
+ {
+  "label": "input_frame_rate above max",
+  "params": [
+   "vectors=1",
+   "in_fps_is_out_fps=0",
+   "input_frame_rate=1000.5"
+  ]
+ },
+ {
+  "label": "time_remap_mode 0",
+  "params": [
+   "vectors=1",
+   "time_remap_mode=0"
+  ]
+ },
+ {
+  "label": "time_remap_mode 3",
+  "params": [
+   "vectors=1",
+   "time_remap_mode=3"
+  ]
+ },
+ {
+  "label": "frame_interp 0",
+  "params": [
+   "vectors=1",
+   "frame_interp=0"
+  ]
+ },
+ {
+  "label": "frame_interp 4",
+  "params": [
+   "vectors=1",
+   "frame_interp=4"
+  ]
+ },
+ {
+  "label": "input_fields 0",
+  "params": [
+   "vectors=1",
+   "input_fields=0"
+  ]
+ },
+ {
+  "label": "input_fields 4",
+  "params": [
+   "vectors=1",
+   "input_fields=4"
+  ]
+ },
+ {
+  "label": "src_mark_segments 0",
+  "params": [
+   "vectors=1",
+   "src_mark_segments=0"
+  ]
+ },
+ {
+  "label": "src_mark_segments 6",
+  "params": [
+   "vectors=1",
+   "src_mark_segments=6"
+  ]
+ },
+ {
+  "label": "in_fps_is_out_fps 2",
+  "params": [
+   "vectors=1",
+   "in_fps_is_out_fps=2"
+  ]
+ },
+ {
+  "label": "popup by name",
+  "params": [
+   "vectors=1",
+   "frame_interp=Blend"
+  ]
+ },
+ {
+  "label": "key without frame",
+  "params": [
+   "vectors=1",
+   "speed_percent=100@0;50"
+  ]
+ },
+ {
+  "label": "two keys one tick",
+  "params": [
+   "vectors=1",
+   "speed_percent=100@0;50@0"
+  ]
+ },
+ {
+  "label": "held and eased key",
+  "params": [
+   "vectors=1",
+   "speed_percent=100@0he"
+  ]
+ },
+ {
+  "label": "keyed popup with handle",
+  "params": [
+   "vectors=1",
+   "frame_interp=1@0i0/50;2@5"
+  ]
+ },
+ {
+  "label": "keyed speed above max",
+  "params": [
+   "vectors=1",
+   "speed_percent=100@0;10001@5"
+  ]
+ }
+]

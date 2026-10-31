@@ -1,0 +1,23 @@
+id	kind	cases_changed	groups	description
+m00	control	0		pristine source rebuilt in the scratch copy (must change nothing)
+m01	operand order	7	draft:1,motion:2,prep:1,sens:2,size:1	8 bpc luma sum associated differently: r*0.3 + (g*0.59 + b*0.11)
+m02	pyramid level	96	blur:18,draft:1,prep:7,sb:9,sens:3,size:9,spec:28,speed:3,v360:8,vec:10	level_count adds one more level when a side reaches 2
+m03	f32 vs f64	78	alpha:4,blur:10,draft:2,motion:6,prep:8,sb:6,sens:1,size:9,spec:20,speed:2,v360:7,vec:3	structure tensor determinant t computed in f64 in new_disp
+m04	dropped clamp	3	blur:3	upper clamp of the blur compensation amount (20) removed
+m05	rounding	98	alpha:4,blur:23,draft:8,motion:6,prep:9,sb:7,sens:9,size:7,spec:4,speed:8,v360:7,vec:6	8 bpc store truncates instead of adding 0.5
+m06	operand order	112	alpha:8,blur:18,draft:3,motion:8,prep:8,sb:10,sens:2,size:13,spec:28,speed:2,v360:8,vec:4	vertical lerp of the bilinear sampler written as top*(1-fy) + bot*fy
+m07	swapped weight	14	alpha:2,motion:1,sb:5,spec:5,v360:1	Smart Blend mix uses (1-w) on the first composite instead of w on the second
+m08	rounding	17	alpha:2,blur:1,draft:1,sb:7,spec:2,v360:4	8 bpc hole fill store adds 0.25 instead of 0.5
+m09	constant	13	draft:1,sb:4,spec:2,v360:3,vec:3	Weighted Blend sharpening blur radius 3.0 changed to 2.0
+m10	boundary	7	v360:2,vec:5	Nearest at exactly half way takes B instead of A
+m11	operand order	6	blur:6	blur amount written as a*blur - blur
+m12	boundary	221	alpha:12,blur:51,draft:11,motion:14,prep:18,sb:17,sens:11,size:21,spec:28,speed:11,v360:16,vec:11	solver right-hand side keeps samples at exactly w-1 out of range
+m13	f32 vs f64	3	prep:3	Delinearize power in single precision powf
+m14	rounding	17	alpha:2,blur:1,draft:1,sb:7,spec:2,v360:4	edge fade scale of 8 bpc drops its +0.5 rounding term
+m15	iteration off by one	221	alpha:12,blur:51,draft:11,motion:14,prep:18,sb:17,sens:11,size:21,spec:28,speed:11,v360:16,vec:11	finest-level block matching runs after iteration 2 instead of 1
+m16	operand order	4	alpha:2,sb:1,spec:1	over(): inverse alpha as (white - a)/white
+m17	boundary	4	sens:4	start level: sensitivity 100 (x == L) takes the interpolated branch
+m18	swapped weight	11	draft:1,sb:4,v360:3,vec:3	sharpen strength halved again (0.25 instead of 0.5)
+m19	operand order	10	alpha:2,sb:4,spec:1,v360:3	hole fill combine multiplies by the reciprocal
+m20	f32 vs f64	39	alpha:4,blur:9,draft:1,motion:3,prep:2,sb:5,sens:1,size:7,spec:4,speed:1,vec:2	16 bpc luma narrows its f64 sum before the division by 257
+m21	f32 vs f64	63	alpha:4,blur:9,draft:2,motion:5,prep:6,sb:5,sens:1,size:7,spec:19,speed:2,vec:3	float luma narrows its f64 sum before the scale by 255

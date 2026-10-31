@@ -1,0 +1,1373 @@
+{
+ "moved_out": [
+  {
+   "id": "retime-fgbg.size-n2-w1.box2-1x1.d8.e55ad6e5",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "12",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w2.box3-1x1.d16.3c565e8a",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "24",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w3.box2-1x1.d32.9f6d185a",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "48",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w2.box3-2x2.d8.4fc6df20",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "48",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n1-w3.box1-2x2.d16.6439bbd1",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "96",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w4.box3-2x2.d32.d489fb0b",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "192",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n1-w3.box1-2x3.d8.b944a37c",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "72",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w4.box2-2x3.d16.2992e55a",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "144",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n1-w1.box1-2x3.d32.a162c242",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "288",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w4.box2-3x2.d8.4eee0156",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "72",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w1.box3-3x2.d16.38695831",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "144",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w2.box2-3x2.d32.4de773b5",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "288",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w1.box3-1x5.d8.ed56215a",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "60",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n1-w2.box1-1x5.d16.12e1d483",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "120",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w3.box3-1x5.d32.d2c05e5a",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "240",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n1-w2.box1-5x1.d8.bc07258e",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "60",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w3.box2-5x1.d16.4a294f1b",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "120",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n1-w4.box1-5x1.d32.fd6b1067",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x7ab47c",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "240",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w3.box2-3x3.d8.1853d35f",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "108",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n3-w4.box3-3x3.d16.62e16375",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "216",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.size-n2-w1.box2-3x3.d32.ab10ecbd",
+   "block": "size",
+   "tags": [
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "432",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.pt-tiny.box1-3x3.d8.764d4b6c",
+   "block": "points",
+   "tags": [
+    "standin",
+    "tiny"
+   ],
+   "category": "judged",
+   "reasons": [
+    "tiny frame the original stops on: sizes 1x1 to 5x5 enter a grid only if the original accepts them (docs/parity.md, Rules without a note, tiny frames)",
+    "fix-pro/runs/g1layers/status_merged.json: GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1; the tiny frame faults are the original's own behaviour (no host answer varied changes them)"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x85eb1",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "108",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.dg2-n2.box2-32x24.d32.b1f7d1e6",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane"
+   ],
+   "review": false,
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "36864",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.dg4-n2.box2-32x24.d32.d018122e",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane"
+   ],
+   "review": false,
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "36864",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.dg6-n2.box2-32x24.d32.6d54b178",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane"
+   ],
+   "review": false,
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "36864",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.edge0.box1-32x24.d32.26a025a3",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane"
+   ],
+   "review": false,
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "36864",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.edge4.box1-32x24.d8.d59a3f0f",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "point position outside the POINT parameter the plugin registers: PF_PointDef holds x_value and y_value as PF_Fixed 16.16 (AE_Effect.h lines 1321 and 1864 to 1875), at most 32767 px, so no host can hand a position of 1,000,000 px to the plugin",
+    "fix-pro/runs/g1layers/status_merged.json: error: 'i' format requires -2147483648 <= number <= 2147483647 (the harness cannot write the value either); params pt4_pos=1000000,5"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "error: 'i' format requires -2147483648 <= number <= 2147483647",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "9216",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.edge4.box1-32x24.d32.d1c8f48c",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "point position outside the POINT parameter the plugin registers: PF_PointDef holds x_value and y_value as PF_Fixed 16.16 (AE_Effect.h lines 1321 and 1864 to 1875), at most 32767 px, so no host can hand a position of 1,000,000 px to the plugin",
+    "fix-pro/runs/g1layers/status_merged.json: error: 'i' format requires -2147483648 <= number <= 2147483647 (the harness cannot write the value either); params pt4_pos=1000000,5"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "error: 'i' format requires -2147483648 <= number <= 2147483647",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "36864",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.edge8.box1-32x24.d8.e1ca4338",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "point position outside the POINT parameter the plugin registers: PF_PointDef holds x_value and y_value as PF_Fixed 16.16 (AE_Effect.h lines 1321 and 1864 to 1875), at most 32767 px, so no host can hand a position of 1,000,000 px to the plugin",
+    "fix-pro/runs/g1layers/status_merged.json: error: 'i' format requires -2147483648 <= number <= 2147483647 (the harness cannot write the value either); params pt1_pos=5,-1000000"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "error: 'i' format requires -2147483648 <= number <= 2147483647",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "9216",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.edge8.box1-32x24.d32.6b6a9426",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "point position outside the POINT parameter the plugin registers: PF_PointDef holds x_value and y_value as PF_Fixed 16.16 (AE_Effect.h lines 1321 and 1864 to 1875), at most 32767 px, so no host can hand a position of 1,000,000 px to the plugin",
+    "fix-pro/runs/g1layers/status_merged.json: error: 'i' format requires -2147483648 <= number <= 2147483647 (the harness cannot write the value either); params pt1_pos=5,-1000000"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "error: 'i' format requires -2147483648 <= number <= 2147483647",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "36864",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.edge-all12.box3-32x24.d16.664ffcc3",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "point position outside the POINT parameter the plugin registers: PF_PointDef holds x_value and y_value as PF_Fixed 16.16 (AE_Effect.h lines 1321 and 1864 to 1875), at most 32767 px, so no host can hand a position of 1,000,000 px to the plugin",
+    "fix-pro/runs/g1layers/status_merged.json: error: 'i' format requires -2147483648 <= number <= 2147483647 (the harness cannot write the value either); params pt8_pos=1000000,5 pt9_pos=5,-1000000"
+   ],
+   "review": false,
+   "original": {
+    "status": "error",
+    "error": "error: 'i' format requires -2147483648 <= number <= 2147483647",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "18432",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.overlap-order-d32.box1-16x12.d32.f8b7331d",
+   "block": "geom",
+   "tags": [],
+   "category": "judged",
+   "reasons": [
+    "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane"
+   ],
+   "review": false,
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "9216",
+    "error": ""
+   }
+  },
+  {
+   "id": "retime-fgbg.disc-subpix-d32.specall-16x12.d32.20fa15c8",
+   "block": "geom",
+   "tags": [
+    "special"
+   ],
+   "category": "judged",
+   "reasons": [
+    "uninitialised alpha word of the original: the Source display without Alt Color Source at 32 bpc writes a missing layer fill whose alpha dword the original never initialises (the low 32 bits of a stale return address left in the stack slot where the fill colour is built; it depends on the image base), so the original does not define that word",
+    "read from the original's code: the caller builds the fill colour as [A, R, G, B] = [never written, 0, 0, 1.0]; the reference alpha holds the same stale word under every host state varied; the rewrite against the reference: every differing sample is in the alpha plane"
+   ],
+   "review": false,
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "9216",
+    "error": ""
+   }
+  }
+ ],
+ "unresolved": [],
+ "candidates": [
+  {
+   "id": "retime-fgbg.oc-fg1_matte_chan-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_matte_chan=0 outside the registered popup 1..4"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_matte_chan`: 0 outside 1..=4"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_matte_chan-5",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_matte_chan=5 outside the registered popup 1..4"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_matte_chan`: 5 outside 1..=4"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg2_matte_chan-5",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg2_matte_chan=5 outside the registered popup 1..4"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg2_matte_chan`: 5 outside 1..=4"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg3_matte_chan-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg3_matte_chan=0 outside the registered popup 1..4"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg3_matte_chan`: 0 outside 1..=4"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_sensitivity-100.01",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_sensitivity=100.01 outside the registered 0.0..100.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_sensitivity`: 100.01 outside 0..=100"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_sensitivity--0.01",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_sensitivity=-0.01 outside the registered 0.0..100.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_sensitivity`: -0.01 outside 0..=100"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg2_sensitivity-101",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg2_sensitivity=101 outside the registered 0.0..100.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg2_sensitivity`: 101 outside 0..=100"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg3_sensitivity--1",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg3_sensitivity=-1 outside the registered 0.0..100.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg3_sensitivity`: -1 outside 0..=100"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink-10.01",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_inv_matte_shrink=10.01 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_inv_matte_shrink`: 10.01 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--0.01",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_inv_matte_shrink=-0.01 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_inv_matte_shrink`: -0.01 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--0.5",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_inv_matte_shrink=-0.5 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_inv_matte_shrink`: -0.5 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--1",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_inv_matte_shrink=-1 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_inv_matte_shrink`: -1 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_inv_matte_shrink--2.5",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg1_inv_matte_shrink=-2.5 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg1_inv_matte_shrink`: -2.5 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg2_inv_matte_shrink--1",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg2_inv_matte_shrink=-1 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg2_inv_matte_shrink`: -1 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg3_inv_matte_shrink-11",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "fg3_inv_matte_shrink=11 outside the registered 0.0..10.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `fg3_inv_matte_shrink`: 11 outside 0..=10"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-display-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "display=0 outside the registered popup 1..6"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at TwixtorPro_64.aex+0x30a448",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `display`: 0 outside 1..=6"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-display-7",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "display=7 outside the registered popup 1..6"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `display`: 7 outside 1..=6"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-draw_geom-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "draw_geom=0 outside the registered popup 1..6"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `draw_geom`: 0 outside 1..=6"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-draw_geom-7",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "draw_geom=7 outside the registered popup 1..6"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `draw_geom`: 7 outside 1..=6"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_use-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "pt1_use=0 outside the registered popup 1..5"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `pt1_use`: 0 outside 1..=5"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_use-6",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "pt1_use=6 outside the registered popup 1..5"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `pt1_use`: 6 outside 1..=5"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt12_use-6",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "pt12_use=6 outside the registered popup 1..5"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `pt12_use`: 6 outside 1..=5"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_color-256,0,0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "unjudged",
+   "original": null,
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `pt1_color`: cannot parse `256,0,0`"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_color--1,0,0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "unjudged",
+   "original": null,
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `pt1_color`: cannot parse `-1,0,0`"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_color-0,0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "unjudged",
+   "original": null,
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `pt1_color`: cannot parse `0,0`"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_pos-nan,0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "unjudged",
+   "original": null,
+   "rewrite": {
+    "exit": "0",
+    "bytes": "4608",
+    "error": "accepted by --check"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-pt1_pos-0,inf",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "unjudged",
+   "original": null,
+   "rewrite": {
+    "exit": "0",
+    "bytes": "4608",
+    "error": "accepted by --check"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_sensitivity-100.01",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "main_bg_sensitivity=100.01 outside the registered 0.0..100.0"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `main_bg_sensitivity`: 100.01 outside 0..=100"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-main_bg_track-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "unsupported",
+    "error": "param `main_bg_track` has no counterpart among the registered params of TwixtorPro_64",
+    "category": "param_unregistered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: unknown param `main_bg_track`"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-fg1_track-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "unsupported",
+    "error": "param `fg1_track` has no counterpart among the registered params of TwixtorPro_64",
+    "category": "param_unregistered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: unknown param `fg1_track`"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-warping-5",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "warping=5 outside the registered popup 1..4"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `warping`: 5 outside 1..=4"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-warping-0",
+   "phase_a_reason": "outside the registered range or popup choices, or not a parameter of retime-fgbg",
+   "range_violations": [
+    "warping=0 outside the registered popup 1..4"
+   ],
+   "verdict": "out_of_contract",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "3",
+    "bytes": "0",
+    "error": "vfx: error: bad value for `warping`: 0 outside 1..=4"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-matte-wrong-size",
+   "phase_a_reason": "matte layer of another size than the footage (the plugin shows an error fill)",
+   "range_violations": [],
+   "verdict": "unresolved",
+   "original": {
+    "status": "error",
+    "error": "ValueError: ~/twixtor-parity/fix-layers2/ooc13_ts/inputs/m-hard-0-25x16.d8.f3.rgba has 4800 bytes, 3 frames of 1536 are 4608",
+    "category": "emulator_fault"
+   },
+   "rewrite": {
+    "exit": "4",
+    "bytes": "0",
+    "error": "vfx: error: layer fg1_matte ~/twixtor-parity/regress-m3/ts/fgbg-layers/inputs/m-hard-0-25x16.d8.f3.rgba ends with a partial frame (192 of 1536 bytes) a"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-matte-short",
+   "phase_a_reason": "matte clip shorter than the footage: frames past its end are an unprovided host read",
+   "range_violations": [],
+   "verdict": "original_rendered_review",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "4608",
+    "error": "accepted by --check"
+   }
+  },
+  {
+   "id": "retime-fgbg.oc-matte-depth-mismatch-note",
+   "phase_a_reason": "control case: a valid render listed with the candidates so their verdicts can be compared",
+   "range_violations": [],
+   "verdict": "original_rendered_review",
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "category": "rendered"
+   },
+   "rewrite": {
+    "exit": "0",
+    "bytes": "4608",
+    "error": "accepted by --check"
+   }
+  }
+ ],
+ "counts": {
+  "moved_out": 33,
+  "unresolved": 0,
+  "rendered_in_contract": 353,
+  "candidates": 35,
+  "candidates_out": 32,
+  "candidates_promote_review": 2,
+  "out_of_contract_total": 65,
+  "moved_by_category": {
+   "judged": 33
+  },
+  "status_counts": {
+   "status:error": 27,
+   "status:rendered": 359
+  }
+ },
+ "param_map_plugin_side": true,
+ "judged_unknown": [],
+ "module": "fgbg-layers",
+ "measured_at": "2026-10-31",
+ "param_map": "~/twixtor-parity/harness-seh/param_map_TwixtorPro_64.tsv",
+ "status_files": [
+  "~/twixtor-parity/fix-pro/runs/g1layers/status_merged.json",
+  "~/twixtor-parity/fix-pro/runs/ooc_layers/status_merged.json",
+  "~/twixtor-parity/fix-layers2/runs/ooc13/status_all.jsonl"
+ ],
+ "categories_moved_out": [
+  "out_of_range",
+  "param_unregistered",
+  "plugin_error",
+  "refused"
+ ],
+ "judged_files": [
+  "~/twixtor-parity/re/f7-close-pro/res/layers_ooc_judged.tsv"
+ ],
+ "command": "python3 phase_b.py ooc --status ~/twixtor-parity/fix-pro/runs/g1layers/status_merged.json --status ~/twixtor-parity/fix-pro/runs/ooc_layers/status_merged.json --status ~/twixtor-parity/fix-layers2/runs/ooc13/status_all.jsonl --judged ~/twixtor-parity/re/f7-close-pro/res/layers_ooc_judged.tsv"
+}

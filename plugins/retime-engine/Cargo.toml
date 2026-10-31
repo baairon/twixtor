@@ -10,3 +10,9 @@ description = "The shared engine of the effects: time maps, optical flow, warps,
 [dependencies]
 fx-core.workspace = true
 rayon.workspace = true
+
+[features]
+default = ["emulator-nan"]
+# Which NaN an operation on two NaNs returns (`src/nanrule.rs`): on, the x87 selection of the emulator the references were
+# rendered with; off, the processor's rule (the first operand).
+emulator-nan = []

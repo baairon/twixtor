@@ -5,15 +5,14 @@
 //! (negative), using the motion blur primitive [`motion_blur`]; the post step is
 //! [`clear_rgb_where_transparent`].
 //!
-//! The wrap-around (360) variant ([`blur_compensation_wrap`] with `is360`, parity gap G6) has no
-//! established description (U). It is defined here by
-//! the most constrained reading: the same taps, weights, counts and stores as the plain leaves,
-//! with the tap x coordinate wrapped into `[0, W)` by the loops of the 360 inverse warp; the
-//! bilinear taps sample with the 360 sampler of the warp (`bilerp360`), the nearest taps read
-//! column `trunc(x)` of the wrapped coordinate (the tap's column modulo `W`). The y test, the
-//! flow lookup and the forward and backward tap order are those of the plain leaves. A pixel
-//! whose taps all stay inside the image (`0 <= x < W - 1`, `0 <= y < H - 1` for the bilinear
-//! taps, `0 <= x < W` for the nearest taps) comes out bit identical to the plain blur.
+//! The wrap-around (360) variant ([`blur_compensation_wrap`] with `is360`, parity gap G6): the bilinear taps are READ
+//! (the float 360 leaf of TwixtorPro_64's blur compensation): every tap counts, its x is
+//! wrapped into `[0, W)` by the loops of the 360 inverse warp and its position is put on the sphere
+//! ([`sphere_tap`]: y by whole heights, after an odd count x half a turn and y reflected), then sampled with the 360
+//! sampler of the warp (`bilerp360`). The nearest taps keep the most constrained reading (U): the taps of the plain
+//! leaf with the column `trunc(x)` of the wrapped coordinate and the plain y test. The flow lookup and the forward and
+//! backward tap order are those of the plain leaves. A pixel whose taps all stay inside the image (`0 <= x < W - 1`,
+//! `0 <= y < H - 1` for the bilinear taps, `0 <= x < W` for the nearest taps) comes out bit identical to the plain blur.
 //!
 //! Numerics: single precision in the written order, no fused multiply add, truncating stores as
 //! documented per function; rows run through rayon row chunks, so the result does not depend on
@@ -173,13 +172,12 @@ pub fn clear_rgb_where_transparent(img: &mut Image) {
 ///   count only when inside, the backward taps ALWAYS count (the increment sits after the range
 ///   test in the backward loop). The centre of the nearest taps is `centre + 0.5`.
 ///
-/// * Wrap-around taps (`is360`, G6, U: the most constrained reading of a 360 variant of
-///   the leaves): the tap positions are accumulated exactly as above; per tap a copy of its x is
+/// * Wrap-around taps (`is360`, G6): the tap positions are accumulated exactly as above; per tap a copy of its x is
 ///   wrapped into `[0, W)` by the loops of the 360 inverse warp (`while x < 0 { x += W }`, then
-///   `while W <= x { x -= W }`, single precision). Bilinear: a tap counts when `0 <= py < H` and
-///   adds `bilerp360(src, x, py)`, the 360 sampler of the inverse warp (right neighbour of the
-///   last column is column 0, the row below the last row is the last row shifted by half the
-///   width). Nearest (`q = p + 0.5` the accumulated position): a tap is inside when
+///   `while W <= x { x -= W }`, single precision). Bilinear (READ): EVERY tap counts and adds
+///   `bilerp360(src, x', y')` at its position on the sphere ([`sphere_tap`]), the 360 sampler of the inverse warp
+///   (right neighbour of the last column is column 0, the row below the last row is the last row shifted by half the
+///   width). Nearest (U, the most constrained reading) (`q = p + 0.5` the accumulated position): a tap is inside when
 ///   `0 <= trunc32(q.y) < H`, and an inside tap reads column `trunc32` of its wrapped `q.x`, which
 ///   is its column modulo `W`; the forward and backward counting rules stay. The x of a tap whose
 ///   y is outside is not wrapped.
@@ -299,6 +297,48 @@ fn run<P: Pix>(
     !b.bad.load(Ordering::Relaxed)
 }
 
+/// The position of a bilinear wrap-around tap on the sphere (READ, the float 360 leaf of the blur compensation,
+/// TwixtorPro_64; TRACED on `mix08.movebox-31x21.d32`: the sampler receives the backward tap of pixel (1, 0)
+/// at x = 16.5016, half a turn from 1.0016): `x` is already in `[0, W)`; `y += H`
+/// while `y < 0` and `y -= H` while `H <= y`, counting the steps; after an odd count `x = W * 0.5 + x` (then `W` less
+/// unless it is below `W`) and a `y` other than 0 becomes `H - y`. `None` when the loops exceed their bound or the
+/// result is not inside the frame (NaN, infinite, or a reflection that rounds to `H`).
+#[inline(always)]
+pub(crate) fn sphere_tap(x: f32, qy: f32, wf: f32, hf: f32) -> Option<(f32, f32)> {
+    let mut y = qy;
+    let mut steps = 0u32;
+    while y < 0.0 {
+        y += hf;
+        steps += 1;
+        if steps > WRAP_LIMIT {
+            return None;
+        }
+    }
+    while hf <= y {
+        y -= hf;
+        steps += 1;
+        if steps > WRAP_LIMIT {
+            return None;
+        }
+    }
+    let mut x = x;
+    if steps % 2 == 1 {
+        x = wf * 0.5f32 + x;
+        #[allow(clippy::neg_cmp_op_on_partial_ord)]
+        if !(x < wf) {
+            x -= wf;
+        }
+        if y != 0.0 {
+            y = hf - y;
+        }
+    }
+    if x >= 0.0 && x < wf && y >= 0.0 && y < hf {
+        Some((x, y))
+    } else {
+        None
+    }
+}
+
 impl<'a, P: Pix> Blur<'a, P> {
     /// The x of a wrap-around tap brought into `[0, W)` by the loops of the 360 inverse warp
     /// (`x += W` while `x < 0`, then `x -= W` while `W <= x`, single precision), or `None` when
@@ -383,16 +423,15 @@ impl<'a, P: Pix> Blur<'a, P> {
                 return;
             }
             if WRAP {
-                if 0.0 <= qy && qy < self.hf {
-                    let Some(wx) = self.wrap_x(qx) else {
-                        self.bad.store(true, Ordering::Relaxed);
-                        return;
-                    };
-                    *cnt += 1;
-                    let t = bilerp360(self.src, self.w, self.w1i, self.h1i, wx, qy);
-                    for c in 0..CHANNELS {
-                        sum[c] += t[c];
-                    }
+                // every tap counts; its position is put on the sphere ([`sphere_tap`]) and sampled with the 360 sampler
+                let Some((wx, wy)) = self.wrap_x(qx).and_then(|wx| sphere_tap(wx, qy, self.wf, self.hf)) else {
+                    self.bad.store(true, Ordering::Relaxed);
+                    return;
+                };
+                *cnt += 1;
+                let t = bilerp360(self.src, self.w, self.w1i, self.h1i, wx, wy);
+                for c in 0..CHANNELS {
+                    sum[c] += t[c];
                 }
             } else if 0.0 <= qx && qx < self.wf && 0.0 <= qy && qy < self.hf {
                 *cnt += 1;

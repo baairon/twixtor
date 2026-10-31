@@ -1,5 +1,5 @@
 //! The Source display (a copy of the source layer with the premultiply round trip of the input
-//! prepare and the output finish), `Alt Src` as the source, the error fills (red at half alpha for
+//! prepare and the output finish), `Alt Motion Src` as the source, the error fills (red at half alpha for
 //! a size mismatch, the GREY image for a missing layer) and the frames outside the clip.
 
 mod common;
@@ -49,11 +49,11 @@ fn alt_src_is_the_source_when_it_has_pixels() {
     let alt = random_clip(Depth::U8, 6, 4, 4, 2);
     let rig = Rig::new(input.clone(), &[("display", "1")]).with_layer(ALT, alt.clone()).with_frames(4);
     assert_eq!(rig.render(2).unwrap(), round_trip(&alt[2]));
-    // an Alt Src of size 0 is no layer at all: the input is the source
+    // an Alt Motion Src of size 0 is no layer at all: the input is the source
     let empty = vec![Frame::new(0, 0, Depth::U8)];
     let rig = Rig::new(input.clone(), &[("display", "1")]).with_layer(ALT, empty).with_frames(4);
     assert_eq!(rig.render(2).unwrap(), round_trip(&input[2]));
-    // the vector display reads the pair from Alt Src: the same clip moved by a known amount gives vectors, the input is ignored
+    // the vector display reads the pair from Alt Motion Src: the same clip moved by a known amount gives vectors, the input is ignored
     let moving = DEFAULT_MOTION.clip(Depth::U8, 64, 48, 6);
     let noise = random_clip(Depth::U8, 64, 48, 6, 3);
     let via_alt = Rig::new(noise, &[("max_displace", "16")]).with_layer(ALT, moving.clone()).with_frames(6);
@@ -132,7 +132,7 @@ fn red_is_tested_before_grey() {
     layers.insert("fg1_matte", Arc::new(MemLayer::new(time(), vec![Frame::new(3, 3, Depth::U8)]).unwrap()));
     let out = render_empty_input(Depth::U8, &layers);
     assert_eq!(out, error_frame(ErrorKind::SizeMismatch, 6, 4, Depth::U8));
-    // an empty Alt Src falls back to the (empty) input: still grey
+    // an empty Alt Motion Src falls back to the (empty) input: still grey
     let mut layers = LayerSet::new();
     layers.insert(ALT, Arc::new(MemLayer::new(time(), vec![Frame::new(0, 0, Depth::U8)]).unwrap()));
     assert_eq!(render_empty_input(Depth::U8, &layers), error_frame(ErrorKind::MissingLayer(MissingLayerStyle::Grey), 6, 4, Depth::U8));

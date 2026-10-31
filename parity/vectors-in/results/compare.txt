@@ -1,0 +1,27 @@
+grid 451 cases: 449 rendered, 2 refused by the base rewrite; 33 candidates out of range (33 refused by --check)
+mutants: 24 total, 24 changed at least one case, survivors []
+  m01  decode scale          198 cases changed
+  m02  decode scale           52 cases changed
+  m03  channel order         124 cases changed
+  m04  hole threshold          3 cases changed
+  m05  wrong axis scale       23 cases changed
+  m06  hole mask offset        7 cases changed
+  m07  error fill colour       4 cases changed
+  m08  error fill colour       2 cases changed
+  m09  error fill colour       2 cases changed
+  m10  frame off by one       86 cases changed
+  m11  frame off by one        9 cases changed
+  m12  swapped prev/next     338 cases changed
+  m13  popup mapping          36 cases changed
+  m14  rate                  372 cases changed
+  m15  label mapping           4 cases changed
+  m16  rounding                1 cases changed
+  m17  param time              1 cases changed
+  m18  wrong param            23 cases changed
+  m19  threshold              18 cases changed
+  m20  sign                   19 cases changed
+  m21  rounding                1 cases changed
+  m22  presence               21 cases changed
+  m23  popup mapping          17 cases changed
+  m24  dropped term            2 cases changed
+wrote results/summary.json

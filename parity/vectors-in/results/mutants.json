@@ -1,0 +1,618 @@
+{
+ "base_cases": 451,
+ "control": {
+  "cases": 451,
+  "differing_from_base": 0
+ },
+ "mutants": [
+  {
+   "id": "m01",
+   "kind": "decode scale",
+   "file": "plugins/retime-engine/src/vectors.rs",
+   "desc": "8 bpc red decode divides by 255 instead of 254",
+   "run": true,
+   "changed": 198,
+   "example": [
+    "vectors-in.backm50.16x12.d8.8f1f26",
+    "vectors-in.blur-0.16x12.d8.93f8d7",
+    "vectors-in.blur0p01.16x12.d8.415b98"
+   ],
+   "by_group": {
+    "speed": 16,
+    "blur": 11,
+    "layers": 18,
+    "display": 5,
+    "fg": 15,
+    "framenum": 4,
+    "footage": 6,
+    "misc": 6,
+    "ftime": 5,
+    "inrate": 21,
+    "keyed": 11,
+    "mark": 4,
+    "maxdisp": 12,
+    "outrate": 3,
+    "defaults": 1,
+    "vecscale": 18,
+    "size": 10,
+    "tiny": 3,
+    "vecfield": 18,
+    "warp": 11
+   },
+   "by_depth": {
+    "8": 198,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m02",
+   "kind": "decode scale",
+   "file": "plugins/retime-engine/src/vectors.rs",
+   "desc": "16 bpc green decode divides by 65535 instead of 65534",
+   "run": true,
+   "changed": 52,
+   "example": [
+    "vectors-in.blur2p5.16x12.d16.a8b6c8",
+    "vectors-in.both-source-layer.16x12.d16.c7c991",
+    "vectors-in.fg1-display3.16x12.d16.c3486e"
+   ],
+   "by_group": {
+    "blur": 1,
+    "layers": 4,
+    "fg": 2,
+    "framenum": 2,
+    "footage": 6,
+    "maxdisp": 2,
+    "defaults": 1,
+    "vecscale": 1,
+    "size": 10,
+    "tiny": 3,
+    "vecfield": 15,
+    "warp": 5
+   },
+   "by_depth": {
+    "8": 0,
+    "16": 52,
+    "32": 0
+   }
+  },
+  {
+   "id": "m03",
+   "kind": "channel order",
+   "file": "plugins/retime-engine/src/vectors.rs",
+   "desc": "32 bpc horizontal motion read from the green channel",
+   "run": true,
+   "changed": 124,
+   "example": [
+    "vectors-in.blur2p5.16x12.d32.d31f29",
+    "vectors-in.both-source-layer.16x12.d32.eee609",
+    "vectors-in.fg1-display3.16x12.d32.7af19b"
+   ],
+   "by_group": {
+    "blur": 1,
+    "layers": 4,
+    "fg": 2,
+    "framenum": 2,
+    "footage": 8,
+    "maxdisp": 2,
+    "defaults": 1,
+    "vecscale": 1,
+    "size": 10,
+    "sp_src": 24,
+    "sp_vecA": 12,
+    "sp_vecB": 6,
+    "sp_vecG": 12,
+    "sp_vecR": 17,
+    "tiny": 3,
+    "vecfield": 14,
+    "warp": 5
+   },
+   "by_depth": {
+    "8": 0,
+    "16": 0,
+    "32": 124
+   }
+  },
+  {
+   "id": "m04",
+   "kind": "hole threshold",
+   "file": "plugins/retime-engine/src/holefill.rs",
+   "desc": "a 32 bpc hole mask value below 0.5 no longer counts as a hole",
+   "run": true,
+   "changed": 3,
+   "example": [
+    "vectors-in.fg1-display3.16x12.d32.7af19b",
+    "vectors-in.vec-gall.16x12.d32.fa38ed",
+    "vectors-in.vec-galpha.16x12.d32.2d88f5"
+   ],
+   "by_group": {
+    "fg": 1,
+    "vecfield": 2
+   },
+   "by_depth": {
+    "8": 0,
+    "16": 0,
+    "32": 3
+   }
+  },
+  {
+   "id": "m05",
+   "kind": "wrong axis scale",
+   "file": "plugins/retime-engine/src/vectors.rs",
+   "desc": "Vec Scale Y multiplies by the X scale",
+   "run": true,
+   "changed": 23,
+   "example": [
+    "vectors-in.key-vec_scale_x.16x12.d8.dca825",
+    "vectors-in.key-vec_scale_y.16x12.d8.1fe60b",
+    "vectors-in.scalex0.16x12.d8.f1538b"
+   ],
+   "by_group": {
+    "keyed": 2,
+    "vecscale": 21
+   },
+   "by_depth": {
+    "8": 21,
+    "16": 1,
+    "32": 1
+   }
+  },
+  {
+   "id": "m06",
+   "kind": "hole mask offset",
+   "file": "plugins/retime-engine/src/vectors.rs",
+   "desc": "8 bpc hole mask loses its low bit",
+   "run": true,
+   "changed": 7,
+   "example": [
+    "vectors-in.fg1-chan1.16x12.d8.50c8f9",
+    "vectors-in.fg1-chan4.16x12.d8.668f39",
+    "vectors-in.fg1-display3.16x12.d8.11976b"
+   ],
+   "by_group": {
+    "fg": 6,
+    "vecfield": 1
+   },
+   "by_depth": {
+    "8": 7,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m07",
+   "kind": "error fill colour",
+   "file": "plugins/retime-engine/src/image.rs",
+   "desc": "8 bpc size mismatch fill has alpha 127 instead of 128",
+   "run": true,
+   "changed": 4,
+   "example": [
+    "vectors-in.no-vectors.16x12.d8.438d7f",
+    "vectors-in.short-next-only.16x12.d8.9e18f9",
+    "vectors-in.short-vectors.16x12.d8.8db962"
+   ],
+   "by_group": {
+    "layers": 4
+   },
+   "by_depth": {
+    "8": 4,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m08",
+   "kind": "error fill colour",
+   "file": "plugins/retime-engine/src/image.rs",
+   "desc": "16 bpc size mismatch fill has green 1",
+   "run": true,
+   "changed": 2,
+   "example": [
+    "vectors-in.no-vectors.16x12.d16.f0e6bf",
+    "vectors-in.short-vectors.16x12.d16.7752cd"
+   ],
+   "by_group": {
+    "layers": 2
+   },
+   "by_depth": {
+    "8": 0,
+    "16": 2,
+    "32": 0
+   }
+  },
+  {
+   "id": "m09",
+   "kind": "error fill colour",
+   "file": "plugins/retime-engine/src/image.rs",
+   "desc": "32 bpc size mismatch fill has alpha 1.0 instead of 0.5",
+   "run": true,
+   "changed": 2,
+   "example": [
+    "vectors-in.no-vectors.16x12.d32.c0995b",
+    "vectors-in.short-vectors.16x12.d32.a575e0"
+   ],
+   "by_group": {
+    "layers": 2
+   },
+   "by_depth": {
+    "8": 0,
+    "16": 0,
+    "32": 2
+   }
+  },
+  {
+   "id": "m10",
+   "kind": "frame off by one",
+   "file": "plugins/vectors-in/src/vectorin.rs",
+   "desc": "Vectors Next is fetched one source frame late (single layer path)",
+   "run": true,
+   "changed": 86,
+   "example": [
+    "vectors-in.backm50.16x12.d8.8f1f26",
+    "vectors-in.both-source-layer.16x12.d16.c7c991",
+    "vectors-in.both-source-layer.16x12.d32.eee609"
+   ],
+   "by_group": {
+    "speed": 2,
+    "layers": 17,
+    "footage": 19,
+    "ftime": 1,
+    "inrate": 1,
+    "keyed": 2,
+    "sp_src": 21,
+    "vecfield": 23
+   },
+   "by_depth": {
+    "8": 32,
+    "16": 16,
+    "32": 38
+   }
+  },
+  {
+   "id": "m11",
+   "kind": "frame off by one",
+   "file": "plugins/vectors-in/src/vectorin.rs",
+   "desc": "Vectors Prev is fetched one source frame early (FG matte path)",
+   "run": true,
+   "changed": 9,
+   "example": [
+    "vectors-in.fg1-display1.16x12.d8.50e11f",
+    "vectors-in.fg1-display3.16x12.d16.c3486e",
+    "vectors-in.fg1-display3.16x12.d32.7af19b"
+   ],
+   "by_group": {
+    "fg": 9
+   },
+   "by_depth": {
+    "8": 6,
+    "16": 1,
+    "32": 2
+   }
+  },
+  {
+   "id": "m12",
+   "kind": "swapped prev/next",
+   "file": "plugins/vectors-in/src/vectorin.rs",
+   "desc": "the forward flow is loaded from the Prev layer (single layer path)",
+   "run": true,
+   "changed": 338,
+   "example": [
+    "vectors-in.backm50.16x12.d8.8f1f26",
+    "vectors-in.blur-0.16x12.d8.93f8d7",
+    "vectors-in.blur0p01.16x12.d8.415b98"
+   ],
+   "by_group": {
+    "speed": 16,
+    "blur": 11,
+    "layers": 17,
+    "display": 5,
+    "framenum": 8,
+    "footage": 20,
+    "misc": 6,
+    "ftime": 5,
+    "inrate": 21,
+    "keyed": 11,
+    "mark": 4,
+    "maxdisp": 15,
+    "outrate": 3,
+    "defaults": 3,
+    "vecscale": 22,
+    "size": 30,
+    "sp_src": 24,
+    "sp_vecA": 12,
+    "sp_vecB": 6,
+    "sp_vecG": 12,
+    "sp_vecR": 15,
+    "tiny": 9,
+    "vecfield": 45,
+    "warp": 18
+   },
+   "by_depth": {
+    "8": 173,
+    "16": 47,
+    "32": 118
+   }
+  },
+  {
+   "id": "m13",
+   "kind": "popup mapping",
+   "file": "plugins/vectors-in/src/glue.rs",
+   "desc": "Warping Inverse is served as Smart Blend warp code 1",
+   "run": true,
+   "changed": 36,
+   "example": [
+    "vectors-in.blur1-inv.16x12.d8.58631a",
+    "vectors-in.blur5-inv.16x12.d8.d79507",
+    "vectors-in.fg1-warp-inverse.16x12.d8.dbdd4b"
+   ],
+   "by_group": {
+    "blur": 2,
+    "fg": 1,
+    "keyed": 1,
+    "layers": 6,
+    "sp_vecR": 5,
+    "tiny": 9,
+    "warp": 12
+   },
+   "by_depth": {
+    "8": 19,
+    "16": 6,
+    "32": 11
+   }
+  },
+  {
+   "id": "m14",
+   "kind": "rate",
+   "file": "plugins/vectors-in/src/glue.rs",
+   "desc": "In FPS is Out FPS reads the clip as 29.97 fps instead of 30",
+   "run": true,
+   "changed": 372,
+   "example": [
+    "vectors-in.backm100.16x12.d8.07552f",
+    "vectors-in.backm50.16x12.d8.8f1f26",
+    "vectors-in.blur-0.16x12.d8.93f8d7"
+   ],
+   "by_group": {
+    "speed": 21,
+    "blur": 13,
+    "layers": 26,
+    "display": 5,
+    "fg": 18,
+    "framenum": 9,
+    "footage": 19,
+    "misc": 6,
+    "ftime": 7,
+    "inrate": 1,
+    "keyed": 10,
+    "mark": 6,
+    "maxdisp": 19,
+    "outrate": 3,
+    "defaults": 3,
+    "vecscale": 22,
+    "size": 32,
+    "sp_src": 20,
+    "sp_vecA": 12,
+    "sp_vecB": 6,
+    "sp_vecG": 12,
+    "sp_vecR": 15,
+    "tiny": 9,
+    "vecfield": 57,
+    "warp": 21
+   },
+   "by_depth": {
+    "8": 194,
+    "16": 56,
+    "32": 122
+   }
+  },
+  {
+   "id": "m15",
+   "kind": "label mapping",
+   "file": "plugins/vectors-in/src/timemap.rs",
+   "desc": "Src: Mark Segments 4 and 5 are swapped",
+   "run": true,
+   "changed": 4,
+   "example": [
+    "vectors-in.mark-keys-4at0_1at3.16x12.d8.30fa52",
+    "vectors-in.mark-keys-5at0_2at2.16x12.d8.ada6d5",
+    "vectors-in.mark4.16x12.d8.5a3ae6"
+   ],
+   "by_group": {
+    "mark": 4
+   },
+   "by_depth": {
+    "8": 4,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m16",
+   "kind": "rounding",
+   "file": "plugins/vectors-in/src/timemap.rs",
+   "desc": "frame to time conversion truncates instead of adding 0.5",
+   "run": true,
+   "changed": 1,
+   "example": [
+    "vectors-in.ftime-fps10-speed110.16x12.d8.e8e650"
+   ],
+   "by_group": {
+    "ftime": 1
+   },
+   "by_depth": {
+    "8": 1,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m17",
+   "kind": "param time",
+   "file": "plugins/vectors-in/src/vectorin.rs",
+   "desc": "Max Displace is read at time 0 instead of the current time",
+   "run": true,
+   "changed": 1,
+   "example": [
+    "vectors-in.key-vectors_max_displace.16x12.d8.8a2470"
+   ],
+   "by_group": {
+    "keyed": 1
+   },
+   "by_depth": {
+    "8": 1,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m18",
+   "kind": "wrong param",
+   "file": "plugins/vectors-in/src/vectorin.rs",
+   "desc": "Vec Scale Y is read from the Vec Scale X slider",
+   "run": true,
+   "changed": 23,
+   "example": [
+    "vectors-in.key-vec_scale_x.16x12.d8.dca825",
+    "vectors-in.key-vec_scale_y.16x12.d8.1fe60b",
+    "vectors-in.scalex0.16x12.d8.f1538b"
+   ],
+   "by_group": {
+    "keyed": 2,
+    "vecscale": 21
+   },
+   "by_depth": {
+    "8": 21,
+    "16": 1,
+    "32": 1
+   }
+  },
+  {
+   "id": "m19",
+   "kind": "threshold",
+   "file": "plugins/vectors-in/src/vectorin.rs",
+   "desc": "the FG matte step threshold is 0.5 instead of 0.95",
+   "run": true,
+   "changed": 18,
+   "example": [
+    "vectors-in.fg1-chan1.16x12.d8.50c8f9",
+    "vectors-in.fg1-chan4.16x12.d8.668f39",
+    "vectors-in.fg1-display1.16x12.d8.50e11f"
+   ],
+   "by_group": {
+    "fg": 18
+   },
+   "by_depth": {
+    "8": 14,
+    "16": 2,
+    "32": 2
+   }
+  },
+  {
+   "id": "m20",
+   "kind": "sign",
+   "file": "plugins/retime-engine/src/compose/vector.rs",
+   "desc": "flow inversion (one vector layer) keeps the sign of the x component",
+   "run": true,
+   "changed": 19,
+   "example": [
+    "vectors-in.fg1-prev-only.16x12.d8.1b10c7",
+    "vectors-in.next-only-w1-i1.16x12.d8.772c1e",
+    "vectors-in.next-only-w1-i2.16x12.d8.32568d"
+   ],
+   "by_group": {
+    "fg": 1,
+    "layers": 18
+   },
+   "by_depth": {
+    "8": 15,
+    "16": 2,
+    "32": 2
+   }
+  },
+  {
+   "id": "m21",
+   "kind": "rounding",
+   "file": "crates/fx-core/src/fixed.rs",
+   "desc": "16.16 conversion truncates instead of rounding half away from zero",
+   "run": true,
+   "changed": 1,
+   "example": [
+    "vectors-in.key-speed_percent.16x12.d8.663e75"
+   ],
+   "by_group": {
+    "keyed": 1
+   },
+   "by_depth": {
+    "8": 1,
+    "16": 0,
+    "32": 0
+   }
+  },
+  {
+   "id": "m22",
+   "kind": "presence",
+   "file": "plugins/vectors-in/src/glue.rs",
+   "desc": "one vector layer present counts as no vector layer",
+   "run": true,
+   "changed": 21,
+   "example": [
+    "vectors-in.fg1-prev-only.16x12.d8.1b10c7",
+    "vectors-in.next-only-w1-i1.16x12.d8.772c1e",
+    "vectors-in.next-only-w1-i2.16x12.d8.32568d"
+   ],
+   "by_group": {
+    "fg": 1,
+    "layers": 20
+   },
+   "by_depth": {
+    "8": 17,
+    "16": 2,
+    "32": 2
+   }
+  },
+  {
+   "id": "m23",
+   "kind": "popup mapping",
+   "file": "plugins/vectors-in/src/glue.rs",
+   "desc": "the Source display is Display 3 instead of 2",
+   "run": true,
+   "changed": 17,
+   "example": [
+    "vectors-in.display2-d16.16x12.d16.d874d5",
+    "vectors-in.display2-d32.16x12.d32.f96f2a",
+    "vectors-in.display2-source-layer.16x12.d8.e825a9"
+   ],
+   "by_group": {
+    "display": 5,
+    "fg": 11,
+    "keyed": 1
+   },
+   "by_depth": {
+    "8": 13,
+    "16": 2,
+    "32": 2
+   }
+  },
+  {
+   "id": "m24",
+   "kind": "dropped term",
+   "file": "plugins/vectors-in/src/glue.rs",
+   "desc": "the FG layer inverse matte shrink is not passed on",
+   "run": true,
+   "changed": 2,
+   "example": [
+    "vectors-in.fg1-shrink10.16x12.d8.5b7141",
+    "vectors-in.fg1-shrink1p5.16x12.d8.baa739"
+   ],
+   "by_group": {
+    "fg": 2
+   },
+   "by_depth": {
+    "8": 2,
+    "16": 0,
+    "32": 0
+   }
+  }
+ ]
+}

@@ -1,0 +1,2 @@
+#!/bin/bash
+exec $HOME/twixtor-parity/retime-flow/bin/vfx-base "$@" --quality draft

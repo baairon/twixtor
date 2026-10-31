@@ -5,6 +5,7 @@ use super::mesh::{mip_level, position_row, Grid};
 use super::pyramid::level_count;
 use super::raster::{triangle, Sink, Vtx};
 use super::*;
+use crate::holefill::fill_holes;
 use crate::image::{Fmt, Image, Samples};
 use crate::smartblend::SmartOpts;
 
@@ -443,14 +444,40 @@ fn convert_rules() {
 }
 
 #[test]
-fn gouraud_variant_is_refused_by_name() {
-    let src = textured(6, 6, Fmt::U8, 1);
-    let mut out = Image::new(6, 6, Fmt::U8);
-    let e = forward_warp_with(&mut out, &src, &const_flow(6, 6, [1.0, 0.0]), 1.0, ForwardOpts { pyramid: false }, false)
-        .unwrap_err();
-    assert!(format!("{e}").contains("the Gouraud rasteriser"), "{e}");
+fn gouraud_variant_interpolates_the_vertex_colours() {
+    // a white impulse at (7, 6) of an opaque black 16 x 12 frame pushed by half of (1, 1): the cell split runs from
+    // (c + 1, r) to (c, r + 1), so the impulse lands on the two pixels of that diagonal at half value (127 after the
+    // tie breaking epsilon of the vertices), where the textured variant spreads it over four pixels at a quarter
+    let (w, h) = (16usize, 12usize);
+    let mut src = Image::new(w, h, Fmt::U8);
+    if let Samples::U8(d) = &mut src.samples {
+        for px in d.chunks_exact_mut(CHANNELS) {
+            px.copy_from_slice(&[255, 0, 0, 0]);
+        }
+        let i = (6 * w + 7) * CHANNELS;
+        d[i..i + CHANNELS].copy_from_slice(&[255, 255, 255, 255]);
+    }
+    let flow = const_flow(w, h, [1.0, 1.0]);
+    let red = |img: &Image, x: usize, y: usize| match &img.samples {
+        Samples::U8(d) => d[(y * w + x) * CHANNELS + 1],
+        _ => unreachable!(),
+    };
+    let mut out = Image::new(w, h, Fmt::U8);
+    let cov = forward_warp_with(&mut out, &src, &flow, 0.5, ForwardOpts { pyramid: false }, true).unwrap().unwrap();
+    for y in 0..h {
+        for x in 0..w {
+            let want = if (x, y) == (8, 6) || (x, y) == (7, 7) { 127 } else { 0 };
+            assert_eq!(red(&out, x, y), want, "Gouraud ({x}, {y})");
+        }
+    }
+    assert_eq!(cov.data[0], 0, "the top row is not reached by a push of half a pixel down");
+    let mut tex = Image::new(w, h, Fmt::U8);
+    forward_warp_with(&mut tex, &src, &flow, 0.5, ForwardOpts::default(), false).unwrap();
+    for (x, y) in [(7, 6), (8, 6), (7, 7), (8, 7)] {
+        assert_eq!(red(&tex, x, y), 64, "textured ({x}, {y})");
+    }
     // a zero flow is still the plain copy (the early outs come first)
-    forward_warp_with(&mut out, &src, &const_flow(6, 6, [0.0, 0.0]), 1.0, ForwardOpts { pyramid: false }, false).unwrap();
+    forward_warp_with(&mut out, &src, &const_flow(w, h, [0.0, 0.0]), 1.0, ForwardOpts { pyramid: false }, false).unwrap();
     assert_eq!(out, src);
 }
 
@@ -676,7 +703,7 @@ fn blend_and_weighted_forward_pair_each_frame_with_its_own_flow() {
         blend_forward(&mut swapped, &a, &f_ba, &b, &f_ab, wa).unwrap();
         assert_ne!(out, swapped);
         // code 2 Blend, both option sets
-        for opts in [SmartOpts::default(), SmartOpts { binary_alpha: true, is360: false }] {
+        for opts in [SmartOpts::default(), SmartOpts { binary_alpha: true, is360: false, ..SmartOpts::default() }] {
             let mut out = Image::new(24, 18, fmt);
             blend_forward_fill(&mut out, &a, &f_ab, &b, &f_ba, wa, opts).unwrap();
             let mut want = Image::new(24, 18, fmt);
@@ -699,6 +726,31 @@ fn blend_and_weighted_forward_pair_each_frame_with_its_own_flow() {
         weighted_tail(&mut want, &mut ta2, &a, &mut tb2, &b, wa, Some((&mut c1, &c2)), SmartOpts::default()).unwrap();
         assert_eq!(out, want, "{fmt:?} weighted code 2");
     }
+}
+
+/// Code 3 Weighted Blend sharpens with the vertical tap order of its stage set, as the inverse and code 2 weighted
+/// compositions do (the plugin's Weighted Blend blur is the shared separable routine for every warping code; MEASURED:
+/// fgbg-core `interp3-w4.pan-16x12.d32` identical with it).
+#[test]
+fn weighted_forward_on_takes_the_vertical_taps_of_its_stage_set() {
+    use crate::holefill::VerticalTaps;
+    use crate::stages::{AboveFirstTaps, StageSet, Stages};
+    let (a, b, f_ab, f_ba) = two_frames(Fmt::F32);
+    let wa = 0.65f32;
+    let frac = 1.0f32 - wa;
+    let above = AboveFirstTaps::wrap(StageSet::cpu());
+    let mut out = Image::new(24, 18, Fmt::F32);
+    weighted_forward_on(above.get(), &mut out, &a, &f_ab, &b, &f_ba, wa).unwrap();
+    let (mut ta, mut tb) = (Image::new(24, 18, Fmt::F32), Image::new(24, 18, Fmt::F32));
+    above.get().forward_warp(&mut ta, &a, &f_ab, frac).unwrap();
+    above.get().forward_warp(&mut tb, &b, &f_ba, wa).unwrap();
+    let mut want = Image::new(24, 18, Fmt::F32);
+    let opts = SmartOpts { taps: VerticalTaps::AboveFirst, ..SmartOpts::default() };
+    weighted_tail(&mut want, &mut ta.clone(), &a, &mut tb.clone(), &b, wa, None, opts).unwrap();
+    assert_eq!(out, want);
+    let mut below = Image::new(24, 18, Fmt::F32);
+    weighted_tail(&mut below, &mut ta, &a, &mut tb, &b, wa, None, SmartOpts::default()).unwrap();
+    assert_ne!(out, below, "the border rows of the sharpening blur round otherwise with the tap below first");
 }
 
 #[test]

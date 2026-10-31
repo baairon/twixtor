@@ -10,13 +10,14 @@ between `<!--gen:` KEY `-->` and `<!--/gen:` KEY `-->` (spaced out here so this 
 Every key and its source is listed in docs/data/facts.json; the snapshots and scans are described in
 tools/docgen/data.py.
 
---check is hermetic: it reads the committed snapshots and scans files, and runs no process.
+--check is hermetic: it reads the committed snapshots, the parity/<id>/results files and the tree, and runs
+no process. The module status table comes from parity/<id>/results/summary.json and verify.json; a module
+without a summary.json is Not started. A result file that is not valid JSON, names another module or has a
+wrong type is an error (exit 3), not a row.
 
 --refresh-data runs `vfx list --json --all` (vfx from --vfx, else VFX_PATH) and rewrites
-docs/data/controls.tsv and docs/data/gaps.tsv. With --testset DIR (a set of `fx-parity gen --families`)
-it also rewrites docs/data/references.tsv from DIR/cases.json, every case `missing`; with --refs DIR as
-well it grades them with `fx-parity run --testset T --refs R --json` (fx-parity from --parity, else next
-to vfx). docs/data/lock.json is written by `tools/parity_lock.py record`, not here.
+docs/data/controls.tsv and docs/data/gaps.tsv. docs/data/lock.json is written by `tools/parity_lock.py
+record`, not here.
 
 Exit codes: 0 done (or no drift); 1 drift or an unknown key; 2 usage; 3 a snapshot that cannot be read,
 or a tool that cannot be run. Python 3 standard library only.
@@ -90,7 +91,7 @@ def sibling(vfx, name):
     return os.path.join(os.path.dirname(os.path.abspath(vfx)), name + ext)
 
 
-def refresh(root, vfx, parity=None, testset=None, refs=None):
+def refresh(root, vfx):
     """Rewrites the snapshots; returns the paths it wrote."""
     if not vfx:
         raise dg.DataError("--refresh-data needs a built vfx: pass --vfx PATH or set VFX_PATH")
@@ -100,22 +101,6 @@ def refresh(root, vfx, parity=None, testset=None, refs=None):
     wrote = OrderedPaths()
     wrote.put(root, dg.DATA + "/controls.tsv", dg.tsv_text(dg.CONTROLS_HEADER, dg.controls_from_listing(listing)))
     wrote.put(root, dg.DATA + "/gaps.tsv", dg.tsv_text(dg.GAPS_HEADER, dg.gaps_from_listing(listing)))
-    if testset:
-        cases_path = os.path.join(testset, "cases.json")
-        if not os.path.isfile(cases_path):
-            raise dg.DataError("no cases.json in {}".format(testset))
-        cases = json.loads(dg.read_text(cases_path))
-        statuses = None
-        if refs:
-            parity = parity or sibling(vfx, "fx-parity")
-            if not os.path.isfile(parity):
-                raise dg.DataError("fx-parity not found at {}: pass --parity PATH".format(parity))
-            report = run_json([parity, "run", "--testset", testset, "--refs", refs, "--json", "--vfx", vfx])
-            statuses = {c["id"]: c["status"] for c in report.get("cases", [])}
-        rows = dg.references_from_cases(cases, statuses, dg.family_gaps(root))
-        wrote.put(root, dg.DATA + "/references.tsv", dg.tsv_text(dg.REFERENCES_HEADER, rows))
-    elif refs:
-        raise dg.DataError("--refs needs --testset")
     return wrote.paths
 
 
@@ -135,9 +120,6 @@ def main(argv=None):
     ap.add_argument("--check", action="store_true", help="regenerate in memory and exit 1 on drift")
     ap.add_argument("--refresh-data", action="store_true", help="rebuild the snapshots of docs/data/ from a built vfx")
     ap.add_argument("--vfx", default=os.environ.get("VFX_PATH") or None, help="vfx for --refresh-data (default VFX_PATH)")
-    ap.add_argument("--parity", help="fx-parity for --refs (default: next to vfx)")
-    ap.add_argument("--testset", metavar="DIR", help="a reference family set (fx-parity gen --families) for references.tsv")
-    ap.add_argument("--refs", metavar="DIR", help="reference renders of --testset, graded by fx-parity run")
     ap.add_argument("--root", default=dg.ROOT, help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
     if args.check and args.refresh_data:
@@ -145,7 +127,7 @@ def main(argv=None):
     root = args.root
     try:
         if args.refresh_data:
-            for rel in refresh(root, args.vfx, args.parity, args.testset, args.refs):
+            for rel in refresh(root, args.vfx):
                 print("gen_docs: {} rebuilt".format(rel))
         outputs, changed, unknown = drift(root)
     except (dg.DataError, OSError) as e:

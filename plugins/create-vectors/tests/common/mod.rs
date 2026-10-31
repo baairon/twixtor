@@ -86,9 +86,15 @@ impl Rig {
 }
 
 /// The vector field a Create Vectors output frame carries, as a consumer (plugin 03 or 04) reads it: the wire frame goes
-/// through the input prepare (`Image::from_frame`) and the decode with the `Max Displace` the effect was run with.
+/// through the input prepare (`Image::from_frame`) and the decode with the `Max Displace` the effect was run with. The
+/// plugins work bottom row first (`create_vectors::glue`, row order), so `G` holds the vertical component pointing up
+/// the rows; the decoded `dy` is negated to give the field in the rows of the frame.
 pub fn decode(frame: &Frame, max_displace: f32) -> FlowField {
-    decode_vectors(&Image::from_frame(frame), max_displace)
+    let mut flow = decode_vectors(&Image::from_frame(frame), max_displace);
+    for p in flow.data.chunks_exact_mut(2) {
+        p[1] = -p[1];
+    }
+    flow
 }
 
 /// Error of a flow field against a constant true flow over the pixels at least `margin` away from

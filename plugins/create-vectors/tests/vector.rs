@@ -1,7 +1,7 @@
 //! Ground truth of the Create Vectors output: a texture that translates by a known number of pixels
 //! per frame (`common/moving.rs`, 3.4 px in x and 1.7 px in y per frame) must come out as vectors
 //! that decode (with `vectors::decode_vectors` at the same Max Displace, as plugins 03 and 04 read
-//! them) to the known motion.
+//! them, `G` pointing up the rows: `common::decode`) to the known motion.
 //!
 //! Sign convention: the flow is `X(p) ~ Y(p + flow(p))` with `X` the frame of the pair that comes
 //! first (`a`) and `Y` the second (`b`). The content moves by `+v` per frame, so frame `k` shows
@@ -22,6 +22,7 @@ mod common;
 
 use common::moving::*;
 use common::*;
+use create_vectors::glue::flip_image;
 use fx_core::{Depth, Frame, Pixels};
 use retime_engine::create_vectors::{create_vectors, frame_index, frame_pair, frame_time, CreateVectorsSettings};
 use retime_engine::image::Image;
@@ -150,7 +151,8 @@ fn the_output_is_an_opaque_image_with_zero_blue_at_the_output_size() {
     }
 }
 
-/// The wiring: the front-end output is the engine's pass on the premultiplied frames of the pair, finished.
+/// The wiring: the front-end output is the engine's pass on the premultiplied frames of the pair upside down (the
+/// row order of the plugin), turned back and finished.
 #[test]
 fn the_front_end_is_the_engine_pass_on_the_pair_of_frames() {
     for depth in [Depth::U8, Depth::U16, Depth::F32] {
@@ -172,7 +174,12 @@ fn the_front_end_is_the_engine_pass_on_the_pair_of_frames() {
                 track_rgb_a: false,
                 max_displace: 16.0,
             };
-            let want = create_vectors(&Image::from_frame(fa), &Image::from_frame(fb), &settings).unwrap().to_frame();
+            let (mut x, mut y) = (Image::from_frame(fa), Image::from_frame(fb));
+            flip_image(&mut x);
+            flip_image(&mut y);
+            let mut v = create_vectors(&x, &y, &settings).unwrap();
+            flip_image(&mut v);
+            let want = v.to_frame();
             assert_eq!(got, want, "{depth:?} track {track}");
         }
     }

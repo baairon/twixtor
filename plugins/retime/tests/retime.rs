@@ -132,10 +132,13 @@ fn engine_frame(rig: &Rig, n: u64) -> fx_core::Frame {
     let k = ((n - 1) / 2) as usize;
     let frame = |i: usize| Image::from_frame(&*fx_core::Layer::frame_at(&rig.input, (i as i64) * 100).unwrap().expect("frame"));
     let (a, b) = (frame(k), frame(k + 1));
+    // plugin 01's vector path runs on reversed rows (`EngineSettings::motion_rows_reversed`)
+    let flip = |img: Image| if settings.motion_rows_reversed { img.rows_reversed() } else { img };
+    let (a, b) = (flip(a), flip(b));
     let pos = n as f32 / 2.0;
     let sel = Selection { s0: pos, s1: pos + 0.5, a: k as i32, b: k as i32 + 1, wa: 0.5, exact: false, vectors_quality: 4, interp: settings.interp };
     let flows = solve_flows(&settings, &sel, &a, &b).unwrap();
-    Rendered::Image(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap()).into_frame()
+    Rendered::Image(flip(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap())).into_frame()
 }
 
 #[test]
@@ -178,7 +181,7 @@ fn mismatched_sizes_give_the_red_fill_and_a_missing_input_the_blue_one() {
         let mut cx = rig.cx(1);
         cx.width += 1;
         assert_eq!(rig.render_cx(&cx).unwrap(), fill(set.depth, true, w + 1, h), "{:?}", set.depth);
-        // Alt Source A of another size replaces the input and does not fit
+        // Alt Color Source of another size replaces the input and does not fit
         let wide = vec![fx_core::Frame::new(w + 1, h, set.depth)];
         let rig = set.rig(&[]).with_layer("alt_source_a", wide.clone());
         assert_eq!(rig.render(0).unwrap(), fill(set.depth, true, w, h));
@@ -198,16 +201,16 @@ fn mismatched_sizes_give_the_red_fill_and_a_missing_input_the_blue_one() {
 fn alt_source_a_is_retimed_instead_of_the_input_and_an_empty_one_is_ignored() {
     let sets = sets();
     for set in &sets {
-        // the input holds the clip backwards, Alt Source A the clip forwards
+        // the input holds the clip backwards, Alt Color Source the clip forwards
         let backwards: Vec<_> = set.clip.iter().rev().cloned().collect();
         let rig = Rig::new(backwards.clone(), &[]).with_layer("alt_source_a", set.clip.clone());
         for n in 0..4u64 {
             assert_eq!(rig.render(n).unwrap(), set.rt[n as usize], "{:?} frame {n}", set.depth);
         }
-        // a zero size Alt Source A is "not set": the input is used
+        // a zero size Alt Color Source is "not set": the input is used
         let rig = Rig::new(backwards, &[]).with_layer("alt_source_a", vec![fx_core::Frame::new(0, 0, set.depth)]);
         assert_eq!(rig.render(0).unwrap(), set.rt[3]);
-        // Alt Source B of the right size does not change a fast path render
+        // Alt Motion Source of the right size does not change a fast path render
         let rig = set.rig(&[NO_VECTORS, ("speed_percent", "50"), BLEND]).with_layer("alt_source_b", set.clip.clone());
         assert_eq!(rig.render(1).unwrap(), set.b01);
     }
@@ -254,4 +257,17 @@ fn an_empty_composition_renders_without_panicking() {
         let out = rig.render(0).unwrap();
         assert_eq!((out.width, out.height, out.depth()), (0, 0, depth));
     }
+}
+
+#[test]
+fn the_pull_push_fills_and_the_blur_take_the_tap_above_first() {
+    // MEASURED against Twixtor_64: the plugin's line kernel takes the tap
+    // below first in the host's rows, the tap above first in the reversed rows of the vector path
+    use retime_engine::holefill::VerticalTaps;
+    use retime_engine::stages::Stages;
+    let set = &sets()[0];
+    let rig = set.rig(&[]);
+    let settings = retime_engine::frontend::read_settings(&retime::WIRING, &rig.cx(0), &rig.env()).unwrap();
+    assert!(settings.motion_rows_reversed);
+    assert_eq!(settings.stages.get().vertical_taps(), VerticalTaps::AboveFirst);
 }

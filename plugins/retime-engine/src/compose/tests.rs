@@ -902,3 +902,19 @@ mod sweep {
         }
     }
 }
+
+#[test]
+fn an_inverse_matte_shrink_takes_exact_positions_to_the_layered_vector_path() {
+    use crate::layers::{LayerJob, LayerParams};
+    let layer = |shrink: f32| LayerParams { matte_chan: 4, sensitivity: 0.7, shrink, track: true };
+    let bg = layer(0.0);
+    let on_frame = Selection { s0: 2.0, s1: 2.0, a: 2, b: 3, wa: 1.0, exact: true, vectors_quality: 4, interp: 1 };
+    let between = Selection { exact: false, ..on_frame };
+    for d in [1, 3, 4, 6] {
+        assert!(layered_exact(&on_frame, &LayerJob::for_display(&[layer(0.0), layer(-0.0)], bg, d)), "no shrink, display {d}");
+        assert!(!layered_exact(&on_frame, &LayerJob::for_display(&[layer(0.0), layer(1.0)], bg, d)), "FG2 shrink, display {d}");
+        assert!(!layered_exact(&on_frame, &LayerJob::for_display(&[layer(-0.5)], bg, d)), "a grow counts, display {d}");
+        assert!(!layered_exact(&between, &LayerJob::for_display(&[layer(0.0)], bg, d)), "not exact, display {d}");
+    }
+    assert!(layered_exact(&on_frame, &LayerJob::for_display(&[], bg, 1)), "no FG layer: the position decides");
+}

@@ -123,6 +123,8 @@ pub struct Wiring {
     pub missing_layer: MissingLayerStyle,
     /// The pre-render lists three extra checkouts at `-current_time`.
     pub register_layers: bool,
+    /// The vector path runs on reversed rows (`EngineSettings::motion_rows_reversed`).
+    pub motion_rows_reversed: bool,
 }
 
 /// The 16.16 reader: `((v as f64) * (1.0 / 65536.0)) as f32 * scale`.
@@ -230,8 +232,13 @@ pub fn read_settings(wiring: &Wiring, cx: &TemporalContext, env: &Env<'_>) -> Re
         no_tracking_layer: !layer_is_set(env.layer(wiring.layers.alt_b)),
         missing_layer_style: wiring.missing_layer,
         wrap_360: false,
+        motion_rows_reversed: wiring.motion_rows_reversed,
+        track_alpha: false,
         device: cx.device,
-        stages: crate::stages::StageSet::from_context(cx),
+        // the fills of Smart Blend and Forward warping and the blur of the Weighted Blend run the plugin's line kernel,
+        // whose vertical border rows take the tap below first in the host's rows, i.e. the tap above first in the
+        // reversed rows of the vector path
+        stages: crate::stages::AboveFirstTaps::wrap(crate::stages::StageSet::from_context(cx)),
     })
 }
 

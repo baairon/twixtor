@@ -14,7 +14,8 @@
 //! calls it), so the plain path keeps its bytes. With the flag on the horizontal passes are the
 //! `_wrapx` primitives of `flow::conv` and `flow::sample` (tap indices modulo the width, no border
 //! renormalisation; the horizontal resample keeps the period, `sx = sw / dw`, the right neighbour
-//! of the last column is column 0) and the vertical passes are the plain ones. Precision: those
+//! of the last column is column 0) and the vertical passes are the solver's (border rows above
+//! first, `conv::convolve_above_first`). Precision: those
 //! primitives' (single precision in the order written, no fused multiply add, rows through rayon
 //! row chunks, so the output does not depend on the thread count). When every halving of a frame
 //! has an even width, a circular rotation of the input by a multiple of `2^r` columns rotates the
@@ -233,9 +234,12 @@ pub fn luma(img: &Image, track_alpha: bool, video_range: bool) -> Result<Plane, 
     Ok(out)
 }
 
-/// The 5 tap binomial blur `[1 4 6 4 1] / 16` of the pyramid code.
+/// The 5 tap binomial blur `[1 4 6 4 1] / 16` of the pyramid code, its vertical border rows with
+/// the tap above first (`conv::convolve_above_first`, MEASURED against the original); the reduction, the edge
+/// enhancement and the pyramid
+/// take it.
 pub fn blur5(p: &mut Plane) {
-    conv::blur5(&mut p.data, p.width, p.height);
+    conv::blur5_above_first(&mut p.data, p.width, p.height);
 }
 
 /// Corner aligned bilinear resampling to `(dw, dh)`.
@@ -255,14 +259,15 @@ pub fn reduce(mut t: Plane, r: u32) -> Plane {
 }
 
 /// [`blur5`], or with `wrap` its horizontal wrap-around variant (G6, U; module header): the
-/// circular horizontal pass of `conv::blur5_wrapx`, then the plain vertical pass. Without `wrap`
+/// circular horizontal pass of `conv::blur5_wrapx_above_first`, then the vertical pass with the
+/// border rows above first. Without `wrap`
 /// it is [`blur5`].
 pub fn blur5_with(p: &mut Plane, wrap: bool) {
     if !wrap {
         blur5(p);
         return;
     }
-    conv::blur5_wrapx(&mut p.data, p.width, p.height);
+    conv::blur5_wrapx_above_first(&mut p.data, p.width, p.height);
 }
 
 /// [`resample`], or with `wrap` the resample of a plane that is periodic in x (G6, U; module
@@ -294,8 +299,8 @@ pub fn reduce_with(t: Plane, r: u32, wrap: bool) -> Plane {
 }
 
 /// Delinearize: `p = (max(p, 0) / 255) ^ (1 / 2.2) * 255` in single precision with
-/// `gamma = 2.2f`. The power is the double precision `pow` rounded to single, which differs from a
-/// single precision `powf` for about 1 in 8000 arguments (1 ulp).
+/// `gamma = 2.2f`. The power is the `powf` of the plugin's runtime (`crt_powf::powf`), not the correctly
+/// rounded one: they differ by one unit in the last place for rare arguments.
 pub fn delinearize(p: &mut Plane) {
     let gamma: f32 = 2.2;
     let inv = 1.0f32 / gamma;
@@ -304,7 +309,7 @@ pub fn delinearize(p: &mut Plane) {
             *v = 0.0;
         }
         let base = *v / 255.0f32;
-        *v = (base as f64).powf(inv as f64) as f32 * 255.0f32;
+        *v = crate::crt_powf::powf(base, inv) * 255.0f32;
     });
 }
 
@@ -313,7 +318,7 @@ pub fn delinearize(p: &mut Plane) {
 /// `v = m <= 20.0 ? m * 0.05 : 1.0`, `p = (v * 255.0 + p) * 0.5` (single precision).
 pub fn edge_enhance(p: &mut Plane) {
     let (w, h) = (p.width, p.height);
-    conv::blur_gaussian(&mut p.data, w, h, 1, 2.0);
+    conv::blur_gaussian_above_first(&mut p.data, w, h, 1, 2.0);
     let g = crate::flow::calc_grad(&p.data, w, h);
     p.data.par_chunks_mut(w).enumerate().for_each(|(y, row)| {
         for (x, v) in row.iter_mut().enumerate() {
@@ -334,6 +339,7 @@ pub fn edge_enhance(p: &mut Plane) {
 /// at the top and bottom rows). U: it is not the solver's wrap gradient `(I(x + 1) - I(x - 1)) /
 /// 2` (`flow::calc_grad_wrap`, the variant of the solver), which rounds differently
 /// at every column; the transform only becomes circular. A width of 1 gives `gx = 0`.
+#[allow(dead_code)]
 fn calc_grad_wrapx(img: &[f32], w: usize, h: usize) -> Vec<f32> {
     let mut g = vec![0.0f32; w * h * 2];
     if w == 0 || h == 0 {
@@ -363,9 +369,9 @@ fn calc_grad_wrapx(img: &[f32], w: usize, h: usize) -> Vec<f32> {
     g
 }
 
-/// [`edge_enhance`], or with `wrap` its horizontally circular variant (G6, U): the Gaussian of
-/// radius 2.0 through `conv::blur_gaussian_wrapx` (circular horizontal pass, plain vertical pass),
-/// the gradient of [`calc_grad_wrapx`], then the per pixel map of [`edge_enhance`] unchanged
+/// [`edge_enhance`], or with `wrap` its 360 variant (TRACED): the Gaussian of radius 2.0 through
+/// `conv::blur_gaussian_wrapx_above_first` (circular horizontal pass, the vertical pass over the poles),
+/// the solver's 360 gradient `flow::calc_grad_wrap`, then the per pixel map of [`edge_enhance`] unchanged
 /// (`m = sqrt(gx*gx + gy*gy)`, `v = m <= 20.0 ? m * 0.05 : 1.0`, `p = (v * 255.0 + p) * 0.5`,
 /// single precision). Without `wrap` it is [`edge_enhance`].
 pub fn edge_enhance_with(p: &mut Plane, wrap: bool) {
@@ -373,9 +379,13 @@ pub fn edge_enhance_with(p: &mut Plane, wrap: bool) {
         edge_enhance(p);
         return;
     }
+    // TRACED (TwixtorPro_64, the edge enhancement on `mix03.movebox-17x13.d32`, frame 0, level 0 8 x 6): the blur of
+    // radius 2.0 is the 360 one, circular rows and the column walk over
+    // the poles (0 of 48 samples differ from the traced blurred plane, 40 with the plain blur), and the gradient is the
+    // solver's 360 gradient (0 of 96 up to the sign of gy, which the plugin's rows from the bottom flip)
     let (w, h) = (p.width, p.height);
-    conv::blur_gaussian_wrapx(&mut p.data, w, h, 1, 2.0);
-    let g = calc_grad_wrapx(&p.data, w, h);
+    conv::blur_gaussian_wrapx_above_first(&mut p.data, w, h, 1, 2.0);
+    let g = crate::flow::calc_grad_wrap(&p.data, w, h);
     p.data.par_chunks_mut(w.max(1)).enumerate().for_each(|(y, row)| {
         for (x, v) in row.iter_mut().enumerate() {
             let gx = g[(y * w + x) * 2];
@@ -573,7 +583,7 @@ mod tests {
         assert_eq!(p.data[1], 255.0);
         assert_eq!(p.data[2], 0.0);
         let inv = 1.0f32 / 2.2f32;
-        let want = ((127.5f32 / 255.0f32) as f64).powf(inv as f64) as f32 * 255.0;
+        let want = crate::crt_powf::powf(127.5f32 / 255.0f32, inv) * 255.0;
         assert_eq!(p.data[3].to_bits(), want.to_bits());
         // 0.5^(1/2.2) * 255 is about 186.1
         assert!((p.data[3] - 186.1).abs() < 0.1, "{}", p.data[3]);
@@ -612,6 +622,44 @@ mod tests {
         // a width of 2 reads the other column on both sides, a width of 1 gives 0
         assert_eq!(calc_grad_wrapx(&[1.0, 5.0, 2.0, 9.0], 2, 2)[0], 0.0);
         assert_eq!(calc_grad_wrapx(&[3.0, 7.0], 1, 2)[0], 0.0);
+    }
+
+    /// TRACED (TwixtorPro_64, `retime-fgbg.mix03.movebox-17x13.d32`, frame 0: the solver's level 0 of frame A, 8 x 6,
+    /// at the edge enhancement and after it at the level builder, in the plugin's logical rows; 360
+    /// Video on): the 360 edge enhancement blurs over the poles and takes the
+    /// solver's 360 gradient, bit for bit; the plain blur of the earlier reading differs.
+    #[test]
+    fn the_360_edge_enhancement_is_the_plugins_on_a_traced_level() {
+        let input: [u32; 48] = [
+            0x4331312a, 0x4347bc31, 0x43468d55, 0x4338ef71, 0x433b09f7, 0x433d5987, 0x432ca342, 0x4323341f,
+            0x433b1b73, 0x43514721, 0x43561733, 0x433c4cb2, 0x43298616, 0x432e9570, 0x4331974a, 0x433272c2,
+            0x43472c15, 0x4347e03d, 0x434d8345, 0x433fa9db, 0x43315db0, 0x4335bdfe, 0x43511cbc, 0x4351ffe5,
+            0x4330624f, 0x432d4a83, 0x43465302, 0x4346e7e6, 0x433ea1f3, 0x4343eb6c, 0x434c1c64, 0x434230fd,
+            0x432d96c6, 0x43357050, 0x434031cf, 0x434211c4, 0x4340dff0, 0x43358287, 0x4326e4a6, 0x432b69db,
+            0x434c0228, 0x43518ebb, 0x4343e645, 0x4337e6f5, 0x43325e04, 0x432339dd, 0x4319610c, 0x43356fec,
+        ];
+        let want: [u32; 48] = [
+            0x432ab661, 0x432a6db3, 0x43449153, 0x431f1ef1, 0x42d9ba1a, 0x431b079a, 0x43195e04, 0x42c7faf2,
+            0x4332fb56, 0x431d46af, 0x431bbfd0, 0x43421364, 0x42fc14ea, 0x42d02444, 0x4323e480, 0x433ddfc1,
+            0x42fb521e, 0x432dc652, 0x430d93a6, 0x432788c0, 0x430d377e, 0x4329e846, 0x432dd5ec, 0x4307dfd4,
+            0x4319578f, 0x431800ae, 0x431a0936, 0x42e283e7, 0x42f8ff7e, 0x42f2ea68, 0x433a1770, 0x43409830,
+            0x430a9f33, 0x431be2ae, 0x42fdc776, 0x4303291a, 0x430c8e95, 0x432ba54b, 0x433a6d16, 0x43032060,
+            0x43177b16, 0x430a7594, 0x4338e3ef, 0x430bfa33, 0x4305df51, 0x431f365c, 0x430d691e, 0x433711fe,
+        ];
+        let plane = || Plane { width: 8, height: 6, data: input.iter().map(|&b| f32::from_bits(b)).collect() };
+        let mut p = plane();
+        edge_enhance_with(&mut p, true);
+        assert_eq!(p.data.iter().map(|v| v.to_bits()).collect::<Vec<_>>(), want.to_vec());
+        // the plain blur with the 360 gradient (the earlier reading) is not the plugin's
+        let mut q = plane();
+        conv::blur_gaussian_above_first(&mut q.data, 8, 6, 1, 2.0);
+        let g = crate::flow::calc_grad_wrap(&q.data, 8, 6);
+        for (i, v) in q.data.iter_mut().enumerate() {
+            let m = (g[i * 2] * g[i * 2] + g[i * 2 + 1] * g[i * 2 + 1]).sqrt();
+            let f = if m <= 20.0f32 { m * 0.05f32 } else { 1.0f32 };
+            *v = (f * 255.0f32 + *v) * 0.5f32;
+        }
+        assert_ne!(q.data.iter().map(|v| v.to_bits()).collect::<Vec<_>>(), want.to_vec());
     }
 
     #[test]

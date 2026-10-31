@@ -18,6 +18,8 @@ pub struct RunOptions {
     pub effect: Option<String>,
     pub vfx: Option<PathBuf>,
     pub jobs: usize,
+    /// The accepted distance in representable floats at 32 bpc; 0 is bit for bit.
+    pub max_ulp: u64,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -50,6 +52,8 @@ pub struct CaseResult {
     pub frame: Option<usize>,
     /// Clips: how many frames fail.
     pub failing_frames: usize,
+    /// Pixels outside the accepted tolerance over the whole case (a clip's frames added up).
+    pub differing_pixels: usize,
     /// Mean absolute error as a fraction of full scale: the frame's for a still, the clip's
     /// (the mean of its frames' means) for a clip. None when nothing was compared: no
     /// reference, or an error.
@@ -162,8 +166,13 @@ fn read_clip(path: &Path, case: &Case, what: &str) -> Result<Vec<u8>, String> {
     Ok(bytes)
 }
 
-/// Runs one case. `vfx` is driven as a subprocess, exactly like a real pipe.
+/// Runs one case with the default window of 1 ULP at 32 bpc.
 pub fn run_case(vfx: &Vfx, testset: &Path, refs: &Path, case: &Case) -> CaseResult {
+    run_case_within(vfx, testset, refs, case, compare::F32_MAX_ULP)
+}
+
+/// Runs one case. `vfx` is driven as a subprocess, exactly like a real pipe.
+pub fn run_case_within(vfx: &Vfx, testset: &Path, refs: &Path, case: &Case, max_ulp: u64) -> CaseResult {
     let input_path = testset.join(&case.input);
     let reference_path = refs.join(&case.reference);
     let result = |status, error: Option<String>, comparison: Option<Comparison>| CaseResult {
@@ -174,6 +183,7 @@ pub fn run_case(vfx: &Vfx, testset: &Path, refs: &Path, case: &Case) -> CaseResu
         comparison,
         frame: None,
         failing_frames: 0,
+        differing_pixels: 0,
         worst_frame: None,
         testset: testset.to_path_buf(),
         input_path: input_path.clone(),
@@ -186,7 +196,7 @@ pub fn run_case(vfx: &Vfx, testset: &Path, refs: &Path, case: &Case) -> CaseResu
         return result(Status::NoReference, None, None);
     }
     if case.is_temporal() {
-        return run_clip(vfx, testset, case, &input_path, &reference_path, result, failed);
+        return run_clip(vfx, testset, case, max_ulp, &input_path, &reference_path, result, failed);
     }
     let (input_bytes, input) = match read_frame(&input_path, case, "input") {
         Ok(f) => f,
@@ -204,8 +214,13 @@ pub fn run_case(vfx: &Vfx, testset: &Path, refs: &Path, case: &Case) -> CaseResu
         return failed(format!("vfx wrote {} bytes, a frame is {}", output.len(), input_bytes.len()));
     }
     let actual = Frame::from_bytes(case.width, case.height, input.depth(), &output);
-    match compare::compare(&input, &expected, &actual) {
-        Ok(c) => result(if c.is_match() { Status::Pass } else { Status::Fail }, None, Some(c)),
+    match compare::compare_within(&input, &expected, &actual, max_ulp) {
+        Ok(c) => {
+            let differing = c.differing_pixels;
+            let mut r = result(if c.is_match() { Status::Pass } else { Status::Fail }, None, Some(c));
+            r.differing_pixels = differing;
+            r
+        }
         Err(e) => failed(e),
     }
 }
@@ -216,6 +231,7 @@ fn run_clip(
     vfx: &Vfx,
     testset: &Path,
     case: &Case,
+    max_ulp: u64,
     input_path: &Path,
     reference_path: &Path,
     result: impl Fn(Status, Option<String>, Option<Comparison>) -> CaseResult,
@@ -249,7 +265,7 @@ fn run_clip(
             expected.len()
         ));
     }
-    let clip = match compare::compare_clip((case.width, case.height, depth), case.frames, &input, &expected, &output) {
+    let clip = match compare::compare_clip_within((case.width, case.height, depth), case.frames, &input, &expected, &output, max_ulp) {
         Ok(c) => c,
         Err(e) => return failed(e),
     };
@@ -268,6 +284,7 @@ fn run_clip(
     };
     r.frame = clip.first.as_ref().map(|(f, _)| *f);
     r.failing_frames = clip.failing_frames;
+    r.differing_pixels = clip.differing_pixels;
     // the clip's own error, not that of its first failing frame
     r.mean_abs_diff = Some(clip.mean_abs_diff);
     r.worst_frame = clip.worst_frame;
@@ -327,7 +344,7 @@ fn run_cases(vfx: &Vfx, opts: &RunOptions, cases: &[Case]) -> Vec<CaseResult> {
                 if i >= cases.len() {
                     break;
                 }
-                let r = run_case(vfx, &opts.testset, &opts.refs, &cases[i]);
+                let r = run_case_within(vfx, &opts.testset, &opts.refs, &cases[i], opts.max_ulp);
                 *slots[i].lock().unwrap() = Some(r);
             });
         }
@@ -687,6 +704,9 @@ pub fn to_json(results: &[CaseResult], brief: bool) -> Value {
                     v["frame"] = json!(frame);
                     v["failing_frames"] = json!(r.failing_frames);
                 }
+                if r.comparison.is_some() {
+                    v["clip_differing_pixels"] = json!(r.differing_pixels);
+                }
             }
             if r.status == Status::Fail {
                 v["input_path"] = json!(r.input_path.display().to_string());
@@ -772,6 +792,7 @@ mod tests {
             comparison,
             frame: None,
             failing_frames: 0,
+            differing_pixels: 0,
             worst_frame: None,
             testset: PathBuf::from("set"),
             input_path: PathBuf::from("set/inputs/x"),

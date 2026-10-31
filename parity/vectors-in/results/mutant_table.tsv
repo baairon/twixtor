@@ -1,0 +1,25 @@
+id	kind	file	changed_cases	by_group	description
+m01	decode scale	plugins/retime-engine/src/vectors.rs	198	blur:11,defaults:1,display:5,fg:15,footage:6,framenum:4,ftime:5,inrate:21,keyed:11,layers:18,mark:4,maxdisp:12,misc:6,outrate:3,size:10,speed:16,tiny:3,vecfield:18,vecscale:18,warp:11	8 bpc red decode divides by 255 instead of 254
+m02	decode scale	plugins/retime-engine/src/vectors.rs	52	blur:1,defaults:1,fg:2,footage:6,framenum:2,layers:4,maxdisp:2,size:10,tiny:3,vecfield:15,vecscale:1,warp:5	16 bpc green decode divides by 65535 instead of 65534
+m03	channel order	plugins/retime-engine/src/vectors.rs	124	blur:1,defaults:1,fg:2,footage:8,framenum:2,layers:4,maxdisp:2,size:10,sp_src:24,sp_vecA:12,sp_vecB:6,sp_vecG:12,sp_vecR:17,tiny:3,vecfield:14,vecscale:1,warp:5	32 bpc horizontal motion read from the green channel
+m04	hole threshold	plugins/retime-engine/src/holefill.rs	3	fg:1,vecfield:2	a 32 bpc hole mask value below 0.5 no longer counts as a hole
+m05	wrong axis scale	plugins/retime-engine/src/vectors.rs	23	keyed:2,vecscale:21	Vec Scale Y multiplies by the X scale
+m06	hole mask offset	plugins/retime-engine/src/vectors.rs	7	fg:6,vecfield:1	8 bpc hole mask loses its low bit
+m07	error fill colour	plugins/retime-engine/src/image.rs	4	layers:4	8 bpc size mismatch fill has alpha 127 instead of 128
+m08	error fill colour	plugins/retime-engine/src/image.rs	2	layers:2	16 bpc size mismatch fill has green 1
+m09	error fill colour	plugins/retime-engine/src/image.rs	2	layers:2	32 bpc size mismatch fill has alpha 1.0 instead of 0.5
+m10	frame off by one	plugins/vectors-in/src/vectorin.rs	86	footage:19,ftime:1,inrate:1,keyed:2,layers:17,sp_src:21,speed:2,vecfield:23	Vectors Next is fetched one source frame late (single layer path)
+m11	frame off by one	plugins/vectors-in/src/vectorin.rs	9	fg:9	Vectors Prev is fetched one source frame early (FG matte path)
+m12	swapped prev/next	plugins/vectors-in/src/vectorin.rs	338	blur:11,defaults:3,display:5,footage:20,framenum:8,ftime:5,inrate:21,keyed:11,layers:17,mark:4,maxdisp:15,misc:6,outrate:3,size:30,sp_src:24,sp_vecA:12,sp_vecB:6,sp_vecG:12,sp_vecR:15,speed:16,tiny:9,vecfield:45,vecscale:22,warp:18	the forward flow is loaded from the Prev layer (single layer path)
+m13	popup mapping	plugins/vectors-in/src/glue.rs	36	blur:2,fg:1,keyed:1,layers:6,sp_vecR:5,tiny:9,warp:12	Warping Inverse is served as Smart Blend warp code 1
+m14	rate	plugins/vectors-in/src/glue.rs	372	blur:13,defaults:3,display:5,fg:18,footage:19,framenum:9,ftime:7,inrate:1,keyed:10,layers:26,mark:6,maxdisp:19,misc:6,outrate:3,size:32,sp_src:20,sp_vecA:12,sp_vecB:6,sp_vecG:12,sp_vecR:15,speed:21,tiny:9,vecfield:57,vecscale:22,warp:21	In FPS is Out FPS reads the clip as 29.97 fps instead of 30
+m15	label mapping	plugins/vectors-in/src/timemap.rs	4	mark:4	Src: Mark Segments 4 and 5 are swapped
+m16	rounding	plugins/vectors-in/src/timemap.rs	1	ftime:1	frame to time conversion truncates instead of adding 0.5
+m17	param time	plugins/vectors-in/src/vectorin.rs	1	keyed:1	Max Displace is read at time 0 instead of the current time
+m18	wrong param	plugins/vectors-in/src/vectorin.rs	23	keyed:2,vecscale:21	Vec Scale Y is read from the Vec Scale X slider
+m19	threshold	plugins/vectors-in/src/vectorin.rs	18	fg:18	the FG matte step threshold is 0.5 instead of 0.95
+m20	sign	plugins/retime-engine/src/compose/vector.rs	19	fg:1,layers:18	flow inversion (one vector layer) keeps the sign of the x component
+m21	rounding	crates/fx-core/src/fixed.rs	1	keyed:1	16.16 conversion truncates instead of rounding half away from zero
+m22	presence	plugins/vectors-in/src/glue.rs	21	fg:1,layers:20	one vector layer present counts as no vector layer
+m23	popup mapping	plugins/vectors-in/src/glue.rs	17	display:5,fg:11,keyed:1	the Source display is Display 3 instead of 2
+m24	dropped term	plugins/vectors-in/src/glue.rs	2	fg:2	the FG layer inverse matte shrink is not passed on

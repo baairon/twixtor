@@ -37,11 +37,6 @@ GAPS = """id\ttitle\teffects\tcontrols
 G1\tfirst open point\te1,e2\ta
 G2\tsecond open point\te2\tpt1_use,pt2_use,pt3_use
 """
-REFERENCES = """family\tgap\tcase\teffect\tcontrols\tresult
-fam-one\tG1\tc1\te1\ta,lay\tpass
-fam-one\tG1\tc2\te2\ta\tfail
-fam-two\tG2\tc3\te2\tpt1_use\tmissing
-"""
 LOCK = {"baseline": {"ref": "abc", "commit": "abcdef0123456789"}, "date": "2026-01-02",
         "corpora": {"L1": {"rendered_at_baseline": 10, "identical": 10, "differ": 0, "refused_at_baseline": 2,
                            "refused_now_render": 1},
@@ -58,10 +53,10 @@ RUST = "#[cfg(test)]\nmod tests {\n    #[test]\n    fn one() {}\n    #[test]\n  
        "    // #[test] in a comment is no test\n}\n"
 README = """# r
 
-<!--f:controls_total-->0<!--/f--> controls, <!--f:gaps_open-->0<!--/f--> gaps, <!--f:unproven-->0<!--/f--> unproven.
+<!--f:modules_total-->0<!--/f--> modules, <!--f:modules_verified-->0<!--/f--> verified, <!--f:modules_reported-->0<!--/f--> reported.
 
-<!--gen:gaps-->
-<!--/gen:gaps-->
+<!--gen:modules-->
+<!--/gen:modules-->
 """
 
 
@@ -83,6 +78,27 @@ def quiet(fn, *a):
         code = fn(*a)
     return code, out.getvalue(), err.getvalue()
 
+def verified_summary(mid):
+    """A summary.json that meets the status rule."""
+    return {"module": mid, "plugin": "Twixtor_64.aex", "plugin_sha256": "ab", "effect": "retime",
+            "status": "verified", "blockers": [],
+            "cases": {"in_contract": 150, "compared": 150, "identical": 150, "differing": 0, "out_of_contract": 4,
+                      "logic_parity": 3},
+            "values": {"bytes_compared": 1000, "floats_compared": 2000, "differing_values": 0, "max_ulp": 0},
+            "call_records": {"compared": 12, "matching": 12},
+            "mutants": {"total": 8, "killed": 8, "survivors": []},
+            "stand_ins": ["keyframe values from a fixed table"], "fixes": [], "commands": ["run it"],
+            "measured_at": "2026-11-02"}
+
+
+def write_summary(root, mid, doc):
+    write(root, "parity/{}/results/summary.json".format(mid), json.dumps(doc))
+
+
+def write_verify(root, mid, doc):
+    write(root, "parity/{}/results/verify.json".format(mid), json.dumps(doc))
+
+
 
 class Synthetic(unittest.TestCase):
     """A small repository: snapshots, one crate with a fixture folder, one Python test file, two pages."""
@@ -92,7 +108,6 @@ class Synthetic(unittest.TestCase):
         self.addCleanup(shutil.rmtree, self.root, True)
         write(self.root, "docs/data/controls.tsv", CONTROLS)
         write(self.root, "docs/data/gaps.tsv", GAPS)
-        write(self.root, "docs/data/references.tsv", REFERENCES)
         write(self.root, "docs/data/lock.json", json.dumps(LOCK))
         write(self.root, "crates/k/Cargo.toml", '[package]\nname = "kay"\n')
         write(self.root, "crates/k/src/lib.rs", RUST)
@@ -116,16 +131,17 @@ class Generation(Synthetic):
         code, out, _ = self.gen()
         self.assertEqual(code, 0, out)
         text = read(self.root, "README.md")
-        self.assertIn("<!--f:controls_total-->7<!--/f--> controls, <!--f:gaps_open-->2<!--/f--> gaps", text)
-        self.assertIn("<!--f:unproven-->5<!--/f-->", text)
-        self.assertIn("| G1 | first open point | `e1`, `e2` | `a` | 1 of 2 |", text)
-        self.assertIn("| G2 | second open point | `e2` | `pt1_use` to `pt3_use` | 0 of 1 |", text)
+        self.assertIn("<!--f:modules_total-->6<!--/f--> modules, <!--f:modules_verified-->0<!--/f--> verified, "
+                      "<!--f:modules_reported-->0<!--/f--> reported", text)
+        self.assertIn("| `retime-time` | `Twixtor_64.aex` | Not started | - | - | - | - | - | - | - | - | - |", text)
+        self.assertIn("| Total | - | 0 of 6 match, 0 of 6 verified | 0 | 0 | 0 / 0 | 0 / 0 | - | 0 of 0 | 0 of 0 | 0 of 6 "
+                      "| - |", text)
         self.assertIn("<!--f:lock_identical-->1,014<!--/f--> of <!--f:lock_total-->1,015<!--/f-->",
                       read(self.root, "docs/p.md"))
         facts = json.loads(read(self.root, "docs/data/facts.json"))
         self.assertEqual(facts["generator"], "tools/gen_docs.py")
         self.assertTrue(all(f["source"] for f in facts["facts"].values()))
-        self.assertEqual(sorted(facts["blocks"]), ["families", "fixtures", "gaps", "lock", "tests"])
+        self.assertEqual(sorted(facts["blocks"]), ["fixtures", "harness", "lock", "modules", "notes", "tests"])
         code, out, _ = self.gen("--check")
         self.assertEqual(code, 0, out)
         self.assertIn("0 drifted, 0 unknown keys", out)
@@ -135,25 +151,43 @@ class Generation(Synthetic):
     def test_check_finds_a_mutated_marker(self):
         self.gen()
         text = read(self.root, "README.md")
-        write(self.root, "README.md", text.replace("<!--f:gaps_open-->2<!--/f-->", "<!--f:gaps_open-->3<!--/f-->"))
+        write(self.root, "README.md", text.replace("<!--f:modules_total-->6<!--/f-->", "<!--f:modules_total-->7<!--/f-->"))
         code, out, _ = self.gen("--check")
         self.assertEqual(code, 1)
         self.assertIn("1 drifted", out)
         self.assertIn("  README.md", out)
-        write(self.root, "README.md", text.replace("| 1 of 2 |", "| 2 of 2 |"))
+        write(self.root, "README.md", text.replace("| Not started |", "| Verified |", 1))
         self.assertEqual(self.gen("--check")[0], 1)
         write(self.root, "README.md", text)
         self.assertEqual(self.gen("--check")[0], 0)
 
     def test_check_finds_changed_data(self):
         self.gen()
-        write(self.root, "docs/data/controls.tsv", CONTROLS + "e2\tc\tcheckbox\n")
+        lock = json.loads(json.dumps(LOCK))
+        lock["corpora"]["L1"]["identical"] = 9
+        write(self.root, "docs/data/lock.json", json.dumps(lock))
+        code, out, _ = self.gen("--check")
+        self.assertEqual(code, 1)
+        self.assertIn("docs/p.md", out)
+        self.assertIn("docs/data/facts.json", out)
+        write(self.root, "docs/data/lock.json", json.dumps(LOCK))
+        write(self.root, "plugins/p/tests/t.rs", "#[test]\nfn t() {}\n#[test]\nfn u() {}\n")
+        self.assertEqual(self.gen("--check")[0], 1)
+
+    def test_a_result_file_moves_the_table(self):
+        self.gen()
+        write_summary(self.root, "retime-time", verified_summary("retime-time"))
         code, out, _ = self.gen("--check")
         self.assertEqual(code, 1)
         self.assertIn("README.md", out)
-        self.assertIn("docs/data/facts.json", out)
-        write(self.root, "plugins/p/tests/t.rs", "#[test]\nfn t() {}\n#[test]\nfn u() {}\n")
-        self.assertEqual(self.gen("--check")[0], 1)
+        self.assertEqual(self.gen()[0], 0)
+        text = read(self.root, "README.md")
+        self.assertIn("<!--f:modules_verified-->1<!--/f--> verified, <!--f:modules_reported-->1<!--/f--> reported", text)
+        self.assertEqual(self.gen("--check")[0], 0)
+        write(self.root, "parity/retime-time/results/summary.json", "{")
+        code, _, err = self.gen("--check")
+        self.assertEqual(code, 3)
+        self.assertIn("parity/retime-time/results/summary.json", err)
 
     def test_unknown_keys_fail_and_stay_untouched(self):
         write(self.root, "docs/q.md", "<!--f:no_such_key-->7<!--/f-->\n<!--gen:nope-->\nold\n<!--/gen:nope-->\n")
@@ -172,12 +206,9 @@ class Generation(Synthetic):
         code, _, err = self.gen("--check")
         self.assertEqual(code, 3)
         self.assertIn("G3 names nope of e1", err)
-        write(self.root, "docs/data/gaps.tsv", GAPS)
-        write(self.root, "docs/data/references.tsv", REFERENCES + "f\tG1\tc4\te1\ta\tmaybe\n")
-        self.assertEqual(self.gen("--check")[0], 3)
-        write(self.root, "docs/data/references.tsv", "family\tcase\n")
+        write(self.root, "docs/data/gaps.tsv", "id\ttitle\n")
         self.assertIn("the header must be", self.gen("--check")[2])
-        write(self.root, "docs/data/references.tsv", REFERENCES)
+        write(self.root, "docs/data/gaps.tsv", GAPS)
         lock = json.loads(json.dumps(LOCK))
         del lock["corpora"]["L3"]
         write(self.root, "docs/data/lock.json", json.dumps(lock))
@@ -195,25 +226,18 @@ class Facts(Synthetic):
     def value(self, key):
         return self.d.facts[key]["value"]
 
-    def test_controls_gaps_and_unproven(self):
-        self.assertEqual([self.value(k) for k in ("controls_total", "controls_params", "controls_layers",
-                                                  "effects_total")], [7, 6, 1, 2])
-        self.assertEqual(self.value("gaps_open"), 2)
-        self.assertEqual(self.value("gap_controls"), 5)  # (e1, a), (e2, a), three points of e2
-        self.assertEqual(self.d.facts["gap_controls_pct"]["text"], "71.4")
-        # c1 passes and sets e1 a and e1 lay; c2 fails on e2 a; c3 has no reference
-        self.assertEqual(sorted(self.d.graded_pairs()), [("e1", "a"), ("e1", "lay")])
-        self.assertEqual(self.value("graded_controls"), 2)
-        self.assertEqual(self.value("unproven"), 5)
-        self.assertEqual([self.value(k) for k in ("family_cases", "families_total", "graded_cases", "graded_failed",
-                                                  "graded_missing")], [3, 2, 1, 1, 1])
-        self.assertEqual(self.d.facts["graded_pct"]["text"], "33.3")
-
-    def test_a_failing_case_takes_a_control_back(self):
-        write(self.root, "docs/data/references.tsv", REFERENCES + "fam-one\tG1\tc5\te1\tlay\tfail\n")
+    def test_the_module_facts_and_no_graded_figures(self):
+        self.assertEqual([self.value(k) for k in ("modules_total", "modules_reported", "modules_verified",
+                                                  "modules_rerun")], [6, 0, 0, 0])
+        for gone_key in ("controls_total", "gaps_open", "graded_cases", "unproven", "family_cases"):
+            self.assertNotIn(gone_key, self.d.facts)
+        write_summary(self.root, "retime-time", verified_summary("retime-time"))
+        write_summary(self.root, "retime-flow", dict(verified_summary("retime-flow"), status="blocked"))
+        write_verify(self.root, "retime-time", {"module": "retime-time", "reran_at": "2026-11-03", "matches": True,
+                                                "differences": []})
         d = dg.Data(self.root)
-        self.assertEqual(sorted(d.graded_pairs()), [("e1", "a")])
-        self.assertEqual(d.facts["unproven"]["value"], 6)
+        self.assertEqual([d.facts[k]["value"] for k in ("modules_reported", "modules_verified", "modules_rerun")],
+                         [2, 1, 1])
 
     def test_lock_figures(self):
         self.assertEqual(self.value("lock_ref"), "abcdef0")
@@ -248,54 +272,46 @@ class Facts(Synthetic):
 
 
 class Rendering(Synthetic):
-    def test_id_list(self):
-        self.assertEqual(render.id_list(["pt1_use", "pt2_use", "pt3_use"]), "`pt1_use` to `pt3_use`")
-        self.assertEqual(render.id_list(["fg2_matte", "fg3_matte"]), "`fg2_matte`, `fg3_matte`")
-        self.assertEqual(render.id_list(["pt1_use", "pt2_use", "pt4_use", "pt5_use", "pt6_use", "x"]),
-                         "`pt1_use`, `pt2_use`, `pt4_use` to `pt6_use`, `x`")
-        self.assertEqual(render.id_list(["fg1_track", "fg2_matte", "fg3_track"]),
-                         "`fg1_track`, `fg2_matte`, `fg3_track`")
-        self.assertEqual(render.id_list([]), "-")
+    def test_code(self):
         self.assertEqual(render.code("a|b"), "`a\\|b`")
         self.assertEqual(render.code("a`b"), "`` a`b ``")
 
     def test_tables(self):
         self.assertEqual(render.table(["A", "B"], [[1, "x"]]), ["| A | B |", "|---|---|", "| 1 | x |"])
         gen = render.Generator(dg.Data(self.root))
-        self.assertEqual(gen.blocks["families"][2:], ["| `fam-one` | G1 | 2 | 1 | 1 | 0 |",
-                                                      "| `fam-two` | G2 | 1 | 0 | 0 | 1 |"])
+        self.assertEqual(sorted(gen.blocks), ["fixtures", "harness", "lock", "modules", "notes", "tests"])
         self.assertEqual(gen.blocks["lock"][-1], "| all | 1,015 | 1,014 | 1 | 5 | 4 |")
         self.assertIn("| `crates/k/tests/fixtures/a.hex` | `ABC1` | model | 3 | 12 |", gen.blocks["fixtures"])
         self.assertIn("| `kay` | `#[test]` | 2 (1 ignored) |", gen.blocks["tests"])
         self.assertIn("| `tools/test_x.py` | `def test_` | 2 |", gen.blocks["tests"])
+        self.assertEqual(gen.blocks["notes"][2:], ["| - | - | None reported yet. |"])
+        self.assertEqual(gen.blocks["harness"][2:], ["| - | No harness summary yet. |"])
 
-    def test_a_case_counts_for_every_gap_its_family_settles(self):
-        write(self.root, "docs/data/references.tsv", REFERENCES + "fam-both\tG1,G2\tc4\te2\tpt1_use\tmissing\n")
+    def test_the_header_names_the_twelve_columns(self):
         gen = render.Generator(dg.Data(self.root))
-        graded = {r.split(" | ")[0].lstrip("| "): r.rsplit(" | ", 1)[1].rstrip(" |") for r in gen.blocks["gaps"][2:]}
-        self.assertEqual(graded, {"G1": "1 of 3", "G2": "0 of 2"})
-
-    def test_empty_register_and_families(self):
-        write(self.root, "docs/data/gaps.tsv", dg.tsv_text(dg.GAPS_HEADER, []))
-        write(self.root, "docs/data/references.tsv", dg.tsv_text(dg.REFERENCES_HEADER, []))
-        gen = render.Generator(dg.Data(self.root))
-        self.assertEqual(gen.blocks["gaps"][2:], ["| none | - | - | - | - |"])
-        self.assertEqual(gen.blocks["families"][2:], ["| none yet | - | 0 | 0 | 0 | 0 |"])
+        self.assertEqual(gen.blocks["modules"][0],
+                         "| Module | Plugin | Status | Cases compared (in contract) | Out of contract (candidates) | "
+                         "Values compared (bytes / floats) | Differing | Max ULP | Call records matching | "
+                         "Mutants killed | Re-run verified | Source |")
+        self.assertEqual(len(gen.blocks["modules"]), 2 + 6 + 1)
+        order = [r.split(" | ")[0].lstrip("| ") for r in gen.blocks["modules"][2:8]]
+        self.assertEqual(order, ["`retime-time`", "`retime-flow`", "`create-vectors`", "`vectors-in`", "`fgbg-core`",
+                                 "`fgbg-layers`"])
 
     def test_fill_keeps_crlf_and_is_idempotent(self):
         gen = render.Generator(dg.Data(self.root))
-        src = "x\r\n<!--gen:lock-->\r\nold\r\n<!--/gen:lock-->\r\n<!--f:gaps_open-->9<!--/f-->\r\n"
+        src = "x\r\n<!--gen:lock-->\r\nold\r\n<!--/gen:lock-->\r\n<!--f:modules_total-->9<!--/f-->\r\n"
         text, unknown = gen.fill(src)
         self.assertEqual(unknown, [])
         self.assertNotIn("old", text)
         self.assertIn("| Corpus |", text)
         self.assertNotIn("\n", text.replace("\r\n", ""))
-        self.assertIn("<!--f:gaps_open-->2<!--/f-->", text)
+        self.assertIn("<!--f:modules_total-->6<!--/f-->", text)
         self.assertEqual(gen.fill(text)[0], text)
 
     def test_a_block_needs_its_own_closing(self):
         gen = render.Generator(dg.Data(self.root))
-        src = "<!--gen:lock-->\nold\n<!--/gen:gaps-->\n"
+        src = "<!--gen:lock-->\nold\n<!--/gen:modules-->\n"
         self.assertEqual(gen.fill(src)[0], src)
 
     def test_spaced_marker_syntax_is_no_marker(self):
@@ -330,30 +346,6 @@ class Refresh(unittest.TestCase):
         with self.assertRaises(dg.DataError):
             dg.gaps_from_listing(bad)
 
-    def test_the_gap_of_a_family_case_comes_from_the_families_table(self):
-        gaps = dg.family_gaps(dg.ROOT)
-        self.assertEqual(gaps["gap-shrink"], ["G1"])
-        self.assertTrue(all(ids for ids in gaps.values()), gaps)
-        cases = {"cases": [{"id": "a", "family": "gap-shrink", "effect": "create-vectors", "params": ["x=1"]},
-                           {"id": "b", "family": "gap-shrink", "gap": "G9", "effect": "retime"},
-                           {"id": "c", "family": "nowhere", "effect": "retime"}]}
-        rows = dg.references_from_cases(cases, None, gaps)
-        self.assertEqual([r["gap"] for r in rows], ["G1", "G9", "-"])
-        self.assertEqual(dg.family_gaps(os.path.join(dg.ROOT, "no-such-folder")), {})
-
-    def test_references_from_cases(self):
-        cases = {"cases": [
-            {"id": "z", "effect": "e1", "family": "fam", "gap": "G1", "params": ["a=1", "b=2"],
-             "layers": {"lay": "x.raw"}},
-            {"id": "y", "effect": "e2", "family": "fam", "params": []},
-            {"id": "plain", "effect": "e1", "params": ["a=1"]},
-        ]}
-        rows = dg.references_from_cases(cases, {"z": "pass"})
-        self.assertEqual([tuple(r.values()) for r in rows], [("fam", "-", "y", "e2", "-", "missing"),
-                                                             ("fam", "G1", "z", "e1", "a,b,lay", "pass")])
-        self.assertEqual(dg.references_from_cases(cases, {"z": "FAIL", "y": "no reference"})[1]["result"], "fail")
-        with self.assertRaises(dg.DataError):
-            dg.references_from_cases(cases, {"z": "odd"})
 
     def test_program_and_sibling(self):
         self.assertEqual(gen_docs.program(os.path.join("d", "vfx.py")),
@@ -381,15 +373,13 @@ assert sys.argv[1:] == ["list", "--json", "--all"], sys.argv
 print(%r)
 ''' % json.dumps(LISTING)
 
+
 FAKE_PARITY = r'''
-import json, sys
+import sys
 if sys.argv[1:] == ["--help"]:
     print("fx-parity gen --out DIR --families IDS")
     sys.exit(0)
-args = sys.argv[1:]
-assert args[0] == "run" and "--json" in args and "--strict" not in args, args
-print(json.dumps({"summary": {}, "cases": [{"id": "z", "status": "pass"}, {"id": "y", "status": "FAIL"}]}))
-sys.exit(1)
+sys.exit(2)
 '''
 
 
@@ -397,21 +387,12 @@ class RefreshMain(Synthetic):
     def test_refresh_rewrites_the_snapshots_and_fills(self):
         tools = os.path.join(self.root, "bin")
         write(self.root, "bin/vfx.py", FAKE_VFX)
-        write(self.root, "bin/fx-parity.py", FAKE_PARITY)
-        write(self.root, "pack/cases.json", json.dumps({"cases": [
-            {"id": "z", "effect": "e1", "family": "fam", "gap": "G1", "params": ["a=1"]},
-            {"id": "y", "effect": "e2", "family": "fam", "gap": "G1", "params": ["a=2"]},
-            {"id": "w", "effect": "e2", "family": "fam2", "params": []}]}))
-        code, out, err = self.gen("--refresh-data", "--vfx", os.path.join(tools, "vfx.py"),
-                                  "--testset", os.path.join(self.root, "pack"), "--refs", os.path.join(self.root, "pack"))
+        code, out, err = self.gen("--refresh-data", "--vfx", os.path.join(tools, "vfx.py"))
         self.assertEqual(code, 0, out + err)
         self.assertIn("gen_docs: docs/data/controls.tsv rebuilt", out)
         self.assertEqual(read(self.root, "docs/data/controls.tsv"), "effect\tid\tkind\ne1\ta\tfloat\ne1\tlay\tlayer\n"
                                                                      "e2\ta\tfloat\ne2\tb\tpopup\n")
         self.assertEqual(read(self.root, "docs/data/gaps.tsv").splitlines()[1], "G1\tone\te1,e2\ta")
-        self.assertEqual(read(self.root, "docs/data/references.tsv").splitlines()[1:],
-                         ["fam\tG1\ty\te2\ta\tfail", "fam\tG1\tz\te1\ta\tpass", "fam2\t-\tw\te2\t-\tmissing"])
-        self.assertIn("<!--f:controls_total-->4<!--/f-->", read(self.root, "README.md"))
         self.assertEqual(self.gen("--check")[0], 0)
 
     def test_refresh_needs_a_vfx(self):
@@ -423,13 +404,144 @@ class RefreshMain(Synthetic):
         code, _, err = self.gen("--refresh-data", "--vfx", os.path.join(self.root, "nope"))
         self.assertIn("vfx not found", err)
         write(self.root, "bin/vfx.py", FAKE_VFX)
-        code, _, err = self.gen("--refresh-data", "--vfx", os.path.join(self.root, "bin", "vfx.py"),
-                                "--refs", self.root)
-        self.assertIn("--refs needs --testset", err)
         with contextlib.redirect_stderr(io.StringIO()):
             with self.assertRaises(SystemExit) as e:
                 gen_docs.main(["--check", "--refresh-data"])
         self.assertEqual(e.exception.code, 2)
+
+
+class Modules(Synthetic):
+    def block(self, name="modules"):
+        return render.Generator(dg.Data(self.root)).blocks[name]
+
+    def row(self, mid):
+        return [r for r in self.block() if r.startswith("| `{}` |".format(mid))][0]
+
+    def test_a_verified_module_fills_its_row_and_the_totals(self):
+        write_summary(self.root, "retime-time", verified_summary("retime-time"))
+        self.assertEqual(self.row("retime-time"),
+                         "| `retime-time` | `Twixtor_64.aex` | Verified | 150 | 4 | 1,000 / 2,000 | 0 / 0 | 0 | "
+                         "12 of 12 | 8 of 8 | - | `parity/retime-time/results/summary.json` |")
+        self.assertEqual(self.row("retime-flow").split(" | ")[2], "Not started")
+        self.assertEqual(self.block()[-1], "| Total | - | 1 of 6 match, 1 of 6 verified | 150 | 4 | 1,000 / 2,000 | 0 / 0 "
+                                           "| 0 | 12 of 12 | 8 of 8 | 0 of 6 | - |")
+        notes = self.block("notes")[2:]
+        self.assertEqual(notes, ["| `retime-time` | stand-in | keyframe values from a fixed table |",
+                                 "| `retime-time` | logic parity | 3 compared cases use a stand-in on both sides |"])
+
+    def test_the_status_rule(self):
+        for field, change in (("cases", {"compared": 149, "identical": 149}), ("cases", {"differing": 1}),
+                              ("values", {"differing_values": 1}), ("call_records", {"matching": 11}),
+                              ("mutants", {"killed": 7}), ("mutants", {"total": 0, "killed": 0}),
+                              ("call_records", {"compared": 0, "matching": 0}),
+                              ("mutants", {"survivors": ["flip a sign"]})):
+            doc = verified_summary("fgbg-core")
+            doc[field] = dict(doc[field], **change)
+            write_summary(self.root, "fgbg-core", doc)
+            m = dg.load_module(self.root, "fgbg-core", "x", "y")
+            self.assertTrue(m["unmet"], (field, change))
+            self.assertFalse(dg.is_verified(m))
+            self.assertEqual(self.row("fgbg-core").split(" | ")[2],
+                             "Unconfirmed (file says verified, rule unmet)", (field, change))
+        write_summary(self.root, "fgbg-core", verified_summary("fgbg-core"))
+        self.assertEqual(dg.load_module(self.root, "fgbg-core", "x", "y")["unmet"], [])
+        self.assertEqual(self.row("fgbg-core").split(" | ")[2], "Verified")
+
+    def test_a_module_in_progress_that_matches_on_the_emulator_run(self):
+        doc = verified_summary("vectors-in")
+        doc.update(status="in_progress", blockers=["mutants survive: m07"])
+        doc["cases"] = dict(doc["cases"], in_contract=160)
+        doc["mutants"] = {"total": 8, "killed": 7, "survivors": ["m07"]}
+        write_summary(self.root, "vectors-in", doc)
+        m = dg.load_module(self.root, "vectors-in", "x", "y")
+        self.assertTrue(dg.is_match(m))
+        self.assertFalse(dg.is_verified(m))
+        self.assertEqual(self.row("vectors-in").split(" | ")[2:4], ["Matches", "150 of 160"])
+        self.assertTrue(self.block()[-1].startswith("| Total | - | 1 of 6 match, 0 of 6 verified | 150 of 160 |"))
+        self.assertEqual(dg.Data(self.root).facts["modules_match"]["value"], 1)
+        self.assertEqual(dg.Data(self.root).facts["cases_compared"]["value"], 150)
+        for field, change in (("cases", {"differing": 1}), ("values", {"differing_values": 1}),
+                              ("cases", {"compared": 149, "identical": 149}), ("call_records", {"matching": 11}),
+                              ("call_records", {"compared": 0, "matching": 0})):
+            bad = dict(doc, **{field: dict(doc[field], **change)})
+            write_summary(self.root, "vectors-in", bad)
+            self.assertFalse(dg.is_match(dg.load_module(self.root, "vectors-in", "x", "y")), (field, change))
+            self.assertEqual(self.row("vectors-in").split(" | ")[2], "In progress", (field, change))
+        write_summary(self.root, "vectors-in", dict(doc, status="blocked"))
+        self.assertEqual(self.row("vectors-in").split(" | ")[2], "Blocked")
+        self.assertEqual(dg.Data(self.root).facts["modules_match"]["value"], 0)
+
+    def test_other_states_show_as_the_file_states_them(self):
+        doc = verified_summary("create-vectors")
+        doc.update(status="blocked", blockers=["no mock for call 7"])
+        doc["cases"] = {"in_contract": 150, "compared": 40}
+        write_summary(self.root, "create-vectors", doc)
+        row = self.row("create-vectors").split(" | ")
+        self.assertEqual((row[2], row[3]), ("Blocked", "40 of 150"))
+        self.assertIn("| `create-vectors` | blocker | no mock for call 7 |", self.block("notes"))
+        doc["status"] = "in_progress"
+        write_summary(self.root, "create-vectors", doc)
+        self.assertEqual(self.row("create-vectors").split(" | ")[2], "In progress")
+
+    def test_a_re_run_is_yes_no_stale_or_a_dash(self):
+        write_summary(self.root, "retime-time", verified_summary("retime-time"))
+        cases = [({"module": "retime-time", "reran_at": "2026-11-03", "matches": True, "differences": []}, "Yes, 2026-11-03"),
+                 ({"module": "retime-time", "reran_at": "2026-11-01", "matches": True, "differences": []}, "Stale, 2026-11-01"),
+                 ({"module": "retime-time", "reran_at": "2026-11-03", "matches": False, "differences": ["a", "b"]},
+                  "No, 2 differences")]
+        for doc, shown in cases:
+            write_verify(self.root, "retime-time", doc)
+            self.assertEqual(self.row("retime-time").split(" | ")[10], shown)
+        write_verify(self.root, "retime-time", cases[0][0])
+        self.assertEqual(self.block()[-1].split(" | ")[10], "1 of 6")
+
+    def test_max_ulp_total_is_the_largest(self):
+        for mid, ulp in (("retime-time", 0), ("retime-flow", 3), ("vectors-in", None)):
+            doc = verified_summary(mid)
+            doc["values"]["max_ulp"] = ulp
+            write_summary(self.root, mid, doc)
+        self.assertEqual(self.row("vectors-in").split(" | ")[7], "-")
+        self.assertEqual(self.block()[-1].split(" | ")[7], "3")
+
+    def test_malformed_results_are_errors_not_rows(self):
+        path = "parity/retime-time/results/summary.json"
+        doc = verified_summary("retime-time")
+        for bad in (dict(doc, module="retime-flow"), dict(doc, status="done"), dict(doc, cases=[1]),
+                    dict(doc, cases=dict(doc["cases"], compared=True)),
+                    dict(doc, cases=dict(doc["cases"], compared=-1)),
+                    dict(doc, values=dict(doc["values"], max_ulp=1.5)),
+                    dict(doc, blockers="one"), dict(doc, mutants=dict(doc["mutants"], survivors=[1])), [1]):
+            write(self.root, path, json.dumps(bad))
+            with self.assertRaises(dg.DataError, msg=str(bad)[:60]):
+                dg.Data(self.root)
+        write(self.root, path, json.dumps(doc))
+        write_verify(self.root, "retime-time", {"module": "retime-flow", "matches": True})
+        with self.assertRaises(dg.DataError):
+            dg.Data(self.root)
+        write_verify(self.root, "retime-time", {"module": "retime-time", "matches": "yes"})
+        with self.assertRaises(dg.DataError):
+            dg.Data(self.root)
+
+    def test_result_text_is_ascii_and_dashless(self):
+        doc = verified_summary("retime-time")
+        doc["blockers"] = ["a " + chr(0x2014) + " b | c" + chr(0xe9)]
+        doc["status"] = "blocked"
+        write_summary(self.root, "retime-time", doc)
+        notes = self.block("notes")
+        self.assertIn("| `retime-time` | blocker | a - b \\| c? |", notes)
+        self.assertEqual([l for l in notes if any(ord(c) > 127 for c in l)], [])
+
+    def test_the_harness_summary_is_shown_as_stated(self):
+        self.assertEqual(self.block("harness")[2:], ["| - | No harness summary yet. |"])
+        write(self.root, "parity/harness/results/summary.json",
+              json.dumps({"emulator": "qiling", "ok": True, "count": 3, "none": None, "list": [1, 2],
+                          "big": list(range(100))}))
+        self.assertEqual(self.block("harness")[2:], [
+            "| `emulator` | qiling |", "| `ok` | true |", "| `count` | 3 |", "| `none` | null |",
+            "| `list` | [1,2] |", "| `big` | 100 entries, see the file |"])
+        write(self.root, "parity/harness/results/summary.json", "[]")
+        with self.assertRaises(dg.DataError):
+            dg.Data(self.root)
 
 
 class CheckDocs(unittest.TestCase):
@@ -499,6 +611,22 @@ class CheckDocs(unittest.TestCase):
         found, _ = check_docs.run(self.root, ["flags"], os.path.join(self.root, "missing-vfx"))
         self.assertEqual([f[3] for f in found["flags"]], ["vfx not found at " + os.path.join(self.root, "missing-vfx")])
 
+    def test_limits_table_must_match_the_register(self):
+        write(self.root, "docs/data/gaps.tsv", GAPS)
+        write(self.root, "README.md", "# R\n\n## Limits\n\n| Gap | Open point | Rule |\n|---|---|---|\n"
+                                      "| G1 | first open point | a rule |\n| G3 | invented | a rule |\n\n"
+                                      "## Legal\n\n| G2 | second open point | outside the section |\n")
+        found = [(f[2], f[3]) for f in self.run_checks("limits")["limits"]]
+        self.assertEqual(found, [(3, "gap G2 (second open point) is not in the Limits table"),
+                                 (8, "gap G3 is not in docs/data/gaps.tsv")])
+        write(self.root, "README.md", "# R\n\n## Limits\n\n| G1 | first open point | a |\n| G2 | other title | b |\n")
+        self.assertEqual([f[3] for f in self.run_checks("limits")["limits"]],
+                         ["gap G2 is titled 'other title', the register says 'second open point'"])
+        write(self.root, "README.md", "# R\n\n## Limits\n\n| G1 | first open point | a |\n| G2 | second open point | b |\n")
+        self.assertEqual(self.run_checks("limits")["limits"], [])
+        write(self.root, "README.md", "# R\n")
+        self.assertEqual([f[3] for f in self.run_checks("limits")["limits"]], ["no `## Limits` heading"])
+
     def test_main_counts_json_and_list(self):
         write(self.root, "README.md", "# R\n\n[a](x.md) [b](y.md) [c](z.md) [d](w.md) [e](v.md) [f](u.md)\n")
         code, out, _ = quiet(check_docs.main, ["--only", "links", "--root", self.root])
@@ -522,7 +650,7 @@ class CheckDocs(unittest.TestCase):
         self.assertEqual(quiet(gen_docs.main, ["--root", self.root])[0], 0)
         self.assertEqual(self.run_checks("regen")["regen"], [])
         write(self.root, "docs/p.md", read(self.root, "docs/p.md") + "<!--f:zzz-->1<!--/f-->\n")
-        write(self.root, "docs/data/controls.tsv", CONTROLS + "e1\tq\tfloat\n")
+        write_summary(self.root, "vectors-in", verified_summary("vectors-in"))
         found = sorted((f[1], f[3]) for f in self.run_checks("regen")["regen"])
         self.assertIn(("docs/p.md", "unknown marker key f:zzz"), found)
         self.assertIn(("README.md", "differs from a fresh generation (run python -I tools/gen_docs.py)"), found)
@@ -550,14 +678,26 @@ class ThisTree(unittest.TestCase):
             self.assertRegex(g["id"], r"^G\d+[a-z]?$")
             self.assertTrue(set(dg.split_list(g["effects"])) <= effects)
         self.assertEqual(d.facts["lock_differ"]["value"], 0)
+        self.assertEqual([m["id"] for m in d.modules], [m[0] for m in dg.MODULES])
 
-    def test_parity_page_quotes_every_standard(self):
+    def test_limits_table_matches_the_register(self):
+        self.assertEqual(check_docs.run(dg.ROOT, ["limits"])[0]["limits"], [])
+
+    def test_parity_page_quotes_the_bar_and_not_the_old_figures(self):
         text = read(dg.ROOT, "docs/parity.md")
-        for key in ("graded_cases", "family_cases", "gaps_open", "gap_controls", "model_fixtures", "model_cases",
-                    "lock_identical", "lock_total", "lock_ref", "unproven", "controls_total"):
+        for key in ("modules_total", "modules_verified", "model_fixtures", "model_cases", "lock_identical",
+                    "lock_total", "lock_ref"):
             self.assertIn("<!--f:" + key + "-->", text)
-        for block in ("gaps", "families", "fixtures", "lock", "tests"):
+        for block in ("modules", "notes", "harness", "fixtures", "lock", "tests"):
             self.assertIn("<!--gen:" + block + "-->", text)
+        readme = read(dg.ROOT, "README.md")
+        self.assertIn("<!--gen:modules-->", readme)
+        self.assertIn("\n## Limits\n", readme)
+        for old in ("Parity gaps", "Unproven", "of 117", "within one unit in the last place", "within one ULP of"):
+            self.assertNotIn(old, readme)
+            self.assertNotIn(old, text)
+        self.assertIn("bit for bit", readme)
+        self.assertIn("bit for bit", text)
 
     def test_documentation_checks_pass(self):
         results, _ = check_docs.run(dg.ROOT, ["links", "paths", "ascii", "dashes"])

@@ -32,7 +32,7 @@ mod tests_extras;
 #[cfg(test)]
 mod tests_pyramid;
 
-use sample::{bilinear1, bilinear1_wrapx_at, bilinear2, bilinear2_wrapx, cvtt};
+use sample::{bilinear1_sphere, bilinear1, bilinear1_wrapx_at, bilinear2, bilinear2_wrapx, cvtt};
 
 /// A two channel f32 vector field, row major, interleaved `(dx, dy)` per pixel. Units are pixels
 /// of the image the field belongs to.
@@ -399,15 +399,18 @@ pub(crate) fn upsample_flow(src: &[f32], sw: usize, sh: usize, dw: usize, dh: us
 /// column is exact, so rotating the coarse field by `k` columns rotates the fine one by `2 k`, bit
 /// for bit.
 pub(crate) fn upsample_flow_wrapx(src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
-    let sx = dw as f32 / sw as f32;
-    let rx = sw as f32 / dw as f32;
-    let sy = (dh as f32 - 1.0f32) / ((sh as i32 - 1) as f32);
+    // READ (mode 6 of the flow resample kernel of TwixtorPro_64): the scales are
+    // `dw / sw` and `dh / sh` (single precision quotients of the converted sizes), the steps their double reciprocals
+    // narrowed, the sampler the 2 channel equirectangular one
+    let sx = dw as i32 as f32 / sw as i32 as f32;
+    let sy = dh as i32 as f32 / sh as i32 as f32;
+    let rx = (1.0f64 / (sx as f64)) as f32;
     let ry = (1.0f64 / (sy as f64)) as f32;
     let mut dst = vec![0.0f32; dw * dh * 2];
     dst.par_chunks_mut(dw * 2).enumerate().for_each(|(y, row)| {
         let fy = (y as i32 as f32) * ry;
         for x in 0..dw {
-            let v = bilinear2_wrapx(src, sw, sh, (x as i32 as f32) * rx, fy);
+            let v = sample::bilinear2_sphere(src, sw, sh, (x as i32 as f32) * rx, fy);
             row[x * 2] = v[0] * sx;
             row[x * 2 + 1] = v[1] * sy;
         }
@@ -648,6 +651,44 @@ const WRAP_LIMIT: u32 = 1 << 16;
 /// when `d` is NaN or more than [`WRAP_LIMIT`] widths (an infinite flow too); the solver treats
 /// such a target as outside. A flow without a fraction (`x - u` exact) gives the column and the
 /// fraction of `x - u` wrapped into `[0, W)`.
+/// A position on the equirectangular frame of `fw x fh` (READ: the wrap loops of the 360
+/// B step and block matching of TwixtorPro_64), single precision in this order: `x` is
+/// brought into `[0, fw)` by adding or subtracting `fw` one at a time, `y` into `[0, fh)` the same way while the
+/// steps are counted; after an odd count `x = fw * 0.5 + x` (minus `fw` when that reaches `fw`) and, unless `y` is
+/// 0, `y = fh - y`. NaN or infinite positions are returned as they are (no loop runs on them).
+#[inline]
+pub(crate) fn sphere_target(x: f32, y: f32, fw: f32, fh: f32) -> (f32, f32) {
+    if !(x.is_finite() && y.is_finite()) || !(fw > 0.0 && fh > 0.0) {
+        return (x, y);
+    }
+    let (mut x, mut y) = (x, y);
+    while x < 0.0 {
+        x = x + fw;
+    }
+    while fw <= x {
+        x = x - fw;
+    }
+    let mut n = 0u32;
+    while y < 0.0 {
+        y = y + fh;
+        n += 1;
+    }
+    while fh <= y {
+        y = y - fh;
+        n += 1;
+    }
+    if n % 2 == 1 {
+        x = fw * 0.5f32 + x;
+        if fw <= x {
+            x = x - fw;
+        }
+        if y != 0.0 {
+            y = fh - y;
+        }
+    }
+    (x, y)
+}
+
 #[inline]
 pub(crate) fn wrap_target(x: usize, u: f32, w: usize) -> Option<(usize, f32)> {
     let d = -u;
@@ -678,25 +719,16 @@ pub(crate) fn calc_grad_wrap(img: &[f32], w: usize, h: usize) -> Vec<f32> {
     }
     g.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
         for x in 0..w {
+            // READ (TwixtorPro_64): central differences times 0.5, the
+            // columns modulo the width, above row 0 and below row h - 1 the same edge row half a turn away
             let c = img[y * w + x];
             let left = img[y * w + (x + w - 1) % w];
             let right = img[y * w + (x + 1) % w];
-            let mut nx = (c - left) + 0.0f32;
-            let mut dx = 1.0f32;
-            let mut ny = 0.0f32;
-            let mut dy = 0.0f32;
-            if y >= 1 {
-                ny = (c - img[(y - 1) * w + x]) + 0.0f32;
-                dy = 1.0;
-            }
-            nx = nx + (right - c);
-            dx = dx + 1.0;
-            if y + 1 <= h - 1 {
-                ny = ny + (img[(y + 1) * w + x] - c);
-                dy = dy + 1.0;
-            }
-            row[x * 2] = nx / dx;
-            row[x * 2 + 1] = ny / dy;
+            let pole = (w / 2 + x) % w;
+            let up = if y >= 1 { img[(y - 1) * w + x] } else { img[pole] };
+            let down = if y + 1 <= h - 1 { img[(y + 1) * w + x] } else { img[(h - 1) * w + pole] };
+            row[x * 2] = ((c - left) + (right - c)) * 0.5f32;
+            row[x * 2 + 1] = ((c - up) + (down - c)) * 0.5f32;
         }
     });
     g
@@ -746,16 +778,19 @@ pub(crate) fn calc_b_with(i1: &[f32], i0: &[f32], grad: &[f32], flow: &[f32], w:
     let fw = w as f32;
     let fh = h as f32;
     if wrap {
+        // READ (the 360 branch of the B step of TwixtorPro_64): a flow of a
+        // whole width or height or more gives B = 0; else the target `(x - u, y - v)` is wrapped onto the sphere
+        // (`sphere_target`) and sampled with the equirectangular bilinear sampler
         b.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
             let fy = y as f32;
             for x in 0..w {
                 let i = y * w + x;
-                let sy = fy - flow[i * 2 + 1];
-                let target = if sy < 0.0 || fh - 1.0 < sy { None } else { wrap_target(x, flow[i * 2], w) };
+                let (u, v) = (flow[i * 2], flow[i * 2 + 1]);
+                let target = if fw <= u.abs() || fh <= v.abs() { None } else { Some(sphere_target(x as f32 - u, fy - v, fw, fh)) };
                 let pass = match target {
                     None => None,
-                    Some((col, fx)) => {
-                        let sample = |img: &[f32]| bilinear1_wrapx_at(img, w, h, col, fx, sy);
+                    Some((sx, sy)) => {
+                        let sample = |img: &[f32]| bilinear1_sphere(img, w, h, sx, sy);
                         match mask_y {
                             Some(m) if !(sample(m) >= WARPED_MASK_MIN) => None,
                             _ => Some(sample(i0)),
@@ -820,6 +855,74 @@ pub(crate) fn all_flow_out_of_range_y(flow: &[f32], w: usize, h: usize) -> bool 
 }
 
 impl<'a> Block<'a> {
+    /// The 3x3 patch of imgA around `(x, y)` in the 360 mode (READ in
+    /// TwixtorPro_64), row major: each column modulo the width, each row brought into `[0, 2h)` and, past the
+    /// last row, mirrored (`2h - r - 1`) onto the column half a turn away (`c + w / 2`, minus `w` when it reaches it).
+    #[inline]
+    fn patch_sphere(&self, x: usize, y: usize) -> [f32; 9] {
+        let (w, h) = (self.w as i64, self.h as i64);
+        let mut p = [0.0f32; 9];
+        let mut n = 0;
+        for dy in -1..=1i64 {
+            for dx in -1..=1i64 {
+                let mut c = (x as i64 + dx).rem_euclid(w);
+                let mut r = (y as i64 + dy).rem_euclid(2 * h);
+                if r > h - 1 {
+                    c += w / 2;
+                    if c >= w {
+                        c -= w;
+                    }
+                    r = 2 * h - r - 1;
+                }
+                p[n] = self.a[(r * w + c) as usize];
+                n += 1;
+            }
+        }
+        p
+    }
+
+    /// The block cost of the 360 mode (READ in TwixtorPro_64): the target
+    /// `(tx, ty)` is put on the sphere ([`sphere_target`]); the nine positions `cx - 1, cx, cx + 1` by
+    /// `cy - 1, cy, cy + 1` (single precision), row major, are each put on the sphere again and sampled with the
+    /// equirectangular bilinear sampler; with `d_i = p_i - q_i` the cost is `d8^2 + ((d0^2 + d1^2) + ... + d7^2)`.
+    /// It always exists (no range check).
+    #[inline]
+    fn cost_sphere(&self, p: &[f32; 9], tx: f32, ty: f32) -> f32 {
+        let (fw, fh) = (self.w as f32, self.h as f32);
+        let (cx, cy) = sphere_target(tx, ty, fw, fh);
+        let xs = [cx - 1.0f32, cx, cx + 1.0f32];
+        let ys = [cy - 1.0f32, cy, cy + 1.0f32];
+        let mut sq = [0.0f32; 9];
+        let mut n = 0;
+        for yy in ys {
+            for xx in xs {
+                let (sx, sy) = sphere_target(xx, yy, fw, fh);
+                let d = p[n] - bilinear1_sphere(self.b, self.w, self.h, sx, sy);
+                sq[n] = d * d;
+                n += 1;
+            }
+        }
+        let mut s = sq[0];
+        for v in &sq[1..8] {
+            s = s + *v;
+        }
+        sq[8] + s
+    }
+
+    /// One pixel of the two horizontal sweeps of the 360 mode: the neighbour's vector `n` replaces `cur` when its
+    /// [`Block::cost_sphere`] is smaller (both at the targets `(x - u, y - v)`).
+    #[inline]
+    fn step_sphere(&self, x: usize, y: usize, cur: [f32; 2], n: [f32; 2]) -> Option<[f32; 2]> {
+        let patch = self.patch_sphere(x, y);
+        let c0 = self.cost_sphere(&patch, x as f32 - cur[0], y as f32 - cur[1]);
+        let c1 = self.cost_sphere(&patch, x as f32 - n[0], y as f32 - n[1]);
+        if c1 < c0 {
+            Some(n)
+        } else {
+            None
+        }
+    }
+
     /// The 3x3 patch of imgA around `(x, y)` of the wrap solve: [`Block::patch`] with the columns
     /// `x - 1`, `x`, `x + 1` taken modulo the width (rule G6), so every column has one.
     #[inline]
@@ -975,6 +1078,69 @@ fn sweeps_ring<S: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Syn
     }
 }
 
+/// The four sweeps of the 360 mode (READ: the two horizontal drivers of TwixtorPro_64
+/// run their row kernels over every row in the 360 mode, the vertical drivers
+/// are those of the plain solve): sweep 1 over every row, columns `0..w` increasing, in place, the left
+/// neighbour `(x - 1) mod w`; sweep 2 columns `w - 1` down to 0, the right neighbour `(x + 1) mod w`; both with
+/// `sphere`; then sweeps 3 and 4 of [`sweeps`] with `plain`. Rows in parallel (a row is independent in sweeps 1 and 2).
+fn sweeps_sphere<S, P>(flow: &mut [f32], w: usize, h: usize, sphere: S, plain: P)
+where
+    S: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Sync,
+    P: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Sync,
+{
+    for right in [false, true] {
+        flow.par_chunks_mut(w * 2).enumerate().for_each(|(y, row)| {
+            let xs: Vec<usize> = if right { (0..w).rev().collect() } else { (0..w).collect() };
+            for x in xs {
+                let nx = if right { (x + 1) % w } else { (x + w - 1) % w };
+                let cur = [row[x * 2], row[x * 2 + 1]];
+                let n = [row[nx * 2], row[nx * 2 + 1]];
+                if let Some(v) = sphere(x, y, cur, n) {
+                    row[x * 2] = v[0];
+                    row[x * 2 + 1] = v[1];
+                }
+            }
+        });
+    }
+    let mut ft = vec![0.0f32; flow.len()];
+    for y in 0..h {
+        for x in 0..w {
+            ft[(x * h + y) * 2] = flow[(y * w + x) * 2];
+            ft[(x * h + y) * 2 + 1] = flow[(y * w + x) * 2 + 1];
+        }
+    }
+    ft.par_chunks_mut(h * 2).enumerate().for_each(|(x, col)| {
+        if x >= 1 && x <= w - 2 {
+            for y in 1..=(h - 2) {
+                let cur = [col[y * 2], col[y * 2 + 1]];
+                let n = [col[(y - 1) * 2], col[(y - 1) * 2 + 1]];
+                if let Some(v) = plain(x, y, cur, n) {
+                    col[y * 2] = v[0];
+                    col[y * 2 + 1] = v[1];
+                }
+            }
+        }
+    });
+    ft.par_chunks_mut(h * 2).enumerate().for_each(|(x, col)| {
+        if x >= 1 && x <= w - 2 {
+            for y in (1..=(h - 2)).rev() {
+                let cur = [col[y * 2], col[y * 2 + 1]];
+                let n = [col[(y + 1) * 2], col[(y + 1) * 2 + 1]];
+                if let Some(v) = plain(x, y, cur, n) {
+                    col[y * 2] = v[0];
+                    col[y * 2 + 1] = v[1];
+                }
+            }
+        }
+    });
+    for y in 0..h {
+        for x in 0..w {
+            flow[(y * w + x) * 2] = ft[(x * h + y) * 2];
+            flow[(y * w + x) * 2 + 1] = ft[(x * h + y) * 2 + 1];
+        }
+    }
+}
+
 /// The four sweeps of [`block_match`], in its order/// The four sweeps of [`block_match`], in its order, over its interior pixels, with its in place
 /// neighbour rule and transposes, where `step(x, y, cur, n)` decides each pixel.
 fn sweeps<S: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Sync>(flow: &mut [f32], w: usize, h: usize, step: S) {
@@ -1072,7 +1238,10 @@ pub(crate) fn block_match_with(a: &[f32], b: &[f32], flow: &mut [f32], w: usize,
         bm.step_with(x, y, cur, n, wrap)
     };
     if wrap {
-        sweeps_ring(flow, w, h, step);
+        let gated = |x: usize, y: usize| gate.is_some_and(|m| m[y * w + x] < MASK_ON);
+        let sphere = |x: usize, y: usize, cur: [f32; 2], n: [f32; 2]| if gated(x, y) { None } else { bm.step_sphere(x, y, cur, n) };
+        let plain = |x: usize, y: usize, cur: [f32; 2], n: [f32; 2]| if gated(x, y) { None } else { bm.step(x, y, cur, n) };
+        sweeps_sphere(flow, w, h, sphere, plain);
     } else {
         sweeps(flow, w, h, step);
     }
@@ -1107,12 +1276,12 @@ pub fn solve_pyramids(x: &Pyramid, y: &Pyramid, settings: &FlowSettings) -> Resu
         let img_b = &y.levels[l].data;
         let grad = calc_grad(img_a, w, h);
         let mut a = calc_a(&grad, w, h);
-        conv::blur_gaussian(&mut a, w, h, 3, 7.0);
+        conv::blur_gaussian_above_first(&mut a, w, h, 3, 7.0);
         for it in 0..3 {
             let mut b = calc_b(img_a, img_b, &grad, &flow, w, h);
-            conv::blur_gaussian(&mut b, w, h, 2, 7.0);
+            conv::blur_gaussian_above_first(&mut b, w, h, 2, 7.0);
             new_disp(&mut flow, &a, &b);
-            conv::blur_gaussian(&mut flow, w, h, 2, 5.0);
+            conv::blur_gaussian_above_first(&mut flow, w, h, 2, 5.0);
             if it == 1 && l == 0 && !settings.skip_refine {
                 block_match(img_a, img_b, &mut flow, w, h);
             }

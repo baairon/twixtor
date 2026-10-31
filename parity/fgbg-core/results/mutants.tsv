@@ -1,0 +1,23 @@
+id	file	status_vs_base	cases_changed_vs_base	what
+M01	plugins/retime-engine/src/forward/mesh.rs	changed-cases	126	mesh vertex tie-break epsilon in x doubled (mesh rounding)
+M02	plugins/retime-engine/src/forward/mesh.rs	changed-cases	32	mip level: diagonal distances summed in the opposite order (operand order)
+M03	plugins/retime-engine/src/forward/mesh.rs	changed-cases	134	mip level off by one
+M04	plugins/retime-engine/src/forward/raster.rs	changed-cases	134	scan converter drops one-pixel spans (rasterization)
+M05	plugins/retime-engine/src/forward/raster.rs	no-change	0	first scanline of a triangle rounds down instead of up
+M06	plugins/retime-engine/src/forward/raster.rs	changed-cases	9	edge activation compare made inclusive
+M07	plugins/retime-engine/src/forward.rs	changed-cases	4	running mean accumulation with the weight on the wrong operand (swapped weight)
+M08	plugins/retime-engine/src/forward.rs	changed-cases	68	8 bit store without the 0.5 rounding bias
+M09	plugins/retime-engine/src/forward.rs	changed-cases	3	Nearest forward tie at exactly half way picks the later frame
+M10	plugins/retime-engine/src/forward.rs	changed-cases	32	Blend and Weighted Blend forward (no coverage) push frame B along the flow of A
+M11	plugins/retime-engine/src/forward.rs	changed-cases	96	coverage image requires two hits
+M12	plugins/retime-engine/src/forward/pyramid.rs	changed-cases	126	pyramid blur taps changed
+M13	plugins/retime-engine/src/forward/pyramid.rs	changed-cases	37	mip level blend written from the other end (operand order, last bits)
+M14	plugins/retime-engine/src/forward/pyramid.rs	changed-cases	130	mip level blend fraction inverted (swapped weight)
+M15	plugins/retime-engine/src/forward.rs	changed-cases	98	flows below half a pixel count as zero (copy shortcut threshold)
+M16	plugins/retime-engine/src/forward/mesh.rs	changed-cases	13	vertex scale by reciprocal multiply instead of divide (last bits)
+M17	plugins/retime-engine/src/forward/mesh.rs	changed-cases	134	mip level neighbour above the first row not mirrored
+M18	plugins/retime-fgbg/src/glue.rs	changed-cases	167	Warping popup choices 3 and 4 swapped
+M19	plugins/retime-fgbg/src/glue.rs	changed-cases	18	Track RGB+A never reaches the engine
+M20	plugins/retime-fgbg/src/timemap.rs	changed-cases	2	frame to time conversion truncates instead of rounding
+M21	plugins/retime-engine/src/forward/raster.rs	changed-cases	132	span start column rounds down instead of up (rasterization)
+M22	plugins/retime-engine/src/forward/raster.rs	changed-cases	135	span end column rounds up instead of down (rasterization)

@@ -58,7 +58,7 @@ impl Effect for Retime {
 
     fn params(&self) -> Vec<ParamSpec> {
         vec![
-            popup("display", "Display", &["Output", "Source"], 1),
+            popup("display", "Display", &["Twixtored Output", "Source"], 1),
             checkbox("video_360", "360 Video", false),
             // Enabled only while Display is "Source".
             popup(
@@ -81,20 +81,20 @@ impl Effect for Retime {
             ),
             // Fixed point slider, in frames, enabled only in Speed mode.
             slider("src_time_offset", "Src Time Offset", (0.0, 30000.0), (0.0, 30000.0), 0.0, 0),
-            popup("vectors", "Vectors", &["No Vectors", "Sloppy", "Medium", "High", "Best"], 5),
-            popup("prep", "Prep", &["None", "Contrast/Edge Enhance", "Delinearize"], 1),
+            popup("vectors", "Motion Vectors", &["No Motion Vectors", "Sloppy", "Medium", "High", "Best"], 5),
+            popup("prep", "Image Prep", &["None", "Contrast/Edge Enhance", "Delinearize"], 1),
             // Fixed point slider, percent.
-            slider("sensitivity", "Sensitivity", (0.0, 100.0), (0.0, 100.0), 70.0, 2),
+            slider("sensitivity", "Motion Sensitivity", (0.0, 100.0), (0.0, 100.0), 70.0, 2),
             checkbox("plenty_memory", "Plenty Memory?", true),
             popup("time_remap_mode", "Time Remap Mode", &["Speed", "Frame Number"], 1),
             // Fixed point slider, percent, enabled only in Speed mode.
             slider("speed_percent", "Speed %", (-10000.0, 10000.0), (-1000.0, 1000.0), 100.0, 3),
             // Float slider, enabled only in Frame Number mode.
             slider("frame_num", "Frame Num", (-200000.0, 200000.0), (0.0, 2000.0), 0.0, 2),
-            popup("frame_interp", "Frame Interp", &["Nearest", "Blend", "Weighted Blend"], 2),
+            popup("frame_interp", "Frame Interp", &["Nearest", "Blend", "Motion Weighted Blend"], 2),
             checkbox("smart_blend", "Smart Blend", false),
             // Fixed point slider.
-            slider("blur_compensation", "Blur Compensation", (0.0, 10.0), (0.0, 10.0), 0.0, 2),
+            slider("blur_compensation", "Motion Blur Compensation", (0.0, 10.0), (0.0, 10.0), 0.0, 2),
         ]
     }
 
@@ -108,12 +108,13 @@ impl Effect for Retime {
         EffectKind::Temporal
     }
 
-    /// The two optional layers: layer A replaces the input as the retimed footage, layer B is the
-    /// separate source for the vector estimation.
+    /// The two optional layers: "Alt Color Source" (`alt_source_a`) replaces the input as the
+    /// retimed footage, "Alt Motion Source" (`alt_source_b`) is the separate source for the vector
+    /// estimation.
     fn layers(&self) -> Vec<LayerSpec> {
         vec![
-            LayerSpec { id: LAYER_ALT_A, name: "Alt Source A", optional: true },
-            LayerSpec { id: LAYER_ALT_B, name: "Alt Source B", optional: true },
+            LayerSpec { id: LAYER_ALT_A, name: "Alt Color Source", optional: true },
+            LayerSpec { id: LAYER_ALT_B, name: "Alt Motion Source", optional: true },
         ]
     }
 
@@ -122,10 +123,11 @@ impl Effect for Retime {
         glue::dependencies(cx, env)
     }
 
-    /// Time Remap Mode Speed and Frame Number with Nearest, Blend and Weighted Blend. Exact frame
-    /// positions and Vectors set to No Vectors take the frame blend path; a position between frames
-    /// with Vectors on (the default, Best) takes the optical flow path (flow solver, inverse warps,
-    /// Smart Blend when its checkbox is on, Blur Compensation). The motion search never halves
+    /// Time Remap Mode Speed and Frame Number with Nearest, Blend and Motion Weighted Blend. Exact
+    /// frame positions and Motion Vectors set to No Motion Vectors take the frame blend path; a
+    /// position between frames with Motion Vectors on (the default, Best) takes the optical flow
+    /// path (flow solver, inverse warps, Smart Blend when its checkbox is on, Motion Blur
+    /// Compensation). The motion search never halves
     /// below 2 x 2, and a frame with a side of 1 has no search and renders as No Vectors (the tiny
     /// frames rule, parity gap G7); there is no other fallback to the frame blend.
     fn render_temporal(&self, cx: &TemporalContext, env: &Env<'_>, output: &mut Frame) -> Result<()> {
@@ -193,13 +195,65 @@ mod tests {
                 other => panic!("{id} is {other:?}"),
             }
         };
-        check("display", 2, 1, "Output", "Source");
+        check("display", 2, 1, "Twixtored Output", "Source");
         check("src_mark_segments", 5, 1, "Cut A", "No MV, Frame Blend");
         check("input_fields", 3, 1, "None", "Lower Field First");
-        check("vectors", 5, 5, "No Vectors", "Best");
+        check("vectors", 5, 5, "No Motion Vectors", "Best");
         check("prep", 3, 1, "None", "Delinearize");
         check("time_remap_mode", 2, 1, "Speed", "Frame Number");
-        check("frame_interp", 3, 2, "Nearest", "Weighted Blend");
+        check("frame_interp", 3, 2, "Nearest", "Motion Weighted Blend");
+    }
+
+    /// The display names and the full popup choice lists as the original registers them in
+    /// PARAMS_SETUP (`parity/retime-params/pairing.tsv`, from `Twixtor_64`'s capture).
+    #[test]
+    fn names_and_choices_match_the_registered_interface() {
+        let names: Vec<(&str, &str)> = Retime.params().iter().map(|p| (p.id, p.name)).collect();
+        assert_eq!(
+            names,
+            [
+                ("display", "Display"),
+                ("video_360", "360 Video"),
+                ("src_mark_segments", "Src: Mark Segments"),
+                ("input_fields", "Input: Fields"),
+                ("in_fps_is_out_fps", "In FPS is Out FPS"),
+                ("input_frame_rate", "Input: Frame Rate"),
+                ("src_time_offset", "Src Time Offset"),
+                ("vectors", "Motion Vectors"),
+                ("prep", "Image Prep"),
+                ("sensitivity", "Motion Sensitivity"),
+                ("plenty_memory", "Plenty Memory?"),
+                ("time_remap_mode", "Time Remap Mode"),
+                ("speed_percent", "Speed %"),
+                ("frame_num", "Frame Num"),
+                ("frame_interp", "Frame Interp"),
+                ("smart_blend", "Smart Blend"),
+                ("blur_compensation", "Motion Blur Compensation"),
+            ]
+        );
+        let choices = |id: &str| match find(id).kind {
+            ParamKind::Popup { choices, .. } => choices,
+            other => panic!("{id} is {other:?}"),
+        };
+        assert_eq!(choices("display"), ["Twixtored Output", "Source"]);
+        assert_eq!(choices("vectors"), ["No Motion Vectors", "Sloppy", "Medium", "High", "Best"]);
+        assert_eq!(choices("prep"), ["None", "Contrast/Edge Enhance", "Delinearize"]);
+        assert_eq!(choices("frame_interp"), ["Nearest", "Blend", "Motion Weighted Blend"]);
+        assert_eq!(choices("time_remap_mode"), ["Speed", "Frame Number"]);
+        assert_eq!(choices("input_fields"), ["None", "Upper Field First", "Lower Field First"]);
+        assert_eq!(
+            choices("src_mark_segments"),
+            ["Cut A", "Cut B", "Cut C", "No MV, Use Nearest", "No MV, Frame Blend"]
+        );
+    }
+
+    #[test]
+    fn layers_are_the_two_alt_sources() {
+        let layers: Vec<(&str, &str, bool)> = Retime.layers().iter().map(|l| (l.id, l.name, l.optional)).collect();
+        assert_eq!(
+            layers,
+            [("alt_source_a", "Alt Color Source", true), ("alt_source_b", "Alt Motion Source", true)]
+        );
     }
 
     #[test]

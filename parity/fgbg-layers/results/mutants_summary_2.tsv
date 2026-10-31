@@ -1,0 +1,3 @@
+id	status	changed_cases	what
+M05	changed-cases	160	layer OVER with source and destination swapped
+M06	changed-cases	15	8 bpc layer premultiply truncates instead of rounding

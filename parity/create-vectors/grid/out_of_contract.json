@@ -1,0 +1,364 @@
+[
+ {
+  "id": "create-vectors.ooc-md-zero.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-md-zero",
+  "params": [
+   "max_displace=0"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-md-zero.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "max_displace below its valid minimum 1"
+ },
+ {
+  "id": "create-vectors.ooc-md-low.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-md-low",
+  "params": [
+   "max_displace=0.99"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-md-low.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "max_displace below its valid minimum 1"
+ },
+ {
+  "id": "create-vectors.ooc-md-neg.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-md-neg",
+  "params": [
+   "max_displace=-1"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-md-neg.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "max_displace below its valid minimum 1"
+ },
+ {
+  "id": "create-vectors.ooc-md-high.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-md-high",
+  "params": [
+   "max_displace=8192.5"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-md-high.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "max_displace above its valid maximum 8192"
+ },
+ {
+  "id": "create-vectors.ooc-sens-neg.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-sens-neg",
+  "params": [
+   "main_bg_sensitivity=-0.01"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-sens-neg.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "sensitivity below 0"
+ },
+ {
+  "id": "create-vectors.ooc-sens-high.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-sens-high",
+  "params": [
+   "main_bg_sensitivity=100.01"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-sens-high.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "sensitivity above 100"
+ },
+ {
+  "id": "create-vectors.ooc-shrink-high.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-shrink-high",
+  "params": [
+   "fg1_inv_matte_shrink=10.5"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-shrink-high.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "shrink above 10"
+ },
+ {
+  "id": "create-vectors.ooc-shrink-neg.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-shrink-neg",
+  "params": [
+   "fg1_inv_matte_shrink=-1"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-shrink-neg.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "shrink below 0"
+ },
+ {
+  "id": "create-vectors.ooc-display-0.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-display-0",
+  "params": [
+   "display=0"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-display-0.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup below its first choice"
+ },
+ {
+  "id": "create-vectors.ooc-display-4.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-display-4",
+  "params": [
+   "display=4"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-display-4.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-dbg-6.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-dbg-6",
+  "params": [
+   "debug_view_method=6"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-dbg-6.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-tf-3.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-tf-3",
+  "params": [
+   "track_frame=3"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-tf-3.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-lo-6.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-lo-6",
+  "params": [
+   "layers_output=6"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-lo-6.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-geom-7.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-geom-7",
+  "params": [
+   "draw_geom=7"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-geom-7.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-pt-use-6.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-pt-use-6",
+  "params": [
+   "pt1_use=6"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-pt-use-6.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-pt-color-256.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-pt-color-256",
+  "params": [
+   "pt1_color=256,0,0"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-pt-color-256.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "color channel above 255"
+ },
+ {
+  "id": "create-vectors.ooc-prep-4.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-prep-4",
+  "params": [
+   "prep=4"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-prep-4.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "popup above its last choice"
+ },
+ {
+  "id": "create-vectors.ooc-unknown-param.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-unknown-param",
+  "params": [
+   "no_such_param=1"
+  ],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-unknown-param.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "unknown param id"
+ },
+ {
+  "id": "create-vectors.ooc-matte-size.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-matte-size",
+  "params": [],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-matte-size.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "FG matte layer of another size than the output (plugin shows an error fill)",
+  "layers": {
+   "fg1_matte": "inputs/matte_disc-8x6.d8.f3.rgba"
+  }
+ },
+ {
+  "id": "create-vectors.ooc-alt-size.shift-16x12.d8",
+  "effect": "create-vectors",
+  "label": "ooc-alt-size",
+  "params": [],
+  "depth": 8,
+  "width": 16,
+  "height": 12,
+  "source": "shift",
+  "input": "inputs/shift-16x12.d8.f3.rgba",
+  "reference": "create-vectors.ooc-alt-size.shift-16x12.d8.rgba",
+  "kind": "temporal",
+  "frames": 3,
+  "fps": "24",
+  "why": "Alt Src layer of another size than the output (plugin shows an error fill)",
+  "layers": {
+   "alt_source_a": "inputs/shiftB-8x6.d8.f3.rgba"
+  }
+ }
+]

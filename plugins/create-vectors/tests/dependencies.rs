@@ -3,7 +3,7 @@
 //! `frame = (u32)(current_time / time_step + 0.5) = n`, `t(k) = rnd(k * 100)`.
 //!
 //! The list of one frame, in issue order (`X` is `current_time`; the layers are written as `L0` for
-//! the input layer, `Alt` for `Alt Src`, `FG1` to `FG3` for the matte layers):
+//! the input layer, `Alt` for `Alt Motion Src`, `FG1` to `FG3` for the matte layers):
 //!
 //! 1. `L0@X`, `Alt@X`, `L0@X` again when `Alt` is empty, then `FG1@X`, `FG2@X`, `FG3@X` up to and
 //!    including the first empty one;
@@ -36,7 +36,7 @@ fn rig(params: &[(&str, &str)]) -> Rig {
 
 #[test]
 fn vectors_previous_reads_the_source_at_frame_and_frame_minus_one() {
-    // frame 7, Display Vectors (default), Track Frame Previous (default), no Alt Src, no FG: 4 probes and 2 fetches
+    // frame 7, Display Vectors (default), Track Frame Previous (default), no Alt Motion Src, no FG: 4 probes and 2 fetches
     assert_eq!(
         rig(&[]).deps(7).unwrap(),
         vec![co(None, 700), co(Some(ALT), 700), co(None, 700), co(Some(FG[0]), 700), co(None, 700), co(None, 600)]
@@ -74,13 +74,13 @@ fn the_source_display_needs_the_current_time_only() {
 
 #[test]
 fn alt_src_replaces_the_input_as_the_source() {
-    // Alt Src has pixels: no second L0 probe, the pair is read from Alt Src
+    // Alt Motion Src has pixels: no second L0 probe, the pair is read from Alt Motion Src
     let r = rig(&[]).with_layer(ALT, clip());
     assert_eq!(
         r.deps(7).unwrap(),
         vec![co(None, 700), co(Some(ALT), 700), co(Some(FG[0]), 700), co(Some(ALT), 700), co(Some(ALT), 600)]
     );
-    // and for the Source display: Alt Src at X once more
+    // and for the Source display: Alt Motion Src at X once more
     let r = rig(&[("display", "1")]).with_layer(ALT, clip());
     assert_eq!(r.deps(7).unwrap(), vec![co(None, 700), co(Some(ALT), 700), co(Some(FG[0]), 700), co(Some(ALT), 700)]);
 }
@@ -218,7 +218,7 @@ fn the_layer_list_matches_the_spec() {
     assert_eq!(
         ids,
         vec![
-            ("alt_source_a", "Alt Src", true),
+            ("alt_source_a", "Alt Motion Src", true),
             ("fg1_matte", "FG1: Matte", true),
             ("fg2_matte", "FG2: Matte", true),
             ("fg3_matte", "FG3: Matte", true)

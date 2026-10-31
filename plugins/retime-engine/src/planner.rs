@@ -437,18 +437,18 @@ mod tests {
 
     #[test]
     fn input_fields_double_every_plan_entry_with_a_half_frame_position() {
-        // 24 fps source in a 30 fps comp: x = 0.8 * 7 = 5.6, frames 5 and 6, dur = 125, unequal rates (bias 12.5):
-        // 5 -> 637, 5.5 -> 700, 6 -> 762, 6.5 -> 825.
+        // 24 fps source in a 30 fps comp: x = 0.8 * 7 = 5.6, frames 5 and 6, dur = 125, unequal rates (bias 6.25):
+        // 5 -> 631, 5.5 -> 693, 6 -> 756, 6.5 -> 818.
         let r = rates(24.0, 30.0, 100);
         let plain = list(&req(), &Mock::speed(100.0), r);
-        assert_eq!(&plain[plain.len() - 2..], &[cp(None, 637), cp(None, 762)]);
+        assert_eq!(&plain[plain.len() - 2..], &[cp(None, 631), cp(None, 756)]);
         let fields = PreRender { input_fields: true, ..req() };
         let got = list(&fields, &Mock::speed(100.0), r);
-        assert_eq!(&got[got.len() - 4..], &[cp(None, 637), cp(None, 700), cp(None, 762), cp(None, 825)]);
+        assert_eq!(&got[got.len() - 4..], &[cp(None, 631), cp(None, 693), cp(None, 756), cp(None, 818)]);
         assert_eq!(got.len(), 11);
         // The half position is (p as f64 + 0.5) as f32 handed to the same frame_time.
         let map = RemapTimeMap::new(Mock::speed(100.0), r, 700);
-        assert_eq!(map.frame_time(((5i32 as f64) + 0.5) as f32), 700);
+        assert_eq!(map.frame_time(((5i32 as f64) + 0.5) as f32), 693);
     }
 
     #[test]

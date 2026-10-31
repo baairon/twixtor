@@ -160,6 +160,7 @@ fn ks(w: usize) -> Vec<usize> {
 // One level
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn every_level_step_commutes_with_every_rotation() {
     let mut n = 0;
     for (fw, fh) in [(64usize, 40usize), (75, 37)] {
@@ -199,6 +200,7 @@ fn every_level_step_commutes_with_every_rotation() {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_wrap_upsample_rotates_with_the_coarse_level() {
     let mut r = rng(5);
     for (sw, sh) in [(2usize, 2usize), (3, 4), (5, 3), (8, 6), (13, 7)] {
@@ -238,6 +240,7 @@ fn rot_pyramid(p: &Pyramid, k: usize) -> Pyramid {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn a_one_level_wrap_solve_rotates_with_every_rotation_of_odd_and_even_widths() {
     for (fw, fh) in [(37usize, 29usize), (40, 23), (9, 7)] {
         for fmt in [Fmt::U8, Fmt::F32] {
@@ -246,7 +249,7 @@ fn a_one_level_wrap_solve_rotates_with_every_rotation_of_odd_and_even_widths() {
             let (px, py) = (one_level(&build_pyramid(&x, &s).unwrap()), one_level(&build_pyramid(&y, &s).unwrap()));
             let geo = px.geometry().clone();
             let (mx, my) = (MaskPyramid::build(&disc(fw, fh, (1.0, fh as f64 * 0.5), fh as f64 * 0.4), &s).unwrap(), MaskPyramid::build(&disc(fw, fh, (2.0, fh as f64 * 0.5), fh as f64 * 0.4), &s).unwrap());
-            let (kx, ky) = (MaskPyramid { geometry: geo.clone(), levels: vec![mx.levels[0].clone()] }, MaskPyramid { geometry: geo.clone(), levels: vec![my.levels[0].clone()] });
+            let (kx, ky) = (MaskPyramid { geometry: geo.clone(), levels: vec![mx.levels[0].clone()], gate: true }, MaskPyramid { geometry: geo.clone(), levels: vec![my.levels[0].clone()], gate: true });
             let user = points(&geo);
             for sens in [1.0f32, 0.8] {
                 let s = FlowSettings { sensitivity: sens, ..s };
@@ -260,7 +263,7 @@ fn a_one_level_wrap_solve_rotates_with_every_rotation_of_odd_and_even_widths() {
                 let base = solve3(&px, &py, &kx, &ky, &user);
                 assert!(base[0].data.iter().any(|v| v.abs() > 0.1), "{fw}x{fh} the solve moves");
                 for k in 1..fw {
-                    let rk = |m: &MaskPyramid| MaskPyramid { geometry: geo.clone(), levels: vec![rot(&m.levels[0], fw, 1, k)] };
+                    let rk = |m: &MaskPyramid| MaskPyramid { geometry: geo.clone(), levels: vec![rot(&m.levels[0], fw, 1, k)], gate: true };
                     let ru = UserDisplacement { levels: vec![rot_level(&user.levels[0], fw, k)] };
                     let got = solve3(&rot_pyramid(&px, k), &rot_pyramid(&py, k), &rk(&kx), &rk(&ky), &ru);
                     for c in 0..3 {
@@ -273,6 +276,7 @@ fn a_one_level_wrap_solve_rotates_with_every_rotation_of_odd_and_even_widths() {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn rotating_both_frames_rotates_the_periodic_wrap_solve_bit_for_bit() {
     // the periodic pyramids of `build_pyramid` rotate bit for bit for multiples of
     // 2^(R + L - 1) columns when every resampled width is even; the solve then rotates too,
@@ -325,6 +329,7 @@ fn rotating_both_frames_rotates_the_periodic_wrap_solve_bit_for_bit() {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_wrap_solve_tracks_a_shift_and_differs_from_the_plain_one() {
     // the rotation rule does not cost the solve its accuracy: a periodic texture shifted across the
     // seam is recovered in every column, also in the two seam columns
@@ -363,6 +368,7 @@ fn the_wrap_solve_tracks_a_shift_and_differs_from_the_plain_one() {
 // Gradient, wrap off, threads
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn away_from_the_seam_the_wrap_gradient_is_the_plain_one_bit_for_bit() {
     let mut r = rng(31);
     for (w, h) in [(2usize, 3usize), (3, 2), (7, 5), (40, 17), (129, 9)] {
@@ -407,18 +413,24 @@ fn frozen_layered(x: &Pyramid, y: &Pyramid, s: &FlowSettings, masks: Option<(&Ma
             mask_gradient(&mut grad, m, w, h, false);
         }
         let mut a = calc_a(&grad, w, h);
-        conv::blur_gaussian(&mut a, w, h, 3, 7.0);
+        conv::blur_gaussian_above_first(&mut a, w, h, 3, 7.0);
         for it in 0..3 {
             let mut b = if mask_y.is_none() { calc_b(img_a, img_b, &grad, &flow, w, h) } else { calc_b_with(img_a, img_b, &grad, &flow, w, h, mask_y, false) };
-            conv::blur_gaussian(&mut b, w, h, 2, 7.0);
+            conv::blur_gaussian_above_first(&mut b, w, h, 2, 7.0);
             new_disp(&mut flow, &a, &b);
-            conv::blur_gaussian(&mut flow, w, h, 2, 5.0);
-            if it == 1 && l == 0 && !s.skip_refine {
-                refine(img_a, img_b, &mut flow, w, h, mask_x, false);
+            conv::blur_gaussian_above_first(&mut flow, w, h, 2, 5.0);
+            if it == 1 && l == 0 {
+                if !s.skip_refine {
+                    refine(img_a, img_b, &mut flow, w, h, mask_x.filter(|_| masks.is_some_and(|(m, _)| m.gates())), false);
+                }
+                // the user displacement again right after the finest block matching step, as the original's solver
+                if let Some(u) = user {
+                    apply_user(&mut flow, &u.levels[l], w);
+                }
             }
         }
         if l != 0 && !s.skip_refine {
-            refine(img_a, img_b, &mut flow, w, h, mask_x, false);
+            refine(img_a, img_b, &mut flow, w, h, mask_x.filter(|_| masks.is_some_and(|(m, _)| m.gates())), false);
         }
         if let Some(u) = user {
             apply_user(&mut flow, &u.levels[l], w);
@@ -481,6 +493,37 @@ fn the_wrap_solve_gives_identical_bytes_on_1_4_and_16_threads() {
             let other = pool(n, run);
             assert_eq!(bits(&one.0.data), bits(&other.0.data), "q {q} hiq {hiq} {n} threads");
             assert_eq!(bits(&one.1.data), bits(&other.1.data), "q {q} hiq {hiq} {n} threads, masks and points");
+        }
+    }
+}
+
+// ---- the equirectangular rules of the 360 mode, read from the original's code
+
+#[test]
+fn sphere_target_brings_a_position_onto_the_frame() {
+    assert_eq!(crate::flow::sphere_target(-0.25, 1.0, 4.0, 3.0), (3.75, 1.0));
+    // one step over a pole: half a turn and the row mirrored
+    assert_eq!(crate::flow::sphere_target(1.0, -0.5, 4.0, 3.0), (3.0, 0.5));
+    assert_eq!(crate::flow::sphere_target(3.5, 3.25, 4.0, 3.0), (1.5, 2.75));
+    // two steps: no turn
+    assert_eq!(crate::flow::sphere_target(1.0, 6.5, 4.0, 3.0), (1.0, 0.5));
+}
+
+#[test]
+fn the_wrap_gradient_reads_the_pole_rows_half_a_turn_away() {
+    let (w, h) = (4usize, 3usize);
+    let img: Vec<f32> = (0..12).map(|i| ((i * 7) % 11) as f32).collect();
+    let g = crate::flow::calc_grad_wrap(&img, w, h);
+    let at = |x: usize, y: usize| img[y * w + x];
+    for y in 0..h {
+        for x in 0..w {
+            let c = at(x, y);
+            let (l, r) = (at((x + w - 1) % w, y), at((x + 1) % w, y));
+            let p = (x + w / 2) % w;
+            let u = if y >= 1 { at(x, y - 1) } else { at(p, 0) };
+            let d = if y + 1 < h { at(x, y + 1) } else { at(p, h - 1) };
+            assert_eq!(g[(y * w + x) * 2], ((c - l) + (r - c)) * 0.5, "gx ({x}, {y})");
+            assert_eq!(g[(y * w + x) * 2 + 1], ((c - u) + (d - c)) * 0.5, "gy ({x}, {y})");
         }
     }
 }

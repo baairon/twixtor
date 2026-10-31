@@ -1,0 +1,64 @@
+{
+ "module": "fgbg-layers",
+ "plugin": "TwixtorPro_64.aex",
+ "plugin_sha256": "58bbd99248a531acb572e5ddb13570d8102a087c32123191e2f52f477e2dcf2d",
+ "effect": "retime-fgbg",
+ "status": "in_progress",
+ "blockers": [
+  "2 out of contract candidates were rendered by the original and are within registered ranges: review for promotion into the grid",
+  "mutant survivors: M20, M21, M22, M23, M24, M25, M29, M43"
+ ],
+ "cases": {
+  "in_contract": 353,
+  "compared": 353,
+  "identical": 353,
+  "differing": 0,
+  "out_of_contract": 65,
+  "logic_parity": 341
+ },
+ "values": {
+  "bytes_compared": 1952316,
+  "floats_compared": 248016,
+  "differing_values": 0,
+  "max_ulp": null
+ },
+ "call_records": {
+  "compared": 353,
+  "matching": 353
+ },
+ "mutants": {
+  "total": 50,
+  "killed": 42,
+  "survivors": [
+   "M20",
+   "M21",
+   "M22",
+   "M23",
+   "M24",
+   "M25",
+   "M29",
+   "M43"
+  ]
+ },
+ "stand_ins": [
+  "33 cases (tag standin in testset/grid.tsv) use keyframed ptN_pos or ptN_use values: AE keyframe interpolation is replaced by the harness's labelled linear stand-in on both sides",
+  "362 cases hand matte layers (fg1_matte to fg3_matte) to the plugin as raw clips through the harness, which is a stand-in for how AE hands a hidden layer over",
+  "logic_parity counts compared cases that depend on either stand-in (341 of 353 compared); they are not full parity"
+ ],
+ "fixes": [],
+ "commands": [
+  "python3 gen_grid.py --out testset --vfx bin/vfx_base",
+  "python3 render_grid.py --vfx bin/vfx_base --testset testset --out results/base.tsv --jobs 2",
+  "python3 split_refused.py --testset testset --base results/base.tsv",
+  "python3 render_grid.py --vfx bin/vfx_base --testset testset --cases testset/out_of_contract.json --out results/ooc.tsv --jobs 2",
+  "python3 run_mutants.py --tree src_mut --testset testset --base results/base.tsv --out mutants",
+  "python3 run_mutants.py --tree src_mut --testset testset --base results/base.tsv --out mutants2 --ids M05,M06   (M05 and M06 were replaced after the first run found them equivalent; results/mutants_summary_2.tsv overrides)",
+  "python3 make_summary.py",
+  "python3 phase_b.py grade --refs ~/twixtor-parity/fix-pro/runs/g1layers/refs",
+  "python3 phase_b.py ooc --status ~/twixtor-parity/fix-pro/runs/g1layers/status_merged.json --status ~/twixtor-parity/fix-pro/runs/ooc_layers/status_merged.json --status ~/twixtor-parity/fix-layers2/runs/ooc13/status_all.jsonl --judged ~/twixtor-parity/re/f7-close-pro/res/layers_ooc_judged.tsv",
+  "python3 phase_b.py calls --plugin-records ~/twixtor-parity/fix-pro/runs/g1layers/rec --rewrite-records ~/twixtor-parity/re/f7-close-pro/rw/layers-m14",
+  "python3 phase_b.py kills --refs ~/twixtor-parity/fix-pro/runs/g1layers/refs",
+  "python3 phase_b.py summary"
+ ],
+ "measured_at": "2026-10-31"
+}

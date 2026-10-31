@@ -42,11 +42,13 @@ fn popups_are_read_minus_one_and_checkboxes_as_flags() {
     );
     let s = settings_of(&rig, 0);
     assert_eq!((s.vectors_quality, s.interp), (1, 2));
-    assert_eq!((s.prep_contrast_edge, s.prep_delinearize), (false, true));
-    assert_eq!((s.display_source, s.video_360, s.cache_last, s.input_fields), (true, true, false, FieldOrder::LowerFirst));
-    // Prep = Contrast/Edge Enhance
+    // Prep = Delinearize renders as None in plugin 03 (fix 09)
+    assert_eq!((s.prep_contrast_edge, s.prep_delinearize), (false, false));
+    // 360 Video is TwixtorPro's wrap mode, not plugin 01's video range luma
+    assert_eq!((s.display_source, s.video_360, s.wrap_360, s.cache_last, s.input_fields), (true, false, true, false, FieldOrder::LowerFirst));
+    // Prep = Contrast/Edge Enhance runs both Prep stages in plugin 03 (fix 09)
     let s = settings_of(&Rig::new(clip(), &[("prep", "2")]), 0);
-    assert_eq!((s.prep_contrast_edge, s.prep_delinearize), (true, false));
+    assert_eq!((s.prep_contrast_edge, s.prep_delinearize), (true, true));
     // every vectors quality and interpolation popup value
     for v in 1..=5 {
         assert_eq!(settings_of(&Rig::new(clip(), &[("vectors", &v.to_string())]), 0).vectors_quality, v - 1);
@@ -213,8 +215,8 @@ fn the_wiring_names_real_parameters_of_the_expected_kinds() {
     assert_eq!(
         layers,
         vec![
-            (w.layers.alt_a, "Alt Source A", true),
-            (w.layers.alt_b, "Alt Source B", true),
+            (w.layers.alt_a, "Alt Color Source", true),
+            (w.layers.alt_b, "Alt Motion Source", true),
             ("fg1_matte", "FG1 Matte", true),
             ("fg2_matte", "FG2 Matte", true),
             ("fg3_matte", "FG3 Matte", true),
@@ -236,9 +238,11 @@ fn the_wrap_flag_is_off_and_the_device_request_is_carried_without_changing_a_pix
         let mut cx = rig.cx(1);
         cx.device = device;
         let s = read_settings(&cx, &rig.env()).unwrap();
-        assert_eq!(s, EngineSettings { device, ..plain.clone() });
+        // the stages are a fresh wrapper per read (`AboveFirstTaps`) and compare by identity: carry them over
+        assert_eq!(s, EngineSettings { device, stages: s.stages.clone(), ..plain.clone() });
         assert_eq!(rig.render_cx(&cx).unwrap(), want, "{device}");
     }
+    // 360 Video sets the wrap mode
     let s = settings_of(&Rig::new(clip(), &[("video_360", "1")]), 0);
-    assert!(s.video_360 && !s.wrap_360);
+    assert!(!s.video_360 && s.wrap_360);
 }

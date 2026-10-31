@@ -1,8 +1,8 @@
 //! The tracking points (`ptN_use`, `ptN_pos`) as an input of the layered solves: [`point_layer`]
 //! maps a `Pt N: Use` value to its layer, [`read_pos`] reads a point,
-//! [`user_displacement`] turns point pairs into the user displacement of every pyramid level (the
-//! points producer, rule G2) and [`second_tracker`] is the displacement interpolator of a layer whose
-//! Track is off (rule G5).
+//! [`user_displacement`] turns point pairs into the user displacement of every pyramid level (READ
+//! from TwixtorPro_64: a level 0 splat, normalised, and its blurred pyramid; see [`user_displacement_with`]) and
+//! [`second_tracker`] is the displacement interpolator of a layer whose Track is off (rule G5).
 //!
 //! Claim tags: V established, I inferred, U not established (a rule of this project, pinned in
 //! the parity gaps register until a reference render grades it).
@@ -15,7 +15,8 @@
 //! `X(p) ~ Y(p + flow(p))`, about `to - from` at the point.
 //!
 //! Precision contract: f32 evaluated in the order written, no fused multiply add, the points
-//! accumulated in their order. At a level of `w_l x h_l` for an output of `W x H`:
+//! accumulated in their order. The user displacement follows [`user_displacement_with`]. The
+//! second tracker's splat (rule G5, U), at a level of `w_l x h_l` for an output of `W x H`:
 //! `kx = (w_l - 1) as f32 / (W - 1) as f32` and `ky = (h_l - 1) as f32 / (H - 1) as f32`; the
 //! pixel is `ix = cvtt(from_x * kx + 0.5)`, `iy = cvtt(from_y * ky + 0.5)` (truncation); then
 //! `d.x = d.x + (from_x - to_x) * kx`, `d.y = d.y + (from_y - to_y) * ky` and `w = w + 1.0`.
@@ -88,7 +89,87 @@ pub fn in_frame(p: [f32; 2], out: (usize, usize)) -> bool {
     fx >= 0.0 && fx < out.0 as f32 && fy >= 0.0 && fy < out.1 as f32
 }
 
-/// The splat of the pairs into one level of `wl x hl` (see [`user_displacement`]).
+/// `(int)v` of a double as the plugin's `cvttsd2si` computes it: truncation toward zero; NaN and
+/// values outside the `i32` range give `i32::MIN`.
+fn cvtt_f64(v: f64) -> i32 {
+    if v.is_nan() || v >= 2147483648.0 || v <= -2147483649.0 {
+        i32::MIN
+    } else {
+        v as i32
+    }
+}
+
+/// `d.x = sx * d.x`, `d.y = sy * d.y` at every pixel (the plugin's scale step), f32.
+fn scale_xy(d: &mut [f32], sx: f32, sy: f32) {
+    for v in d.chunks_exact_mut(2) {
+        v[0] = sx * v[0];
+        v[1] = sy * v[1];
+    }
+}
+
+/// Level 0 of [`user_displacement_with`] (READ in TwixtorPro_64): the splat of the
+/// pairs at `w0 x h0`, normalised, scaled by -1.
+fn finest_level(pairs: &[([f32; 2], [f32; 2])], w0: usize, h0: usize, out: (usize, usize)) -> UserLevel {
+    let mut lvl = UserLevel { d: vec![0.0f32; w0 * h0 * 2], w: vec![0.0f32; w0 * h0] };
+    if out.0 < 2 || out.1 < 2 || w0 == 0 || h0 == 0 {
+        return lvl;
+    }
+    let kx = (w0 as i32 - 1) as f32 / (out.0 as i32 - 1) as f32;
+    let ky = (h0 as i32 - 1) as f32 / (out.1 as i32 - 1) as f32;
+    for &(from, to) in pairs {
+        let x = from[0] * kx;
+        let y = from[1] * ky;
+        let ix = cvtt_f64(f64::from(x) + 0.5);
+        let iy = cvtt_f64(f64::from(y) + 0.5);
+        if ix < 0 || iy < 0 || ix as usize >= w0 || iy as usize >= h0 {
+            continue;
+        }
+        let i = iy as usize * w0 + ix as usize;
+        lvl.d[2 * i] = (to[0] * kx - x) + lvl.d[2 * i];
+        lvl.d[2 * i + 1] = (to[1] * ky - y) + lvl.d[2 * i + 1];
+        lvl.w[i] = lvl.w[i] + 1.0f32;
+    }
+    for (d, w) in lvl.d.chunks_exact_mut(2).zip(lvl.w.iter_mut()) {
+        if 0.0f32 < *w {
+            d[0] = d[0] / *w;
+            d[1] = d[1] / *w;
+            *w = 1.0f32;
+        }
+    }
+    scale_xy(&mut lvl.d, -1.0f32, -1.0f32);
+    lvl
+}
+
+/// Level `l + 1` of [`user_displacement_with`] from level `l` (`(pw, ph)` to `(nw, nh)`): the binomial blur of the
+/// image pyramid (both channels of `d`, and `w`), the resample to the next size (per channel), `d` scaled by the ratios
+/// `(nw - 1) / (pw - 1)` and `(nh - 1) / (ph - 1)` (f32 quotients of the converted integers). `wrap`: the 360 mode of
+/// the same filters.
+fn coarser_level(prev: &UserLevel, (pw, ph): (usize, usize), (nw, nh): (usize, usize), wrap: bool) -> UserLevel {
+    use crate::flow::conv;
+    use crate::prep::{resample_with, Plane};
+    let blur = |data: &mut [f32], c: usize| {
+        if wrap {
+            conv::convolve_wrapx_above_first(data, pw, ph, c, &conv::BINOMIAL5);
+        } else {
+            conv::convolve_above_first(data, pw, ph, c, &conv::BINOMIAL5);
+        }
+    };
+    let mut t = prev.d.clone();
+    blur(&mut t, 2);
+    let chan = |c: usize| Plane { width: pw, height: ph, data: t.iter().skip(c).step_by(2).copied().collect() };
+    let (rx, ry) = (resample_with(&chan(0), nw, nh, wrap), resample_with(&chan(1), nw, nh, wrap));
+    let mut d: Vec<f32> = rx.data.iter().zip(&ry.data).flat_map(|(&x, &y)| [x, y]).collect();
+    let mut u = prev.w.clone();
+    blur(&mut u, 1);
+    let w = resample_with(&Plane { width: pw, height: ph, data: u }, nw, nh, wrap).data;
+    let sx = (nw as i32 - 1) as f32 / (pw as i32 - 1) as f32;
+    let sy = (nh as i32 - 1) as f32 / (ph as i32 - 1) as f32;
+    scale_xy(&mut d, sx, sy);
+    UserLevel { d, w }
+}
+
+/// The splat of the pairs into one level of `wl x hl` of the second tracker (see [`second_tracker`]; rule G2's
+/// producer of this project, kept for rule G5, U).
 fn splat(pairs: &[([f32; 2], [f32; 2])], wl: usize, hl: usize, out: (usize, usize)) -> UserLevel {
     let mut lvl = UserLevel { d: vec![0.0f32; wl * hl * 2], w: vec![0.0f32; wl * hl] };
     if out.0 < 2 || out.1 < 2 || wl == 0 || hl == 0 {
@@ -116,26 +197,45 @@ fn splat(pairs: &[([f32; 2], [f32; 2])], wl: usize, hl: usize, out: (usize, usiz
 
 /// The user displacement of a layer from its point pairs `(from X, to Y)` in output pixels (`out`
 /// is the output size `(W, H)`), one [`UserLevel`] per level of the solver geometry `geo`,
-/// finest first (the points producer, U; rule G2). Per level, a nearest pixel splat in point order:
-/// a pair whose `from` lies outside the output frame ([`in_frame`]) or whose `to` is not finite is
-/// skipped (U, ours); else at the pixel `(cvtt(from_x * kx + 0.5), cvtt(from_y * ky + 0.5))` the
-/// displacement grows by `((from_x - to_x) * kx, (from_y - to_y) * ky)` and the weight by 1.0, with
-/// `kx = (w_l - 1) / (W - 1)` and `ky = (h_l - 1) / (H - 1)` (the corner aligned scale of the
-/// solver's flow upsampling; ky is the vertical twin of the contract's `k_l`, U). Two points on
-/// one pixel add up, so the consumer `flow = d / w` takes their mean. The values are in the
-/// solver's own sign (see the module documentation). An output with a side below 2 (never
-/// searched) gives empty levels. Records gap G2 when there is at least one pair.
+/// finest first: [`user_displacement_with`] without the 360 mode.
 pub fn user_displacement(pairs: &[([f32; 2], [f32; 2])], geo: &FlowGeometry, out: (usize, usize)) -> UserDisplacement {
+    user_displacement_with(pairs, geo, out, false)
+}
+
+/// The user displacement of a layer from its point pairs `(from X, to Y)` in output pixels (`out` the output size
+/// `(W, H)`), one [`UserLevel`] per level of the solver geometry `geo`, finest first (READ, TwixtorPro_64: the setter
+/// called before every layer solve, the point splat, the finish with the normalisation and the scale step; TRACED on
+/// `pt-use2-n2`):
+/// 1. level 0 (`w0 x h0`): `kx = (f32)(w0 - 1) / (f32)(W - 1)`, `ky` the same with the heights; per pair in point order
+///    `x = from_x * kx`, `y = from_y * ky`, the pixel `(int)((double)x + 0.5)`, `(int)((double)y + 0.5)` (truncation in
+///    double); a pair lands only when that pixel lies in the level (nothing else is tested, also not `to`), then
+///    `d.x = (to_x * kx - x) + d.x`, `d.y = (to_y * ky - y) + d.y`, `w = w + 1.0`;
+/// 2. where `0.0 < w`: `d.x = d.x / w`, `d.y = d.y / w`, `w = 1.0` (the mean of the pairs on a pixel);
+/// 3. `d = -1.0 * d` at every pixel (the solver's own sign, module documentation);
+/// 4. every coarser level from the one above it: `d` and `w` blurred with the binomial blur of the image pyramid and
+///    resampled to the level's size, then `d.x` scaled by `(f32)(w_l - 1) / (f32)(w_{l-1} - 1)` and `d.y` by the
+///    same quotient of the heights; `wrap` is the 360 mode of these filters (the flag the solve's 360 mode gives).
+///
+/// The solver's consumer sets `flow = d / w` where `w != 0` (`flow::extras::apply_user`), so a coarse level carries
+/// the blurred spread of the level 0 pairs. An output with a side below 2 (never searched) gives empty levels.
+/// Records gap G2 when there is at least one pair.
+pub fn user_displacement_with(pairs: &[([f32; 2], [f32; 2])], geo: &FlowGeometry, out: (usize, usize), wrap: bool) -> UserDisplacement {
     if !pairs.is_empty() {
         fx_core::gaps::record(&crate::gaps::G2);
     }
-    UserDisplacement { levels: geo.sizes.iter().map(|&(wl, hl)| splat(pairs, wl, hl, out)).collect() }
+    let mut levels: Vec<UserLevel> = Vec::with_capacity(geo.sizes.len());
+    for (l, &(wl, hl)) in geo.sizes.iter().enumerate() {
+        let lvl = if l == 0 { finest_level(pairs, wl, hl, out) } else { coarser_level(&levels[l - 1], geo.sizes[l - 1], (wl, hl), wrap) };
+        levels.push(lvl);
+    }
+    UserDisplacement { levels }
 }
 
 /// The flow of a layer whose Track is off (role V, arithmetic U; rule G5): the displacement
 /// interpolated from its point pairs `(from X, to Y)` in output pixels (`out` the output size)
 /// instead of an optical flow estimate, at the working resolution `geo.width x geo.height`. The
-/// level 0 splat of [`user_displacement`] gives `d / w` at every pixel with a point; the other
+/// level 0 splat of this project's rule G2 (module documentation: the pixel `cvtt(from * k + 0.5)` of a pair whose
+/// `from` lies in the frame and whose `to` is finite, `d += (from - to) * k`) gives `d / w` at every pixel with a point; the other
 /// pixels are holes of a u8 mask (255), filled by the pull-push fill `holefill::fill_flow_holes`
 /// (no 360 wrap), with no further blur; the field is then multiplied by `-1.0` into the solver's
 /// output convention `X(p) ~ Y(p + flow(p))`, so a pixel with one point holds exactly

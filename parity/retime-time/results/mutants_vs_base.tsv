@@ -1,0 +1,26 @@
+mutant	file	expect	changed_cases	changed_vs_base	exit_changes	groups	what
+m01_u8_round_dropped	blend.rs	kill	74	76	0	big:2;extreme:5;framenum:5;interp:9;keyed:5;length:6;long:6;long6000:1;marks:8;rate:14;speed:13	8 bpc blend truncates instead of rounding (+0.5 dropped)
+m02_u16_operands_swapped	blend.rs	kill	45	47	0	extreme:3;framenum:2;interp:6;keyed:5;length:4;long:4;marks:5;rate:5;speed:11	16 bpc blend with the operands swapped (weight applies to the other frame)
+m03_f32_blend_in_f64	blend.rs	kill	79	80	0	big:2;extreme:4;fields:2;framenum:3;interp:7;keyed:5;length:4;long:5;marks:5;rate:19;special:11;speed:12	32 bpc blend sum computed in f64 and rounded once
+m04_blend_snap_wider	blend.rs	kill	63	65	0	extreme:6;fields:1;framenum:6;interp:6;length:3;long:10;long6000:1;marks:3;rate:13;speed:14	blend snap-to-copy tolerance 0.005 -> 0.01
+m05_extrapolation_weight	blend.rs	kill	25	27	0	extreme:9;framenum:6;interp:3;keyed:1;marks:1;special:2;speed:3	extrapolation branch passes w instead of 1 - w to lerp (swapped weight)
+m06_lerp_clamp_dropped	blend.rs	kill	15	17	0	extreme:6;framenum:4;interp:2;marks:1;speed:2	integer lerp no longer clamps colours to 0..=alpha
+m07_weighted_weight_swapped	blend.rs	kill	72	74	0	extreme:6;fields:3;framenum:12;interp:30;keyed:2;long:4;marks:1;rate:12;special:2	Weighted Blend uses wa instead of 1 - wa as the blend weight
+m08_f32_plus_zero_dropped	blend.rs	maybe equivalent	3	5	0	special:3	32 bpc blend no longer adds 0.0 (turns -0 into +0)
+m09_exact_tolerance_wider	timeline.rs	equivalent in scope	0	2	0		exact-frame tolerance 0.005 -> 0.01 (the exact flag only gates the vector path, so none expected at vectors=1)
+m10_nearest_tie_to_b	timeline.rs	kill	27	29	0	fields:1;interp:9;keyed:1;marks:7;rate:4;special:5	Nearest at exactly half way takes the later frame
+m11_trunc_vs_floor	timeline.rs	kill	28	30	0	extreme:9;framenum:9;interp:3;keyed:1;marks:1;special:2;speed:3	frame choice floors the source position instead of truncating (differs below 0)
+m12_b_frame_off_by_one	timeline.rs	kill	299	299	0	big:6;extreme:30;fields:3;framenum:30;interp:42;keyed:17;length:15;long:16;long6000:1;marks:23;rate:49;special:22;speed:45	second source frame is a + 2
+m13_k_bias	timeline.rs	kill	3	5	0	rate:3	tick bias and rate-equality tolerance K 0.1 -> 0.05
+m14_snap_tolerance	timeline.rs	kill	3	5	0	long6000:1;rate:2	typed frame rate snapping tolerance 2e-5 -> 4e-5
+m15_speed_sum_in_f64	timeline.rs	kill	53	54	0	extreme:4;fields:2;interp:7;keyed:4;length:4;long:11;marks:2;special:6;speed:13	Speed half-frame sum accumulated in f64 instead of f32
+m16_marker_cut_one_way	timeline.rs	kill	11	13	0	marks:11	a label change only cuts when the label falls (ma > mb)
+m17_marker_time_unrounded	timeline.rs	kill	8	10	0	marks:8	marker sample time loses its +0.5 rounding
+m18_frame_time_round_dropped	timeline.rs	kill	4	6	0	rate:4	frame time for near-equal rates loses its +0.5 rounding
+m19_fields_not_doubled	timeline.rs	kill	10	12	0	fields:10	input fields no longer double the source rate
+m20_dur_in_f32	timeline.rs	equivalent in practice	0	2	0		source frame duration computed in f32 instead of f64 (a search over input rates 0.1 to 1000 in steps of 0.01 against 13 output rates and 14 frames found no frame time that moves)
+m21_framenum_ratio_in_f32	timeline.rs	kill	8	10	0	rate:8	Frame Num rate ratio applied in f32 instead of f64
+m22_speed_ratio_in_f32	timeline.rs	kill	16	18	0	long6000:1;marks:4;rate:11	Speed rate ratio applied in f32 instead of f64
+m23_planner_second_frame	planner.rs	call record only	0	2	0		planner asks the host for frames f and f + 2 (changes the call record only; the fast path reads select's frames)
+m24_blend_weight_f32	timeline.rs	equivalent	0	2	0		blend weight 1 - wa in f32 instead of f64 then narrowed (should be identical)
+m25_dur_operand_order	timeline.rs	equivalent in practice	0	2	0		source frame duration computed as lts * (out / in) (no input found where the f32 result differs)

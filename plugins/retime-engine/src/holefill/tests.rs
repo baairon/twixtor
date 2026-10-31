@@ -578,6 +578,114 @@ fn a_constant_flow_survives_its_holes() {
 }
 
 // ------------------------------------------------------------------------------------------------
+// the vertical tap order (VerticalTaps)
+// ------------------------------------------------------------------------------------------------
+
+/// The G plane of output frame 1 of the probe case `vectors-in.hf1-12x9-4-6`: the frame pushed by
+/// (2, 3) pixels, 12 x 9, in
+/// the bottom-up rows the fill of `TwixtorProVectorsIn_64` sees, holes zeroed (`HF1_MASK`: the
+/// three rows 0 to 2 and columns 0 and 1).
+const HF1_W: usize = 12;
+const HF1_H: usize = 9;
+const HF1_INPUT: [u32; 108] = [
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x428bb2d1, 0x42df23fc,
+        0x447853a8, 0x446f63a0, 0x434e6364, 0x440877ce, 0x440fc25f, 0x43cfbf20, 0x44032d4b, 0x4418b309,
+        0x00000000, 0x00000000, 0x41c80000, 0x442c8825, 0x43788fdc, 0x4388c972, 0x43d35188, 0x43d783cd,
+        0x44757f9a, 0x4400e6ea, 0x44168b78, 0x44006c2d, 0x00000000, 0x00000000, 0x42fb3400, 0x43050d2b,
+        0x445afc81, 0x42549c00, 0x44787e58, 0x433533d0, 0x4459db77, 0x444eea43, 0x439e716d, 0x440fa8cc,
+        0x00000000, 0x00000000, 0x443e4000, 0x43880e3d, 0x44401029, 0x42def5e0, 0x4475851d, 0x422e5a00,
+        0x4411fe65, 0x44379306, 0x436fec80, 0x44324f0e, 0x00000000, 0x00000000, 0x43cc2000, 0x4354188a,
+        0x430995f1, 0x4411cda6, 0x43bee412, 0x41bc4710, 0x43bab9c8, 0x43a13380, 0x443145cc, 0x438d0515,
+        0x00000000, 0x00000000, 0x42640000, 0x446919ff, 0x442b4161, 0x440ac68b, 0x43f13b92, 0x438e8cb8,
+        0x43b0357e, 0x445e803a, 0x42ad5b20, 0x447554d0,
+];
+const HF1_MASK: &str = "111111111111111111111111111111111111110000000000110000000000110000000000110000000000110000000000110000000000";
+/// The 48 hole values the original wrote (MEASURED under the emulator, `refs/` of probe hf1),
+/// in row order.
+const HF1_PLUGIN: [u32; 48] = [
+        0x43b473d7, 0x43b8e616, 0x43c0ae12, 0x43cc571f, 0x43d92ea2, 0x43e34296, 0x43ea2f59, 0x43f01a31,
+        0x43f58273, 0x43f9ab57, 0x43fc96f1, 0x43fea27e, 0x43b08f0b, 0x43b39371, 0x43bbda7b, 0x43cba56c,
+        0x43dd8ebf, 0x43e8f9bb, 0x43ee0f61, 0x43f2cfae, 0x43f84c41, 0x43fc54cd, 0x43ff0646, 0x4400a1a5,
+        0x43aa0ee3, 0x43aa7471, 0x43b3541c, 0x43c97612, 0x43e2f652, 0x43f092a0, 0x43f3ff0b, 0x43f8c207,
+        0x43ffa81c, 0x4401aed5, 0x44024da7, 0x440311f6, 0x43a39b2a, 0x43a1597c, 0x43a28e41, 0x439ffd84,
+        0x43a8777d, 0x43a8b9e6, 0x43af90d9, 0x43b3918a, 0x43b1ccc7, 0x43b83410, 0x43afb395, 0x43b76508,
+];
+/// The same holes filled with the engine's other tap order, as the rewrite filled them before.
+const HF1_BELOW_FIRST: [u32; 48] = [
+        0x43b473d7, 0x43b8e616, 0x43c0ae12, 0x43cc571f, 0x43d92ea2, 0x43e34296, 0x43ea2f59, 0x43f01a31,
+        0x43f58273, 0x43f9ab57, 0x43fc96f1, 0x43fea27e, 0x43b08f0b, 0x43b39371, 0x43bbda7b, 0x43cba56c,
+        0x43dd8ec0, 0x43e8f9bc, 0x43ee0f61, 0x43f2cfae, 0x43f84c41, 0x43fc54cd, 0x43ff0647, 0x4400a1a5,
+        0x43aa0ee3, 0x43aa7472, 0x43b3541c, 0x43c97612, 0x43e2f652, 0x43f092a0, 0x43f3ff0d, 0x43f8c208,
+        0x43ffa81c, 0x4401aed5, 0x44024da7, 0x440311f6, 0x43a39b2a, 0x43a1597d, 0x43a28e41, 0x439ffd84,
+        0x43a8777d, 0x43a8b9e6, 0x43af90d9, 0x43b3918a, 0x43b1ccc7, 0x43b8340f, 0x43afb395, 0x43b76508,
+];
+
+fn hf1_fill(taps: VerticalTaps) -> Vec<u32> {
+    let mut plane: Vec<f32> = HF1_INPUT.iter().map(|&b| f32::from_bits(b)).collect();
+    let mask: Vec<u8> = HF1_MASK.bytes().map(|b| if b == b'1' { 255 } else { 0 }).collect();
+    fill_plane_with(&mut plane, HF1_W, HF1_H, HoleMaskRef::U8(&mask), false, taps).unwrap();
+    plane.iter().zip(&mask).filter(|(_, &m)| m != 0).map(|(v, _)| v.to_bits()).collect()
+}
+
+#[test]
+fn above_first_reproduces_the_holes_the_vectors_in_plugin_filled() {
+    assert_eq!(HF1_MASK.len(), HF1_W * HF1_H);
+    assert_eq!(hf1_fill(VerticalTaps::AboveFirst), HF1_PLUGIN.to_vec());
+    // the engine's order is the default, and it differs from the plugin in 8 of the 48 values
+    let below = hf1_fill(VerticalTaps::default());
+    assert_eq!(below, HF1_BELOW_FIRST.to_vec());
+    assert_eq!(below.iter().zip(HF1_PLUGIN.iter()).filter(|(a, b)| a != b).count(), 8);
+    let mut plane: Vec<f32> = HF1_INPUT.iter().map(|&b| f32::from_bits(b)).collect();
+    let mask: Vec<u8> = HF1_MASK.bytes().map(|b| if b == b'1' { 255 } else { 0 }).collect();
+    fill_plane(&mut plane, HF1_W, HF1_H, HoleMaskRef::U8(&mask), false).unwrap();
+    let plain: Vec<u32> = plane.iter().zip(&mask).filter(|(_, &m)| m != 0).map(|(v, _)| v.to_bits()).collect();
+    assert_eq!(plain, below, "fill_plane is the BelowFirst fill");
+}
+
+#[test]
+fn the_tap_order_reaches_every_entry_point_and_keeps_the_known_pixels() {
+    let (w, h) = (17usize, 13usize);
+    let mut rng = Rng(0x5eed_0004);
+    let mut mask = vec![0u8; w * h];
+    rect(&mut mask, w, 0, 0, w, 2);
+    rect(&mut mask, w, 0, 0, 3, h);
+    let img = image_from(Fmt::F32, w, h, &mut rng);
+    let cov = crate::warp::Coverage { width: w, height: h, data: mask.clone() };
+    let (mut a, mut b, mut c) = (img.clone(), img.clone(), img.clone());
+    fill_holes_with(&mut a, &cov, false, VerticalTaps::AboveFirst).unwrap();
+    fill_holes_masked_with(&mut b, HoleMaskRef::U8(&mask), false, VerticalTaps::AboveFirst).unwrap();
+    fill_holes(&mut c, &cov, false).unwrap();
+    assert!(same_bits(&a, &b));
+    assert!(!same_bits(&a, &c), "the two orders differ somewhere in the holes");
+    let (sa, si) = (samples_f32(&a), samples_f32(&img));
+    for i in 0..w * h {
+        if mask[i] == 0 {
+            for ch in 0..CHANNELS {
+                assert_eq!(sa[i * CHANNELS + ch].to_bits(), si[i * CHANNELS + ch].to_bits(), "known pixel {i}");
+            }
+        }
+    }
+    // the flow fill: each component is the plane fill with the same order
+    let mut flow = FlowField::new(w, h);
+    for (i, v) in flow.data.iter_mut().enumerate() {
+        *v = (i % 23) as f32 * 0.37 - 3.0;
+    }
+    let mut want0: Vec<f32> = flow.data.iter().step_by(2).copied().collect();
+    fill_plane_with(&mut want0, w, h, HoleMaskRef::U8(&mask), false, VerticalTaps::AboveFirst).unwrap();
+    fill_flow_holes_with(&mut flow, HoleMaskRef::U8(&mask), false, VerticalTaps::AboveFirst).unwrap();
+    let got0: Vec<u32> = flow.data.iter().step_by(2).map(|v| v.to_bits()).collect();
+    assert_eq!(got0, want0.iter().map(|v| v.to_bits()).collect::<Vec<_>>());
+    // without a hole either order is the identity
+    let mut d = img.clone();
+    fill_holes_masked_with(&mut d, HoleMaskRef::U8(&vec![0u8; w * h]), false, VerticalTaps::AboveFirst).unwrap();
+    assert!(same_bits(&d, &img));
+}
+
+// ------------------------------------------------------------------------------------------------
 // independent f64 reference of the pull-push fill
 // ------------------------------------------------------------------------------------------------
 
@@ -971,6 +1079,7 @@ fn mask_ref(kind: u32, bytes: &[u8]) -> OwnedMask {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn wrap_model_fixtures_hole_fill_is_reproduced_bit_for_bit() {
     let mut n = 0;
     let mut depths = [0usize; 3];
@@ -1373,6 +1482,7 @@ mod reference_wrap {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_wrap_fill_agrees_with_an_independent_double_precision_reference() {
     let mut rng = Rng(5678);
     let sizes = [(2usize, 2usize), (3, 3), (7, 5), (12, 9), (17, 17), (33, 20), (5, 40), (64, 12)];
@@ -1456,4 +1566,120 @@ fn timing_probe_1080p() {
     let t = std::time::Instant::now();
     fill_flow_holes(&mut fl, HoleMaskRef::U8(&m2), false).unwrap();
     println!("[f1] flow fill 960x540: {:?}", t.elapsed());
+}
+
+// ------------------------------------------------------------------------------------------------
+// NaN colours: the fill is repeated with the NaN rule (crate::nanrule) when its result holds a NaN
+// ------------------------------------------------------------------------------------------------
+
+#[test]
+fn the_fill_with_the_nan_rule_gives_the_plain_numbers_in_every_mode() {
+    let (w, h) = (19usize, 13usize);
+    let mut rng = Rng(0x5eed_0f6f);
+    let mut mask = vec![0u8; w * h];
+    rect(&mut mask, w, 0, 0, w, 3);
+    rect(&mut mask, w, 0, 0, 4, h);
+    rect(&mut mask, w, 9, 5, 14, 9);
+    let num: Vec<f32> = (0..w * h).map(|_| rng.unit() * 300.0 - 100.0).collect();
+    let mut special = num.clone();
+    special[6 * w + 6] = f32::INFINITY;
+    special[6 * w + 7] = f32::NEG_INFINITY;
+    special[10 * w + 16] = f32::from_bits(0x7fc0_0000);
+    let bits = |v: &[f32]| v.iter().map(|x| x.to_bits()).collect::<Vec<u32>>();
+    for is360 in [false, true] {
+        for taps in [VerticalTaps::BelowFirst, VerticalTaps::AboveFirst] {
+            let f = Filler::new(w, h, HoleMaskRef::U8(&mask), is360, taps).unwrap().unwrap();
+            assert_eq!(bits(&f.solve(&num, true)), bits(&f.solve(&num, false)), "numbers {is360} {taps:?}");
+            let (r, p) = (f.solve(&special, true), f.solve(&special, false));
+            assert!(r.iter().any(|v| v.is_nan()), "the infinities make NaNs");
+            for (i, (a, b)) in r.iter().zip(&p).enumerate() {
+                assert!(a.to_bits() == b.to_bits() || (a.is_nan() && b.is_nan()), "sample {i} {is360} {taps:?}");
+            }
+            // a plane without NaN in its result is filled once, with the plain operations
+            let mut once = num.clone();
+            f.fill(&mut once);
+            assert_eq!(bits(&once), bits(&f.solve(&num, false)));
+        }
+    }
+}
+
+#[cfg(feature = "emulator-nan")]
+#[test]
+fn where_two_nans_meet_in_the_fill_the_nan_rule_picks_the_result() {
+    // a positive and a negative quiet NaN side by side, and an infinity next to its negative (their sums make the
+    // default NaN 0xffc00000): with the emulator's rule every NaN the fill makes is the positive one, whatever the
+    // order of the operands; the known negative NaN keeps its own bits
+    let (w, h) = (16usize, 12usize);
+    let mut mask = vec![0u8; w * h];
+    rect(&mut mask, w, 0, 0, w, 4);
+    let (pos, neg) = (0x7fc0_0000u32, 0xffc0_0000u32);
+    let mut plane: Vec<f32> = (0..w * h).map(|i| (i % 7) as f32 * 0.25).collect();
+    plane[6 * w + 5] = f32::from_bits(neg);
+    plane[6 * w + 6] = f32::from_bits(pos);
+    plane[9 * w + 10] = f32::INFINITY;
+    plane[9 * w + 11] = f32::NEG_INFINITY;
+    for taps in [VerticalTaps::BelowFirst, VerticalTaps::AboveFirst] {
+        let mut p = plane.clone();
+        fill_plane_with(&mut p, w, h, HoleMaskRef::U8(&mask), false, taps).unwrap();
+        assert!(p[..4 * w].iter().all(|v| v.is_nan()), "every hole sees the NaNs");
+        for (i, v) in p.iter().enumerate() {
+            if i == 6 * w + 5 {
+                assert_eq!(v.to_bits(), neg, "a known pixel keeps its NaN");
+            } else if v.is_nan() {
+                assert_eq!(v.to_bits(), pos, "pixel ({}, {}) {taps:?}", i % w, i / w);
+            }
+        }
+        assert_eq!(p[9 * w + 10], f32::INFINITY, "a known infinity comes back");
+    }
+}
+
+// A traced fill of the original: `specbox1-w1` (fgbg-layers, 32 bpc,
+// 16x12) frame 1, FG1's plate of side A, colour channel 2, the plane handed to the plugin's single channel fill
+// (equal to the rewrite's plate bit for bit) and the plane the plugin wrote back (the image at the channel copy
+// right after the fill), both in the rewrite's rows, with the holes of the plate's mask (`1` a hole).
+#[cfg(feature = "emulator-nan")]
+const TP_HOLES: &str = "000000000000000000000000000000000000000000000000000000000000000000011111100000000001111110000000000111111000000000011111100000000001111110000000000111111000000000000000000000000000000000000000";
+#[cfg(feature = "emulator-nan")]
+const TP_INPUT: [u32; 192] = [
+    0x3ecde0c5, 0x3ef352c6, 0x3f1eb156, 0x3f462d47, 0x3f46d54d, 0x3f5fbbba, 0x3f4590bb, 0x3f40bc70, 0x3f1baa70, 0x3ef2e040, 0x3ebee233, 0x3e85ba8a, 0x3e57caef, 0x3e16e878, 0x3e500531, 0x3e736ad7,
+    0x3f218c02, 0x3f452857, 0x3f4a8c43, 0x3f5f2e72, 0x3f56c10a, 0x3f4bcb44, 0x3f257d4e, 0x3f0b4be2, 0x3ebee1d9, 0x3e9479bf, 0x3e5ce4f1, 0x3e245343, 0x3e603bf2, 0x3e52e5c6, 0x3ead5dc5, 0x3f077c41,
+    0x3f4de3ee, 0x3f4dc934, 0x3f631b52, 0x3f4eaace, 0x3f384c7f, 0x3f17d766, 0x3ed8e6b4, 0x3ea9f465, 0x3e58ab71, 0x3e19f57b, 0x3e35ce2c, 0x3e678ad8, 0x3eba96c2, 0x3eea41c9, 0x3f0e0012, 0x3f3c7b0a,
+    0x3f605fe1, 0x3f51095e, 0x3f33f85a, 0x3f167dca, 0x3efc88f4, 0x3eba0bb4, 0x3e68bd28, 0x3e020587, 0x3e478d6c, 0x3e3e7472, 0x3e818b81, 0x3ecb30a0, 0x3f09a0a9, 0x3f36caeb, 0x3f52a028, 0x3f615e15,
+    0x3f3d1279, 0x3f2bfe05, 0x3eff455a, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffc00000, 0xffc00000, 0x3ed40f97, 0x3efa0985, 0x3f1f6f7c, 0x3f4d10f0, 0x3f580087, 0x3f5dc2d8, 0x3f4b6e6d,
+    0x3f0c0225, 0x3eac1151, 0x3e5c1a7a, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0xffc00000, 0x3f16eb2f, 0x3f3e3af7, 0x3f5b0575, 0x3f5fc5db, 0x3f4ca8fc, 0x3f35babf, 0x3f16e7a3,
+    0x3e781816, 0x3e6b1795, 0x3e2b8ce5, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f58098b, 0x3f573cce, 0x3f603c23, 0x3f42eb1b, 0x3f1bd49e, 0x3f0c6865, 0x3ece9a6d,
+    0x3e529a08, 0x3e1c4d8c, 0x7fc00000, 0x7fc00000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f548183, 0x3f506469, 0x3f235ce1, 0x3f0be1da, 0x3ed74d0b, 0x3e8bb7cb, 0x3e223a18,
+    0x3e1f86eb, 0x3e8b6129, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3f31711a, 0x3f0c6da4, 0x3ee06dfe, 0x3e92e4f9, 0x3e7ed582, 0x3e1e2598, 0x3de2f479,
+    0x3ebaf385, 0x3ef8cd07, 0xffc00000, 0x7fc00000, 0x7fc00000, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x3ef22caf, 0x3ea82aed, 0x3e43824d, 0x3e41dfa8, 0x3e049226, 0x3e487ca4, 0x3e98d66d,
+    0x3f1ff308, 0x3f3d4ba9, 0x3f54094b, 0x3f539b1a, 0x3f59cd73, 0x3f406a01, 0x3f1cf8ab, 0x3f0af8b5, 0x3eb0b0bb, 0x3e98f11f, 0x3e10ea3b, 0x3e25cba5, 0x3e3b2b2b, 0x3e84c412, 0x3eb21cb5, 0x3f09ff20,
+    0x3f55278f, 0x3f52df3d, 0x3f4b92ef, 0x3f52fa78, 0x3f3318ee, 0x3f10cd3d, 0x3ecb7e2d, 0x3e8aa715, 0x3e66b6f5, 0x3e174a14, 0x3debf9ed, 0x3e82e055, 0x3e9ed9fe, 0x3ef29d27, 0x3f25caaf, 0x3f31693a,
+];
+#[cfg(feature = "emulator-nan")]
+const TP_PLUGIN: [u32; 192] = [
+    0x3ecde0c5, 0x3ef352c6, 0x3f1eb156, 0x3f462d47, 0x3f46d54d, 0x3f5fbbba, 0x3f4590bb, 0x3f40bc70, 0x3f1baa70, 0x3ef2e040, 0x3ebee233, 0x3e85ba8a, 0x3e57caef, 0x3e16e878, 0x3e500531, 0x3e736ad7,
+    0x3f218c02, 0x3f452857, 0x3f4a8c43, 0x3f5f2e72, 0x3f56c10a, 0x3f4bcb44, 0x3f257d4e, 0x3f0b4be2, 0x3ebee1d9, 0x3e9479bf, 0x3e5ce4f1, 0x3e245343, 0x3e603bf2, 0x3e52e5c6, 0x3ead5dc5, 0x3f077c41,
+    0x3f4de3ee, 0x3f4dc934, 0x3f631b52, 0x3f4eaace, 0x3f384c7f, 0x3f17d766, 0x3ed8e6b4, 0x3ea9f465, 0x3e58ab71, 0x3e19f57b, 0x3e35ce2c, 0x3e678ad8, 0x3eba96c2, 0x3eea41c9, 0x3f0e0012, 0x3f3c7b0a,
+    0x3f605fe1, 0x3f51095e, 0x3f33f85a, 0x3f167dca, 0x3efc88f4, 0x3eba0bb4, 0x3e68bd28, 0x3e020587, 0x3e478d6c, 0x3e3e7472, 0x3e818b81, 0x3ecb30a0, 0x3f09a0a9, 0x3f36caeb, 0x3f52a028, 0x3f615e15,
+    0x3f3d1279, 0x3f2bfe05, 0x3eff455a, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x3ed40f97, 0x3efa0985, 0x3f1f6f7c, 0x3f4d10f0, 0x3f580087, 0x3f5dc2d8, 0x3f4b6e6d,
+    0x3f0c0225, 0x3eac1151, 0x3e5c1a7a, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x3f16eb2f, 0x3f3e3af7, 0x3f5b0575, 0x3f5fc5db, 0x3f4ca8fc, 0x3f35babf, 0x3f16e7a3,
+    0x3e781816, 0x3e6b1795, 0x3e2b8ce5, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x3f58098b, 0x3f573cce, 0x3f603c23, 0x3f42eb1b, 0x3f1bd49e, 0x3f0c6865, 0x3ece9a6d,
+    0x3e529a08, 0x3e1c4d8c, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x3f548183, 0x3f506469, 0x3f235ce1, 0x3f0be1da, 0x3ed74d0b, 0x3e8bb7cb, 0x3e223a18,
+    0x3e1f86eb, 0x3e8b6129, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x3f31711a, 0x3f0c6da4, 0x3ee06dfe, 0x3e92e4f9, 0x3e7ed582, 0x3e1e2598, 0x3de2f479,
+    0x3ebaf385, 0x3ef8cd07, 0xffc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x7fc00000, 0x3ef22caf, 0x3ea82aed, 0x3e43824d, 0x3e41dfa8, 0x3e049226, 0x3e487ca4, 0x3e98d66d,
+    0x3f1ff308, 0x3f3d4ba9, 0x3f54094b, 0x3f539b1a, 0x3f59cd73, 0x3f406a01, 0x3f1cf8ab, 0x3f0af8b5, 0x3eb0b0bb, 0x3e98f11f, 0x3e10ea3b, 0x3e25cba5, 0x3e3b2b2b, 0x3e84c412, 0x3eb21cb5, 0x3f09ff20,
+    0x3f55278f, 0x3f52df3d, 0x3f4b92ef, 0x3f52fa78, 0x3f3318ee, 0x3f10cd3d, 0x3ecb7e2d, 0x3e8aa715, 0x3e66b6f5, 0x3e174a14, 0x3debf9ed, 0x3e82e055, 0x3e9ed9fe, 0x3ef29d27, 0x3f25caaf, 0x3f31693a,
+];
+
+#[cfg(feature = "emulator-nan")]
+#[test]
+fn a_traced_fill_of_nan_colours_is_the_plugins_bit_for_bit() {
+    let (w, h) = (16usize, 12usize);
+    let mask: Vec<u8> = TP_HOLES.bytes().map(|b| if b == b'1' { 255 } else { 0 }).collect();
+    assert_eq!(mask.len(), w * h);
+    let mut plane: Vec<f32> = TP_INPUT.iter().map(|&b| f32::from_bits(b)).collect();
+    fill_plane_with(&mut plane, w, h, HoleMaskRef::U8(&mask), false, VerticalTaps::AboveFirst).unwrap();
+    let got: Vec<u32> = plane.iter().map(|v| v.to_bits()).collect();
+    assert_eq!(got, TP_PLUGIN.to_vec());
+    // the plane holds NaNs of both signs, so the fill went through the NaN rule
+    assert!(TP_INPUT.contains(&0x7fc0_0000) && TP_INPUT.contains(&0xffc0_0000));
 }

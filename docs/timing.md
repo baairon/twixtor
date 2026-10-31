@@ -1,6 +1,6 @@
 # Timing
 
-How the retiming effects map each output frame to a source position, and what that position produces. The arithmetic is `plugins/retime-engine/src/timeline.rs`. Key syntax: [README: parameter values](../README.md#parameter-values).
+How the retiming effects map each output frame to a source position, and what that position produces. The arithmetic is `plugins/retime-engine/src/timeline.rs`. Key syntax: [reference: parameter values](reference.md#parameter-values).
 
 ## Terms
 
@@ -10,7 +10,7 @@ How the retiming effects map each output frame to a source position, and what th
 | source position | the source frame an output frame shows, possibly fractional: 17.9 is 90% of the way from frame 17 to 18 |
 | exact frame | a position within 0.005 of a whole frame: that frame is copied, not built |
 | in-between frame | any other position: built from source frames `trunc(p)` and `trunc(p) + 1` |
-| tick | the unit keys are stored in: 1/100 of a frame at integer rates, 1/D of a frame at a rate N/D ([README: time base](../README.md#parameter-values)) |
+| tick | the unit keys are stored in: 1/100 of a frame at integer rates, 1/D of a frame at a rate N/D ([reference: time base](reference.md#parameter-values)) |
 
 ## Speed mode
 
@@ -20,7 +20,7 @@ How the retiming effects map each output frame to a source position, and what th
 P(n) = sum for j = 1 to n of (S(j - 1/2) + S(j)) / 2
 ```
 
-S is the speed as a fraction (`speed_percent` / 100), each sample read at the tick `trunc(t + 0.1)` of its half frame t. A fractional output position adds a partial step, the result is multiplied by the ratio of the source and output rates ([rate model](#rate-model)), and a negative output position gives 0.
+S is the speed as a fraction (`speed_percent` / 100), each sample read at the tick `trunc(t + 0.05)` of its half frame t. A fractional output position adds a partial step, the result is multiplied by the ratio of the source and output rates ([rate model](#rate-model)), and a negative output position gives 0.
 
 - The sum exceeds the exact area under the curve by (S(n) - S(0)) / 4 frames: a quarter frame for every 100 points by which the current speed differs from the speed at frame 0. The shift vanishes when the speed returns to its starting value.
 - A key does not mark a source frame: in `100@0;50@24;100@48` the key at output frame 24 lands on source position 17.9 and the key at 48 on 36.0.
@@ -120,7 +120,7 @@ A run that starts off the grid has no exact frames. Above 100%, speeds that are 
 
 | Setting | p(t) |
 |---|---|
-| Speed mode (`time_remap_mode=1`) in `retime`, `retime-fgbg` and `vectors-in` | linear between the knots of the half frame sum of [Speed mode](#speed-mode) (32-bit floats, the speed read at tick trunc(L x k / 2 + 0.1)), plus trunc(`src_time_offset`) x out_fps / in_fps in `retime` |
+| Speed mode (`time_remap_mode=1`) in `retime`, `retime-fgbg` and `vectors-in` | linear between the knots of the half frame sum of [Speed mode](#speed-mode) (32-bit floats, the speed read at tick trunc(L x k / 2 + 0.05)), plus trunc(`src_time_offset`) x out_fps / in_fps in `retime` |
 | Frame Number mode (`time_remap_mode=2`) | `frame_num` at the continuous tick t x L, with its keys, eases and handles; a hold stays put until the next key and jumps there |
 | `display=2` (Source) | t + trunc(`src_time_offset`) in `retime`, t in `retime-fgbg` and `vectors-in` |
 | `create-vectors`, a frame effect, any other effect | t |

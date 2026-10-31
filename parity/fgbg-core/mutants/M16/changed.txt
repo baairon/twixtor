@@ -1,0 +1,13 @@
+retime-fgbg.blur10-neg.movebox-20x14.d32.21ca1c32
+retime-fgbg.edge-w3-big.edge-16x12.d16.b2f53503
+retime-fgbg.interp1-w3.movebox-16x12.d32.5b7fb75b
+retime-fgbg.interp1-w4.pan-16x12.d32.fe29ea0e
+retime-fgbg.interp3-w3.movebox-16x12.d32.7bd51b88
+retime-fgbg.interp3-w4.pan-16x12.d32.5834f016
+retime-fgbg.mix03.movebox-17x13.d32.8dc9d18c
+retime-fgbg.mot-backbox-w3.backbox-48x32.d32.b5a585d3
+retime-fgbg.mot-fastbox-w4.fastbox-48x32.d32.0d594dda
+retime-fgbg.mot-movebox-w3.movebox-48x32.d32.64387cd9
+retime-fgbg.mot-pan-w3.pan-48x32.d16.0719f004
+retime-fgbg.warp3.movebox-24x16.d32.1973d907
+retime-fgbg.warp4.movebox-24x16.d32.de9a8d85

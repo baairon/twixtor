@@ -1,0 +1,126 @@
+{
+ "measured_at": "2026-10-30",
+ "checks": [
+  {
+   "check": "perfect: bin vfx reproduces results/base.tsv",
+   "ok": true,
+   "detail": "399 of 399 outputs equal their base.tsv hash"
+  },
+  {
+   "check": "perfect: 0 differing, all compared",
+   "ok": true,
+   "detail": "pass 399, FAIL 0, differing values 0, max ULP 0"
+  },
+  {
+   "check": "perfect: no audit disagreement",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "perfect: mutants killed equals phase A count",
+   "ok": true,
+   "detail": "killed 21 of 22 (phase A: 21 change an output); survivors ['M05']"
+  },
+  {
+   "check": "calls: records built from the rewrite's own match",
+   "ok": true,
+   "detail": "compared 399, matching 399"
+  },
+  {
+   "check": "calls: exactly the damaged records mismatch",
+   "ok": true,
+   "detail": "compared 398, matching 394, mismatching 4"
+  },
+  {
+   "check": "calls: a record with no plugin side is 'no_plugin_record', not compared",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "calls: mismatch kinds and first differing output frame",
+   "ok": true,
+   "detail": "{\"extra_read\": [[\"extra_read\"], 3], \"missing_read\": [[\"missing_read\"], 3], \"wrong_time\": [[\"wrong_time\"], 3], \"wrong_index\": [[\"wrong_index\"], 3]}"
+  },
+  {
+   "check": "perturbed: exactly the perturbed cases differ",
+   "ok": true,
+   "detail": "8 differ, 8 perturbed"
+  },
+  {
+   "check": "perturbed: differing values and max ULP right per case",
+   "ok": true,
+   "detail": "ULPs ['0', '1', '8', 'None']"
+  },
+  {
+   "check": "perturbed: -0 against 0 counted as differing at ULP 0",
+   "ok": true,
+   "detail": "case retime-fgbg.specrgb-w1.specrgb-8x6.d32.863c5a4f sample 15 -0 to 0 in the reference"
+  },
+  {
+   "check": "perturbed: NaN payload change counted",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "perturbed: totals",
+   "ok": true,
+   "detail": "max ULP 8, differing values 8"
+  },
+  {
+   "check": "perturbed: kills computed only on cases where the base equals the reference",
+   "ok": true,
+   "detail": "killed 20 of 22; M20 became a survivor because both its cases were perturbed"
+  },
+  {
+   "check": "perturbed: no killer is a perturbed case",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "perturbed: summary counts",
+   "ok": true,
+   "detail": "{\"in_contract\": 399, \"compared\": 399, \"identical\": 391, \"differing\": 8, \"out_of_contract\": 23, \"logic_parity\": 5}"
+  },
+  {
+   "check": "missing refs: 'no reference', neither pass nor failure",
+   "ok": true,
+   "detail": "7 no reference, 392 pass, 0 FAIL"
+  },
+  {
+   "check": "missing refs: summary compared excludes them",
+   "ok": true,
+   "detail": "{\"in_contract\": 399, \"compared\": 392, \"identical\": 392, \"differing\": 0, \"out_of_contract\": 23, \"logic_parity\": 5}"
+  },
+  {
+   "check": "ooc: moved cases leave the in-contract count",
+   "ok": true,
+   "detail": "{\"in_contract_before\": 399, \"moved\": 7, \"in_contract_after\": 392, \"candidates\": 23, \"out_of_contract_total\": 30, \"not_judged\": 2, \"rendered_by_the_original\": 390, \"without_status\": 0, \"candidates_rendered_by_the_original\": 1}"
+  },
+  {
+   "check": "ooc: a candidate the original renders is flagged, never a pass or failure",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "check": "ooc: summary in_contract, compared and out_of_contract",
+   "ok": true,
+   "detail": "{\"in_contract\": 392, \"compared\": 392, \"identical\": 392, \"differing\": 0, \"out_of_contract\": 30, \"logic_parity\": 5}"
+  },
+  {
+   "check": "triage: ladder is a test set fx-parity runs",
+   "ok": true,
+   "detail": "4 rungs, 4 pass"
+  },
+  {
+   "check": "perfect: summary",
+   "ok": true,
+   "detail": "status in_progress, cases {\"in_contract\": 399, \"compared\": 399, \"identical\": 399, \"differing\": 0, \"out_of_contract\": 23, \"logic_parity\": 5}, mutants {\"total\": 22, \"killed\": 21, \"survivors\": [\"M05\"]}, call records {\"compared\": 399, \"matching\": 399}, blockers ['mutants survive: M05']"
+  },
+  {
+   "check": "selftest wrote nothing outside results/selftest",
+   "ok": true,
+   "detail": ""
+  }
+ ],
+ "failed": 0
+}

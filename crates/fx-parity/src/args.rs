@@ -12,7 +12,7 @@ usage:
   fx-parity gen --out DIR --families ID,...|all [--vfx PATH] [--effects ID,...]
                 [--jobs N]
   fx-parity run --testset DIR --refs DIR [--effect ID] [--json] [--brief]
-                [--strict] [--vfx PATH] [--jobs N]
+                [--strict] [--max-ulp N] [--vfx PATH] [--jobs N]
   fx-parity selfcheck --testset DIR [--effect ID] [--max-cases N]
                 [--threads N,...] [--json] [--vfx PATH] [--jobs N]
   fx-parity checklist --testset DIR [--out FILE] [--vfx PATH]
@@ -57,7 +57,9 @@ clip named by the case's `reference` in the references directory. 8 and 16 bpc
 must match exactly, 32 bpc within 1 ULP, clips frame by frame; a failing clip is
 reported with its first failing frame. Cases without a reference are listed as
 `no reference` and never count as a pass; --strict turns them into a failure.
---brief lists only the failures.
+--brief lists only the failures. --max-ulp N sets the accepted distance at 32 bpc in
+representable floats (default 1); 0 is bit for bit, so -0.0 against 0.0 and NaNs with
+other bits differ. 8 and 16 bpc stay exact. The report gives the largest distance either way.
 
 Every case that was compared also gets its mean error, the mean absolute difference over
 all pixels and all 4 channels as a percentage of full scale (255 at 8 bpc, 65535 at 16 bpc,
@@ -144,6 +146,7 @@ pub struct RunArgs {
     pub json: bool,
     pub brief: bool,
     pub strict: bool,
+    pub max_ulp: u64,
     pub vfx: Option<PathBuf>,
     pub jobs: Option<usize>,
 }
@@ -335,6 +338,7 @@ fn parse_run(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
         json: false,
         brief: false,
         strict: false,
+        max_ulp: crate::compare::F32_MAX_ULP,
         vfx: None,
         jobs: None,
     };
@@ -350,6 +354,10 @@ fn parse_run(mut it: impl Iterator<Item = String>) -> Result<Command, String> {
             "--json" => a.json = true,
             "--brief" => a.brief = true,
             "--strict" => a.strict = true,
+            "--max-ulp" => {
+                let text = value(&flag, inline, &mut it)?;
+                a.max_ulp = text.parse().map_err(|_| format!("`--max-ulp` expects a whole number of floats, got `{text}`"))?;
+            }
             other => return Err(format!("unexpected argument `{other}` for run")),
         }
     }
@@ -527,6 +535,27 @@ mod tests {
         assert_eq!(a.effect.as_deref(), Some("retime"));
         assert!(a.json && a.brief && a.strict);
         assert_eq!(a.vfx, Some(PathBuf::from("v.exe")));
+        assert_eq!(a.max_ulp, 1);
+    }
+
+    #[test]
+    fn run_max_ulp() {
+        let ulp = |extra: &[&str]| {
+            let mut args = vec!["run", "--testset", "t", "--refs", "r"];
+            args.extend_from_slice(extra);
+            match p(&args) {
+                Ok(Command::Run(a)) => Ok(a.max_ulp),
+                Ok(_) => panic!("not run"),
+                Err(e) => Err(e),
+            }
+        };
+        assert_eq!(ulp(&[]), Ok(1));
+        assert_eq!(ulp(&["--max-ulp", "0"]), Ok(0));
+        assert_eq!(ulp(&["--max-ulp=4"]), Ok(4));
+        for bad in ["-1", "x", "1.5", ""] {
+            assert!(ulp(&["--max-ulp", bad]).unwrap_err().contains("--max-ulp"), "{bad}");
+        }
+        assert!(ulp(&["--max-ulp"]).is_err());
     }
 
     #[test]

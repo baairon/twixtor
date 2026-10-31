@@ -18,7 +18,7 @@ use fx_core::{Frame, FxError, Result};
 mod vector;
 
 pub use vector::{
-    check_supported, compose_vectors, flow_from_vector_image, flow_settings, invert_flow, invert_flow_on, nearest_uses_f_ab,
+    check_supported, compose_vectors, flow_from_vector_image, flow_from_vector_image_with, flow_settings, invert_flow, invert_flow_on, nearest_uses_f_ab,
     solve_flows, Flows,
 };
 
@@ -152,7 +152,7 @@ where
 {
     job.check()?;
     let sel = select_frames(settings, host)?;
-    if sel.vectors_quality != 0 && !sel.exact {
+    if sel.vectors_quality != 0 && !layered_exact(&sel, job) {
         if job.nfg > 0 {
             return crate::layers::vector_path(settings, host, job, &sel, points);
         }
@@ -175,6 +175,9 @@ where
 /// missing one is inverted per layer as in [`retime_with_flows`]); the composition is the layered
 /// one of [`retime_layers`]. With `nfg = 0` it IS [`retime_with_flows`], whose closure asks
 /// `flows` for layer 0 with the constant matte 1 at both frames, so it equals it byte for byte.
+/// A job with `plates` asks for the flows of every layer of the group on an exact frame too
+/// (unless its fast path is the single layer one) and drops them, as the original does
+/// (`layers::exact_frame_flow_loads`).
 pub fn retime_layers_with_flows<F>(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, mut flows: F) -> Result<Rendered>
 where
     F: FnMut(&Selection, usize, &LayerMattes<'_>) -> Result<Flows>,
@@ -187,14 +190,28 @@ where
         });
     }
     let sel = select_frames(settings, host)?;
-    if sel.vectors_quality != 0 && !sel.exact {
+    if sel.vectors_quality != 0 && !layered_exact(&sel, job) {
         return crate::layers::vector_path_with_flows(settings, host, job, &sel, flows);
+    }
+    if job.plates && sel.vectors_quality != 0 && !job.full_group_fast_path() {
+        // the original loads the flows of every layer of the group on an exact frame too and drops them
+        crate::layers::exact_frame_flow_loads(settings, host, job, &sel, flows)?;
     }
     crate::layers::fast_path(settings, host, job, &sel)
 }
 
+/// Whether a layered render takes the fast path of an exact position: the position is exact
+/// (`Selection::exact`) and no FG layer has an inverse matte shrink. The original's render function clears its
+/// exactness flag when the render has FG layers and any of their shrinks is nonzero (a `-0` shrink is zero), so such a
+/// frame runs the layered vector path with `frac = 0` (READ in TwixtorPro_64, the code shared by the effects
+/// with FG layers; TRACED: the solves and warps run on the exact frames of a shrink). With `nfg = 0` it is
+/// `sel.exact`.
+fn layered_exact(sel: &Selection, job: &LayerJob) -> bool {
+    sel.exact && !job.layers[..job.nfg].iter().any(|l| l.shrink != 0.0)
+}
+
 /// Steps 2 and 3 of [`retime`]: fetch `A` and `B`, clear the output, [`interpolate`].
-fn fast_path(settings: &EngineSettings, host: &dyn EngineHost, sel: &Selection) -> Result<Rendered> {
+pub(crate) fn fast_path(settings: &EngineSettings, host: &dyn EngineHost, sel: &Selection) -> Result<Rendered> {
     let a = host.main_frame(sel.a)?;
     let b = host.main_frame(sel.b)?;
     if let Some(fill) = issue_fill(settings, host) {

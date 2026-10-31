@@ -1,0 +1,964 @@
+{
+ "definition": "ooc_cands.py OOCSET STATUS RECORDS CANDIDATES_TSV PARAM_MAP OUT_JSON: the out-of-contract candidates of vectors-in\njudged by what the ORIGINAL does with them.\n\nPer candidate (a row of the module's `results/out_of_contract.tsv`, put on a grid case by `ooc_set.py`):\n  registered   the plugin's own registration of the parameter (`param_map_TwixtorProVectorsIn_64.tsv`, read by the\n               harness from the plugin's PARAMS_SETUP): its type, valid range and popup choices, or none (the plugin\n               registers no such parameter);\n  original     the harness run of the candidate set (`run_harness.py --summary`): rendered, unsupported (the harness\n               refused to set the case up) or error, with its text; and, from the record, the value the plugin read\n               back for that parameter (`inter.checkout_param` of its index, first one);\n  rewrite      `vfx apply --check` of the phase A candidate list (exit 3: refused, with its message).\nVerdict classes:\n  no_such_param          the plugin registers no parameter with that id: the input cannot be given to the original\n  original_refuses       the harness or the plugin refuses / errors on it\n  outside_registered     the original renders it, but the value lies outside the range the plugin registers (a host\n                         hands a slider only values inside its valid range and a popup only 1 to its number of\n                         choices, AE_Effect.h PF_ParamDef), so no host produces it; out of contract, listed to review\n  inside_registered      the original renders it and the value lies inside the registered range: the rewrite's refusal\n                         would then be a real difference (back in contract)\n",
+ "counts": {
+  "outside_registered": 25,
+  "no_such_param": 6,
+  "original_refuses": 2
+ },
+ "original_status_counts": {
+  "rendered": 25,
+  "unsupported": 6,
+  "error": 2
+ },
+ "candidates": [
+  {
+   "candidate": "ooc00",
+   "case": "vectors-in.ooc00.size-16x12",
+   "param": "speed_percent",
+   "value": "10001",
+   "why": "speed above 10000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `speed_percent`: 10001 outside -10000..=10000"
+   },
+   "registered": {
+    "ae_index": "23",
+    "ae_name": "Speed %",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "-10000.0",
+    "ae_max": "10000.0",
+    "ae_slider_min": "-1000.0",
+    "ae_slider_max": "1000.0",
+    "ae_default": "100.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 78, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 23, 50, 100, 3000, '0x80000001af70'], 'ret': 0, 'param_index': 23, 'time': 50, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc01",
+   "case": "vectors-in.ooc01.size-16x12",
+   "param": "speed_percent",
+   "value": "-10001",
+   "why": "speed below -10000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `speed_percent`: -10001 outside -10000..=10000"
+   },
+   "registered": {
+    "ae_index": "23",
+    "ae_name": "Speed %",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "-10000.0",
+    "ae_max": "10000.0",
+    "ae_slider_min": "-1000.0",
+    "ae_slider_max": "1000.0",
+    "ae_default": "100.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 77, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 23, 50, 100, 3000, '0x80000001af70'], 'ret': 0, 'param_index': 23, 'time': 50, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc02",
+   "case": "vectors-in.ooc02.size-16x12",
+   "param": "frame_num",
+   "value": "200001",
+   "why": "frame number above 200000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_num`: 200001 outside -200000..=200000"
+   },
+   "registered": {
+    "ae_index": "24",
+    "ae_name": "Frame Num",
+    "ae_type": "FLOAT_SLIDER",
+    "ae_min": "-200000.0",
+    "ae_max": "200000.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "2000.0",
+    "ae_default": "0.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc03",
+   "case": "vectors-in.ooc03.size-16x12",
+   "param": "frame_num",
+   "value": "-200001",
+   "why": "frame number below -200000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_num`: -200001 outside -200000..=200000"
+   },
+   "registered": {
+    "ae_index": "24",
+    "ae_name": "Frame Num",
+    "ae_type": "FLOAT_SLIDER",
+    "ae_min": "-200000.0",
+    "ae_max": "200000.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "2000.0",
+    "ae_default": "0.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc04",
+   "case": "vectors-in.ooc04.size-16x12",
+   "param": "vec_scale_x",
+   "value": "10.01",
+   "why": "scale x above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_x`: 10.01 outside -10..=10"
+   },
+   "registered": {
+    "ae_index": "16",
+    "ae_name": "Vec Scale X",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "-10.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "-10.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "1.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 732, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 16, 0, 100, 3000, '0x80000001a580'], 'ret': 0, 'param_index': 16, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 1}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc05",
+   "case": "vectors-in.ooc05.size-16x12",
+   "param": "vec_scale_x",
+   "value": "-10.01",
+   "why": "scale x below -10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_x`: -10.01 outside -10..=10"
+   },
+   "registered": {
+    "ae_index": "16",
+    "ae_name": "Vec Scale X",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "-10.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "-10.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "1.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 732, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 16, 0, 100, 3000, '0x80000001a580'], 'ret': 0, 'param_index': 16, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 1}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc06",
+   "case": "vectors-in.ooc06.size-16x12",
+   "param": "vec_scale_y",
+   "value": "10.01",
+   "why": "scale y above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_y`: 10.01 outside -10..=10"
+   },
+   "registered": {
+    "ae_index": "17",
+    "ae_name": "Vec Scale Y",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "-10.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "-10.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "1.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 734, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 17, 0, 100, 3000, '0x80000001a580'], 'ret': 0, 'param_index': 17, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 1}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc07",
+   "case": "vectors-in.ooc07.size-16x12",
+   "param": "vec_scale_y",
+   "value": "-10.01",
+   "why": "scale y below -10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vec_scale_y`: -10.01 outside -10..=10"
+   },
+   "registered": {
+    "ae_index": "17",
+    "ae_name": "Vec Scale Y",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "-10.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "-10.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "1.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 734, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 17, 0, 100, 3000, '0x80000001a580'], 'ret': 0, 'param_index': 17, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 1}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc08",
+   "case": "vectors-in.ooc08.size-16x12",
+   "param": "vectors_max_displace",
+   "value": "-1",
+   "why": "max displace below 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vectors_max_displace`: -1 outside 0..=10000"
+   },
+   "registered": {
+    "ae_index": "15",
+    "ae_name": "Vectors: Max Displace",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "0.0",
+    "ae_max": "10000.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "10000.0",
+    "ae_default": "2048.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 54, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 15, 0, 100, 3000, '0x80000001b200'], 'ret': 0, 'param_index': 15, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc09",
+   "case": "vectors-in.ooc09.size-16x12",
+   "param": "vectors_max_displace",
+   "value": "10001",
+   "why": "max displace above 10000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `vectors_max_displace`: 10001 outside 0..=10000"
+   },
+   "registered": {
+    "ae_index": "15",
+    "ae_name": "Vectors: Max Displace",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "0.0",
+    "ae_max": "10000.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "10000.0",
+    "ae_default": "2048.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 54, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 15, 0, 100, 3000, '0x80000001b200'], 'ret': 0, 'param_index': 15, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc10",
+   "case": "vectors-in.ooc10.size-16x12",
+   "param": "input_frame_rate",
+   "value": "0.1",
+   "why": "input rate below the 32 bit minimum",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `input_frame_rate`: 0.1 outside 0.10000000149011612..=1000"
+   },
+   "registered": {
+    "ae_index": "19",
+    "ae_name": "Input: Frame Rate",
+    "ae_type": "FLOAT_SLIDER",
+    "ae_min": "0.1",
+    "ae_max": "1000.0",
+    "ae_slider_min": "0.1",
+    "ae_slider_max": "1000.0",
+    "ae_default": "29.969999",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 56, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 19, 0, 100, 3000, '0x80000001b1f0'], 'ret': 0, 'param_index': 19, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc11",
+   "case": "vectors-in.ooc11.size-16x12",
+   "param": "input_frame_rate",
+   "value": "1000.5",
+   "why": "input rate above 1000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `input_frame_rate`: 1000.5 outside 0.10000000149011612..=1000"
+   },
+   "registered": {
+    "ae_index": "19",
+    "ae_name": "Input: Frame Rate",
+    "ae_type": "FLOAT_SLIDER",
+    "ae_min": "0.1",
+    "ae_max": "1000.0",
+    "ae_slider_min": "0.1",
+    "ae_slider_max": "1000.0",
+    "ae_default": "29.969999",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 56, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 19, 0, 100, 3000, '0x80000001b1f0'], 'ret': 0, 'param_index': 19, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc12",
+   "case": "vectors-in.ooc12.size-16x12",
+   "param": "output_frame_rate",
+   "value": "0.1",
+   "why": "output rate below the 32 bit minimum",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `output_frame_rate`: 0.1 outside 0.10000000149011612..=1000"
+   },
+   "registered": null,
+   "original": {
+    "status": "unsupported",
+    "error": "param `output_frame_rate` has no counterpart among the registered params of TwixtorProVectorsIn_64",
+    "last_api": null,
+    "pc": null
+   },
+   "verdict": "no_such_param"
+  },
+  {
+   "candidate": "ooc13",
+   "case": "vectors-in.ooc13.size-16x12",
+   "param": "output_frame_rate",
+   "value": "1001",
+   "why": "output rate above 1000",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `output_frame_rate`: 1001 outside 0.10000000149011612..=1000"
+   },
+   "registered": null,
+   "original": {
+    "status": "unsupported",
+    "error": "param `output_frame_rate` has no counterpart among the registered params of TwixtorProVectorsIn_64",
+    "last_api": null,
+    "pc": null
+   },
+   "verdict": "no_such_param"
+  },
+  {
+   "candidate": "ooc14",
+   "case": "vectors-in.ooc14.size-16x12",
+   "param": "blur_compensation",
+   "value": "10.01",
+   "why": "blur above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `blur_compensation`: 10.01 outside 0..=10"
+   },
+   "registered": {
+    "ae_index": "27",
+    "ae_name": "Motion Blur Compensation",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "0.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "0.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 52, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 27, 0, 100, 3000, '0x80000001b200'], 'ret': 0, 'param_index': 27, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc15",
+   "case": "vectors-in.ooc15.size-16x12",
+   "param": "blur_compensation",
+   "value": "-0.01",
+   "why": "blur below 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `blur_compensation`: -0.01 outside 0..=10"
+   },
+   "registered": {
+    "ae_index": "27",
+    "ae_name": "Motion Blur Compensation",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "0.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "0.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 52, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 27, 0, 100, 3000, '0x80000001b200'], 'ret': 0, 'param_index': 27, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc16",
+   "case": "vectors-in.ooc16.size-16x12",
+   "param": "frame_interp",
+   "value": "0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_interp`: 0 outside 1..=3"
+   },
+   "registered": {
+    "ae_index": "25",
+    "ae_name": "Frame Interp",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "2",
+    "ae_choices": "Nearest|Blend|Motion Weighted Blend"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 50, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 25, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 25, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc17",
+   "case": "vectors-in.ooc17.size-16x12",
+   "param": "frame_interp",
+   "value": "4",
+   "why": "popup above 3",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `frame_interp`: 4 outside 1..=3"
+   },
+   "registered": {
+    "ae_index": "25",
+    "ae_name": "Frame Interp",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "2",
+    "ae_choices": "Nearest|Blend|Motion Weighted Blend"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 50, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 25, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 25, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc18",
+   "case": "vectors-in.ooc18.size-16x12",
+   "param": "warping",
+   "value": "0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `warping`: 0 outside 1..=2"
+   },
+   "registered": {
+    "ae_index": "26",
+    "ae_name": "Warping",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "2",
+    "ae_choices": "Inverse|Forward"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 42, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 26, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 26, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc19",
+   "case": "vectors-in.ooc19.size-16x12",
+   "param": "warping",
+   "value": "3",
+   "why": "popup above 2",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `warping`: 3 outside 1..=2"
+   },
+   "registered": {
+    "ae_index": "26",
+    "ae_name": "Warping",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "2",
+    "ae_choices": "Inverse|Forward"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 42, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 26, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 26, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc20",
+   "case": "vectors-in.ooc20.size-16x12",
+   "param": "display",
+   "value": "0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `display`: 0 outside 1..=6"
+   },
+   "registered": {
+    "ae_index": "3",
+    "ae_name": "Display",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Twixtored Output|Source|FG1 Twixtored|FG2 Twixtored|FG3 Twixtored|Background Twixtored"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 48, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 3, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 3, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc21",
+   "case": "vectors-in.ooc21.size-16x12",
+   "param": "display",
+   "value": "7",
+   "why": "popup above 6",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `display`: 7 outside 1..=6"
+   },
+   "registered": {
+    "ae_index": "3",
+    "ae_name": "Display",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Twixtored Output|Source|FG1 Twixtored|FG2 Twixtored|FG3 Twixtored|Background Twixtored"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 48, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 3, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 3, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc22",
+   "case": "vectors-in.ooc22.size-16x12",
+   "param": "src_mark_segments",
+   "value": "0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `src_mark_segments`: 0 outside 1..=5"
+   },
+   "registered": {
+    "ae_index": "12",
+    "ae_name": "Src: Mark Segments",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 81, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 12, 0, 100, 3000, '0x80000001aff0'], 'ret': 0, 'param_index': 12, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc23",
+   "case": "vectors-in.ooc23.size-16x12",
+   "param": "src_mark_segments",
+   "value": "6",
+   "why": "popup above 5",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `src_mark_segments`: 6 outside 1..=5"
+   },
+   "registered": {
+    "ae_index": "12",
+    "ae_name": "Src: Mark Segments",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Cut A|Cut B|Cut C|No MV, Use Nearest|No MV, Frame Blend"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 81, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 12, 0, 100, 3000, '0x80000001aff0'], 'ret': 0, 'param_index': 12, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc24",
+   "case": "vectors-in.ooc24.size-16x12",
+   "param": "time_remap_mode",
+   "value": "0",
+   "why": "popup 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `time_remap_mode`: 0 outside 1..=2"
+   },
+   "registered": {
+    "ae_index": "22",
+    "ae_name": "Time Remap Mode",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Speed|Frame Number"
+   },
+   "original": {
+    "status": "error",
+    "error": "PluginError: SMART_RENDER returned PF_Err 4 (return_msg of 0 bytes)",
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 73, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 22, 0, 100, 3000, '0x80000001ae10'], 'ret': 0, 'param_index': 22, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "original_refuses"
+  },
+  {
+   "candidate": "ooc25",
+   "case": "vectors-in.ooc25.size-16x12",
+   "param": "time_remap_mode",
+   "value": "3",
+   "why": "popup above 2",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `time_remap_mode`: 3 outside 1..=2"
+   },
+   "registered": {
+    "ae_index": "22",
+    "ae_name": "Time Remap Mode",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Speed|Frame Number"
+   },
+   "original": {
+    "status": "error",
+    "error": "PluginError: SMART_RENDER returned PF_Err 4 (return_msg of 0 bytes)",
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 73, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 22, 0, 100, 3000, '0x80000001ae10'], 'ret': 0, 'param_index': 22, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "original_refuses"
+  },
+  {
+   "candidate": "ooc26",
+   "case": "vectors-in.ooc26.fg1-display1",
+   "param": "fg1_matte_chan",
+   "value": "5",
+   "why": "popup above 4",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `fg1_matte_chan`: 5 outside 1..=4"
+   },
+   "registered": {
+    "ae_index": "31",
+    "ae_name": "FG1 Matte Chan",
+    "ae_type": "POPUP",
+    "ae_min": "",
+    "ae_max": "",
+    "ae_slider_min": "",
+    "ae_slider_max": "",
+    "ae_default": "1",
+    "ae_choices": "Red|Green|Blue|Alpha"
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 50, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 31, 0, 100, 3000, '0x80000001b220'], 'ret': 0, 'param_index': 31, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc27",
+   "case": "vectors-in.ooc27.fg1-display1",
+   "param": "fg1_inv_matte_shrink",
+   "value": "10.01",
+   "why": "shrink above 10",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `fg1_inv_matte_shrink`: 10.01 outside 0..=10"
+   },
+   "registered": {
+    "ae_index": "32",
+    "ae_name": "FG1 Inv Matte Shrink",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "0.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "0.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 48, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 32, 0, 100, 3000, '0x80000001b200'], 'ret': 0, 'param_index': 32, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc28",
+   "case": "vectors-in.ooc28.fg2-display1",
+   "param": "fg2_inv_matte_shrink",
+   "value": "-0.01",
+   "why": "shrink below 0",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: bad value for `fg2_inv_matte_shrink`: -0.01 outside 0..=10"
+   },
+   "registered": {
+    "ae_index": "37",
+    "ae_name": "FG2 Inv Matte Shrink",
+    "ae_type": "FIX_SLIDER",
+    "ae_min": "0.0",
+    "ae_max": "10.0",
+    "ae_slider_min": "0.0",
+    "ae_slider_max": "10.0",
+    "ae_default": "0.0",
+    "ae_choices": ""
+   },
+   "original": {
+    "status": "rendered",
+    "error": null,
+    "last_api": null,
+    "pc": null,
+    "value_read": "{'seq': 53, 'ev': 'cb', 'fn': 'inter.checkout_param', 'args': ['0x300000000', 37, 0, 100, 3000, '0x80000001b200'], 'ret': 0, 'param_index': 37, 'time': 0, 'time_step': 100, 'time_scale': 3000, 'footage_frame': 0, 'out_frame': 0}"
+   },
+   "inside_registered_range": false,
+   "verdict": "outside_registered"
+  },
+  {
+   "candidate": "ooc29",
+   "case": "vectors-in.ooc29.size-16x12",
+   "param": "src_time_offset",
+   "value": "1",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `src_time_offset`"
+   },
+   "registered": null,
+   "original": {
+    "status": "unsupported",
+    "error": "param `src_time_offset` has no counterpart among the registered params of TwixtorProVectorsIn_64",
+    "last_api": null,
+    "pc": null
+   },
+   "verdict": "no_such_param"
+  },
+  {
+   "candidate": "ooc30",
+   "case": "vectors-in.ooc30.size-16x12",
+   "param": "vectors",
+   "value": "2",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `vectors`"
+   },
+   "registered": null,
+   "original": {
+    "status": "unsupported",
+    "error": "param `vectors` has no counterpart among the registered params of TwixtorProVectorsIn_64",
+    "last_api": null,
+    "pc": null
+   },
+   "verdict": "no_such_param"
+  },
+  {
+   "candidate": "ooc31",
+   "case": "vectors-in.ooc31.size-16x12",
+   "param": "sensitivity",
+   "value": "70",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `sensitivity`"
+   },
+   "registered": null,
+   "original": {
+    "status": "unsupported",
+    "error": "param `sensitivity` has no counterpart among the registered params of TwixtorProVectorsIn_64",
+    "last_api": null,
+    "pc": null
+   },
+   "verdict": "no_such_param"
+  },
+  {
+   "candidate": "ooc32",
+   "case": "vectors-in.ooc32.size-16x12",
+   "param": "smart_blend",
+   "value": "1",
+   "why": "param the effect does not have",
+   "rewrite": {
+    "check_exit": 3,
+    "message": "vfx: error: unknown param `smart_blend`"
+   },
+   "registered": null,
+   "original": {
+    "status": "unsupported",
+    "error": "param `smart_blend` has no counterpart among the registered params of TwixtorProVectorsIn_64",
+    "last_api": null,
+    "pc": null
+   },
+   "verdict": "no_such_param"
+  }
+ ]
+}

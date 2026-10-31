@@ -1,0 +1,378 @@
+{
+ "format": 1,
+ "ffmpeg": "none (raw frames written by gen.py)",
+ "inputs": [
+  {
+   "file": "inputs/disc-16x16.d8.f4.rgba",
+   "source": "disc",
+   "width": 16,
+   "height": 16,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-33x31.d8.f4.rgba",
+   "source": "disc",
+   "width": 33,
+   "height": 31,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-40x30.d32.f4.gbrapf32le",
+   "source": "disc",
+   "width": 40,
+   "height": 30,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-40x30.d8.f4.rgba",
+   "source": "disc",
+   "width": 40,
+   "height": 30,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/disc-64x48.d8.f4.rgba",
+   "source": "disc",
+   "width": 64,
+   "height": 48,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-32x24.d16.f4.rgba64le",
+   "source": "shift",
+   "width": 32,
+   "height": 24,
+   "depth": 16,
+   "pix_fmt": "rgba64le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-32x24.d32.f4.gbrapf32le",
+   "source": "shift",
+   "width": 32,
+   "height": 24,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 4
+  },
+  {
+   "file": "inputs/shift-7x9.d8.f4.rgba",
+   "source": "shift",
+   "width": 7,
+   "height": 9,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 4
+  }
+ ],
+ "cases": [
+  {
+   "id": "retime.draft-v2.disc-64x48.d8.e82e9ddc",
+   "effect": "retime",
+   "label": "draft-v2",
+   "params": [
+    "speed_percent=50",
+    "vectors=2"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.draft-v2.disc-64x48.d8.e82e9ddc.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v3.disc-64x48.d8.7b4f253d",
+   "effect": "retime",
+   "label": "draft-v3",
+   "params": [
+    "speed_percent=25",
+    "vectors=3"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.draft-v3.disc-64x48.d8.7b4f253d.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v4.disc-64x48.d8.19cd0d45",
+   "effect": "retime",
+   "label": "draft-v4",
+   "params": [
+    "speed_percent=75",
+    "vectors=4"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.draft-v4.disc-64x48.d8.19cd0d45.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v5.disc-64x48.d8.7fa478de",
+   "effect": "retime",
+   "label": "draft-v5",
+   "params": [
+    "speed_percent=33.3333",
+    "vectors=5"
+   ],
+   "depth": 8,
+   "width": 64,
+   "height": 48,
+   "source": "disc",
+   "input": "inputs/disc-64x48.d8.f4.rgba",
+   "reference": "retime.draft-v5.disc-64x48.d8.7fa478de.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v3.shift-32x24.d16.5a935ae7",
+   "effect": "retime",
+   "label": "draft-v3",
+   "params": [
+    "speed_percent=62.5",
+    "vectors=3"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "shift",
+   "input": "inputs/shift-32x24.d16.f4.rgba64le",
+   "reference": "retime.draft-v3.shift-32x24.d16.5a935ae7.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v5.shift-32x24.d16.44f3d9c8",
+   "effect": "retime",
+   "label": "draft-v5",
+   "params": [
+    "speed_percent=40",
+    "vectors=5"
+   ],
+   "depth": 16,
+   "width": 32,
+   "height": 24,
+   "source": "shift",
+   "input": "inputs/shift-32x24.d16.f4.rgba64le",
+   "reference": "retime.draft-v5.shift-32x24.d16.44f3d9c8.rgba64le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v3.shift-32x24.d32.9bdc39a7",
+   "effect": "retime",
+   "label": "draft-v3",
+   "params": [
+    "speed_percent=50",
+    "vectors=3"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "shift",
+   "input": "inputs/shift-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.draft-v3.shift-32x24.d32.9bdc39a7.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v5.shift-32x24.d32.67460634",
+   "effect": "retime",
+   "label": "draft-v5",
+   "params": [
+    "speed_percent=20",
+    "vectors=5"
+   ],
+   "depth": 32,
+   "width": 32,
+   "height": 24,
+   "source": "shift",
+   "input": "inputs/shift-32x24.d32.f4.gbrapf32le",
+   "reference": "retime.draft-v5.shift-32x24.d32.67460634.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-tiny.shift-7x9.d8.ef9c1654",
+   "effect": "retime",
+   "label": "draft-tiny",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "width": 7,
+   "height": 9,
+   "source": "shift",
+   "input": "inputs/shift-7x9.d8.f4.rgba",
+   "reference": "retime.draft-tiny.shift-7x9.d8.ef9c1654.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-sq.disc-16x16.d8.439f7a35",
+   "effect": "retime",
+   "label": "draft-sq",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 8,
+   "width": 16,
+   "height": 16,
+   "source": "disc",
+   "input": "inputs/disc-16x16.d8.f4.rgba",
+   "reference": "retime.draft-sq.disc-16x16.d8.439f7a35.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-odd.disc-33x31.d8.c91e9780",
+   "effect": "retime",
+   "label": "draft-odd",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 8,
+   "width": 33,
+   "height": 31,
+   "source": "disc",
+   "input": "inputs/disc-33x31.d8.f4.rgba",
+   "reference": "retime.draft-odd.disc-33x31.d8.c91e9780.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-sb-blur.disc-40x30.d8.3099bc5f",
+   "effect": "retime",
+   "label": "draft-sb-blur",
+   "params": [
+    "speed_percent=33.3333",
+    "smart_blend=1",
+    "blur_compensation=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.draft-sb-blur.disc-40x30.d8.3099bc5f.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-i3.disc-40x30.d8.a04253c4",
+   "effect": "retime",
+   "label": "draft-i3",
+   "params": [
+    "speed_percent=62.5",
+    "frame_interp=3"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.draft-i3.disc-40x30.d8.a04253c4.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-v360.disc-40x30.d8.b07ed498",
+   "effect": "retime",
+   "label": "draft-v360",
+   "params": [
+    "speed_percent=40",
+    "video_360=1"
+   ],
+   "depth": 8,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d8.f4.rgba",
+   "reference": "retime.draft-v360.disc-40x30.d8.b07ed498.rgba",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  },
+  {
+   "id": "retime.draft-prep2.disc-40x30.d32.86a2a3f3",
+   "effect": "retime",
+   "label": "draft-prep2",
+   "params": [
+    "speed_percent=50",
+    "prep=2"
+   ],
+   "depth": 32,
+   "width": 40,
+   "height": 30,
+   "source": "disc",
+   "input": "inputs/disc-40x30.d32.f4.gbrapf32le",
+   "reference": "retime.draft-prep2.disc-40x30.d32.86a2a3f3.gbrapf32le",
+   "kind": "temporal",
+   "frames": 4,
+   "fps": "24",
+   "group": "draft",
+   "quality": "draft"
+  }
+ ]
+}

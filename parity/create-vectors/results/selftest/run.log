@@ -1,0 +1,196 @@
+== unit tests
+----------------------------------------------------------------------
+Ran 30 tests in 0.020s
+
+OK
+== selftest
+Fri Oct 30 17:23:45 UTC 2026
+  [ok] vfx exists: ~/twixtor-parity/create-vectors/src/target/release/vfx
+  [ok] an fx-parity with --max-ulp is available: ~/twixtor-parity/harness/repo/target/release/fx-parity
+a) perfect oracle: the rewrite's own base renders as references
+  [ok] base renders: 446 of 446, failed 0
+  [ok] grade engine is fx-parity at max ULP 0: fx-parity
+  [ok] 0 differing, all compared: {'total': 446, 'pass': 446, 'fail': 0, 'no_reference': 0}
+  [ok] python comparison agrees with fx-parity: 0
+  [ok] fresh base renders equal the saved phase A hashes: 446 of 446
+kills: 26 of 26 mutants killed over 446 candidate cases (0 excluded: out_of_contract 0, no_reference 0, base_differs 0)
+wrote ~/twixtor-parity/create-vectors/results/selftest/perfect/kills.json
+  [ok] mutants killed equal the phase A count of mutants that change an output: 26 of 26 killed; phase A: 26 of 26 change an output
+  [ok] same mutants killed
+  [ok] kills not stale
+ooc: 0 grid cases moved out; candidates 20: 20 out (20 unjudged), 0 back in contract; 0 unresolved
+wrote ~/twixtor-parity/create-vectors/results/selftest/perfect/ooc.json
+  [ok] no status: the 20 candidates stay out, unjudged
+  [ok] ooc rewrite behaviour recorded
+  [ok] a vfx that writes VFX_CALL_RECORD exists: ~/twixtor-parity/harness/repo/target/release/vfx
+  [ok] the record-capable vfx renders the same bytes as the base on all 446 cases: {'total': 446, 'pass': 446, 'fail': 0, 'no_reference': 0}; vfx sha256 03ce7cd95020
+  [ok] rewrite call records over the whole set: 446 recorded, 0 failed
+calls: 446 cases, 446 compared, 446 matching, 0 mismatching, 0 not compared
+wrote ~/twixtor-parity/create-vectors/results/selftest/perfect/calls.json
+  [ok] synthetic plugin records match the rewrite's: {'cases': 446, 'compared': 446, 'matching': 446, 'mismatching': 0, 'not_compared': 0}
+summary: status in_progress; in contract 446, compared 446, identical 446, differing 0, out of contract 20; call records 446/446; mutants killed 26 of 26
+  blocker: 20 out-of-contract candidates not judged against the original yet
+wrote ~/twixtor-parity/create-vectors/results/selftest/perfect/summary.json
+  [ok] perfect-oracle summary: counts computed: {"in_contract": 446, "compared": 446, "identical": 446, "differing": 0, "out_of_contract": 20, "logic_parity": 5}
+  [ok] perfect-oracle summary: unjudged candidates keep it in progress: 20 out-of-contract candidates not judged against the original yet
+  [ok] values counted: {"bytes_compared": 894312, "floats_compared": 335616, "differing_values": 0, "max_ulp": 0}
+ooc: 0 grid cases moved out; candidates 20: 20 out (0 unjudged), 0 back in contract; 0 unresolved
+wrote ~/twixtor-parity/create-vectors/results/selftest/perfect/ooc.json
+summary: status verified; in contract 446, compared 446, identical 446, differing 0, out of contract 20; call records 446/446; mutants killed 26 of 26
+wrote ~/twixtor-parity/create-vectors/results/selftest/perfect/summary.json
+  [ok] with every gate met (stand-in oracle, scratch summary) the status is computed as verified: verified; blockers: 
+  [ok] a forced status can never be verified
+b) perturbed oracle: one bit, -0 against 0, a NaN, and every case a rare mutant changes
+  [ok] exactly the perturbed cases differ: 7 differ, 7 perturbed
+  [ok] the others pass
+  [ok] python comparison agrees with fx-parity
+  [ok] values and ULP of default/d8: differing 1, own ulp None, fx-parity ulp None, nan 0
+  [ok] values and ULP of default/d16: differing 1, own ulp None, fx-parity ulp None, nan 0
+  [ok] values and ULP of default/d32: differing 1, own ulp 1, fx-parity ulp 1, nan 0
+  [ok] values and ULP of default/d32: differing 1, own ulp 0, fx-parity ulp 0, nan 0
+  [ok] values and ULP of mix-dbg/d32: differing 1, own ulp None, fx-parity ulp nan mismatch, nan 1
+  [ok] -0 against 0 is a differing value at ULP 0: found a +0
+kills: 25 of 26 mutants killed over 439 candidate cases (7 excluded: out_of_contract 0, no_reference 0, base_differs 7)
+  SURVIVOR m24: changes outputs only on cases where the base already differs from the reference, that have no reference, or that are out of contract
+wrote ~/twixtor-parity/create-vectors/results/selftest/perturbed/kills.json
+  [ok] kills equal an independent computation (changed cases minus perturbed): 25 killed, expected 25
+  [ok] mutant m24 (changes 2 cases, all perturbed) is a survivor: changes outputs only on cases where the base already differs from the reference, that have no reference, or that are out of contract
+  [ok] candidates exclude the perturbed cases
+summary: status in_progress; in contract 446, compared 446, identical 439, differing 7, out of contract 20; call records 0/0; mutants killed 25 of 26
+  blocker: 7 compared cases differ
+  blocker: 1 32 bpc cases differ in NaN bits (ULP undefined): max ULP covers the other values
+  blocker: call records not compared yet
+  blocker: mutants: 25 of 26 killed; survivors m24
+  blocker: out-of-contract candidates not judged against the original yet (no ooc.json)
+wrote ~/twixtor-parity/create-vectors/results/selftest/perturbed/summary.json
+  [ok] perturbed summary counts: {"in_contract": 446, "compared": 446, "identical": 439, "differing": 7, "out_of_contract": 20, "logic_parity": 5} ulp 1
+  [ok] perturbed summary: nan note: an output holding a NaN was perturbed in its payload
+   an output holding a NaN was perturbed in its payload
+triage: 446 compared, 7 differ (0 with no reference left out)
+
+settings that co-occur with differences (differing / cases with it):
+ group:
+   defaults-sizes                                  4 / 42     9.5%
+   fg-debug                                        2 / 5     40.0%
+   float-specials                                  1 / 51     2.0%
+ depth:
+   d32                                             3 / 174    1.7%
+   d8                                              3 / 168    1.8%
+   d16                                             1 / 104    1.0%
+ size:
+   2x3                                             2 / 4     50.0%
+   16x12                                           1 / 235    0.4%
+   1x1                                             1 / 4     25.0%
+   1x4                                             1 / 5     20.0%
+   24x16                                           1 / 38     2.6%
+ frames:
+   3                                               7 / 441    1.6%
+ fps:
+   24                                              7 / 440    1.6%
+ source:
+   shift                                           4 / 120    3.3%
+   disc                                            1 / 97     1.0%
+   multi                                           1 / 40     2.5%
+   specmix                                         1 / 6     16.7%
+ param-key:
+   (all defaults)                                  4 / 183    2.2%
+   display                                         3 / 88     3.4%
+   draw_geom                                       2 / 25     8.0%
+   pt1_pos                                         2 / 39     5.1%
+   pt1_use                                         2 / 40     5.0%
+ param:
+   display=1                                       2 / 25     8.0%
+   debug_view_method=2                             1 / 14     7.1%
+   display=3                                       1 / 60     1.7%
+   draw_geom=3                                     1 / 2     50.0%
+   draw_geom=4                                     1 / 2     50.0%
+ layer:
+   (none)                                          5 / 357    1.4%
+   fg1_matte                                       2 / 85     2.4%
+   fg2_matte                                       1 / 39     2.6%
+ tag:
+   core                                            3 / 40     7.5%
+
+smallest differing cases (size, frames, depth first):
+     1x1    3 frames d32 0   params  create-vectors.default.shift-1x1.d32.b0264172  [defaults]
+       first difference: frame 0 G x=0 y=0 expected 0x3f000001 actual 0x3f000000; 1 values in 1 frames
+     1x4    3 frames d32 0   params  create-vectors.default.shift-1x4.d32.ed858111  [defaults]
+       first difference: frame 0 B x=0 y=0 expected 0x80000000 actual 0x00000000; 1 values in 1 frames
+     2x3    3 frames d8  0   params  create-vectors.default.shift-2x3.d8.02182351  [defaults]
+       first difference: frame 0 R x=0 y=0 expected 126 actual 127; 1 values in 1 frames
+     2x3    3 frames d16 0   params  create-vectors.default.shift-2x3.d16.260da5e2  [defaults]
+       first difference: frame 0 R x=0 y=0 expected 34816 actual 32768; 1 values in 1 frames
+     6x4    3 frames d32 2   params  create-vectors.mix-dbg.specmix-6x4.d32.20503049  [display=3 debug_view_method=2]
+       first difference: frame 0 G x=0 y=0 expected 0x7fc00001 actual 0x7fc00000; 1 values in 1 frames
+
+ladder for create-vectors.default.shift-1x1.d32.b0264172: 3 probe cases written to ~/twixtor-parity/create-vectors/results/selftest/perturbed/probe/cases.json
+  base         base                   defaults  (same as default)
+  depth        depth-8                defaults
+  depth        depth-16               defaults
+
+to isolate the cause (references from the emulator for the probe set, then):
+  python3 run_harness.py --testset ~/twixtor-parity/create-vectors/results/selftest/perturbed/probe --refs probe_refs -j1 --records probe_records --summary probe_status.json
+  python3 phase_b.py grade --testset ~/twixtor-parity/create-vectors/results/selftest/perturbed/probe --refs probe_refs --name ladder
+  python3 phase_b.py triage --ladder-result results/ladder.json
+  [ok] ladder written: 3 probe cases
+  [ok] the ladder renders with the rewrite: 3 rendered
+  [ok] fx-parity reads the ladder test set and all rungs match the rewrite: {'total': 3, 'pass': 3, 'fail': 0, 'no_reference': 0}
+c) missing references
+  [ok] no reference is neither pass nor fail: {'total': 446, 'pass': 434, 'fail': 0, 'no_reference': 12}
+kills: 26 of 26 mutants killed over 434 candidate cases (12 excluded: out_of_contract 0, no_reference 12, base_differs 0)
+wrote ~/twixtor-parity/create-vectors/results/selftest/missing/kills.json
+  [ok] kills ignore the cases without a reference
+summary: status in_progress; in contract 446, compared 434, identical 434, differing 0, out of contract 20; call records 0/0; mutants killed 26 of 26
+  blocker: 12 in-contract cases have no reference
+  blocker: call records not compared yet
+  blocker: out-of-contract candidates not judged against the original yet (no ooc.json)
+wrote ~/twixtor-parity/create-vectors/results/selftest/missing/summary.json
+  [ok] summary: compared falls, no verified: 12 in-contract cases have no reference; call records not compared yet; out-of-contract candidates not judged against the original yet (no ooc.json)
+d) out of contract: a synthetic status file
+ooc: 3 grid cases moved out; candidates 20: 18 out (1 unjudged), 2 back in contract; 4 unresolved
+wrote ~/twixtor-parity/create-vectors/results/selftest/ooc/ooc.json
+  [ok] refused grid cases leave the in-contract list, faults and unsupported stay: {"grid_cases": 446, "moved_out_from_grid": 3, "candidates": 20, "candidates_out": 18, "candidates_back_in_contract": 2, "candidates_unjudged": 1, "unresolved": 4}
+  [ok] rendered candidates come back into contract: 2
+  [ok] an unjudged candidate stays out and is flagged
+  [ok] each moved case lists what both sides did
+ooc: 3 grid cases moved out; candidates 20: 18 out (1 unjudged), 2 back in contract; 4 unresolved
+wrote ~/twixtor-parity/create-vectors/results/selftest/ooc/ooc.json
+  [ok] registered ranges move range violations out even when the plugin 'rendered' them: {'grid_cases': 446, 'moved_out_from_grid': 3, 'candidates': 20, 'candidates_out': 18, 'candidates_back_in_contract': 2, 'candidates_unjudged': 1, 'unresolved': 4}
+ooc: 3 grid cases moved out; candidates 20: 18 out (1 unjudged), 2 back in contract; 4 unresolved
+wrote ~/twixtor-parity/create-vectors/results/selftest/ooc/ooc.json
+kills: 26 of 26 mutants killed over 443 candidate cases (3 excluded: out_of_contract 3, no_reference 0, base_differs 0)
+wrote ~/twixtor-parity/create-vectors/results/selftest/ooc/kills.json
+  [ok] kills exclude the cases moved out of contract
+summary: status in_progress; in contract 443, compared 443, identical 443, differing 0, out of contract 21; call records 0/0; mutants killed 26 of 26
+  blocker: call records not compared yet
+  blocker: 1 out-of-contract candidates not judged against the original yet
+  blocker: 2 out-of-contract candidates the plugin rendered in range are in contract now and not compared yet
+  blocker: 4 cases hit emulator or harness problems and are unresolved
+wrote ~/twixtor-parity/create-vectors/results/selftest/ooc/summary.json
+  [ok] summary: moved cases leave in_contract and compared: {"in_contract": 443, "compared": 443, "identical": 443, "differing": 0, "out_of_contract": 21, "logic_parity": 5}
+e) call records: matching, missing read, extra read, wrong time, ordering, unprovided layer, no record
+calls: 10 cases, 7 compared, 4 matching, 3 mismatching, 3 not compared
+  MISMATCH create-vectors.md-1-fg-f32.multi-24x16.d32.173e5be1 first at output frame 2
+  MISMATCH create-vectors.default.shift-1x1.d32.b0264172 first at output frame 0
+  MISMATCH create-vectors.default.shift-1x4.d8.69115139 first at output frame 0
+wrote ~/twixtor-parity/create-vectors/results/selftest/calls/calls.json
+  [ok] a matching case matches
+  [ok] a read the plugin lacks is reported (rewrite-only read) at its output frame: {"out_frame": 2, "reads": {"missing_in_rewrite": [], "extra_in_rewrite": [["fg2_matte", "1/24", 1]], "wrong_time": [], "wrong_index": []}}
+  [ok] a read only the plugin makes is reported (plugin-only read): {"out_frame": 0, "reads": {"missing_in_rewrite": [["input", "1/2400", 0]], "extra_in_rewrite": [], "wrong_time": [], "wrong_index": []}}
+  [ok] a wrong time is classified as wrong_time: {"out_frame": 0, "reads": {"missing_in_rewrite": [], "extra_in_rewrite": [], "wrong_time": [{"layer": "input", "index": 0, "plugin_time": "7/2400", "rewrite_tim
+  [ok] a different order still matches as sets
+  [ok] a checkout of a layer with no clip is dropped, not a mismatch
+  [ok] a case without a plugin record is not compared
+  [ok] an incomplete or errored plugin record is not compared
+calls: 10 cases, 7 compared, 3 matching, 4 mismatching, 3 not compared
+  MISMATCH create-vectors.md-1-fg-f32.multi-24x16.d32.173e5be1 first at output frame 2
+  MISMATCH create-vectors.default.shift-1x1.d32.b0264172 first at output frame 0
+  MISMATCH create-vectors.default.shift-1x4.d8.69115139 first at output frame 0
+  MISMATCH create-vectors.default.shift-1x4.d16.584610f8 first at output frame 0
+wrote ~/twixtor-parity/create-vectors/results/selftest/calls/calls_ordered.json
+  [ok] with order mattering the shuffled case mismatches: frames with two or more reads: True
+  [ok] compared and matching counts: {'cases': 10, 'compared': 7, 'matching': 4, 'mismatching': 3, 'not_compared': 3}
+
+selftest: 58 checks, 0 failed
+exit 0
+Fri Oct 30 17:24:07 UTC 2026

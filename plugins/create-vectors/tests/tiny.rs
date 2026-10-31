@@ -142,7 +142,7 @@ fn the_zero_vector_is_the_centre_code() {
 }
 
 /// The layered settings: FG matte layers (with shrinks, Layers Output, FG Track off), points,
-/// `Main_BG: Track` off and the five Debug views with the Draw Geom overlay.
+/// `Main_BG: Image Track` off and the five Debug views with the Draw Geom overlay.
 fn layered_modes() -> Vec<(Vec<(&'static str, &'static str)>, usize)> {
     let mut out = Vec::new();
     for resolution in ["1", "2"] {

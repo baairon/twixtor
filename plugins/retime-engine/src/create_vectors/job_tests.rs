@@ -101,9 +101,15 @@ fn a_black_fg_matte_with_layers_output_all_is_the_single_layer_output() {
         for nfg in 1..=3 {
             let job = job_with(s, vec![Matte::filled(w, h, 0.0); nfg], 0, nfg);
             assert_eq!(create_vectors_job(&x, &y, &job).unwrap(), single, "{fmt:?} nfg {nfg}");
-            // Layers Output MAIN_BG alone is the same picture
+            // Layers Output MAIN_BG alone is the same picture with its weight, 1 everywhere, in the blue channel
             let job = job_with(s, vec![Matte::filled(w, h, 0.0); nfg], nfg, nfg);
-            assert_eq!(create_vectors_job(&x, &y, &job).unwrap(), single, "{fmt:?} nfg {nfg} MAIN_BG");
+            let mut want = single.clone();
+            match &mut want.samples {
+                Samples::U8(v) => v.chunks_exact_mut(CHANNELS).for_each(|p| p[3] = 255),
+                Samples::U16(v) => v.chunks_exact_mut(CHANNELS).for_each(|p| p[3] = 65535),
+                Samples::F32(v) => v.chunks_exact_mut(CHANNELS).for_each(|p| p[3] = 1.0),
+            }
+            assert_eq!(create_vectors_job(&x, &y, &job).unwrap(), want, "{fmt:?} nfg {nfg} MAIN_BG");
         }
     }
 }
@@ -171,13 +177,21 @@ fn fg_and_bg_regions_decode_to_their_own_velocities() {
     let (lf, lb) = ring(&got);
     let (sf, sb) = ring(&single);
     eprintln!("edge rings: layered FG {lf:.4} BG {lb:.4}, single layer FG {sf:.4} BG {sb:.4}");
-    // measured: layered FG 0.25, BG 0.32; single layer FG 0.31, BG 1.55
-    assert!(lf < 0.5 && lb < 0.5, "layered rings: FG {lf}, BG {lb}");
-    assert!(lf <= sf && lb * 3.0 < sb, "layered FG {lf} BG {lb} against single FG {sf} BG {sb}");
-    // each layer alone (Layers Output FG1 and MAIN_BG) carries its own region
-    let fg_only = decode_vectors(&create_vectors_job(&x, &y, &CreateVectorsJob { first: 0, last: 0, ..job.clone() }).unwrap(), 16.0);
+    // measured (every layer on its own layer image, as the original's code solves it): layered FG 0.0008, BG 1.08; single
+    // layer FG 0.31, BG 1.55. Main_BG solves on the frames times its visible matte, whose black FG area keeps a
+    // static edge at the matte boundary, so its ring stays well above the FG one, still below the single layer's
+    assert!(lf < 0.05 && lb < 1.5, "layered rings: FG {lf}, BG {lb}");
+    assert!(lf * 10.0 < sf && lb < sb, "layered FG {lf} BG {lb} against single FG {sf} BG {sb}");
+    // each layer alone (Layers Output FG1 and MAIN_BG) carries its own region; a layer alone is its own flow,
+    // not weighted, with its visible matte in blue, as the original's code writes it
+    let fg_job = CreateVectorsJob { first: 0, last: 0, ..job.clone() };
+    let fg_out = create_vectors_job(&x, &y, &fg_job).unwrap();
+    let fg_only = decode_vectors(&fg_out, 16.0);
     assert!(region_error(&fg_only, (-3.0, 0.0), core).0 < 0.02);
-    assert!(region_error(&fg_only, (0.0, 0.0), far).1 == 0.0, "FG1 alone is the zero vector outside its matte");
+    let (vis, _) = matte::layer_solve_mattes(&fg_job.mattes_x, &[0.0], 0, Fmt::F32, w, h).unwrap();
+    let mut want = Image::new(w, h, Fmt::F32);
+    vectors::encode_vectors_blue(&mut want, &layer_flows(&x, &y, &fg_job).unwrap()[0], 16.0, &vis).unwrap();
+    assert_eq!(fg_out, want, "FG1 alone is its own flow, also outside its matte");
     let bg_only = decode_vectors(&create_vectors_job(&x, &y, &CreateVectorsJob { first: 1, last: 1, ..job.clone() }).unwrap(), 16.0);
     assert!(region_error(&bg_only, (2.0, -1.0), far).0 < 0.02);
 }
@@ -291,13 +305,22 @@ fn layers_output_picks_the_group() {
     for k in 0..=2 {
         let one = CreateVectorsJob { first: k, last: k, ..all.clone() };
         assert_eq!(layer_flows(&x, &y, &one).unwrap(), vec![flows[k].clone()], "layer {k}");
-        let wts = matte::over_weights(&mattes, k, k, w, h).unwrap();
-        let want = vectors::encode_vectors_merged_image(w, h, fmt, &[(&flows[k], &wts[0])], 16.0).unwrap();
+        // a single layer: its own flow, its visible matte in the blue channel
+        let shrinks: Vec<f32> = all.layers[..2].iter().map(|l| l.shrink).collect();
+        let (vis, _) = matte::layer_solve_mattes(&mattes, &shrinks, k, fmt, w, h).unwrap();
+        let mut want = Image::new(w, h, fmt);
+        vectors::encode_vectors_blue(&mut want, &flows[k], 16.0, &vis).unwrap();
         assert_eq!(create_vectors_job(&x, &y, &one).unwrap(), want, "layer {k}");
     }
+    // the group: the bottom layer encoded, the others laid over it bottom up with their raw mattes (finding 4)
+    let mut want = Image::new(w, h, fmt);
+    vectors::encode_vectors(&mut want, &flows[2], 16.0).unwrap();
+    for k in [1usize, 0] {
+        vectors::composite_vectors(&mut want, &flows[k], 16.0, &matte::integer_plane(&mattes[k], fmt)).unwrap();
+    }
+    assert_eq!(create_vectors_job(&x, &y, &all).unwrap(), want);
     let wts = matte::over_weights(&mattes, 0, 2, w, h).unwrap();
     let layers: Vec<(&FlowField, &Matte)> = flows.iter().zip(wts.iter()).collect();
-    assert_eq!(create_vectors_job(&x, &y, &all).unwrap(), vectors::encode_vectors_merged_image(w, h, fmt, &layers, 16.0).unwrap());
     // the layers differ: FG2 has another sensitivity and FG1's shrink only changes the layers below it
     let peak = |f: &FlowField| f.data.iter().fold(0.0f32, |m, v| m.max(v.abs()));
     assert!(peak(&flows[0]) > 0.5 && peak(&flows[2]) > 0.5);
@@ -411,4 +434,39 @@ fn small_masked_discs_keep_the_zero_flow_where_the_update_test_never_passes() {
         let (mean, _, _) = region_error(&plain, (-2.0, -1.0), |x, y| mp.level(0)[y * w + x] == 1.0);
         assert!(mean < 0.02, "unmasked at ({cx}, {cy}): {mean}");
     }
+}
+
+#[test]
+fn the_debug_display_of_an_fg_stack_composes_the_layers() {
+    // the original's order: bottom up, Y_k OVER the output, then the forward warp of X_k OVER it
+    use crate::debug::{debug_view_on, views_of, VIEW_DIFF, VIEW_WARP};
+    use crate::stages::Stages;
+    let (w, h) = (24usize, 16usize);
+    let fmt = Fmt::U8;
+    let (x, y) = (moving(fmt, w, h, (1.0, 0.5), 1.0, 0.0), moving(fmt, w, h, (1.0, 0.5), 0.0, 0.0));
+    let s = settings(QUALITY_FULL, 1.0, 16.0);
+    let mattes = vec![disc(w, h, 12.0, 8.0, 5.0)];
+    let all = job_with(s, mattes.clone(), 0, 1);
+    let flows = layer_flows(&x, &y, &all).unwrap();
+    let mut want = Image::new(w, h, fmt);
+    for k in [1usize, 0] {
+        let (vx, _) = matte::layer_solve_mattes(&mattes, &[0.0], k, fmt, w, h).unwrap();
+        let (vy, _) = matte::layer_solve_mattes(&mattes, &[0.0], k, fmt, w, h).unwrap();
+        matte::over_pl(&mut want, &matte::premultiply_pl(&y, &vy).unwrap()).unwrap();
+        let mut wk = Image::new(w, h, fmt);
+        Cpu.forward_warp(&mut wk, &matte::premultiply_pl(&x, &vx).unwrap(), &flows[k], 1.0).unwrap();
+        matte::over_pl(&mut want, &wk).unwrap();
+    }
+    assert_eq!(debug_job_view_on(&Cpu, &Cpu, &x, &y, &all, VIEW_WARP).unwrap(), want);
+    assert_eq!(debug_job_view_on(&Cpu, &Cpu, &x, &y, &all, VIEW_DIFF).unwrap(), views_of(&want, &y, VIEW_DIFF));
+    // a one layer group's Warp view is that layer's warp alone
+    let bg = CreateVectorsJob { first: 1, last: 1, ..all.clone() };
+    let (vx, _) = matte::layer_solve_mattes(&mattes, &[0.0], 1, fmt, w, h).unwrap();
+    let mut wk = Image::new(w, h, fmt);
+    Cpu.forward_warp(&mut wk, &matte::premultiply_pl(&x, &vx).unwrap(), &flows[1], 1.0).unwrap();
+    assert_eq!(debug_job_view_on(&Cpu, &Cpu, &x, &y, &bg, VIEW_WARP).unwrap(), wk);
+    // without FG mattes it is the single layer Debug view
+    let one = CreateVectorsJob::single(s);
+    let flow = job_flow(&x, &y, &one).unwrap();
+    assert_eq!(debug_job_view_on(&Cpu, &Cpu, &x, &y, &one, VIEW_DIFF).unwrap(), debug_view_on(&Cpu, &x, &y, &flow, VIEW_DIFF).unwrap());
 }

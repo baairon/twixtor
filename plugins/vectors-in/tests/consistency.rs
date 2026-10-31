@@ -155,6 +155,42 @@ fn every_fetch_of_the_render_was_announced_by_the_dependencies() {
     assert!(with_vector_fetches > 500, "{with_vector_fetches}");
 }
 
+/// In every frame whose dependencies hold more than the five probes (input, Source, both vector
+/// layers, FG1), the render reads the sixth entry, the first registration, from its layer.
+#[test]
+fn the_render_reads_its_first_registration() {
+    let mut checked = 0;
+    for params in scenarios() {
+        for with_source in [false, true] {
+            for n in 0..6u64 {
+                let l = Layers::new();
+                let mut layers = LayerSet::new();
+                if with_source {
+                    layers.insert("source", l.source.clone());
+                }
+                layers.insert("vectors_prev", l.prev.clone());
+                layers.insert("vectors_next", l.next.clone());
+                let curves = curves(&params);
+                let env = Env { params: &curves, input: &*l.input, layers: &layers };
+                let cx = fx_core::TemporalContext::new(W, H, Depth::U8, time(), n, 12);
+                let deps = VectorsIn.dependencies(&cx, &env).unwrap();
+                assert_eq!(vectors_in::glue::first_registration(&cx, &env).unwrap(), deps.get(5).copied(), "{params:?} frame {n}");
+                let mut out = Frame::new(W, H, Depth::U8);
+                let _ = VectorsIn.render_temporal(&cx, &env, &mut out);
+                let Some(first) = deps.get(5).copied() else { continue };
+                let rec = match first.layer {
+                    None => &l.input,
+                    Some("source") => &l.source,
+                    other => panic!("{params:?} frame {n}: the first registration is {other:?}"),
+                };
+                assert!(rec.take().contains(&first.time), "{params:?} source {with_source} frame {n}: {first:?} not read");
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked > 500, "{checked}");
+}
+
 #[test]
 fn the_fg_matte_probes_and_the_layers_without_any_vector_layer_are_announced_too() {
     // no vector layers: the render is the red fill, still only the probes are fetched
@@ -184,7 +220,10 @@ fn the_fg_matte_probes_and_the_layers_without_any_vector_layer_are_announced_too
                 for (k, m) in mattes.iter().enumerate() {
                     let id = ["fg1_matte", "fg2_matte", "fg3_matte"][k];
                     let log = m.take();
-                    assert!(!log.is_empty(), "{params:?} nfg {nfg} frame {n}: matte {k} is fetched");
+                    // the full group (Display 1, the default) of an exact frame (the even frames at speed 50) reads no
+                    // matte: its fast path is the single layer one (`LayerJob::full_group_reads_no_matte`)
+                    let exact_full_group = !params.iter().any(|(id, _)| *id == "display") && n % 2 == 0;
+                    assert_eq!(log.is_empty(), exact_full_group, "{params:?} nfg {nfg} frame {n}: matte {k} fetched {log:?}");
                     fetched.push((id, Some(id), log));
                 }
                 for (name, layer, log) in fetched {

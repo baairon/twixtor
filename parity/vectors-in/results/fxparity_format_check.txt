@@ -1,0 +1,9 @@
+
+graded error
+  vectors-in  449 compared, 449 bit exact, mean error 0% of full scale
+
+449 pass, 0 FAIL, 2 no reference, 451 cases
+---
+  10      11.1%  vectors-in.foot-hdr.16x12.d32.5bcaab
+
+111 pass, 338 FAIL, 2 no reference, 451 cases

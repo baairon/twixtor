@@ -287,6 +287,143 @@ pub fn encode_vectors_merged(dst: &mut Image, layers: &[(&FlowField, &Matte)], s
     Ok(())
 }
 
+/// [`encode_vectors_merged`] with the blue channel holding `blue` (a weight in 0..1 at the size of
+/// `dst`) instead of 0: `q(w * 255)` at 8 bpc, `q(w * 65535)` at 16 bpc (low byte or word, the
+/// engine's rounding `q`) and `w` in float. MEASURED against `CreateMotionVectors_64` under the
+/// emulator: when Layers Output selects one layer, the plugin's blue channel holds that layer's
+/// weight. Errors: as
+/// [`encode_vectors_merged`], and `Mismatch` for a `blue` of another size.
+pub fn encode_vectors_merged_blue(dst: &mut Image, layers: &[(&FlowField, &Matte)], scale: f32, blue: &Matte) -> Result<()> {
+    if blue.width != dst.width || blue.height != dst.height || blue.data.len() != dst.width * dst.height {
+        return Err(FxError::Mismatch(format!(
+            "vector merge: a {}x{} blue weight for an output of {}x{}",
+            blue.width, blue.height, dst.width, dst.height
+        )));
+    }
+    encode_vectors_merged(dst, layers, scale)?;
+    write_blue(dst, blue);
+    Ok(())
+}
+
+/// [`encode_vectors`] of one layer's flow, NOT weighted, with the blue channel holding `blue` (in
+/// 0..1 at the size of `dst`, written as [`encode_vectors_merged_blue`] does). READ in
+/// `CreateMotionVectors_64` (its per frame driver): the output group is composited from
+/// its bottom layer up, the bottom layer's flow encoded plainly and every layer above
+/// it laid over with its matte; a group of one layer is that plain encode alone, and
+/// its blue channel is then overwritten by the layer's visible matte plane (channel 3).
+/// Errors: as [`encode_vectors`], and `Mismatch` for a
+/// `blue` of another size.
+pub fn encode_vectors_blue(dst: &mut Image, flow: &FlowField, scale: f32, blue: &Matte) -> Result<()> {
+    if blue.width != dst.width || blue.height != dst.height || blue.data.len() != dst.width * dst.height {
+        return Err(FxError::Mismatch(format!(
+            "vector encode: a {}x{} blue plane for an output of {}x{}",
+            blue.width, blue.height, dst.width, dst.height
+        )));
+    }
+    encode_vectors(dst, flow, scale)?;
+    write_blue(dst, blue);
+    Ok(())
+}
+
+/// Lays the vectors of one more layer over the vector image `dst` (an [`encode_vectors`] output or
+/// an earlier composite) with that layer's raw matte `m` (one value per pixel of `dst` in the
+/// integer scale of the depth: 0..255, 0..65535, or the float matte). READ in
+/// `CreateMotionVectors_64` (the layer kernel and its per depth variants), all single precision: the layer's
+/// vector `(a, b)` is
+/// sampled as [`encode_vectors`] samples it and clamped to `[-1, 1]` the same way (also in float),
+/// `e = (a + 1.0) * H` with `H` = 127, 32767 or 0.5, the weight `f = m * K` (`K` the f32 constants
+/// `1/255`, `1/65535`, or 1 in float), and every vector channel becomes
+/// `((e - old) * f + old) + 0.5` truncated at 8 and 16 bpc, `((e - old) * f + old) + 0.0` in float;
+/// alpha is the white of the depth and blue 0. Errors: as [`encode_vectors`], and `Mismatch` for a
+/// matte of another length.
+pub fn composite_vectors(dst: &mut Image, flow: &FlowField, scale: f32, m: &[f32]) -> Result<()> {
+    if dst.width < 2 || dst.height < 2 || flow.width < 2 || flow.height < 2 {
+        return Err(FxError::Mismatch(format!(
+            "vector composite needs images and a flow of at least 2x2 (image {}x{}, flow {}x{})",
+            dst.width, dst.height, flow.width, flow.height
+        )));
+    }
+    if flow.data.len() != flow.width * flow.height * 2 || m.len() != dst.width * dst.height {
+        return Err(FxError::Mismatch("vector composite: a flow or matte of another size".into()));
+    }
+    let (dw1, dh1) = ((dst.width as i32 - 1) as f32, (dst.height as i32 - 1) as f32);
+    let (fw1, fh1) = ((flow.width as i32 - 1) as f32, (flow.height as i32 - 1) as f32);
+    let (sx, sy) = (fw1 / dw1, fh1 / dh1);
+    let (kx, ky) = ((dw1 / fw1) / scale, (dh1 / fh1) / scale);
+    let fl = Flow::new(flow);
+    let width = dst.width;
+    let sample = move |x: usize, y: usize| -> (f32, f32) {
+        let [u, v] = fl.bilerp(x as f32 * sx, y as f32 * sy);
+        let (mut a, mut b) = (u * kx, v * ky);
+        clamp_unit(&mut a);
+        clamp_unit(&mut b);
+        (a + 1.0f32, b + 1.0f32)
+    };
+    match &mut dst.samples {
+        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                let (a, b) = sample(x, y);
+                let f = m[y * width + x] * crate::matte::PL_K8;
+                for (c, e) in [(1usize, a * 127.0f32), (2, b * 127.0f32)] {
+                    let old = f32::from(px[c]);
+                    px[c] = (((e - old) * f + old) + 0.5f32) as i64 as u8;
+                }
+                px[0] = 0xff;
+                px[3] = 0;
+            }
+        }),
+        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                let (a, b) = sample(x, y);
+                let f = m[y * width + x] * crate::matte::PL_K16;
+                for (c, e) in [(1usize, a * 32767.0f32), (2, b * 32767.0f32)] {
+                    let old = f32::from(px[c]);
+                    px[c] = (((e - old) * f + old) + 0.5f32) as i64 as u16;
+                }
+                px[0] = 0xffff;
+                px[3] = 0;
+            }
+        }),
+        Samples::F32(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                let (a, b) = sample(x, y);
+                let f = m[y * width + x];
+                for (c, e) in [(1usize, a * 0.5f32), (2, b * 0.5f32)] {
+                    let old = px[c];
+                    px[c] = ((e - old) * f + old) + 0.0f32;
+                }
+                px[0] = 1.0;
+                px[3] = 0.0;
+            }
+        }),
+    }
+    Ok(())
+}
+
+/// Writes `blue` (same size as `dst`, checked by the callers) into the blue channel of `dst`:
+/// `q(w * 255)`, `q(w * 65535)` or `w`.
+fn write_blue(dst: &mut Image, blue: &Matte) {
+    let width = dst.width;
+    let b = &blue.data;
+    match &mut dst.samples {
+        Samples::U8(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                px[3] = crate::image::q(b[y * width + x] * 255.0f32) as u8;
+            }
+        }),
+        Samples::U16(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                px[3] = crate::image::q(b[y * width + x] * 65535.0f32) as u16;
+            }
+        }),
+        Samples::F32(out) => par_rows(out, width * CHANNELS, |y, row| {
+            for (x, px) in row.chunks_exact_mut(CHANNELS).enumerate() {
+                px[3] = b[y * width + x];
+            }
+        }),
+    }
+}
+
 /// [`encode_vectors_merged`] into a new image of the given size and format.
 pub fn encode_vectors_merged_image(
     width: usize,

@@ -331,18 +331,30 @@ pub(crate) fn bilerp4<P: Pix>(src: &[P], w: usize, w1: i32, h1: i32, x: f32, y: 
 }
 
 /// The three lerps shared by the plain and the 360 samplers: `a` = (ix, iy), `b` = (ix + 1,
-/// iy), `c` = (ix, iy + 1), `d` = (ix + 1, iy + 1).
+/// iy), `c` = (ix, iy + 1), `d` = (ix + 1, iy + 1), each [`crate::nanrule::lerp_base_first`].
 #[inline(always)]
 fn mix4<P: Pix>(a: &[P], b: &[P], c: &[P], d: &[P], fx: f32, fy: f32) -> [f32; 4] {
+    let out = mix4_with::<P, crate::nanrule::Plain>(a, b, c, d, fx, fy);
+    // a NaN in the result: the same arithmetic again with the NaN rule (`crate::nanrule`); numbers are the same bits
+    if crate::nanrule::any_nan(&out) {
+        mix4_with::<P, crate::nanrule::Rule>(a, b, c, d, fx, fy)
+    } else {
+        out
+    }
+}
+
+#[inline(always)]
+fn mix4_with<P: Pix, A: crate::nanrule::Arith>(a: &[P], b: &[P], c: &[P], d: &[P], fx: f32, fy: f32) -> [f32; 4] {
+    use crate::nanrule::lerp_base_first_g as lerp;
     let mut out = [0.0f32; 4];
     for k in 0..CHANNELS {
         let p00 = a[k].to_f32();
         let p10 = b[k].to_f32();
         let p01 = c[k].to_f32();
         let p11 = d[k].to_f32();
-        let top = (p10 - p00) * fx + p00;
-        let bot = (p11 - p01) * fx + p01;
-        out[k] = (bot - top) * fy + top;
+        let top = lerp::<A>(p00, p10, fx);
+        let bot = lerp::<A>(p01, p11, fx);
+        out[k] = lerp::<A>(top, bot, fy);
     }
     out
 }

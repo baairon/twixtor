@@ -158,7 +158,8 @@ fn the_wrap_flag_is_off_and_the_device_request_is_carried_without_changing_a_pix
         let mut cx = rig.cx(1);
         cx.device = device;
         let s = read_settings(&WIRING, &cx, &rig.env()).unwrap();
-        assert_eq!(s, EngineSettings { device, ..plain.clone() });
+        // the stages are a fresh wrapper per read (`AboveFirstTaps`) and compare by identity: carry them over
+        assert_eq!(s, EngineSettings { device, stages: s.stages.clone(), ..plain.clone() });
         // the engine only carries the request: the pixels are the CPU's
         assert_eq!(rig.render_cx(&cx).unwrap(), want, "{device}");
     }

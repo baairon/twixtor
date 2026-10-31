@@ -1,10 +1,10 @@
 # ffmpeg pairing
 
-How `vfx` exchanges frames with ffmpeg, and the exact commands `tools/apply.py` builds around it. The wrapper's flags, lookup order, refusals, verification and output lines are in [README: wrapper](../README.md#wrapper); this file covers what happens to the pixels, the rate, the size, the colour and the sound.
+How `vfx` exchanges frames with ffmpeg, and the exact commands `tools/apply.py` builds around it. The wrapper's flags, lookup order, refusals, verification and output lines are in [reference: wrapper](reference.md#wrapper); this file covers what happens to the pixels, the rate, the size, the colour and the sound.
 
 ## Raw frames
 
-`vfx` reads and writes ffmpeg's own raw formats, whole frames back to back with no header ([README: raw frame format](../README.md#raw-frame-format)).
+`vfx` reads and writes ffmpeg's own raw formats, whole frames back to back with no header ([reference: raw frame format](reference.md#raw-frame-format)).
 
 | `--depth` | Decode to `vfx` | Read `vfx` output back |
 |---|---|---|

@@ -1,0 +1,21 @@
+cases 448: {'no reference': 3, 'pass': 423, 'out of contract': 2, 'FAIL': 20}; differing values 9166; vfx ~/twixtor-parity/fix-vin2/bin/t07/vfx
+group: pass/FAIL/other
+  blur 13/0/0; defaults 3/0/0; display 9/0/0; fg 2/20/0; footage 22/0/0; framenum 18/0/0; ftime 11/0/0; inrate 21/0/0; keyed 11/0/0; layers 30/0/0; mark 9/0/0; maxdisp 24/0/0; misc 8/0/0; size 30/0/3; sp_src 24/0/0; sp_vecA 12/0/0; sp_vecB 6/0/0; sp_vecG 12/0/0; sp_vecR 15/0/2; speed 28/0/0; tiny 9/0/0; vecfield 63/0/0; vecscale 22/0/0; warp 21/0/0
+depth: 16 59/2; 32 129/2; 8 235/16
+smallest failing:
+  vectors-in.fg1-short-matte.16x12.d8.3554f3 vals=81 ulp=None 
+  vectors-in.fg1-warp-inverse.16x12.d8.dbdd4b vals=132 ulp=None 
+  vectors-in.fg3-display5.16x12.d8.df9e95 vals=146 ulp=None 
+  vectors-in.fg1-prev-only.16x12.d8.1b10c7 vals=154 ulp=None 
+  vectors-in.fg1-display3.16x12.d8.11976b vals=171 ulp=None 
+  vectors-in.fg1-chan1.16x12.d8.50c8f9 vals=171 ulp=None 
+  vectors-in.fg2-display4.16x12.d8.f8d8c5 vals=184 ulp=None 
+  vectors-in.fg1-chan3.16x12.d8.55e2eb vals=265 ulp=None 
+  vectors-in.fg1-display1.16x12.d8.50e11f vals=298 ulp=None 
+  vectors-in.fg1-display6.16x12.d8.8141db vals=316 ulp=None 
+  vectors-in.fg1-display3.16x12.d16.c3486e vals=380 ulp=None 
+  vectors-in.fg1-display3.16x12.d32.7af19b vals=381 ulp=3222354 
+  vectors-in.fg2-display1.16x12.d16.153b6d vals=442 ulp=None 
+  vectors-in.fg2-display1.16x12.d32.5eaec5 vals=458 ulp=16547715 
+  vectors-in.fg2-display1.16x12.d8.d80b13 vals=479 ulp=None 
+against ~/twixtor-parity/fix-vin2/vin/results_t06/grade.json: {'FAIL changed values': 20, 'FAIL -> pass': 1}; differing values 31562 -> 9166

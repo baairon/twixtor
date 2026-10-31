@@ -1,0 +1,22 @@
+{
+ "measured_at": "2026-10-31",
+ "compare": "per output frame, as sets of (layer, clip frame) and (layer, time): the pixels the original checks out in SMART_RENDER (at the time of their pre-render checkout) against the rewrite's reads",
+ "compared": 460,
+ "matching": 460,
+ "mismatching": 0,
+ "skipped": 2,
+ "limit": "parameter sample times are not recorded by the rewrite, so parameter times are not compared",
+ "mismatches": [],
+ "skipped_cases": [
+  {
+   "id": "retime.long6000-rate29_97.ident-1x1.d8.d634b990",
+   "state": "skipped",
+   "reason": "no plugin record"
+  },
+  {
+   "id": "retime.long6000-rate29_97003.ident-1x1.d8.9b45a592",
+   "state": "skipped",
+   "reason": "no plugin record"
+  }
+ ]
+}

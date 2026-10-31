@@ -1,0 +1,387 @@
+id	block	tags
+retime-fgbg.size-n2-w1.box2-1x1.d8.e55ad6e5	size	tiny
+retime-fgbg.size-n3-w2.box3-1x1.d16.3c565e8a	size	tiny
+retime-fgbg.size-n2-w3.box2-1x1.d32.9f6d185a	size	tiny
+retime-fgbg.size-n3-w2.box3-2x2.d8.4fc6df20	size	tiny
+retime-fgbg.size-n1-w3.box1-2x2.d16.6439bbd1	size	tiny
+retime-fgbg.size-n3-w4.box3-2x2.d32.d489fb0b	size	tiny
+retime-fgbg.size-n1-w3.box1-2x3.d8.b944a37c	size	tiny
+retime-fgbg.size-n2-w4.box2-2x3.d16.2992e55a	size	tiny
+retime-fgbg.size-n1-w1.box1-2x3.d32.a162c242	size	tiny
+retime-fgbg.size-n2-w4.box2-3x2.d8.4eee0156	size	tiny
+retime-fgbg.size-n3-w1.box3-3x2.d16.38695831	size	tiny
+retime-fgbg.size-n2-w2.box2-3x2.d32.4de773b5	size	tiny
+retime-fgbg.size-n3-w1.box3-1x5.d8.ed56215a	size	tiny
+retime-fgbg.size-n1-w2.box1-1x5.d16.12e1d483	size	tiny
+retime-fgbg.size-n3-w3.box3-1x5.d32.d2c05e5a	size	tiny
+retime-fgbg.size-n1-w2.box1-5x1.d8.bc07258e	size	tiny
+retime-fgbg.size-n2-w3.box2-5x1.d16.4a294f1b	size	tiny
+retime-fgbg.size-n1-w4.box1-5x1.d32.fd6b1067	size	tiny
+retime-fgbg.size-n2-w3.box2-3x3.d8.1853d35f	size	tiny
+retime-fgbg.size-n3-w4.box3-3x3.d16.62e16375	size	tiny
+retime-fgbg.size-n2-w1.box2-3x3.d32.ab10ecbd	size	tiny
+retime-fgbg.size-n3-w4.box3-4x4.d8.ff91b5c3	size	
+retime-fgbg.size-n1-w1.box1-4x4.d16.419164f6	size	
+retime-fgbg.size-n3-w2.box3-4x4.d32.2e77441f	size	
+retime-fgbg.size-n1-w1.box1-5x5.d8.73b679d3	size	
+retime-fgbg.size-n2-w2.box2-5x5.d16.26d82af7	size	
+retime-fgbg.size-n1-w3.box1-5x5.d32.02458390	size	
+retime-fgbg.size-n2-w2.box2-7x9.d8.39ec04e5	size	
+retime-fgbg.size-n1-w4.box1-9x7.d16.b66ef7d9	size	
+retime-fgbg.size-n1-w4.box1-16x12.d8.4977ab66	size	
+retime-fgbg.size-n2-w1.box2-16x12.d16.2ec6114b	size	
+retime-fgbg.size-n1-w2.box1-16x12.d32.ac0a7b26	size	
+retime-fgbg.size-n2-w1.box2-17x13.d8.2d0b1e84	size	
+retime-fgbg.size-n1-w3.box1-23x31.d16.cea7b1c8	size	
+retime-fgbg.size-n1-w1.box1-37x23.d32.9e81c51e	size	
+retime-fgbg.size-64x48.box2-64x48.d8.e3739839	size	
+retime-fgbg.size-defaults.box1-1x1.d8.14ea6838	size	defaults,tiny
+retime-fgbg.size-defaults.box1-5x5.d8.3ce545f4	size	defaults
+retime-fgbg.size-defaults.box1-17x13.d8.539b0e9a	size	defaults
+retime-fgbg.n1-w1.box1-24x16.d8.97eae5c3	layers	
+retime-fgbg.n1-w2.box1-24x16.d8.5a34ec49	layers	
+retime-fgbg.n1-w3.box1-24x16.d8.938583d0	layers	
+retime-fgbg.n1-w4.box1-24x16.d8.b944509d	layers	
+retime-fgbg.n2-w1.box2-24x16.d8.6660d3dd	layers	
+retime-fgbg.n2-w2.box2-24x16.d8.9229d5f4	layers	
+retime-fgbg.n2-w3.box2-24x16.d8.587c3a75	layers	
+retime-fgbg.n2-w4.box2-24x16.d8.a7091f86	layers	
+retime-fgbg.n3-w1.box3-24x16.d8.b12ce2a0	layers	
+retime-fgbg.n3-w2.box3-24x16.d8.90aa7334	layers	
+retime-fgbg.n3-w3.box3-24x16.d8.fbfa8c76	layers	
+retime-fgbg.n3-w4.box3-24x16.d8.6c3a6749	layers	
+retime-fgbg.n2-w2.box2-24x16.d16.d02a21b6	layers	
+retime-fgbg.n2-w4.box2-24x16.d16.b3d1c681	layers	
+retime-fgbg.n3-w2.box3-24x16.d16.f2704987	layers	
+retime-fgbg.n3-w4.box3-24x16.d16.e7262c19	layers	
+retime-fgbg.n2-w1.box2-24x16.d32.23677bf6	layers	
+retime-fgbg.n2-w3.box2-24x16.d32.4c3ca3e8	layers	
+retime-fgbg.n3-w1.box3-24x16.d32.df1b9f8d	layers	
+retime-fgbg.n3-w3.box3-24x16.d32.e92c2d32	layers	
+retime-fgbg.alpha-n2-w1.box2a-24x16.d8.5770d595	layers	
+retime-fgbg.alpha-n2-w3.box2a-24x16.d8.1389fa79	layers	
+retime-fgbg.pan-n1.pan-24x16.d8.0c2a7709	layers	
+retime-fgbg.noise-n2.noise-24x16.d8.9cd8603c	layers	
+retime-fgbg.flat-n1.flat-24x16.d8.fbae843a	layers	
+retime-fgbg.edge-n2-d8.edge-16x12.d8.53b90c87	layers	
+retime-fgbg.edge-n2-d16.edge-16x12.d16.c34bfebf	layers	
+retime-fgbg.chan1-chan.box1-24x16.d8.d6d73fa3	chan	
+retime-fgbg.chan1-alpha.box1-24x16.d8.0d513d6d	chan	
+retime-fgbg.chan2-chan.box1-24x16.d8.cf4f1785	chan	
+retime-fgbg.chan2-alpha.box1-24x16.d8.4cce1ae7	chan	
+retime-fgbg.chan3-chan.box1-24x16.d8.a92de7b6	chan	
+retime-fgbg.chan3-alpha.box1-24x16.d8.52bb808f	chan	
+retime-fgbg.chan4-chan.box1-24x16.d8.9f68dc24	chan	
+retime-fgbg.chan4-alpha.box1-24x16.d8.b317dff7	chan	
+retime-fgbg.chan2-chan.box1-24x16.d16.e2c72ea5	chan	
+retime-fgbg.chan4-chan.box1-24x16.d16.1ed6ac92	chan	
+retime-fgbg.chan3-chan.box1-24x16.d32.aaf78cd9	chan	
+retime-fgbg.chan4-chan.box1-24x16.d32.de9e3f16	chan	
+retime-fgbg.perm123.box3-24x16.d8.2dbda95d	chan	
+retime-fgbg.perm321.box3-24x16.d8.784a3fce	chan	
+retime-fgbg.perm444.box3-24x16.d8.4efe0959	chan	
+retime-fgbg.perm222.box3-24x16.d8.750b50cb	chan	
+retime-fgbg.perm213.box3-24x16.d8.5015fe8b	chan	
+retime-fgbg.perm321-alpha.box3-24x16.d8.b2796002	chan	
+retime-fgbg.shrink0-bg.box2-36x24.d8.9466382b	shrink	
+retime-fgbg.shrink-0-bg.box2-36x24.d8.6f1b4d1c	shrink	negzero
+retime-fgbg.shrink0.01-bg.box2-36x24.d8.d7dfdf0c	shrink	
+retime-fgbg.shrink0.5-bg.box2-36x24.d8.0b01903a	shrink	
+retime-fgbg.shrink1-bg.box2-36x24.d8.81dd6098	shrink	
+retime-fgbg.shrink1.5-bg.box2-36x24.d8.0cef07ce	shrink	
+retime-fgbg.shrink2-bg.box2-36x24.d8.3aa99f69	shrink	
+retime-fgbg.shrink2.99-bg.box2-36x24.d8.379fac06	shrink	
+retime-fgbg.shrink3-bg.box2-36x24.d8.47e4f6ec	shrink	
+retime-fgbg.shrink4.25-bg.box2-36x24.d8.75e08a9a	shrink	
+retime-fgbg.shrink6-bg.box2-36x24.d8.4a9e2a80	shrink	
+retime-fgbg.shrink7.25-bg.box2-36x24.d8.b3c3b436	shrink	
+retime-fgbg.shrink9.99-bg.box2-36x24.d8.36ef5467	shrink	
+retime-fgbg.shrink10-bg.box2-36x24.d8.958c1342	shrink	
+retime-fgbg.shrink1-out.box2-36x24.d8.1a0d09b9	shrink	
+retime-fgbg.shrink2.5-out.box2-36x24.d8.0198ffc5	shrink	
+retime-fgbg.shrink10-out.box2-36x24.d8.4419b25b	shrink	
+retime-fgbg.shrink0.5-bg.box2-36x24.d16.8d66dad6	shrink	
+retime-fgbg.shrink0.5-bg.box2-36x24.d32.79ee2ad5	shrink	
+retime-fgbg.shrink3-bg.box2-36x24.d16.bdec8461	shrink	
+retime-fgbg.shrink3-bg.box2-36x24.d32.47f32eaa	shrink	
+retime-fgbg.shrink-soft.box2-36x24.d8.9b186b81	shrink	
+retime-fgbg.shrink-fg2.box3-36x24.d8.ca669aca	shrink	
+retime-fgbg.shrink-fg3.box3-36x24.d8.a6f0afde	shrink	
+retime-fgbg.shrink-fg2-fg2view.box3-36x24.d8.88fbd0ea	shrink	
+retime-fgbg.shrink-all3.box3-36x24.d8.6694a905	shrink	
+retime-fgbg.shrink-n1-d6.box1-36x24.d8.ee236db6	shrink	
+retime-fgbg.shrink-thin.box2-12x9.d8.8bb3abf4	shrink	
+retime-fgbg.shrink0.5-pan.pan-36x24.d8.d55d1e71	shrink	
+retime-fgbg.shrink1-pan.pan-36x24.d8.fe61e274	shrink	
+retime-fgbg.shrink2.5-pan.pan-36x24.d8.da69ac69	shrink	
+retime-fgbg.shrink6-pan.pan-36x24.d8.00255e9a	shrink	
+retime-fgbg.shrink-nan32.box2-24x16.d32.054ca5b7	shrink	special
+retime-fgbg.disp1-n1.box1-24x16.d8.eef066d5	display	
+retime-fgbg.disp1-n2.box2-24x16.d8.a6033c72	display	
+retime-fgbg.disp1-n3.box3-24x16.d8.b689706a	display	
+retime-fgbg.disp2-n1.box1-24x16.d8.09d5e94f	display	
+retime-fgbg.disp2-n2.box2-24x16.d8.e1fbbfbd	display	
+retime-fgbg.disp2-n3.box3-24x16.d8.767dfd84	display	
+retime-fgbg.disp3-n1.box1-24x16.d8.42bc1c1b	display	
+retime-fgbg.disp3-n2.box2-24x16.d8.b2687b75	display	
+retime-fgbg.disp3-n3.box3-24x16.d8.201e97e9	display	
+retime-fgbg.disp4-n1.box1-24x16.d8.3a9a6955	display	
+retime-fgbg.disp4-n2.box2-24x16.d8.19ef0698	display	
+retime-fgbg.disp4-n3.box3-24x16.d8.ea8166d7	display	
+retime-fgbg.disp5-n1.box1-24x16.d8.fbbe6ed5	display	
+retime-fgbg.disp5-n2.box2-24x16.d8.4a468aff	display	
+retime-fgbg.disp5-n3.box3-24x16.d8.fc1a8011	display	
+retime-fgbg.disp6-n1.box1-24x16.d8.9b0ea5fc	display	
+retime-fgbg.disp6-n2.box2-24x16.d8.746b8d03	display	
+retime-fgbg.disp6-n3.box3-24x16.d8.c51b3704	display	
+retime-fgbg.disp3-n2.box2-24x16.d16.2d911911	display	
+retime-fgbg.disp4-n2.box2-24x16.d16.d7a691e0	display	
+retime-fgbg.disp6-n2.box2-24x16.d16.f29b5d31	display	
+retime-fgbg.disp3-n3.box3-24x16.d32.d994c591	display	
+retime-fgbg.disp5-n3.box3-24x16.d32.c0f4a9d6	display	
+retime-fgbg.disp6-n3-w4.box3-24x16.d8.0d3f2d1b	display	
+retime-fgbg.disp3-n3-w2.box3-24x16.d8.3aa60716	display	
+retime-fgbg.exact-d1.box2-24x16.d8.a6fa5ac1	fast	
+retime-fgbg.exact-d3.box2-24x16.d8.cfc12a8d	fast	
+retime-fgbg.exact-d4.box2-24x16.d8.f74b500c	fast	
+retime-fgbg.exact-d6.box2-24x16.d8.1ec9dacc	fast	
+retime-fgbg.exact-d3-d16.box2-24x16.d16.367a015f	fast	
+retime-fgbg.exact-d6-d32.box2-24x16.d32.9775f0f8	fast	
+retime-fgbg.novec-d1.box2-24x16.d8.b27fae4e	fast	
+retime-fgbg.novec-d3.box2-24x16.d8.e2779780	fast	
+retime-fgbg.novec-d6.box2-24x16.d8.3050517a	fast	
+retime-fgbg.novec-n3-w1.box3-24x16.d8.405ae61d	fast	
+retime-fgbg.mark4-d1.box2-24x16.d8.6af0edeb	fast	
+retime-fgbg.mark4-d3.box2-24x16.d8.920e0712	fast	
+retime-fgbg.mark5-d1.box2-24x16.d8.f291f96d	fast	
+retime-fgbg.mark5-d3.box2-24x16.d8.cf637ae2	fast	
+retime-fgbg.exact-soft.box2-24x16.d8.1a92c0ff	fast	
+retime-fgbg.interp1-w1.box2-24x16.d8.2f33a5b0	interp	
+retime-fgbg.interp1-w2.box2-24x16.d8.57236bcf	interp	
+retime-fgbg.interp1-w3.box2-24x16.d8.cc72b14b	interp	
+retime-fgbg.interp1-w4.box2-24x16.d8.33316164	interp	
+retime-fgbg.interp2-w1.box2-24x16.d8.12c290a0	interp	
+retime-fgbg.interp2-w2.box2-24x16.d8.e05b15df	interp	
+retime-fgbg.interp2-w3.box2-24x16.d8.6fe215e6	interp	
+retime-fgbg.interp2-w4.box2-24x16.d8.f005e2e6	interp	
+retime-fgbg.interp3-w1.box2-24x16.d8.282b7ec9	interp	
+retime-fgbg.interp3-w2.box2-24x16.d8.f507523f	interp	
+retime-fgbg.interp3-w3.box2-24x16.d8.8312855b	interp	
+retime-fgbg.interp3-w4.box2-24x16.d8.fcfe75c6	interp	
+retime-fgbg.interp1-w3.box2-24x16.d32.5b1a5aff	interp	
+retime-fgbg.interp3-w3.box2-24x16.d32.f405317d	interp	
+retime-fgbg.interp1-n1.box1-24x16.d8.1e10dd7d	interp	
+retime-fgbg.fg1sens0.box2f-32x24.d8.9ed83130	sens	
+retime-fgbg.fg1sens-0.box2f-32x24.d8.912261ea	sens	negzero
+retime-fgbg.fg1sens100.box2f-32x24.d8.280a26dc	sens	
+retime-fgbg.fg2sens0.box3f-32x24.d8.56fb8876	sens	
+retime-fgbg.fg3sens0.box3f-32x24.d8.bcab4c98	sens	
+retime-fgbg.mbsens0.box2f-32x24.d8.55228790	sens	
+retime-fgbg.fg2sens100.box3f-32x24.d8.d524eb9b	sens	
+retime-fgbg.fg3sens100.box3f-32x24.d8.06e3cbaa	sens	
+retime-fgbg.mbsens100.box2f-32x24.d8.1b315781	sens	
+retime-fgbg.allsens100.box3f-32x24.d16.da8a150f	sens	
+retime-fgbg.allsens35-d32.box3f-32x24.d32.05582f96	sens	
+retime-fgbg.bigmotion.box2f-48x32.d8.c5076af9	sens	
+retime-fgbg.blur0.01-d1.box2-24x16.d8.8a894e4e	blur	
+retime-fgbg.blur0.01-d3.box2-24x16.d8.e3b0d8e4	blur	
+retime-fgbg.blur0.01-d6.box2-24x16.d8.85db7c61	blur	
+retime-fgbg.blur1-d1.box2-24x16.d8.687bd49f	blur	
+retime-fgbg.blur1-d3.box2-24x16.d8.aa920040	blur	
+retime-fgbg.blur1-d6.box2-24x16.d8.0810fb46	blur	
+retime-fgbg.blur2.5-d1.box2-24x16.d8.026d7dea	blur	
+retime-fgbg.blur2.5-d3.box2-24x16.d8.3e79b4e2	blur	
+retime-fgbg.blur2.5-d6.box2-24x16.d8.e3de6341	blur	
+retime-fgbg.blur10-d1.box2-24x16.d8.6db051f5	blur	
+retime-fgbg.blur10-d3.box2-24x16.d8.2cef04e2	blur	
+retime-fgbg.blur10-d6.box2-24x16.d8.a505e44d	blur	
+retime-fgbg.blur3-w1.box2-24x16.d8.28b7a82b	blur	
+retime-fgbg.blur3-w2.box2-24x16.d8.cfa6f1f4	blur	
+retime-fgbg.blur3-w4.box2-24x16.d8.7ededbf8	blur	
+retime-fgbg.blur-neg0.box2-24x16.d8.83955489	blur	negzero
+retime-fgbg.blur2-d32.box2-24x16.d32.1d525c2d	blur	
+retime-fgbg.order012.box3-24x16.d8.9fed0992	order	
+retime-fgbg.order210.box3-24x16.d8.7a0abf06	order	
+retime-fgbg.order120.box3-24x16.d8.6e8611f0	order	
+retime-fgbg.order201.box3-24x16.d8.b50408cf	order	
+retime-fgbg.order10.box2-24x16.d8.5e58471c	order	
+retime-fgbg.order-fullfirst.box2-24x16.d8.e3168990	order	
+retime-fgbg.order-fullfirst-d4.box3-24x16.d8.69066ed0	order	
+retime-fgbg.order-fullfirst-d5.box3-24x16.d8.9b24f0d3	order	
+retime-fgbg.order-fullfirst-d6.box3-24x16.d8.a6a32cbf	order	
+retime-fgbg.order-soft-overlap.box3-24x16.d8.6d9f6967	order	
+retime-fgbg.order-same-box.box2-24x16.d8.733e1f37	order	
+retime-fgbg.order-d16.box3-24x16.d16.82d37f66	order	
+retime-fgbg.fg2only.box3-24x16.d8.b63c82ce	count	
+retime-fgbg.fg3only.box3-24x16.d8.97ef02eb	count	
+retime-fgbg.fg1fg3.box3-24x16.d8.dde39766	count	
+retime-fgbg.fg2fg3.box3-24x16.d8.88620e65	count	
+retime-fgbg.fg1fg3-d6.box3-24x16.d8.07f65770	count	
+retime-fgbg.fg1fg2-d32.box3-24x16.d32.d3c54a25	count	
+retime-fgbg.m-empty.box1-24x16.d8.e4eafca5	mattes	
+retime-fgbg.m-emptya.box1-24x16.d8.eb7a7a25	mattes	
+retime-fgbg.m-full.box1-24x16.d8.96ef67ce	mattes	
+retime-fgbg.m-grey.box1-24x16.d8.4c58db7b	mattes	
+retime-fgbg.m-thrA.box1-24x16.d8.656442b8	mattes	
+retime-fgbg.m-thrB.box1-24x16.d8.add5ee17	mattes	
+retime-fgbg.m-soft.box1-24x16.d8.decd7a59	mattes	
+retime-fgbg.m-noise.box1-24x16.d8.e4d4537e	mattes	
+retime-fgbg.m-ramp.box1-24x16.d8.2d3b735d	mattes	
+retime-fgbg.m-thrA.box1-24x16.d16.759285cf	mattes	
+retime-fgbg.m-thrB.box1-24x16.d16.54ef68b3	mattes	
+retime-fgbg.m-grey.box1-24x16.d16.36d93562	mattes	
+retime-fgbg.m-noise.box1-24x16.d16.fcbc7cd0	mattes	
+retime-fgbg.m-ramp.box1-24x16.d16.e242f4aa	mattes	
+retime-fgbg.m-empty.box1-24x16.d16.510959d3	mattes	
+retime-fgbg.m-empty.box1-24x16.d32.a02e649c	mattes	
+retime-fgbg.m-full.box1-24x16.d32.4763fd38	mattes	
+retime-fgbg.m-grey.box1-24x16.d32.770f16b4	mattes	
+retime-fgbg.m-thrA.box1-24x16.d32.4c6e1a3b	mattes	
+retime-fgbg.m-thrB.box1-24x16.d32.c2b1090d	mattes	
+retime-fgbg.m-noise.box1-24x16.d32.d81f42c9	mattes	
+retime-fgbg.m-ramp.box1-24x16.d32.05ccd16a	mattes	
+retime-fgbg.m-soft.box1-24x16.d32.6de1baed	mattes	
+retime-fgbg.m-emptya.box1-24x16.d32.b2dd3bfb	mattes	
+retime-fgbg.m-empty-n2.box2-24x16.d8.aaf7a6e4	mattes	
+retime-fgbg.m-empty-first.box2-24x16.d8.dee18236	mattes	
+retime-fgbg.m-empty-all3.box3-24x16.d8.f1fd6bb3	mattes	
+retime-fgbg.m-thr-n2.box2-24x16.d8.54851bc7	mattes	
+retime-fgbg.m-thr-n2-d32.box2-24x16.d32.7d65daf3	mattes	
+retime-fgbg.m-full-n3.box3-24x16.d8.802a698c	mattes	
+retime-fgbg.m-grey-bg.box1-24x16.d8.79e42307	mattes	
+retime-fgbg.m-ramp-d6.box2-24x16.d16.509a66a0	mattes	
+retime-fgbg.specbox2-w1.specbox2-16x12.d32.74e1c7bf	spec	special
+retime-fgbg.specbox2-w2.specbox2-16x12.d32.0771a904	spec	special
+retime-fgbg.specbox2-w3.specbox2-16x12.d32.27976dd1	spec	special
+retime-fgbg.specbox2-w4.specbox2-16x12.d32.3a92a83b	spec	special
+retime-fgbg.specbox2a-w3.specbox2a-16x12.d32.c3bbdbce	spec	special
+retime-fgbg.specbox1-w1.specbox1-16x12.d32.154c73a4	spec	special
+retime-fgbg.specbox3-w3.specbox3-16x12.d32.94d441e5	spec	special
+retime-fgbg.specall-w1.specall-16x12.d32.9a81f276	spec	special
+retime-fgbg.specall-w3.specall-16x12.d32.a531ee90	spec	special
+retime-fgbg.specm-chan1.box1-16x12.d32.3a405ed7	spec	special
+retime-fgbg.specm-chan2.box1-16x12.d32.526699e0	spec	special
+retime-fgbg.specm-chan3.box1-16x12.d32.aeb06458	spec	special
+retime-fgbg.specm-chan4.box1-16x12.d32.1d870515	spec	special
+retime-fgbg.specm-n2.box2-16x12.d32.f5dd9d21	spec	special
+retime-fgbg.specm-n2-w4.box2-16x12.d32.60f01149	spec	special
+retime-fgbg.specbox-bg.box2-16x12.d32.b48b1389	spec	special
+retime-fgbg.specm-bg-shrink.box2-16x12.d32.c20e0a24	spec	special
+retime-fgbg.m-nanall.box1-16x12.d32.bd554737	spec	special
+retime-fgbg.m-negnanall.box1-16x12.d32.353236df	spec	special
+retime-fgbg.m-infall.box1-16x12.d32.d6a37879	spec	special
+retime-fgbg.m-ninfall.box1-16x12.d32.eb33ea40	spec	special
+retime-fgbg.m-maxall.box1-16x12.d32.ea745f10	spec	special
+retime-fgbg.m-denall.box1-16x12.d32.254b9d67	spec	special
+retime-fgbg.m-maxden.box1-16x12.d32.886829ec	spec	special
+retime-fgbg.m-fltmin.box1-16x12.d32.cee1998b	spec	special
+retime-fgbg.m-negzero.box1-16x12.d32.20894ab8	spec	special
+retime-fgbg.m-over1.box1-16x12.d32.57373ebe	spec	special
+retime-fgbg.m-nanbox.box1-16x12.d32.b3f9e7c3	spec	special
+retime-fgbg.m-nanall-n2-bg.box2-16x12.d32.301bec7f	spec	special
+retime-fgbg.m-infall-n2-bg.box2-16x12.d32.bd8cec31	spec	special
+retime-fgbg.m-negzero-n2-bg.box2-16x12.d32.989e65c8	spec	special
+retime-fgbg.m-over1-n2-bg.box2-16x12.d32.0c1c4d6b	spec	special
+retime-fgbg.m-denall-n2-bg.box2-16x12.d32.7f56e9c7	spec	special
+retime-fgbg.m-negzero-out.box2-16x12.d32.51cf18c0	spec	special,negzero
+retime-fgbg.specm-exact.box2-16x12.d32.6fb9a4a8	spec	special
+retime-fgbg.pt-use2-n0.box1-32x24.d8.c820ffca	points	standin
+retime-fgbg.pt-use3-n0.box1-32x24.d8.9b6aa786	points	standin
+retime-fgbg.pt-use4-n0.box1-32x24.d8.b5c0e76e	points	standin
+retime-fgbg.pt-use5-n0.box1-32x24.d8.f519144c	points	standin
+retime-fgbg.pt-use2-n2.box2-32x24.d8.bf2b4ded	points	standin
+retime-fgbg.pt-use3-n2.box2-32x24.d8.a7977aec	points	standin
+retime-fgbg.pt-use4-n2.box2-32x24.d8.7f6cc61e	points	standin
+retime-fgbg.pt-use5-n2.box2-32x24.d8.35548c28	points	standin
+retime-fgbg.pt-use1-n2.box2-32x24.d8.1b761699	points	standin
+retime-fgbg.pt-still.box2-32x24.d8.749b2a76	points	
+retime-fgbg.pt-use3-n3.box3-32x24.d8.7c9d5e13	points	standin
+retime-fgbg.pt-same-pixel.box2-32x24.d8.3be809c5	points	standin
+retime-fgbg.pt-all12.box3-32x24.d8.850939f0	points	standin
+retime-fgbg.pt12-only.box2-32x24.d8.14a7edd6	points	standin
+retime-fgbg.pt-outside.box2-32x24.d8.32cb7b89	points	standin
+retime-fgbg.pt-outside-to.box2-32x24.d8.f86a8801	points	standin
+retime-fgbg.pt-default-pos.box2-32x24.d8.c47dbdf6	points	
+retime-fgbg.pt-use-keyed.box2-32x24.d8.988de7fb	points	standin
+retime-fgbg.pt-use-keyed2.box2-32x24.d8.b0c56146	points	standin
+retime-fgbg.pt-subpixel.box1-32x24.d8.a65728f0	points	standin
+retime-fgbg.pt-w1.box2-32x24.d8.1d740969	points	standin
+retime-fgbg.pt-w2-n3.box3-32x24.d8.a2edb883	points	standin
+retime-fgbg.pt-key.box2-32x24.d16.45fb7af1	points	standin
+retime-fgbg.pt-key.box2-32x24.d32.68be32dc	points	standin
+retime-fgbg.pt-interp1.box2-32x24.d8.3abd5699	points	standin
+retime-fgbg.pt-interp3.box2-32x24.d8.2e5d5afd	points	standin
+retime-fgbg.pt-bg-view.box2-32x24.d8.9f197306	points	standin
+retime-fgbg.pt-neg0.box2-32x24.d8.8c5c37ec	points	standin,negzero
+retime-fgbg.pt-fast.box2-32x24.d8.781c0d53	points	standin
+retime-fgbg.pt-still-edge.pan-32x24.d8.30e3e8d6	points	
+retime-fgbg.pt-still-edge.pan-32x24.d8.a2d4583a	points	
+retime-fgbg.pt-still-edge.pan-32x24.d8.1f033d31	points	
+retime-fgbg.pt-still-edge.pan-32x24.d8.8ecc2ae9	points	
+retime-fgbg.pt-still-edge.pan-32x24.d8.33f29f51	points	
+retime-fgbg.pt-still-edge.pan-32x24.d8.e6af5dc0	points	
+retime-fgbg.pt-tiny.box1-3x3.d8.764d4b6c	points	standin,tiny
+retime-fgbg.pt-wide.box1-40x12.d8.eb0e963a	points	standin
+retime-fgbg.pt-tall.box1-12x40.d8.859728dd	points	standin
+retime-fgbg.dg1-n2.box2-32x24.d8.908307e8	geom	
+retime-fgbg.dg2-n2.box2-32x24.d8.6f0e7e21	geom	
+retime-fgbg.dg3-n2.box2-32x24.d8.918d0612	geom	
+retime-fgbg.dg4-n2.box2-32x24.d8.e6b66c97	geom	
+retime-fgbg.dg5-n2.box2-32x24.d8.a652258f	geom	
+retime-fgbg.dg6-n2.box2-32x24.d8.28d3528b	geom	
+retime-fgbg.dg2-n0.box1-32x24.d8.1c587374	geom	
+retime-fgbg.dg3-n0.box1-32x24.d8.77cd3e3a	geom	
+retime-fgbg.dg6-n0.box1-32x24.d8.8f631508	geom	
+retime-fgbg.dg2-n3.box3-32x24.d8.11feb1cc	geom	
+retime-fgbg.dg5-n3.box3-32x24.d8.e822d5df	geom	
+retime-fgbg.dg2-n2.box2-32x24.d16.65d71ac1	geom	
+retime-fgbg.dg4-n2.box2-32x24.d16.fbc6b190	geom	
+retime-fgbg.dg6-n2.box2-32x24.d16.dd9e6296	geom	
+retime-fgbg.dg2-n2.box2-32x24.d32.b1f7d1e6	geom	
+retime-fgbg.dg4-n2.box2-32x24.d32.d018122e	geom	
+retime-fgbg.dg6-n2.box2-32x24.d32.6d54b178	geom	
+retime-fgbg.edge0.box1-32x24.d8.0d6fe00e	geom	
+retime-fgbg.edge0.box1-32x24.d32.26a025a3	geom	
+retime-fgbg.edge4.box1-32x24.d8.d59a3f0f	geom	
+retime-fgbg.edge4.box1-32x24.d32.d1c8f48c	geom	
+retime-fgbg.edge8.box1-32x24.d8.e1ca4338	geom	
+retime-fgbg.edge8.box1-32x24.d32.6b6a9426	geom	
+retime-fgbg.edge-all12.box3-32x24.d16.664ffcc3	geom	
+retime-fgbg.overlap-order.box1-16x12.d8.b9bdecf9	geom	
+retime-fgbg.overlap-order-d32.box1-16x12.d32.f8b7331d	geom	
+retime-fgbg.overlap-reverse.box1-16x12.d8.71e3db01	geom	
+retime-fgbg.alpha-src.box1a-16x12.d8.96e71169	geom	
+retime-fgbg.alpha-src-d16.box1a-16x12.d16.701bdabf	geom	
+retime-fgbg.keyed-pos.box1-32x24.d8.26be5967	geom	standin
+retime-fgbg.keyed-pos-n2.box2-32x24.d8.02ca9942	geom	standin
+retime-fgbg.disc-subpix.flat-16x12.d8.fec3b664	geom	
+retime-fgbg.disc-subpix-d32.specall-16x12.d32.20fa15c8	geom	special
+retime-fgbg.disc-tiny.box1-2x2.d8.91605ca1	geom	tiny
+retime-fgbg.disc-1x1.box1-1x1.d8.cf0daf4a	geom	tiny
+retime-fgbg.disp1-no-draw.box1-32x24.d8.39a25a0c	geom	
+retime-fgbg.wrap-w1.wrapcol-24x16.d8.e13afa31	wrap	
+retime-fgbg.wrap-w2.wrapcol-24x16.d8.c8fd7863	wrap	
+retime-fgbg.wrap-w3.wrapcol-24x16.d8.4a9ecfae	wrap	
+retime-fgbg.wrap-w4.wrapcol-24x16.d8.6391ee84	wrap	
+retime-fgbg.wrap-n2.wrapcol-24x16.d8.f93e5de6	wrap	
+retime-fgbg.wrap-box-w3.box2-24x16.d8.074b689c	wrap	
+retime-fgbg.wrap-bg.wrapcol-24x16.d8.23f2a4fa	wrap	
+retime-fgbg.wrap-blur.wrapcol-24x16.d8.3bd7b9ae	wrap	
+retime-fgbg.wrap-pt.wrapcol-24x16.d8.a102ddde	wrap	standin
+retime-fgbg.wrap-d32.wrapcol-24x16.d32.c3a6a5ce	wrap	
+retime-fgbg.wrap-d16.wrapcol-24x16.d16.eaca713d	wrap	
+retime-fgbg.wrap-off.wrapcol-24x16.d8.86ead36d	wrap	
+retime-fgbg.mix00.box2a-12x20.d8.ae846040	mix	
+retime-fgbg.mix01.box3f-31x21.d16.460aca23	mix	
+retime-fgbg.mix02.box1-17x13.d8.015669cc	mix	
+retime-fgbg.mix03.box2-31x21.d8.2df6213a	mix	
+retime-fgbg.mix04.box2-24x16.d8.b8267e62	mix	
+retime-fgbg.mix05.box1f-31x21.d16.84c40ba8	mix	
+retime-fgbg.mix06.box2f-31x21.d16.af442d8d	mix	
+retime-fgbg.mix07.box3-17x13.d16.c8f68750	mix	
+retime-fgbg.mix08.box3-17x13.d8.d7e029a9	mix	
+retime-fgbg.mix09.box2-24x16.d8.913923e3	mix	
+retime-fgbg.mix10.box3a-17x13.d16.f08eb61a	mix	
+retime-fgbg.mix11.box3a-12x20.d16.5550c056	mix	
+retime-fgbg.mix12.box3-16x12.d8.1447dd90	mix	
+retime-fgbg.mix13.box1a-31x21.d8.51efdedb	mix	

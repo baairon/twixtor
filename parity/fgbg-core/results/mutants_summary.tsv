@@ -1,0 +1,23 @@
+id	status	changed_cases	what
+M01	changed-cases	126	mesh vertex tie-break epsilon in x doubled (mesh rounding)
+M02	changed-cases	32	mip level: diagonal distances summed in the opposite order (operand order)
+M03	changed-cases	134	mip level off by one
+M04	changed-cases	134	scan converter drops one-pixel spans (rasterization)
+M05	no-change	0	first scanline of a triangle rounds down instead of up
+M06	changed-cases	9	edge activation compare made inclusive
+M07	changed-cases	4	running mean accumulation with the weight on the wrong operand (swapped weight)
+M08	changed-cases	68	8 bit store without the 0.5 rounding bias
+M09	changed-cases	3	Nearest forward tie at exactly half way picks the later frame
+M10	changed-cases	32	Blend and Weighted Blend forward (no coverage) push frame B along the flow of A
+M11	changed-cases	96	coverage image requires two hits
+M12	changed-cases	126	pyramid blur taps changed
+M13	changed-cases	37	mip level blend written from the other end (operand order, last bits)
+M14	changed-cases	130	mip level blend fraction inverted (swapped weight)
+M15	changed-cases	98	flows below half a pixel count as zero (copy shortcut threshold)
+M16	changed-cases	13	vertex scale by reciprocal multiply instead of divide (last bits)
+M17	changed-cases	134	mip level neighbour above the first row not mirrored
+M18	changed-cases	167	Warping popup choices 3 and 4 swapped
+M19	changed-cases	18	Track RGB+A never reaches the engine
+M20	changed-cases	2	frame to time conversion truncates instead of rounding
+M21	changed-cases	132	span start column rounds down instead of up (rasterization)
+M22	changed-cases	135	span end column rounds up instead of down (rasterization)

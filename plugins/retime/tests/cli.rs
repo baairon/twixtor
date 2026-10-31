@@ -333,10 +333,13 @@ fn vector_frame(clip: &[Frame], params: &[(&str, &str)], n: usize) -> Frame {
     let settings = retime_engine::frontend::read_settings(&retime::WIRING, &rig.cx(n as u64), &rig.env()).unwrap();
     let k = (n - 1) / 2;
     let (a, b) = (Image::from_frame(&clip[k]), Image::from_frame(&clip[k + 1]));
+    // plugin 01's vector path runs on reversed rows (`EngineSettings::motion_rows_reversed`)
+    let flip = |img: Image| if settings.motion_rows_reversed { img.rows_reversed() } else { img };
+    let (a, b) = (flip(a), flip(b));
     let pos = n as f32 / 2.0;
     let sel = Selection { s0: pos, s1: pos + 0.5, a: k as i32, b: k as i32 + 1, wa: 0.5, exact: false, vectors_quality: 4, interp: settings.interp };
     let flows = solve_flows(&settings, &sel, &a, &b).unwrap();
-    Rendered::Image(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap()).into_frame()
+    Rendered::Image(flip(compose_vectors(&settings, &sel, &a, &b, &flows).unwrap())).into_frame()
 }
 
 /// A 3 x 2 or 2 x 2 clip was below the 2 x 2 working size of Best; the motion search never halves below 2 x 2 (the

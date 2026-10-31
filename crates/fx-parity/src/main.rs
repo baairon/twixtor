@@ -73,6 +73,7 @@ fn cmd_run(a: RunArgs) -> Result<u8, String> {
         effect: a.effect,
         vfx: a.vfx,
         jobs: a.jobs.unwrap_or_else(default_jobs),
+        max_ulp: a.max_ulp,
     };
     let results = run::run(&opts, &|m| eprintln!("fx-parity: warning: {m}"))?;
     let mut out = std::io::stdout().lock();

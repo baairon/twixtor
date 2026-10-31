@@ -114,9 +114,18 @@ fn fg_matte_layers_render_on_every_frame_and_the_groups_of_the_fast_path_are_exa
         let on = |display: &str, matte: &Vec<Frame>| Rig::new(opaque.clone(), &[("display", display)]).with_layer("fg1_matte", matte.clone()).render(1).unwrap();
         let white = flat(w, h, 4, d, 1.0);
         let black = flat(w, h, 4, d, 0.0);
-        for display in ["1", "3", "6"] {
+        for display in ["1", "3"] {
             assert_eq!(on(display, &white), frame, "{d:?} white matte, display {display}");
         }
+        // the Background display rebuilds what FG1 covers; with FG1 covering all there is nothing to build
+        // from and it is opaque black (fix 03, measured on plugin 03)
+        let mut opaque_black = frame.clone();
+        match &mut opaque_black.pixels {
+            Pixels::U8(p) => p.fill([0, 0, 0, 255]),
+            Pixels::U16(p) => p.fill([0, 0, 0, 65535]),
+            Pixels::F32(p) => p.fill([0.0, 0.0, 0.0, 1.0]),
+        }
+        assert_eq!(on("6", &white), opaque_black, "{d:?} white matte, display 6");
         for (display, want) in [("1", frame.clone()), ("3", set.transparent()), ("6", frame.clone())] {
             assert_eq!(on(display, &black), want, "{d:?} black matte, display {display}");
         }
@@ -124,14 +133,13 @@ fn fg_matte_layers_render_on_every_frame_and_the_groups_of_the_fast_path_are_exa
         for display in ["4", "5"] {
             assert_eq!(on(display, &black), frame, "{d:?} display {display}");
         }
-        // a semi transparent frame is composed over itself: FG1's layer image (the frame times 1) OVER Main_BG's
-        // (the frame) raises the alpha, taken literally
+        // the full group on an exact frame reads no matte: a semi transparent frame comes out as it is (fix 04)
         let rt = set.rig(&[]).with_layer("fg1_matte", white.clone()).render(1).unwrap();
-        assert_ne!(rt, set.rt[1], "{d:?}: the golden frame has partial alpha");
+        assert_eq!(rt, set.rt[1], "{d:?}: the full group of an exact frame is the frame");
         // FG2 without FG1 is not counted (the probe loop stops at FG1)
         assert_eq!(set.rig(&[]).with_layer("fg2_matte", set.clip.clone()).render(1).unwrap(), set.rt[1]);
         // the Source display copies the frame
-        assert_eq!(set.rig(&[("display", "2")]).with_layer("fg1_matte", set.clip.clone()).render(1).unwrap(), set.rt[1]);
+        assert_eq!(set.rig(&[("display", "2")]).with_layer("alt_source_a", set.clip.clone()).with_layer("fg1_matte", set.clip.clone()).render(1).unwrap(), set.rt[1]);
     }
 }
 
@@ -183,8 +191,9 @@ fn changed(f: &Frame, g: &Frame) -> Vec<(usize, [u8; 4])> {
 #[test]
 fn the_draw_geom_overlay_draws_the_points_in_use_over_the_source_display() {
     let clip = random_clip(Depth::U8, 16, 12, 4, 5);
-    let src = Rig::new(clip.clone(), &[("display", "2")]).render(1).unwrap();
-    let rig = |p: &[(&str, &str)]| Rig::new(clip.clone(), p);
+    // the Source display shows Alt Color Source (without one it is the missing layer fill)
+    let src = Rig::new(clip.clone(), &[("display", "2")]).with_layer("alt_source_a", clip.clone()).render(1).unwrap();
+    let rig = |p: &[(&str, &str)]| Rig::new(clip.clone(), p).with_layer("alt_source_a", clip.clone());
     // Draw Geom defaults to All: Pt 4 (yellow by default) at (5, 4) is an opaque disc of radius 1.5, the 3 x 3 block
     let drawn = rig(&[("display", "2"), ("pt4_use", "5"), ("pt4_pos", "5,4")]).render(1).unwrap();
     let want: Vec<(usize, [u8; 4])> = [3usize, 4, 5].iter().flat_map(|&y| [4usize, 5, 6].map(|x| (y * 16 + x, [255, 255, 0, 255]))).collect();
@@ -212,17 +221,26 @@ fn the_draw_geom_overlay_draws_the_points_in_use_over_the_source_display() {
 }
 
 #[test]
-fn track_rgb_a_is_the_wrap_flag_where_vectors_are_computed() {
+fn track_rgb_a_does_not_wrap() {
+    // the original does not wrap with Track RGB+A (fix 05); it adds alpha to the solver's luma (fix 07), except with
+    // 360 Video on, where the solver keeps the video range luma
     let set = &sets()[0];
     let rig = set.rig(&[("speed_percent", "50"), ("track_rgb_a", "1")]);
     passes(&rig, 1);
     assert_eq!(rig.render(2).unwrap(), set.rt[1]);
     assert_eq!(set.rig(&[("speed_percent", "50"), ("track_rgb_a", "1"), ("vectors", "1")]).render(1).unwrap(), set.b01);
-    // on the textured clip the wrapped warps and solve read across the left and right borders
+    let tracked = Rig::new(moving(), &[("speed_percent", "50"), ("track_rgb_a", "1")]);
+    let s = retime_fgbg::glue::read_settings(&tracked.cx(1), &tracked.env()).unwrap();
+    assert!(s.track_alpha && !s.wrap_360 && !s.video_360);
+    passes(&tracked, 1);
+    // with 360 Video the wrap mode runs and Track RGB+A still adds alpha to the luma (no luma
+    // routine differs in the 360 mode)
+    let both = Rig::new(moving(), &[("speed_percent", "50"), ("track_rgb_a", "1"), ("video_360", "1")]);
+    let s = retime_fgbg::glue::read_settings(&both.cx(1), &both.env()).unwrap();
+    assert!(s.track_alpha && !s.video_360 && s.wrap_360);
+    passes(&both, 1);
     let plain = Rig::new(moving(), &[("speed_percent", "50")]);
-    let wrapped = Rig::new(moving(), &[("speed_percent", "50"), ("track_rgb_a", "1")]);
-    assert_ne!(wrapped.render(1).unwrap(), plain.render(1).unwrap());
-    assert_eq!(wrapped.render(2).unwrap(), plain.render(2).unwrap(), "an exact frame has no motion to wrap");
+    assert!(!retime_fgbg::glue::read_settings(&plain.cx(1), &plain.env()).unwrap().track_alpha);
 }
 
 #[test]

@@ -419,3 +419,60 @@ fn thread_count_does_not_change_the_vector_coding() {
         }
     }
 }
+
+// ---- the single layer output and the composite of a group, read from CreateMotionVectors_64
+
+#[test]
+fn composite_lays_a_layer_over_with_its_raw_matte_8_bit() {
+    // zero flow underneath (127); the layer moves by the full scale (e = (1 + 1) * 127 = 254)
+    let mut img = Image::new(3, 2, Fmt::U8);
+    encode_vectors(&mut img, &flat_flow(3, 2, 0.0, 0.0), 4.0).unwrap();
+    // mattes 0, 128 and 255 on the first row, 255 below
+    let m = vec![0.0, 128.0, 255.0, 255.0, 255.0, 255.0];
+    composite_vectors(&mut img, &flat_flow(3, 2, 4.0, -4.0), 4.0, &m).unwrap();
+    assert_eq!(px8(&img, 0, 0), [255, 127, 127, 0]);
+    // f = 128 * f32(1/255) = 0.50196081: (254 - 127) * f + 127 + 0.5 = 191.249 -> 191; G: (0 - 127) * f + 127.5 = 63.75 -> 63
+    assert_eq!(px8(&img, 1, 0), [255, 191, 63, 0]);
+    // f = 255 * f32(1/255) rounds to 1.0: the layer's own vector
+    assert_eq!(px8(&img, 2, 0), [255, 254, 0, 0]);
+}
+
+#[test]
+fn composite_16_bit_and_float_clamp_the_vector() {
+    let mut img = Image::new(2, 2, Fmt::U16);
+    encode_vectors(&mut img, &flat_flow(2, 2, 0.0, 0.0), 2.0).unwrap();
+    composite_vectors(&mut img, &flat_flow(2, 2, 2.0, 1.0), 2.0, &[65535.0, 0.0, 32768.0, 65535.0]).unwrap();
+    assert_eq!(px16(&img, 0, 0), [0xffff, 65534, 49151, 0]);
+    assert_eq!(px16(&img, 1, 0), [0xffff, 32767, 32767, 0]);
+    // f = 32768 * f32(1/65535) = 0.5000076: (65534 - 32767) * f + 32767 + 0.5 = 49151.25 -> 49151
+    let f = 32768.0f32 * crate::matte::PL_K16;
+    let want = (((65534.0f32 - 32767.0) * f + 32767.0) + 0.5f32) as i64 as u16;
+    assert_eq!(px16(&img, 0, 1)[1], want);
+    // float: the composite clamps (the plain float encoder does not): 3 scales -> 1.0 -> e = 1.0
+    let mut img = Image::new(2, 2, Fmt::F32);
+    encode_vectors(&mut img, &flat_flow(2, 2, 0.0, 0.0), 1.0).unwrap();
+    composite_vectors(&mut img, &flat_flow(2, 2, 3.0, -0.5), 1.0, &[1.0, 1.0, 0.0, 0.25]).unwrap();
+    assert_eq!(pxf(&img, 0, 0), [1.0, 1.0, 0.25, 0.0]);
+    assert_eq!(pxf(&img, 0, 1), [1.0, 0.5, 0.5, 0.0]);
+    let g = ((0.25f32 - 0.5) * 0.25 + 0.5) + 0.0f32;
+    assert_eq!(pxf(&img, 1, 1), [1.0, ((1.0f32 - 0.5) * 0.25 + 0.5) + 0.0, g, 0.0]);
+    // a matte of another size is refused
+    assert!(composite_vectors(&mut img, &flat_flow(2, 2, 0.0, 0.0), 1.0, &[1.0]).is_err());
+}
+
+#[test]
+fn encode_vectors_blue_is_the_plain_encode_with_the_blue_plane() {
+    let flow = flat_flow(2, 2, 1.0, -0.5);
+    let mut plain = Image::new(2, 2, Fmt::U8);
+    encode_vectors(&mut plain, &flow, 4.0).unwrap();
+    let blue = Matte { width: 2, height: 2, data: vec![0.0, 0.5, 1.0, 100.0 / 255.0] };
+    let mut img = Image::new(2, 2, Fmt::U8);
+    encode_vectors_blue(&mut img, &flow, 4.0, &blue).unwrap();
+    for (i, b) in [0u8, 128, 255, 100].into_iter().enumerate() {
+        let (x, y) = (i % 2, i / 2);
+        let mut want = px8(&plain, x, y);
+        want[3] = b;
+        assert_eq!(px8(&img, x, y), want, "pixel {i}");
+    }
+    assert!(encode_vectors_blue(&mut img, &flow, 4.0, &Matte { width: 1, height: 1, data: vec![0.0] }).is_err());
+}

@@ -1,0 +1,53 @@
+{
+ "measured_at": "2026-10-31",
+ "definition": "among the in-contract cases where the base rewrite output equals the reference, a mutant is killed iff its output differs from the reference (and from the unmutated control build) on at least one",
+ "refs": "~/twixtor-parity/re/f7-supp/refs/time480",
+ "mutant_outputs": "re-rendered with ~/twixtor-parity/re/f7-supp/mutbin on the discriminating cases only",
+ "base_table": "~/twixtor-parity/re/f7-supp/pa/time480/base.tsv",
+ "control_table": "m00_control.tsv",
+ "in_contract_cases": 2,
+ "cases_with_reference": 2,
+ "discriminating_cases": 2,
+ "total": 2,
+ "killed": 1,
+ "survivors": [
+  "m09_exact_tolerance_wider"
+ ],
+ "ignored_tables": [],
+ "grade_crosscheck": {
+  "hash_equal_not_pass": [],
+  "pass_not_hash_equal": []
+ },
+ "mutants": [
+  {
+   "id": "m20_dur_in_f32",
+   "what": "source frame duration computed in f32 instead of f64 (a search over input rates 0.1 to 1000 in steps of 0.01 against 13 output rates and 14 frames found no frame time that moves)",
+   "file": "timeline.rs",
+   "expect": "equivalent in practice",
+   "status": "killed",
+   "killing_count": 2,
+   "killing_cases": [
+    "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d8",
+    "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d32"
+   ],
+   "changed_cases_vs_control": 2,
+   "changed_where_base_differs_or_no_reference": 0,
+   "exit_changes": 0,
+   "not_run_cases": 0
+  },
+  {
+   "id": "m09_exact_tolerance_wider",
+   "what": "exact-frame tolerance 0.005 -> 0.01 (the exact flag only gates the vector path, so none expected at vectors=1)",
+   "file": "timeline.rs",
+   "expect": "equivalent in scope",
+   "status": "survivor",
+   "killing_count": 0,
+   "killing_cases": [],
+   "changed_cases_vs_control": 0,
+   "changed_where_base_differs_or_no_reference": 0,
+   "exit_changes": 0,
+   "not_run_cases": 0,
+   "reason": "changes no output"
+  }
+ ]
+}

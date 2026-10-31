@@ -1,0 +1,54 @@
+{
+ "testset": "~/twixtor-parity/re/f7-supp/supp/time",
+ "refs": "~/twixtor-parity/re/f7-supp/refs/time",
+ "seconds": 50.5,
+ "jobs": 1,
+ "cases": [
+  {
+   "event": "done",
+   "id": "retime.supp-dur-f32-fn475-at15.alt-1x1.d8",
+   "effect": "retime",
+   "frames": 2,
+   "frame_seconds": [
+    0.105,
+    0.136
+   ],
+   "status": "rendered",
+   "seconds": 0.139,
+   "seconds_per_frame": 0.069,
+   "reference": "~/twixtor-parity/re/f7-supp/refs/time/retime.supp-dur-f32-fn475-at15.alt-1x1.d8.rgba",
+   "messages": []
+  },
+  {
+   "event": "done",
+   "id": "retime.supp-dur-f32-fn475-at15.alt-1x1.d32",
+   "effect": "retime",
+   "frames": 2,
+   "frame_seconds": [
+    0.035,
+    0.063
+   ],
+   "status": "rendered",
+   "seconds": 0.064,
+   "seconds_per_frame": 0.032,
+   "reference": "~/twixtor-parity/re/f7-supp/refs/time/retime.supp-dur-f32-fn475-at15.alt-1x1.d32.gbrapf32le",
+   "messages": []
+  }
+ ],
+ "boots": [
+  {
+   "event": "boot",
+   "ok": true,
+   "plugin": "Twixtor_64",
+   "seconds": 49.4,
+   "load_seconds": 36.3,
+   "entry": "mainB",
+   "params": 33,
+   "smart_render": true,
+   "out_flags": "0x6400013",
+   "out_flags2": "0xb01489",
+   "init_errors": [],
+   "messages": []
+  }
+ ]
+}

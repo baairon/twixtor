@@ -1,0 +1,28 @@
+id	status	changed_cases	what
+M01	changed-cases	21	shrink radius larger by half a pixel (G1)
+M02	changed-cases	6	shrink threshold T drops the k[n+1] term (G1)
+M03	changed-cases	5	fractional shrink mixes the two whole shrinks with swapped weights (G1)
+M04	changed-cases	8	matte channel 3 reads green instead of blue
+M05	no-change	0	clamp_matte turns -0.0 into +0.0 (matte product sign of zero)
+M06	no-change	0	float layer premultiply adds 0.0 (loses -0.0)
+M07	changed-cases	236	visibility of the layers below never reduced: layer order lost (G1c)
+M08	changed-cases	155	layers composed top down instead of bottom up (both compositions)
+M09	changed-cases	149	frame B premultiplied by the matte of frame A
+M10	changed-cases	30	display group off by one layer
+M11	changed-cases	156	forward warp code 2 takes the inverse flow assignment of the sides
+M12	changed-cases	174	reverse solve keeps the mask pyramids in A, B order
+M13	changed-cases	26	reverse solve uses the forward point pairs (G2)
+M14	changed-cases	31	point lands one pixel to the right (G2)
+M15	changed-cases	1	in_frame excludes a point at x = -0.5 (G2)
+M16	changed-cases	27	point weight 2 instead of 1 (G2)
+M17	changed-cases	27	point displacement x with the wrong sign (G2)
+M18	changed-cases	18	Pt Use value 2 (FG 1) treated as Don't Use
+M19	changed-cases	27	level scale of a point uses the width instead of width - 1 (G2)
+M20	changed-cases	32	Draw Geom disc radius 2.0 instead of 1.5 (G3)
+M21	changed-cases	12	Draw Geom disc edge exclusive (G3)
+M22	changed-cases	5	Draw Geom 16 bpc colour scale 256 (G3)
+M23	changed-cases	8	Draw Geom float colour divided by 256 (G3)
+M24	changed-cases	10	Draw Geom draws later points first, so earlier points end on top (G3)
+M25	changed-cases	13	mask binarize threshold exclusive at 0.95 (G1b)
+M26	changed-cases	27	user displacement y takes the x component (G2)
+M27	changed-cases	31	user displacement never applied to the flow (G2)

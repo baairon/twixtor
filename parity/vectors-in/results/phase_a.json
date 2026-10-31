@@ -1,0 +1,59 @@
+{
+ "grid_cases": 451,
+ "base_rendered": 449,
+ "base_refused": [
+  [
+   "vectors-in.spvecR-inv-flt_max.12x9.d32.e1a439",
+   "vfx: error: frame 1: unsupported: inverse warp: a sample coordinate is NaN or never converges, which is not supported"
+  ],
+  [
+   "vectors-in.spvecR-inv-nan.12x9.d32.963079",
+   "vfx: error: frame 1: unsupported: inverse warp: a sample coordinate is NaN or never converges, which is not supported"
+  ]
+ ],
+ "determinism_rerun": {
+  "cases": 451,
+  "differing": 0
+ },
+ "control_build": {
+  "cases": 451,
+  "differing_from_base": 0
+ },
+ "out_of_contract_candidates": 33,
+ "candidates_refused_by_rewrite_check": 33,
+ "stand_in_cases": 19,
+ "flagged": {
+  "long_source": 8,
+  "reads_before_start": 6,
+  "reads_past_end": 4,
+  "tiny": 21
+ },
+ "groups": {
+  "blur": 13,
+  "defaults": 3,
+  "display": 9,
+  "fg": 22,
+  "footage": 22,
+  "framenum": 18,
+  "ftime": 11,
+  "inrate": 21,
+  "keyed": 11,
+  "layers": 30,
+  "mark": 9,
+  "maxdisp": 24,
+  "misc": 8,
+  "outrate": 3,
+  "size": 33,
+  "sp_src": 24,
+  "sp_vecA": 12,
+  "sp_vecB": 6,
+  "sp_vecG": 12,
+  "sp_vecR": 17,
+  "speed": 28,
+  "tiny": 9,
+  "vecfield": 63,
+  "vecscale": 22,
+  "warp": 21
+ },
+ "distinct_outputs": 334
+}

@@ -1,0 +1,672 @@
+{
+ "command": "python3 tools/phase_b.py ooc --testsets ~/twixtor-parity/re/f7-supp/ts-flow --results ~/twixtor-parity/re/f8-tiny/tf3/results --phase-a ~/twixtor-parity/re/f8-tiny/tf3/phasea --status ~/twixtor-parity/fix-twixtor/status/flow_all.json --status ~/twixtor-parity/fix-twixtor/ooc/status_flow.json --status ~/twixtor-parity/re/f7-supp/state/h_flow.json --status ~/twixtor-parity/re/f8-tiny/flowrun/status.json --param-map ~/twixtor-parity/fix-twixtor/h/param_map_Twixtor_64.tsv; then the tiny-frame rule (cases of at most 5x5 the original stops on)",
+ "measured_at": "2026-10-31",
+ "status_files": [
+  "~/twixtor-parity/fix-twixtor/status/flow_all.json",
+  "~/twixtor-parity/fix-twixtor/ooc/status_flow.json",
+  "~/twixtor-parity/re/f7-supp/state/h_flow.json",
+  "~/twixtor-parity/re/f8-tiny/flowrun/status.json"
+ ],
+ "counts": {
+  "cases_in_test_sets": 347,
+  "moved_out_of_contract": 10,
+  "unjudged": 7,
+  "accepted_by_the_original": 330,
+  "candidates": 17,
+  "candidates_out_of_contract": 3,
+  "candidates_the_original_renders": 14,
+  "range_candidates": 0,
+  "unknown_ids": 0
+ },
+ "moved": [
+  {
+   "id": "retime.size-default.shift-1x1.d8.5c606309",
+   "group": "size",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 1x1 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.disc-1x1.d16.2f5f3554",
+   "group": "size",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 16,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 1x1 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.alpha-1x1.d32.621a333c",
+   "group": "size",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 32,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 1x1 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.noise-2x2.d8.427ca099",
+   "group": "size",
+   "params": [
+    "speed_percent=25"
+   ],
+   "depth": 8,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 2x2 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.shift-2x2.d16.748f806a",
+   "group": "size",
+   "params": [
+    "speed_percent=75"
+   ],
+   "depth": 16,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 2x2 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.disc-2x2.d32.01cccd59",
+   "group": "size",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 32,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 2x2 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.shift-3x3.d8.3a6b6ea5",
+   "group": "size",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 8,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 3x3 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.disc-3x3.d16.0d9c36b4",
+   "group": "size",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 16,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 3x3 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.size-default.alpha-3x3.d32.3f275f95",
+   "group": "size",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 3x3 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  },
+  {
+   "id": "retime.sb-tiny.shift-3x3.d32.3d6b8ec8",
+   "group": "sb",
+   "params": [
+    "speed_percent=20",
+    "smart_blend=1"
+   ],
+   "depth": 32,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "docs/parity.md tiny frames: sizes 1x1 to 5x5 enter a grid only if the original renders them; the original stops on this 3x3 case: GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+   "reason_class": "tiny_frame_rule"
+  }
+ ],
+ "unjudged": [
+  {
+   "id": "retime.size-default.disc-1x6.d8.094c98d0",
+   "group": "size",
+   "params": [
+    "speed_percent=33.3333"
+   ],
+   "depth": 8,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_dispose_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  },
+  {
+   "id": "retime.size-default.alpha-1x6.d16.542de920",
+   "group": "size",
+   "params": [
+    "speed_percent=62.5"
+   ],
+   "depth": 16,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_dispose_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  },
+  {
+   "id": "retime.size-default.noise-1x6.d32.2a45baca",
+   "group": "size",
+   "params": [
+    "speed_percent=40"
+   ],
+   "depth": 32,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_dispose_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  },
+  {
+   "id": "retime.size-default.alpha-7x1.d8.f33838df",
+   "group": "size",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  },
+  {
+   "id": "retime.size-default.noise-7x1.d16.3cefe003",
+   "group": "size",
+   "params": [
+    "speed_percent=20"
+   ],
+   "depth": 16,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  },
+  {
+   "id": "retime.size-default.shift-7x1.d32.276ca9c6",
+   "group": "size",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 32,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x7ab3cc",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x1807ab3cc",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  },
+  {
+   "id": "retime.draft-tiny.shift-7x9.d8.ef9c1654",
+   "group": "draft",
+   "params": [
+    "speed_percent=50"
+   ],
+   "depth": 8,
+   "plugin": {
+    "status": "error",
+    "error": "GuestFault: Invalid memory mapping (UC_ERR_MAP) at Twixtor_64.aex+0x85ed1",
+    "last_api": "utils.host_lock_handle",
+    "last_callback": "utils.host_dispose_handle",
+    "pc": "0x180085ed1",
+    "messages": []
+   },
+   "rewrite": {
+    "recorded": false
+   },
+   "reason": "harness fault, not judged"
+  }
+ ],
+ "candidates": [
+  {
+   "id": "ooc.0",
+   "label": "vectors=0",
+   "why": "popup below 1",
+   "params": [
+    "vectors=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.1",
+   "label": "vectors=6",
+   "why": "popup above 5",
+   "params": [
+    "vectors=6"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.2",
+   "label": "frame_interp=0",
+   "why": "popup below 1",
+   "params": [
+    "frame_interp=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.3",
+   "label": "frame_interp=4",
+   "why": "popup above 3",
+   "params": [
+    "frame_interp=4"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.4",
+   "label": "smart_blend=2",
+   "why": "checkbox not 0 or 1",
+   "params": [
+    "smart_blend=2"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.5",
+   "label": "video_360=2",
+   "why": "checkbox not 0 or 1",
+   "params": [
+    "video_360=2"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.6",
+   "label": "prep=0",
+   "why": "popup below 1",
+   "params": [
+    "prep=0"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.7",
+   "label": "prep=4",
+   "why": "popup above 3",
+   "params": [
+    "prep=4"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.8",
+   "label": "sensitivity=100.01",
+   "why": "float above 100",
+   "params": [
+    "sensitivity=100.01"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.9",
+   "label": "sensitivity=-0.01",
+   "why": "float below 0",
+   "params": [
+    "sensitivity=-0.01"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.10",
+   "label": "sensitivity=nan",
+   "why": "float NaN",
+   "params": [
+    "sensitivity=nan"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "error",
+    "error": "ValueError: cannot convert float NaN to integer",
+    "messages": []
+   },
+   "verdict": "out_of_contract_confirmed"
+  },
+  {
+   "id": "ooc.11",
+   "label": "blur_compensation=10.01",
+   "why": "float above 10",
+   "params": [
+    "blur_compensation=10.01"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.12",
+   "label": "blur_compensation=-0.01",
+   "why": "float below 0",
+   "params": [
+    "blur_compensation=-0.01"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.13",
+   "label": "speed_percent=10001",
+   "why": "float above 10000",
+   "params": [
+    "speed_percent=10001"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.14",
+   "label": "speed_percent=-10001",
+   "why": "float below -10000",
+   "params": [
+    "speed_percent=-10001"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "rendered",
+    "messages": []
+   },
+   "verdict": "plugin_renders_it"
+  },
+  {
+   "id": "ooc.15",
+   "label": "vectors=Best",
+   "why": "popup given by name",
+   "params": [
+    "vectors=Best"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "error",
+    "error": "ValueError: could not convert string to float: 'Best'",
+    "messages": []
+   },
+   "verdict": "out_of_contract_confirmed"
+  },
+  {
+   "id": "ooc.16",
+   "label": "speed_percent=50@",
+   "why": "key without a frame",
+   "params": [
+    "speed_percent=50@"
+   ],
+   "rewrite": {
+    "check_exit": null,
+    "message": ""
+   },
+   "plugin": {
+    "status": "unsupported",
+    "error": "key `50@`",
+    "messages": []
+   },
+   "verdict": "out_of_contract_confirmed"
+  }
+ ],
+ "range_candidates": [],
+ "unknown_ids": []
+}

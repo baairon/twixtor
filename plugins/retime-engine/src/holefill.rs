@@ -38,14 +38,40 @@
 //! unchanged. Without a hole it is the identity as well, and the flag off is the plain fill above,
 //! bit for bit. A wrapped fill that runs records G6 (`fx_core::gaps::record`).
 //!
+//! The vertical tap order ([`VerticalTaps`]): in the border rows of the vertical pass of every
+//! convolution of the fill (the pull `blur5` and the push Gaussian, values and weights alike) the
+//! engine adds the tap below (`y + j`) before the tap above (`y - j`), as in every other
+//! convolution of the engine. With [`VerticalTaps::AboveFirst`] the tap above comes first; the
+//! horizontal pass, the interior rows, the resamples, the load, the combine and the write back are
+//! unchanged, so the two differ only in the last bits of float sums (32 bpc and flows; 8 and 16
+//! bpc only where a rounding tie falls on the other side). `TwixtorProVectorsIn_64` fills that
+//! way (MEASURED under the emulator: the
+//! probe set hf1 reproduces 4,856 of 4,856 filled values with it against 4,187 without). The rows
+//! are those of the image the fill is given: the bottom-up frame of that plugin's render. The same
+//! order holds for that plugin's Weighted Blend blur (`filters::blur_with`).
+//!
 //! Numerics: every arithmetic step is a single precision operation of the reused primitives
 //! (`crate::flow::conv`, `crate::flow::sample`, no fused multiply add, no reciprocal estimate) or
 //! the division of the combine step. Rows run through rayon row chunks, so the result does not
 //! depend on the thread count.
+//!
+//! NaN colours: a known pixel keeps its value, so a NaN of the image goes through the pull, the
+//! push and the combine of its channel, and an infinity makes default NaNs (`inf - inf` in the
+//! sums and lerps). The original's single channel fill (`TwixtorPro_64`: the load, the pull-push
+//! with the combine, the pyramid blur, the resample and the Gaussian) does every step with scalar
+//! or packed SSE arithmetic, so where two NaNs meet
+//! the result is the NaN rule of `crate::nanrule`.
+//! A channel is filled with the processor's own operations
+//! (`nanrule::Plain`) and filled again with `nanrule::Rule` only when the result holds a NaN:
+//! without a NaN both give the same bits, and numbers never depend on the rule.
 
 use crate::blend::cvtt;
-use crate::flow::conv::{blur5, blur5_wrapx, blur_gaussian, blur_gaussian_wrapx};
-use crate::flow::sample::{resample1, resample1_wrapx};
+use crate::flow::conv::{
+    blur5, blur5_wrapx, blur_gaussian, blur_gaussian_wrapx, convolve1_above_first, convolve1_with, convolve1_wrapx_above_first, gaussian_kernel,
+    BINOMIAL5,
+};
+use crate::flow::sample::{resample1, resample1_with, resample1_wrapx, resample1_wrapx_with};
+use crate::nanrule::{self as nr, Arith};
 use crate::flow::FlowField;
 use crate::image::{Image, Samples, CHANNELS};
 use crate::warp::Coverage;
@@ -60,6 +86,18 @@ pub(crate) mod tests;
 pub const U8_EPS: f64 = f64::from_bits(0x2020_2020_2020_20fc);
 /// Threshold of the hole mask test for u16 and f32 masks (`3.1e-5`).
 pub const WIDE_EPS: f64 = f64::from_bits(0x3f00_40bf_e3b0_3e21);
+
+/// The order of the two taps of one distance in the border rows of the fill's vertical passes
+/// (module header). The default is the engine's.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum VerticalTaps {
+    /// The tap below (`y + j`) first, as the horizontal pass and every other convolution of the
+    /// engine.
+    #[default]
+    BelowFirst,
+    /// The tap above (`y - j`, the lower row index) first: the fill of `TwixtorProVectorsIn_64`.
+    AboveFirst,
+}
 
 /// The `holes` image: 255 (u8), 65535 (u16) or 1.0 (f32) where the warp left nothing, 0 where the
 /// pixel is valid. For Smart Blend this is the inverted coverage.
@@ -143,31 +181,69 @@ enum Passes {
     WrapX,
 }
 
-impl Passes {
-    /// The pull filter: `blur5` (or `blur5_wrapx`) of a 1 channel level.
+/// The passes of one fill: the horizontal mode and the vertical tap order.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct FillPasses {
+    passes: Passes,
+    taps: VerticalTaps,
+}
+
+impl FillPasses {
+    /// The pull filter: `blur5` (or `blur5_wrapx`) of a 1 channel level, with the tap order;
+    /// with `rule` the same passes with the NaN rule ([`nr::Rule`]).
     #[inline]
-    fn blur5(self, data: &mut [f32], w: usize, h: usize) {
-        match self {
-            Passes::Plain => blur5(data, w, h),
-            Passes::WrapX => blur5_wrapx(data, w, h),
+    fn blur5(self, data: &mut [f32], w: usize, h: usize, rule: bool) {
+        if rule {
+            return self.convolve_rule(data, w, h, &BINOMIAL5);
+        }
+        match (self.passes, self.taps) {
+            (Passes::Plain, VerticalTaps::BelowFirst) => blur5(data, w, h),
+            (Passes::WrapX, VerticalTaps::BelowFirst) => blur5_wrapx(data, w, h),
+            (Passes::Plain, VerticalTaps::AboveFirst) => convolve1_above_first(data, w, h, &BINOMIAL5),
+            (Passes::WrapX, VerticalTaps::AboveFirst) => convolve1_wrapx_above_first(data, w, h, &BINOMIAL5),
         }
     }
 
+    /// The level to level resample: `resample1` (or `resample1_wrapx`); with `rule` its lerps
+    /// follow the NaN rule.
+    #[inline]
+    fn resample(self, src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize, rule: bool) -> Vec<f32> {
+        match (self.passes, rule) {
+            (_, false) => self.passes.resample(src, sw, sh, dw, dh),
+            (Passes::Plain, true) => resample1_with::<nr::Rule>(src, sw, sh, dw, dh),
+            (Passes::WrapX, true) => resample1_wrapx_with::<nr::Rule>(src, sw, sh, dw, dh),
+        }
+    }
+
+    /// The push blur: the Gaussian of radius [`GAUSS_RADIUS`] (or its wrapped variant), with the
+    /// tap order; with `rule` the same passes with the NaN rule.
+    #[inline]
+    fn gauss(self, data: &mut [f32], w: usize, h: usize, rule: bool) {
+        if rule {
+            return self.convolve_rule(data, w, h, &gaussian_kernel(GAUSS_RADIUS));
+        }
+        match (self.passes, self.taps) {
+            (Passes::Plain, VerticalTaps::BelowFirst) => blur_gaussian(data, w, h, 1, GAUSS_RADIUS),
+            (Passes::WrapX, VerticalTaps::BelowFirst) => blur_gaussian_wrapx(data, w, h, 1, GAUSS_RADIUS),
+            (Passes::Plain, VerticalTaps::AboveFirst) => convolve1_above_first(data, w, h, &gaussian_kernel(GAUSS_RADIUS)),
+            (Passes::WrapX, VerticalTaps::AboveFirst) => convolve1_wrapx_above_first(data, w, h, &gaussian_kernel(GAUSS_RADIUS)),
+        }
+    }
+
+    /// The convolution of these passes with the half kernel `k` and the NaN rule
+    /// (`conv::convolve1_with`: the same passes and tap order as the plain arms above).
+    fn convolve_rule(self, data: &mut [f32], w: usize, h: usize, k: &[f32]) {
+        convolve1_with::<nr::Rule>(data, w, h, k, self.passes == Passes::WrapX, self.taps == VerticalTaps::AboveFirst)
+    }
+}
+
+impl Passes {
     /// The level to level resample: `resample1` (or `resample1_wrapx`).
     #[inline]
     fn resample(self, src: &[f32], sw: usize, sh: usize, dw: usize, dh: usize) -> Vec<f32> {
         match self {
             Passes::Plain => resample1(src, sw, sh, dw, dh),
             Passes::WrapX => resample1_wrapx(src, sw, sh, dw, dh),
-        }
-    }
-
-    /// The push blur: the Gaussian of radius [`GAUSS_RADIUS`] (or its wrapped variant).
-    #[inline]
-    fn gauss(self, data: &mut [f32], w: usize, h: usize) {
-        match self {
-            Passes::Plain => blur_gaussian(data, w, h, 1, GAUSS_RADIUS),
-            Passes::WrapX => blur_gaussian_wrapx(data, w, h, 1, GAUSS_RADIUS),
         }
     }
 }
@@ -178,13 +254,13 @@ struct Filler {
     geo: Geometry,
     hole: Vec<bool>,
     wts: Vec<Vec<f32>>,
-    passes: Passes,
+    passes: FillPasses,
 }
 
 impl Filler {
     /// `None` when the mask has no hole (the fill is the identity then, with or without the 360
     /// flag). With `is360` and a hole the wrapped passes run and G6 is recorded.
-    fn new(w: usize, h: usize, mask: HoleMaskRef<'_>, is360: bool) -> Result<Option<Filler>> {
+    fn new(w: usize, h: usize, mask: HoleMaskRef<'_>, is360: bool, taps: VerticalTaps) -> Result<Option<Filler>> {
         if mask.len() != w * h {
             return Err(FxError::Mismatch(format!(
                 "hole fill: mask has {} entries for an image of {}x{}",
@@ -208,6 +284,7 @@ impl Filler {
         } else {
             Passes::Plain
         };
+        let passes = FillPasses { passes, taps };
         let geo = geometry(w, h);
         let mut wts: Vec<Vec<f32>> = Vec::with_capacity(geo.top + 1);
         wts.push(hole.iter().map(|&b| if b { 0.0f32 } else { 1.0f32 }).collect());
@@ -215,15 +292,26 @@ impl Filler {
             let (pw, ph) = geo.dims[k - 1];
             let (cw, ch) = geo.dims[k];
             let mut tmp = wts[k - 1].clone();
-            passes.blur5(&mut tmp, pw, ph);
-            wts.push(passes.resample(&tmp, pw, ph, cw, ch));
+            passes.blur5(&mut tmp, pw, ph, false);
+            wts.push(passes.resample(&tmp, pw, ph, cw, ch, false));
         }
         Ok(Some(Filler { geo, hole, wts, passes }))
     }
 
     /// Fills one channel in place. `plane` holds the native units of the depth (0..255,
-    /// 0..65535, any float).
+    /// 0..65535, any float). The fill runs with the processor's own operations and is repeated
+    /// with the NaN rule when its result holds a NaN (module header): only NaN bits can change.
     fn fill(&self, plane: &mut [f32]) {
+        let mut sol = self.solve(plane, false);
+        if nr::any_nan(&sol) {
+            sol = self.solve(plane, true);
+        }
+        plane.copy_from_slice(&sol);
+    }
+
+    /// The pull-push solution of one channel (level 0), every step with the NaN rule when `rule`
+    /// is set. The weight pyramid holds no NaN (zeros and ones blurred), so it is shared.
+    fn solve(&self, plane: &[f32], rule: bool) -> Vec<f32> {
         let geo = &self.geo;
         let passes = self.passes;
         // load: the value image of level 0, holes zeroed
@@ -240,24 +328,24 @@ impl Filler {
             let (pw, ph) = geo.dims[k - 1];
             let (cw, ch) = geo.dims[k];
             let mut tmp = vals[k - 1].clone();
-            passes.blur5(&mut tmp, pw, ph);
-            vals.push(passes.resample(&tmp, pw, ph, cw, ch));
+            passes.blur5(&mut tmp, pw, ph, rule);
+            vals.push(passes.resample(&tmp, pw, ph, cw, ch, rule));
         }
         // push
         let (tw, th) = geo.dims[geo.top];
         let mut sol = vec![0.0f32; tw * th];
         for level in (0..=geo.top).rev() {
             let (lw, lh) = geo.dims[level];
-            combine(&mut sol, &vals[level], &self.wts[level]);
-            passes.gauss(&mut sol, lw, lh);
+            combine_with(&mut sol, &vals[level], &self.wts[level], rule);
+            passes.gauss(&mut sol, lw, lh, rule);
             if level == 0 {
-                combine(&mut sol, &vals[0], &self.wts[0]);
+                combine_with(&mut sol, &vals[0], &self.wts[0], rule);
             } else {
                 let (nw, nh) = geo.dims[level - 1];
-                sol = passes.resample(&sol, lw, lh, nw, nh);
+                sol = passes.resample(&sol, lw, lh, nw, nh, rule);
             }
         }
-        plane.copy_from_slice(&sol);
+        sol
     }
 }
 
@@ -266,9 +354,24 @@ pub const GAUSS_RADIUS: f32 = 5.0;
 
 /// `if (weight != 0.0) sol = value / weight`; a NaN weight is "not equal" and divides.
 fn combine(sol: &mut [f32], value: &[f32], weight: &[f32]) {
+    combine_g::<nr::Plain>(sol, value, weight)
+}
+
+/// [`combine`] with the NaN rule of its division when `rule` is set.
+fn combine_with(sol: &mut [f32], value: &[f32], weight: &[f32], rule: bool) {
+    if rule {
+        combine_g::<nr::Rule>(sol, value, weight)
+    } else {
+        combine(sol, value, weight)
+    }
+}
+
+/// [`combine`] over the arithmetic `A`.
+#[inline(always)]
+fn combine_g<A: Arith>(sol: &mut [f32], value: &[f32], weight: &[f32]) {
     for ((s, &v), &w) in sol.iter_mut().zip(value).zip(weight) {
         if w != 0.0 {
-            *s = v / w;
+            *s = A::div(v, w);
         }
     }
 }
@@ -304,10 +407,15 @@ fn store_u16(x: f32) -> u16 {
 /// without the depth conversions). `mask` has `w * h` entries. `is360` selects the wrap-around
 /// passes (module header); `false` is the plain fill.
 pub fn fill_plane(plane: &mut [f32], w: usize, h: usize, mask: HoleMaskRef<'_>, is360: bool) -> Result<()> {
+    fill_plane_with(plane, w, h, mask, is360, VerticalTaps::BelowFirst)
+}
+
+/// [`fill_plane`] with the vertical tap order `taps` (module header).
+pub fn fill_plane_with(plane: &mut [f32], w: usize, h: usize, mask: HoleMaskRef<'_>, is360: bool, taps: VerticalTaps) -> Result<()> {
     if plane.len() != w * h {
         return Err(FxError::Mismatch("hole fill: plane length does not match its size".into()));
     }
-    if let Some(f) = Filler::new(w, h, mask, is360)? {
+    if let Some(f) = Filler::new(w, h, mask, is360, taps)? {
         f.fill(plane);
     }
     Ok(())
@@ -317,13 +425,18 @@ pub fn fill_plane(plane: &mut [f32], w: usize, h: usize, mask: HoleMaskRef<'_>, 
 /// 255 where nothing was warped; see [`fill_holes_masked`]. Sizes that differ give
 /// `FxError::Mismatch`.
 pub fn fill_holes(img: &mut Image, holes: &Coverage, is360: bool) -> Result<()> {
+    fill_holes_with(img, holes, is360, VerticalTaps::BelowFirst)
+}
+
+/// [`fill_holes`] with the vertical tap order `taps` (module header).
+pub fn fill_holes_with(img: &mut Image, holes: &Coverage, is360: bool, taps: VerticalTaps) -> Result<()> {
     if holes.width != img.width || holes.height != img.height {
         return Err(FxError::Mismatch(format!(
             "hole fill: image {}x{} against holes {}x{}",
             img.width, img.height, holes.width, holes.height
         )));
     }
-    fill_holes_masked(img, HoleMaskRef::U8(&holes.data), is360)
+    fill_holes_masked_with(img, HoleMaskRef::U8(&holes.data), is360, taps)
 }
 
 /// The hole fill of an engine image with a hole mask of u8, u16 or f32 type. Without a hole the
@@ -332,8 +445,13 @@ pub fn fill_holes(img: &mut Image, holes: &Coverage, is360: bool) -> Result<()> 
 /// right border is filled from both sides of the seam. A hole and a side of 1 pixel is
 /// `FxError::Unsupported` with either flag.
 pub fn fill_holes_masked(img: &mut Image, mask: HoleMaskRef<'_>, is360: bool) -> Result<()> {
+    fill_holes_masked_with(img, mask, is360, VerticalTaps::BelowFirst)
+}
+
+/// [`fill_holes_masked`] with the vertical tap order `taps` (module header).
+pub fn fill_holes_masked_with(img: &mut Image, mask: HoleMaskRef<'_>, is360: bool, taps: VerticalTaps) -> Result<()> {
     let (w, h) = (img.width, img.height);
-    let Some(filler) = Filler::new(w, h, mask, is360)? else {
+    let Some(filler) = Filler::new(w, h, mask, is360, taps)? else {
         return Ok(());
     };
     let n = w * h;
@@ -376,11 +494,16 @@ pub fn fill_holes_masked(img: &mut Image, mask: HoleMaskRef<'_>, is360: bool) ->
 /// `vectors::decode_vectors_with_holes`, fill, then `vectors::apply_vec_scale`). The mask has the
 /// size of the flow; `is360` as in [`fill_holes_masked`].
 pub fn fill_flow_holes(flow: &mut FlowField, mask: HoleMaskRef<'_>, is360: bool) -> Result<()> {
+    fill_flow_holes_with(flow, mask, is360, VerticalTaps::BelowFirst)
+}
+
+/// [`fill_flow_holes`] with the vertical tap order `taps` (module header).
+pub fn fill_flow_holes_with(flow: &mut FlowField, mask: HoleMaskRef<'_>, is360: bool, taps: VerticalTaps) -> Result<()> {
     let (w, h) = (flow.width, flow.height);
     if flow.data.len() != w * h * 2 {
         return Err(FxError::Mismatch("hole fill: flow data length does not match its size".into()));
     }
-    let Some(filler) = Filler::new(w, h, mask, is360)? else {
+    let Some(filler) = Filler::new(w, h, mask, is360, taps)? else {
         return Ok(());
     };
     let n = w * h;

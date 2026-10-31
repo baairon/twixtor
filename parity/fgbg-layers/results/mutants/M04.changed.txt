@@ -1,0 +1,8 @@
+retime-fgbg.chan3-chan.box1-24x16.d32.aaf78cd9
+retime-fgbg.chan3-chan.box1-24x16.d8.a92de7b6
+retime-fgbg.mix03.box2-31x21.d8.2df6213a
+retime-fgbg.mix06.box2f-31x21.d16.af442d8d
+retime-fgbg.mix10.box3a-17x13.d16.f08eb61a
+retime-fgbg.perm123.box3-24x16.d8.2dbda95d
+retime-fgbg.perm213.box3-24x16.d8.5015fe8b
+retime-fgbg.perm321.box3-24x16.d8.784a3fce

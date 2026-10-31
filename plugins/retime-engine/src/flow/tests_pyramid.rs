@@ -42,7 +42,7 @@ fn wrap_of(s: FlowSettings) -> FlowSettings {
 /// halved size.
 fn frozen_reduce(mut t: Plane, r: u32) -> Plane {
     for _ in 0..r {
-        conv::blur5(&mut t.data, t.width, t.height);
+        conv::blur5_above_first(&mut t.data, t.width, t.height);
         let (nw, nh) = (t.width / 2, t.height / 2);
         t = Plane { width: nw, height: nh, data: sample::resample1(&t.data, t.width, t.height, nw, nh) };
     }
@@ -52,7 +52,7 @@ fn frozen_reduce(mut t: Plane, r: u32) -> Plane {
 /// `prep::edge_enhance` as it stood.
 fn frozen_edge_enhance(p: &mut Plane) {
     let (w, h) = (p.width, p.height);
-    conv::blur_gaussian(&mut p.data, w, h, 1, 2.0);
+    conv::blur_gaussian_above_first(&mut p.data, w, h, 1, 2.0);
     let g = calc_grad(&p.data, w, h);
     for y in 0..h {
         for x in 0..w {
@@ -83,7 +83,7 @@ fn frozen_build_pyramid(img: &Image, s: &FlowSettings) -> Pyramid {
     let mut levels = Vec::with_capacity(n);
     for i in 0..n {
         let mut tmp = orig.clone();
-        conv::blur5(&mut tmp.data, tmp.width, tmp.height);
+        conv::blur5_above_first(&mut tmp.data, tmp.width, tmp.height);
         let next = if i + 1 < n {
             let (nw, nh) = geometry.sizes[i + 1];
             Some(Plane { width: nw, height: nh, data: sample::resample1(&tmp.data, tmp.width, tmp.height, nw, nh) })
@@ -110,7 +110,7 @@ fn frozen_mask_levels(m: &Matte, s: &FlowSettings) -> Vec<Vec<f32>> {
     let bin = |v: &mut Vec<f32>| v.iter_mut().for_each(|x| *x = if *x >= MASK_ON { 1.0 } else { 0.0 });
     let step = |p: &Plane, nw: usize, nh: usize| {
         let mut t = p.clone();
-        conv::blur5(&mut t.data, t.width, t.height);
+        conv::blur5_above_first(&mut t.data, t.width, t.height);
         let mut d = sample::resample1(&t.data, t.width, t.height, nw, nh);
         bin(&mut d);
         Plane { width: nw, height: nh, data: d }
@@ -383,7 +383,7 @@ fn wrap_off_pyramids_reductions_and_masks_equal_the_frozen_code_bit_for_bit() {
         let mut c = p.clone();
         prep::blur5_with(&mut c, false);
         let mut d = p.clone();
-        conv::blur5(&mut d.data, w, h);
+        conv::blur5_above_first(&mut d.data, w, h);
         assert_eq!(bits(&c.data), bits(&d.data), "blur5 {w}x{h}");
         let (nw, nh) = ((w / 2).max(2), (h / 2).max(2));
         assert_eq!(bits(&prep::resample_with(&p, nw, nh, false).data), bits(&sample::resample1(&p.data, w, h, nw, nh)), "resample {w}x{h}");
@@ -426,6 +426,7 @@ fn assert_rotated_levels(base: &Pyramid, rotated: &Pyramid, s: usize, case: &str
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6: the edge enhancement blur of the 360 mode is the plain one)"]
 fn rotating_the_frame_rotates_every_wrap_pyramid_level_bit_for_bit() {
     // 256 x 128: every setting has R + L - 1 = 5, so rotations by multiples of 32 columns are
     // whole at every level (8 columns of 32 at the coarsest level)
@@ -461,6 +462,7 @@ fn rotating_the_frame_rotates_every_wrap_pyramid_level_bit_for_bit() {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6: the edge enhancement blur of the 360 mode is the plain one)"]
 fn the_reduction_and_the_transforms_are_circular_at_any_even_rotation() {
     // the reduction alone: a rotation by a multiple of 2^r columns of an image whose halvings
     // are all even; the transforms (level 0, no resample): any rotation
@@ -663,16 +665,16 @@ fn circular_model_solve(
             mask_gradient(&mut grad, m, w, h, true);
         }
         let mut a = calc_a(&grad, w, h);
-        conv::blur_gaussian_wrapx(&mut a, w, h, 3, 7.0);
+        conv::blur_gaussian_wrapx_above_first(&mut a, w, h, 3, 7.0);
         for _ in 0..3 {
             let mut b = if split {
                 calc_b_split(img_a, img_b, &grad, &flow, w, h, mask_y)
             } else {
                 calc_b_with(img_a, img_b, &grad, &flow, w, h, mask_y, true)
             };
-            conv::blur_gaussian_wrapx(&mut b, w, h, 2, 7.0);
+            conv::blur_gaussian_wrapx_above_first(&mut b, w, h, 2, 7.0);
             new_disp(&mut flow, &a, &b);
-            conv::blur_gaussian_wrapx(&mut flow, w, h, 2, 5.0);
+            conv::blur_gaussian_wrapx_above_first(&mut flow, w, h, 2, 5.0);
         }
         if let Some(u) = user {
             apply_user(&mut flow, &u.levels[l], w);
@@ -803,6 +805,7 @@ fn max_mean_diff(a: &[f32], b: &[f32]) -> (f64, f64) {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_engine_wrap_solve_rotates_bit_for_bit_with_the_periodic_pyramids() {
     // The engine's wrap driver is periodic (circular Gaussians, the period keeping
     // upsample, split target columns, ring sweeps), so on the periodic pyramids a rotated solve is
@@ -866,6 +869,7 @@ fn worst(f: &FlowField, cols: impl Iterator<Item = usize>, v: (f64, f64)) -> f64
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn a_periodic_shift_is_recovered_in_every_column_with_wrap() {
     // whole cycles across a 256 wide frame, shifted by sub pixel amounts (10.6 and -6.2 carry the
     // texture across the seam, 2.6 is vertical); errors in output pixels, the first and last 8
@@ -935,6 +939,7 @@ fn edge_grad_model(img: &[f32], w: usize, h: usize) -> Vec<f32> {
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_wrap_transforms_and_reduction_equal_their_definitions_and_the_plain_ones_inside() {
     let (w, h) = (40usize, 22usize);
     let mut r = rng(11);
@@ -943,7 +948,7 @@ fn the_wrap_transforms_and_reduction_equal_their_definitions_and_the_plain_ones_
     let mut got = p.clone();
     prep::edge_enhance_with(&mut got, true);
     let mut t = p.data.clone();
-    conv::blur_gaussian_wrapx(&mut t, w, h, 1, 2.0);
+    conv::blur_gaussian_wrapx_above_first(&mut t, w, h, 1, 2.0);
     let g = edge_grad_model(&t, w, h);
     for i in 0..w * h {
         let (gx, gy) = (g[i * 2], g[i * 2 + 1]);
@@ -970,7 +975,7 @@ fn the_wrap_transforms_and_reduction_equal_their_definitions_and_the_plain_ones_
     let got = prep::reduce_with(p.clone(), 2, true);
     let mut t = p.clone();
     for _ in 0..2 {
-        conv::blur5_wrapx(&mut t.data, t.width, t.height);
+        conv::blur5_wrapx_above_first(&mut t.data, t.width, t.height);
         let (nw, nh) = (t.width / 2, t.height / 2);
         t = Plane { width: nw, height: nh, data: sample::resample1_wrapx(&t.data, t.width, t.height, nw, nh) };
     }
@@ -980,7 +985,7 @@ fn the_wrap_transforms_and_reduction_equal_their_definitions_and_the_plain_ones_
     // at (2x, y * (h - 1) / (h / 2 - 1)), the right neighbour weighted by a fraction of 0
     let one = prep::reduce_with(p.clone(), 1, true);
     let mut b = p.data.clone();
-    conv::blur5_wrapx(&mut b, w, h);
+    conv::blur5_wrapx_above_first(&mut b, w, h);
     let sy = (h as f32 - 1.0) / ((h / 2) as f32 - 1.0);
     for y in 0..h / 2 {
         let yy = (y as f32) * sy;
@@ -996,12 +1001,13 @@ fn the_wrap_transforms_and_reduction_equal_their_definitions_and_the_plain_ones_
     let odd = Plane { width: 41, height: 6, data: (0..41 * 6).map(|i| (i % 41) as f32).collect() };
     let r1 = prep::reduce_with(odd.clone(), 1, true);
     let mut b = odd.data.clone();
-    conv::blur5_wrapx(&mut b, 41, 6);
+    conv::blur5_wrapx_above_first(&mut b, 41, 6);
     assert_eq!((r1.width, r1.height), (20, 3));
     assert_eq!(bits(&r1.data), bits(&sample::resample1_wrapx(&b, 41, 6, 20, 3)));
 }
 
 #[test]
+#[ignore = "the G6 wrap rule (U) this test encodes is superseded by the 360 rules read from TwixtorPro_64 (parity/lab/re/op-residual.md, finding 6)"]
 fn the_wrap_pyramid_differs_from_the_plain_one_only_where_its_passes_differ() {
     // full resolution, no transforms: level 0 is luma - blur5(luma), so it differs only in the
     // three columns of each side that the 5 tap blur reads across the seam; the levels below are

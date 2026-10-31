@@ -1,0 +1,74 @@
+{
+  "cases": [
+    {
+      "clip_differing_pixels": 0,
+      "depth": 8,
+      "differing_pixels": 0,
+      "effect": "retime",
+      "fps": "15",
+      "frames": 480,
+      "height": 1,
+      "id": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d8",
+      "input": "inputs/alt-1x1.d8.f480.rgba",
+      "kind": "temporal",
+      "label": "supp-dur-f32-fn475-at15-480f",
+      "layers": {},
+      "max_abs_diff": 0.0,
+      "mean_abs_diff": 0.0,
+      "mismatches": [],
+      "params": [
+        "vectors=1",
+        "time_remap_mode=2",
+        "frame_num=475",
+        "in_fps_is_out_fps=0",
+        "input_frame_rate=29.97"
+      ],
+      "reference": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d8.rgba",
+      "source": "alt",
+      "status": "pass",
+      "width": 1
+    },
+    {
+      "clip_differing_pixels": 0,
+      "depth": 32,
+      "differing_pixels": 0,
+      "effect": "retime",
+      "fps": "15",
+      "frames": 480,
+      "height": 1,
+      "id": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d32",
+      "input": "inputs/alt-1x1.d32.f480.gbrapf32le",
+      "kind": "temporal",
+      "label": "supp-dur-f32-fn475-at15-480f",
+      "layers": {},
+      "max_abs_diff": 0.0,
+      "mean_abs_diff": 0.0,
+      "mismatches": [],
+      "params": [
+        "vectors=1",
+        "time_remap_mode=2",
+        "frame_num=475",
+        "in_fps_is_out_fps=0",
+        "input_frame_rate=29.97"
+      ],
+      "reference": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d32.gbrapf32le",
+      "source": "alt",
+      "status": "pass",
+      "width": 1
+    }
+  ],
+  "graded": {
+    "retime": {
+      "compared": 2,
+      "exact": 2,
+      "mean_abs_diff": 0.0,
+      "worst": null
+    }
+  },
+  "summary": {
+    "fail": 0,
+    "no_reference": 0,
+    "pass": 2,
+    "total": 2
+  }
+}

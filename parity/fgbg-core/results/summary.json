@@ -1,0 +1,55 @@
+{
+ "module": "fgbg-core",
+ "plugin": "TwixtorPro_64.aex",
+ "plugin_sha256": "58bbd99248a531acb572e5ddb13570d8102a087c32123191e2f52f477e2dcf2d",
+ "effect": "retime-fgbg",
+ "status": "in_progress",
+ "blockers": [
+  "14 of 367 in-contract cases have no reference",
+  "14 cases failed in the emulation (not the original's behaviour) and have no reference",
+  "39 cases have no complete plugin call record",
+  "mutants survive: M05, M30"
+ ],
+ "cases": {
+  "in_contract": 367,
+  "compared": 353,
+  "identical": 353,
+  "differing": 0,
+  "out_of_contract": 55,
+  "logic_parity": 5
+ },
+ "values": {
+  "bytes_compared": 2413984,
+  "floats_compared": 565200,
+  "differing_values": 0,
+  "max_ulp": 0
+ },
+ "call_records": {
+  "compared": 360,
+  "matching": 360
+ },
+ "mutants": {
+  "total": 31,
+  "killed": 29,
+  "survivors": [
+   "M05",
+   "M30"
+  ]
+ },
+ "stand_ins": [
+  "5 keyed cases (tag standin in testset/grid.tsv) use the harness's labelled keyframe interpolation on both sides; 5 of them compared, counted as logic_parity and not as full parity"
+ ],
+ "fixes": [],
+ "commands": [
+  "python3 gen_grid.py --out testset --vfx bin/vfx_base",
+  "python3 render_grid.py --vfx bin/vfx_base --testset testset --out results/base.tsv --jobs 2",
+  "python3 run_mutants.py --tree src_mut --testset testset --base results/base.tsv --out mutants",
+  "python3 make_summary.py",
+  "run_harness.py (agent C, round 1): fix-pro/runs/g1core (references, plugin records, status; g2core merged by merge_g2.py), fix-pro/runs/ooc_core (the candidates)",
+  "~/twixtor-parity/re/f7-close-pro/bin/fx-parity run --testset ~/twixtor-parity/regress-m3/ts/fgbg-core --refs ~/twixtor-parity/fix-pro/runs/g1core/refs --max-ulp 0 --json --vfx ~/twixtor-parity/re/f7-close-pro/bin/vfx --jobs 2 --effect retime-fgbg",
+  "phase_b.py ooc --status ~/twixtor-parity/fix-pro/runs/g1core/status_merged.json ~/twixtor-parity/fix-pro/runs/ooc_core/status_merged.json --judged ~/twixtor-parity/re/f7-close-pro/res/core_ooc_judged.tsv",
+  "phase_b.py calls --plugin-records ~/twixtor-parity/fix-pro/runs/g1core/rec --rewrite-records ~/twixtor-parity/re/f7-close-pro/rw/core-m14",
+  "phase_b.py kills --refs ~/twixtor-parity/fix-pro/runs/g1core/refs"
+ ],
+ "measured_at": "2026-10-31"
+}

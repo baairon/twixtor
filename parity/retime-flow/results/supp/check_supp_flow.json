@@ -1,0 +1,19 @@
+{
+ "compare": "per output frame the original rendered, the SMART_PRE_RENDER layer checkouts (layer, time) of the original against the rewrite's checkout list (VFX_CALL_RECORD `checkouts`), as sets",
+ "compared": 2,
+ "matching": 2,
+ "mismatching": 0,
+ "skipped": 0,
+ "classes_in_matching_frames": [
+  [
+   "multiplicity input: original 3, rewrite 2",
+   6
+  ],
+  [
+   "multiplicity input: original 6, rewrite 5",
+   2
+  ]
+ ],
+ "mismatches": [],
+ "skipped_cases": []
+}

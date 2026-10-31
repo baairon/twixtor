@@ -2,85 +2,35 @@
  "generator": "tools/gen_docs.py",
  "note": "Generated from docs/data/ and scans of the tree; do not edit. Each fact: value, the text a marker shows, and its source.",
  "facts": {
-  "controls_total": {
-   "value": 176,
-   "text": "176",
-   "source": "docs/data/controls.tsv rows"
+  "modules_total": {
+   "value": 6,
+   "text": "6",
+   "source": "the module list of tools/docgen/data.py"
   },
-  "controls_params": {
-   "value": 159,
-   "text": "159",
-   "source": "docs/data/controls.tsv rows whose kind is not layer"
+  "modules_reported": {
+   "value": 6,
+   "text": "6",
+   "source": "parity/<id>/results/summary.json and verify.json of the six modules, modules that have a summary.json"
   },
-  "controls_layers": {
-   "value": 17,
-   "text": "17",
-   "source": "docs/data/controls.tsv rows of kind layer"
+  "modules_verified": {
+   "value": 1,
+   "text": "1",
+   "source": "parity/<id>/results/summary.json and verify.json of the six modules, status verified and the status rule met"
   },
-  "effects_total": {
-   "value": 4,
-   "text": "4",
-   "source": "docs/data/controls.tsv distinct effect"
+  "modules_match": {
+   "value": 6,
+   "text": "6",
+   "source": "parity/<id>/results/summary.json and verify.json of the six modules, 150 or more cases compared, none differing and every call record matching on the emulator run"
   },
-  "gaps_open": {
-   "value": 13,
-   "text": "13",
-   "source": "docs/data/gaps.tsv rows"
+  "cases_compared": {
+   "value": 2357,
+   "text": "2,357",
+   "source": "parity/<id>/results/summary.json and verify.json of the six modules, sum of cases.compared"
   },
-  "gap_controls": {
-   "value": 57,
-   "text": "57",
-   "source": "docs/data/gaps.tsv distinct (effect, control) pairs of effects x controls"
-  },
-  "gap_controls_pct": {
-   "value": 32.4,
-   "text": "32.4",
-   "source": "gap_controls over controls_total"
-  },
-  "family_cases": {
-   "value": 117,
-   "text": "117",
-   "source": "docs/data/references.tsv rows"
-  },
-  "families_total": {
-   "value": 14,
-   "text": "14",
-   "source": "docs/data/references.tsv distinct family"
-  },
-  "graded_cases": {
+  "modules_rerun": {
    "value": 0,
    "text": "0",
-   "source": "docs/data/references.tsv rows with result pass"
-  },
-  "graded_failed": {
-   "value": 0,
-   "text": "0",
-   "source": "docs/data/references.tsv rows with result fail"
-  },
-  "graded_missing": {
-   "value": 117,
-   "text": "117",
-   "source": "docs/data/references.tsv rows with result missing"
-  },
-  "graded_pct": {
-   "value": 0.0,
-   "text": "0.0",
-   "source": "graded_cases over family_cases"
-  },
-  "graded_controls": {
-   "value": 0,
-   "text": "0",
-   "source": "docs/data/references.tsv (effect, control) pairs set by a pass row and by no fail row, that docs/data/controls.tsv lists"
-  },
-  "unproven": {
-   "value": 176,
-   "text": "176",
-   "source": "controls_total minus graded_controls"
-  },
-  "unproven_pct": {
-   "value": 100.0,
-   "text": "100.0",
-   "source": "unproven over controls_total"
+   "source": "parity/<id>/results/summary.json and verify.json of the six modules, verify.json says matches, dated on or after measured_at"
   },
   "fixtures_total": {
    "value": 17,
@@ -208,18 +158,18 @@
    "source": "docs/data/lock.json sum of refused_now_render"
   },
   "tests_rust": {
-   "value": 1469,
-   "text": "1,469",
+   "value": 1573,
+   "text": "1,573",
    "source": "scan of `#[test]` lines in the .rs files of every crate"
   },
   "tests_rust_ignored": {
-   "value": 15,
-   "text": "15",
+   "value": 39,
+   "text": "39",
    "source": "scan of `#[ignore` lines, every crate"
   },
   "tests_rust_fx_cli": {
-   "value": 133,
-   "text": "133",
+   "value": 134,
+   "text": "134",
    "source": "scan of `#[test]` lines in the .rs files of fx-cli"
   },
   "tests_rust_fx_core": {
@@ -228,8 +178,8 @@
    "source": "scan of `#[test]` lines in the .rs files of fx-core"
   },
   "tests_rust_fx_parity": {
-   "value": 170,
-   "text": "170",
+   "value": 175,
+   "text": "175",
    "source": "scan of `#[test]` lines in the .rs files of fx-parity"
   },
   "tests_rust_create_vectors": {
@@ -238,28 +188,28 @@
    "source": "scan of `#[test]` lines in the .rs files of create-vectors"
   },
   "tests_rust_retime": {
-   "value": 67,
-   "text": "67",
+   "value": 70,
+   "text": "70",
    "source": "scan of `#[test]` lines in the .rs files of retime"
   },
   "tests_rust_retime_engine": {
-   "value": 755,
-   "text": "755",
+   "value": 843,
+   "text": "843",
    "source": "scan of `#[test]` lines in the .rs files of retime-engine"
   },
   "tests_rust_retime_fgbg": {
-   "value": 101,
-   "text": "101",
+   "value": 104,
+   "text": "104",
    "source": "scan of `#[test]` lines in the .rs files of retime-fgbg"
   },
   "tests_rust_vectors_in": {
-   "value": 100,
-   "text": "100",
+   "value": 104,
+   "text": "104",
    "source": "scan of `#[test]` lines in the .rs files of vectors-in"
   },
   "tests_python": {
-   "value": 592,
-   "text": "592",
+   "value": 600,
+   "text": "600",
    "source": "scan of `def test_` lines in tools/test_*.py"
   },
   "tests_py_apply": {
@@ -288,8 +238,8 @@
    "source": "scan of `def test_` lines in tools/test_conformance.py"
   },
   "tests_py_docgen": {
-   "value": 38,
-   "text": "38",
+   "value": 46,
+   "text": "46",
    "source": "scan of `def test_` lines in tools/test_docgen.py"
   },
   "tests_py_ffstage": {
@@ -324,8 +274,9 @@
   }
  },
  "blocks": {
-  "gaps": "docs/data/gaps.tsv, graded cases from docs/data/references.tsv",
-  "families": "docs/data/references.tsv by family",
+  "modules": "parity/<id>/results/summary.json and verify.json, in the module order of tools/docgen/data.py",
+  "notes": "parity/<id>/results/summary.json: blockers, stand_ins, cases.logic_parity, mutants.survivors",
+  "harness": "parity/harness/results/summary.json, top level entries as stated",
   "fixtures": "scan of crates/ and plugins/ for *.hex",
   "lock": "docs/data/lock.json corpora",
   "tests": "scan of the .rs files of every crate and of tools/test_*.py"

@@ -1,0 +1,50 @@
+{
+ "definition": "a mutant is killed iff on some case where the control build's checkout list matches the original's (as sets, every frame) the mutant's does not",
+ "compare": "per output frame the original rendered, the SMART_PRE_RENDER layer checkouts (layer, time) of the original against the rewrite's checkout list (VFX_CALL_RECORD `checkouts`), as sets",
+ "cases_with_plugin_record": 458,
+ "control_matching": 458,
+ "control_skipped": 0,
+ "mutants": [
+  {
+   "id": "m23_planner_second_frame",
+   "status": "killed",
+   "killing_count": 458,
+   "killing_cases": [
+    "retime.speed-100.ident-1x1.d8.ee6f1237",
+    "retime.speed-100.ident-1x1.d16.f0647604",
+    "retime.speed-100.ident-1x1.d32.a8e3e8d6",
+    "retime.speed-50.extreme-2x1.d8.99bdd9ae",
+    "retime.speed-50.extreme-2x1.d16.680f78c5",
+    "retime.speed-50.extreme-2x1.d32.37c7045f",
+    "retime.speed-25.moving-1x3.d8.6a21f0eb",
+    "retime.speed-25.moving-1x3.d16.4209e8b6",
+    "retime.speed-25.moving-1x3.d32.ceaef620",
+    "retime.speed-33_3.noise-2x3.d8.cf82a6d6",
+    "retime.speed-33_3.noise-2x3.d16.854372f5",
+    "retime.speed-33_3.noise-2x3.d32.aab4f30b",
+    "retime.speed-66_67.alphaslide-5x7.d8.b6ad8b02",
+    "retime.speed-66_67.alphaslide-5x7.d16.eba71253",
+    "retime.speed-66_67.alphaslide-5x7.d32.f357d79d",
+    "retime.speed-150.ident-16x12.d8.03a7003d",
+    "retime.speed-150.ident-16x12.d16.6c93a2a2",
+    "retime.speed-150.ident-16x12.d32.043d4084",
+    "retime.speed-200.extreme-37x23.d8.f2716898",
+    "retime.speed-200.extreme-37x23.d16.a7c3bb2b"
+   ],
+   "first": {
+    "first_out_frame": 0,
+    "kind": "missing_checkout+extra_checkout",
+    "missing": [
+     "input@1/24"
+    ],
+    "extra": [
+     "input@1/12"
+    ]
+   }
+  }
+ ],
+ "killed": [
+  "m23_planner_second_frame"
+ ],
+ "survivors": []
+}

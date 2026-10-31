@@ -1,0 +1,102 @@
+{
+ "rewrite_param_ids": {
+  "blur_compensation": [
+   "-0",
+   "0",
+   "0.01",
+   "0.5",
+   "0.7",
+   "1",
+   "10",
+   "2",
+   "3",
+   "3.3",
+   "5"
+  ],
+  "frame_interp": [
+   "1",
+   "2",
+   "3"
+  ],
+  "prep": [
+   "1",
+   "2",
+   "3"
+  ],
+  "sensitivity": [
+   "-0",
+   "0",
+   "0.01",
+   "0.3",
+   "1",
+   "10",
+   "100",
+   "15.5",
+   "25",
+   "33.33333",
+   "42.42",
+   "50",
+   "69.99",
+   "7.77",
+   "70",
+   "87.654",
+   "99.99"
+  ],
+  "smart_blend": [
+   "0",
+   "1"
+  ],
+  "speed_percent": [
+   "-0",
+   "-50",
+   "0",
+   "10",
+   "100",
+   "100@0;40@5",
+   "120",
+   "150",
+   "175",
+   "20",
+   "200",
+   "25",
+   "300",
+   "33.3333",
+   "40",
+   "400",
+   "50",
+   "60@0e;30@5e",
+   "62.5",
+   "70",
+   "75"
+  ],
+  "vectors": [
+   "1",
+   "2",
+   "3",
+   "4",
+   "5"
+  ],
+  "video_360": [
+   "1"
+  ]
+ },
+ "host_side_not_params": [
+  "fps (24, 30000/1001, 60)",
+  "frames per clip (4 or 6)",
+  "quality (draft cases in testsets/draft)",
+  "frame size and bit depth"
+ ],
+ "left_at_default": [
+  "time_remap_mode",
+  "frame_num",
+  "src_time_offset",
+  "in_fps_is_out_fps",
+  "input_frame_rate",
+  "input_fields",
+  "src_mark_segments",
+  "display",
+  "plenty_memory",
+  "alt_source_a",
+  "alt_source_b"
+ ]
+}

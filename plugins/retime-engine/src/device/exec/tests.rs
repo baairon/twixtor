@@ -546,3 +546,182 @@ fn the_working_set_bounds_grow_with_the_frame() {
     assert!(backend::compose_bytes(&uhd, &none) < (8u64 << 30) / 4 * 3 / 4 * 3);
     assert!(backend::forward_bytes(&uhd) < (1u64 << 31));
 }
+
+/// A device whose forward warp follows the device plan (`fwdstage::plan`): an argument the plan
+/// refuses is its `StageError`, anything it accepts is the textured warp, the only variant the
+/// kernels compute (a Gouraud call that reached it would come back textured).
+struct Textured;
+
+impl Backend for Textured {
+    fn solve(&self, x: &Image, y: &Image, s: &FlowSettings) -> Result<FlowField, StageError> {
+        flow::solve(x, y, s).map_err(cpu_err)
+    }
+    fn solve_pair(&self, a: &Image, b: &Image, s: &FlowSettings) -> Result<FlowPair, StageError> {
+        flow::solve_pair(a, b, s).map_err(cpu_err)
+    }
+    fn solve_pyramids_with(&self, x: &Pyramid, y: &Pyramid, s: &FlowSettings, e: SolveExtras<'_>) -> Result<FlowField, StageError> {
+        solve_pyramids_with(x, y, s, e).map_err(cpu_err)
+    }
+    fn forward_warp_with(
+        &self,
+        out: &mut Image,
+        src: &Image,
+        flow: &FlowField,
+        amount: f32,
+        opts: crate::forward::ForwardOpts,
+        want_coverage: bool,
+    ) -> Result<Option<crate::warp::Coverage>, StageError> {
+        crate::device::fwdstage::plan(out, src, flow, amount, opts)?;
+        crate::forward::forward_warp_with(out, src, flow, amount, crate::forward::ForwardOpts::default(), want_coverage).map_err(cpu_err)
+    }
+}
+
+#[test]
+fn the_gouraud_forward_warp_stays_on_the_cpu_and_the_textured_one_on_the_device() {
+    use crate::forward::ForwardOpts;
+    use crate::stages::GouraudForward;
+    // vectors-in fix 02: every forward warp of vectors-in and of the create-vectors Debug views is
+    // the Gouraud variant, which no kernel computes; a white impulse pushed half a pixel along the
+    // diagonal tells the variants apart (two pixels at half value against four at a quarter)
+    let (w, h) = (16usize, 12usize);
+    let mut src = Image::new(w, h, Fmt::U8);
+    if let Samples::U8(d) = &mut src.samples {
+        for px in d.chunks_exact_mut(4) {
+            px.copy_from_slice(&[255, 0, 0, 0]);
+        }
+        let i = (6 * w + 7) * 4;
+        d[i..i + 4].copy_from_slice(&[255, 255, 255, 255]);
+    }
+    let mut flow = FlowField::new(w, h);
+    flow.data.iter_mut().for_each(|v| *v = 1.0);
+    let cpu = |opts: ForwardOpts| {
+        let mut o = Image::new(w, h, Fmt::U8);
+        let c = crate::forward::forward_warp_with(&mut o, &src, &flow, 0.5, opts, true).unwrap();
+        (o, c)
+    };
+    let (gouraud, gouraud_cov) = cpu(ForwardOpts { pyramid: false });
+    let (textured, _) = cpu(ForwardOpts::default());
+    assert_ne!(gouraud, textured, "the two variants differ on this frame");
+    let e = Arc::new(Exec::new(Textured, "gpu=9 (fake)", Placement::default()));
+    // the stages of vectors-in: the Gouraud variant over the executor, a CPU call, not a failed
+    // device attempt
+    let set = GouraudForward::wrap(StageSet::new(e.clone()));
+    let mut got = Image::new(w, h, Fmt::U8);
+    let cov = set.get().forward_warp_coverage(&mut got, &src, &flow, 0.5).unwrap();
+    assert_eq!(got, gouraud);
+    assert_eq!(cov, gouraud_cov.unwrap());
+    let r = e.report(Stage::ForwardWarp);
+    assert_eq!((r.device, r.fallbacks(), r.cpu), (0, 0, 1));
+    assert_eq!(e.device_attempts(), 0);
+    // the textured warp of the same executor is served by the device
+    let mut got = Image::new(w, h, Fmt::U8);
+    e.forward_warp(&mut got, &src, &flow, 0.5).unwrap();
+    assert_eq!(got, textured);
+    assert_eq!(e.report(Stage::ForwardWarp).device, 1);
+    // should a Gouraud call reach the device anyway, its plan refuses it (and the executor would
+    // rerun it on the CPU)
+    assert!(matches!(crate::device::fwdstage::plan(&src, &src, &flow, 0.5, ForwardOpts { pyramid: false }), Err(StageError::Unsupported(_))));
+    let mut got = Image::new(w, h, Fmt::U8);
+    assert!(matches!(Textured.forward_warp_with(&mut got, &src, &flow, 0.5, ForwardOpts { pyramid: false }, false), Err(StageError::Unsupported(_))));
+}
+
+/// A bit exact device (the CPU functions) that keeps every frame its solves and its compose
+/// chain receive.
+#[derive(Default)]
+struct Recorder {
+    seen: std::sync::Mutex<Vec<Image>>,
+}
+
+impl Recorder {
+    fn keep(&self, img: &Image) {
+        self.seen.lock().unwrap().push(img.clone());
+    }
+}
+
+impl Backend for Recorder {
+    fn solve(&self, x: &Image, y: &Image, s: &FlowSettings) -> Result<FlowField, StageError> {
+        self.keep(x);
+        self.keep(y);
+        flow::solve(x, y, s).map_err(cpu_err)
+    }
+    fn solve_pair(&self, a: &Image, b: &Image, s: &FlowSettings) -> Result<FlowPair, StageError> {
+        self.keep(a);
+        self.keep(b);
+        flow::solve_pair(a, b, s).map_err(cpu_err)
+    }
+    fn solve_pyramids_with(&self, x: &Pyramid, y: &Pyramid, s: &FlowSettings, e: SolveExtras<'_>) -> Result<FlowField, StageError> {
+        solve_pyramids_with(x, y, s, e).map_err(cpu_err)
+    }
+    fn compose_vectors(&self, settings: &EngineSettings, sel: &Selection, a: &Image, b: &Image, flows: &Flows) -> Result<Image, StageError> {
+        self.keep(a);
+        self.keep(b);
+        compose::compose_vectors(settings, sel, a, b, flows).map_err(cpu_err)
+    }
+}
+
+/// The selection and the output frame of a whole render (`compose::render`) of an 8 bpc clip at
+/// half speed.
+fn render_frame(clip: &[&Image], s: &EngineSettings) -> (Selection, Image) {
+    use crate::timeline::{test_support::Mock, RemapTimeMap};
+    use fx_core::{Env, Frame, LayerSet, MemLayer, ParamCurves, Pixels, Rational, TimeBase};
+    let frames = clip
+        .iter()
+        .map(|img| match &img.samples {
+            Samples::U8(v) => Frame { width: img.width, height: img.height, pixels: Pixels::U8(v.chunks_exact(4).map(|p| [p[1], p[2], p[3], p[0]]).collect()) },
+            _ => unreachable!("8 bpc only"),
+        })
+        .collect();
+    let input = MemLayer::new(TimeBase::default_for_rate(Rational::new(30, 1).unwrap()), frames).unwrap();
+    let params = ParamCurves::new(Vec::new());
+    let layers = LayerSet::new();
+    let env = Env { params: &params, input: &input, layers: &layers };
+    let mock = Mock::speed(50.0);
+    let map = RemapTimeMap::new(&mock, s.rates, s.current_time);
+    let host = crate::host::EnvHost::new(&env, s, &map, crate::host::LayerIds::default()).unwrap();
+    let sel = crate::compose::select_frames(s, &host).unwrap();
+    match crate::compose::render(s, &host).unwrap() {
+        crate::compose::Rendered::Image(img) => (sel, img),
+        other => panic!("expected an image, got {other:?}"),
+    }
+}
+
+#[test]
+fn reversed_motion_rows_reach_the_device_bottom_row_first_and_the_frame_equals_the_cpu() {
+    // retime-flow fix 03 (`EngineSettings::motion_rows_reversed`, plugin 01): the vector path turns
+    // the frames upside down above the stage seam, so the device stages (the solve and the compose
+    // chain) receive the reversed frames and the host turns the output back; the device needs no
+    // change of its own
+    let (w, h) = (40, 24);
+    let (f0, f1) = (frame(w, h, Fmt::U8, 0.0), frame(w, h, Fmt::U8, 1.5));
+    let mut s = crate::host::test_support::settings(w, h, Fmt::U8);
+    s.vectors_quality = 4;
+    s.current_time = 100;
+    s.no_tracking_layer = true;
+    for interp in [0, 1, 2] {
+        s.interp = interp;
+        s.motion_rows_reversed = true;
+        let (sel, cpu) = render_frame(&[&f0, &f1], &s);
+        assert_eq!((sel.a, sel.b, sel.wa, sel.exact, sel.vectors_quality), (0, 1, 0.5, false, 4), "interp {interp}: the vector path between frames 0 and 1");
+        let rec = Arc::new(Exec::new(Recorder::default(), "gpu=9 (fake)", Placement::default()));
+        let mut on_device = s.clone();
+        on_device.stages = StageSet::new(rec.clone());
+        assert_eq!(render_frame(&[&f0, &f1], &on_device).1, cpu, "interp {interp}");
+        let r = (rec.report(Stage::Solve), rec.report(Stage::SolvePair), rec.report(Stage::Compose));
+        assert!(r.0.device + r.1.device >= 1, "interp {interp}: the solve ran on the device");
+        assert_eq!((r.2.device, r.2.fallbacks(), r.2.cpu), (1, 0, 0), "interp {interp}: the compose chain ran on the device");
+        let seen = rec.backend().seen.lock().unwrap();
+        assert!(seen.len() >= 4);
+        let (r0, r1) = (f0.rows_reversed(), f1.rows_reversed());
+        assert!(seen.iter().all(|img| *img == r0 || *img == r1), "interp {interp}: every device stage saw the reversed frames");
+        drop(seen);
+        // the CPU frame is the reversed path's own: the frames reversed, solved and composed, the
+        // output reversed back
+        let (a, b) = (f0.rows_reversed(), f1.rows_reversed());
+        let flows = crate::compose::solve_flows(&s, &sel, &a, &b).unwrap();
+        let want = crate::compose::compose_vectors(&s, &sel, &a, &b, &flows).unwrap().rows_reversed();
+        assert_eq!(cpu, want, "interp {interp}: the reversed path");
+        // and the flag matters for these frames
+        s.motion_rows_reversed = false;
+        assert_ne!(render_frame(&[&f0, &f1], &s).1, cpu, "interp {interp}: the top row first render differs");
+    }
+}

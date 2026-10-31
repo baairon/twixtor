@@ -82,9 +82,11 @@ pub fn vector_frame(depth: Depth, width: usize, height: usize, vx: f32, vy: f32,
     encode_vectors_image(width, height, Fmt::from_depth(depth), &flow, max_displace).unwrap().to_frame()
 }
 
-/// `count` identical vector frames with the constant flow `(vx, vy)`.
+/// `count` identical vector frames of a layer that carries the constant flow `(vx, vy)` of the frame as the host sees
+/// it. The plugins work bottom row first (`vectors_in::glue`, row order), so the frames hold the vertical component
+/// pointing up the rows: `vector_frame` of `(vx, -vy)`.
 pub fn vector_clip(depth: Depth, width: usize, height: usize, count: usize, vx: f32, vy: f32, max_displace: f32) -> Vec<Frame> {
-    (0..count).map(|_| vector_frame(depth, width, height, vx, vy, max_displace)).collect()
+    (0..count).map(|_| vector_frame(depth, width, height, vx, -vy, max_displace)).collect()
 }
 
 /// The vector layers of a clip that translates by `(vx, vy)` pixels per frame (`moving::Motion`): `Vectors: Next`

@@ -162,7 +162,6 @@ vectors-in	frame_num	float
 vectors-in	frame_interp	popup
 vectors-in	warping	popup
 vectors-in	blur_compensation	float
-vectors-in	output_frame_rate	float
 vectors-in	fg1_matte_chan	popup
 vectors-in	fg1_inv_matte_shrink	float
 vectors-in	fg2_matte_chan	popup

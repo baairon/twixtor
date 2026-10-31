@@ -24,7 +24,7 @@
 //! |---|---|---|
 //! | `flow::solve`, `flow::solve_pair` (pyramids built on the device, kept resident in the frame cache) | device | the largest part of a vector frame (the measured per call times are in docs/engine.md, Device) |
 //! | `flow::extras::solve_pyramids_with` (masks, user displacement, wrap; host pyramids uploaded) | device | the solve dominates its upload |
-//! | `forward::forward_warp_with` (codes 2 and 3, the flow inversion, the Warp debug view; the mesh and its mip levels on the host) | device | 4 to 7 times faster than the single threaded CPU rasteriser |
+//! | `forward::forward_warp_with` (codes 2 and 3, the flow inversion, the Warp debug view; the mesh and its mip levels on the host) | device, except the Gouraud variant (`pyramid = false`) | 4 to 7 times faster than the single threaded CPU rasteriser; the Gouraud variant has no kernel |
 //! | `compose::compose_vectors` (the warps, Blend, Weighted Blend, Smart Blend, the hole fill and the blur compensation of one vector frame) as one resident chain ([`chain`]) | device, except with the wrap-around (360) flag | the frames and flows go up once and only the finished frame comes back |
 //! | the layered compositions of `retime-fgbg` with mattes, vector coding, mattes, overlays | CPU | proven exact on the device, but alone each costs more in transfers than it saves |
 //! | `delinearize`, the f64 `powf` / `ln` scalars, `matte::effective` with shrink | CPU | not on the device |
@@ -371,12 +371,16 @@ impl<B: Backend> Stages for Exec<B> {
     }
 
     fn forward_warp_with(&self, out: &mut Image, src: &Image, flow: &FlowField, amount: f32, opts: ForwardOpts, want_coverage: bool) -> fx_core::Result<Option<Coverage>> {
+        // the Gouraud variant (`pyramid = false`, `stages::GouraudForward`) has no device kernel:
+        // the CPU computes it, counted as a CPU call, not as a fallback
+        let eligible = opts.pyramid;
         // the device result is written to `out` only on success, so a CPU rerun starts from the
         // caller's image
-        let start = (self.is_active() && self.placement.device(Stage::ForwardWarp)).then(|| out.clone());
+        let start = (eligible && self.is_active() && self.placement.device(Stage::ForwardWarp)).then(|| out.clone());
         let mut dev_out: Option<Image> = None;
-        let r = self.run(
+        let r = self.run_if(
             Stage::ForwardWarp,
+            eligible,
             |b| {
                 let mut tmp = start.ok_or_else(|| StageError::Unsupported("the device was refused".into()))?;
                 let c = b.forward_warp_with(&mut tmp, src, flow, amount, opts, want_coverage)?;

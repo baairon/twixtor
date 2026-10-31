@@ -108,7 +108,8 @@ fn enqueue(s: &Session, settings: &EngineSettings, sel: &Selection, d: &Inputs<'
     let frac = 1.0f32 - wa;
     let (a, b) = (&d.a, &d.b);
     let code = settings.warp_mode;
-    let smart_opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360 };
+    // the device fill kernels have the engine's tap order only (a set with another order runs the CPU composition)
+    let smart_opts = SmartOpts { binary_alpha: settings.video_360, is360: settings.wrap_360, ..SmartOpts::default() };
     let filled = |img: &Image| DeviceCoverage::filled(s, img.width, img.height, 0xff);
     if code >= 2 {
         // compose_forward: the pushed frame uses its own flow

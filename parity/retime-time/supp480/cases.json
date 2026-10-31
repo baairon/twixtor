@@ -1,0 +1,70 @@
+{
+ "format": 1,
+ "ffmpeg": "none (inputs written by parity/retime-time/supp480/gen_supp480.py)",
+ "inputs": [
+  {
+   "file": "inputs/alt-1x1.d8.f480.rgba",
+   "source": "alt",
+   "width": 1,
+   "height": 1,
+   "depth": 8,
+   "pix_fmt": "rgba",
+   "frames": 480
+  },
+  {
+   "file": "inputs/alt-1x1.d32.f480.gbrapf32le",
+   "source": "alt",
+   "width": 1,
+   "height": 1,
+   "depth": 32,
+   "pix_fmt": "gbrapf32le",
+   "frames": 480
+  }
+ ],
+ "cases": [
+  {
+   "id": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d8",
+   "effect": "retime",
+   "label": "supp-dur-f32-fn475-at15-480f",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=475",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=29.97"
+   ],
+   "depth": 8,
+   "width": 1,
+   "height": 1,
+   "source": "alt",
+   "input": "inputs/alt-1x1.d8.f480.rgba",
+   "reference": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d8.rgba",
+   "kind": "temporal",
+   "frames": 480,
+   "fps": "15",
+   "note": "the case of ../supp/ with as many output frames as clip frames, so fx-parity and the harness accept it; kills m20_dur_in_f32 by output (clip frames 474 and 475 against 475 and 475)"
+  },
+  {
+   "id": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d32",
+   "effect": "retime",
+   "label": "supp-dur-f32-fn475-at15-480f",
+   "params": [
+    "vectors=1",
+    "time_remap_mode=2",
+    "frame_num=475",
+    "in_fps_is_out_fps=0",
+    "input_frame_rate=29.97"
+   ],
+   "depth": 32,
+   "width": 1,
+   "height": 1,
+   "source": "alt",
+   "input": "inputs/alt-1x1.d32.f480.gbrapf32le",
+   "reference": "retime.supp-dur-f32-fn475-at15-480f.alt-1x1.d32.gbrapf32le",
+   "kind": "temporal",
+   "frames": 480,
+   "fps": "15",
+   "note": "the case of ../supp/ with as many output frames as clip frames, so fx-parity and the harness accept it; kills m20_dur_in_f32 by output (clip frames 474 and 475 against 475 and 475)"
+  }
+ ]
+}

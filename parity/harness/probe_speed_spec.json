@@ -1,0 +1,229 @@
+[
+ {
+  "name": "speed25",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=25"
+  ]
+ },
+ {
+  "name": "speed50",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed75",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=75"
+  ]
+ },
+ {
+  "name": "speed99",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=99"
+  ]
+ },
+ {
+  "name": "speed100",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=100"
+  ]
+ },
+ {
+  "name": "speed101",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=101"
+  ]
+ },
+ {
+  "name": "speed150",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=150"
+  ]
+ },
+ {
+  "name": "speed200",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=200"
+  ]
+ },
+ {
+  "name": "speed-50",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=-50"
+  ]
+ },
+ {
+  "name": "speed-100",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=-100"
+  ]
+ },
+ {
+  "name": "speed50.vectors1",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "vectors=1"
+  ]
+ },
+ {
+  "name": "speed50.vectors2",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "vectors=2"
+  ]
+ },
+ {
+  "name": "speed50.vectors3",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "vectors=3"
+  ]
+ },
+ {
+  "name": "speed50.vectors4",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "vectors=4"
+  ]
+ },
+ {
+  "name": "speed50.vectors5",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "vectors=5"
+  ]
+ },
+ {
+  "name": "speed50.interp1",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "frame_interp=1"
+  ]
+ },
+ {
+  "name": "speed50.interp2",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "frame_interp=2"
+  ]
+ },
+ {
+  "name": "speed50.interp3",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50",
+   "frame_interp=3"
+  ]
+ },
+ {
+  "name": "speed50.16x12",
+  "size": "16x12",
+  "input": "grey",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed50.37x23",
+  "size": "37x23",
+  "input": "grey",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed50.129x71",
+  "size": "129x71",
+  "input": "grey",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed50.black",
+  "size": "64x48",
+  "input": "black",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed50.noise",
+  "size": "64x48",
+  "input": "noise",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed50.gradient",
+  "size": "64x48",
+  "input": "gradient",
+  "params": [
+   "speed_percent=50"
+  ]
+ },
+ {
+  "name": "speed50.frames8",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "speed_percent=50"
+  ],
+  "frames": 8
+ },
+ {
+  "name": "remap2.fn0.5",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "time_remap_mode=2",
+   "frame_num=0.5"
+  ]
+ },
+ {
+  "name": "remap2.fn1.5",
+  "size": "64x48",
+  "input": "grey",
+  "params": [
+   "time_remap_mode=2",
+   "frame_num=1.5"
+  ]
+ }
+]

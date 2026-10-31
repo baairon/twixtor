@@ -242,10 +242,12 @@ fn hex_literals(src: &str) -> Vec<String> {
 #[test]
 fn every_float_literal_is_a_cpu_constant_exactly() {
     // the f32 constants of the CPU functions, then the f64 ones
-    let f32s: [(f32, &str); 16] = [
+    let f32s: [(f32, &str); 24] = [
         (0.0, "zero"), (0.5, "half"), (1.0, "one"), (127.0, "8 bpc code"), (32767.0, "16 bpc code"), (255.0, "white 8"),
         (65535.0, "white 16"), (16.0, "video black"), (219.0, "video range"), (257.0, "16 to 8"), (0.3, "W30F"),
         (0.59, "W59F"), (0.11, "W11F"), (20.0, "edge limit"), (0.05, "edge gain"), (2.0, "two"),
+        (0.725, "Diff R"), (1.475, "Diff G"), (0.29, "Debug luma R"), (0.12, "Debug luma B"), (0.7, "Debug measure scale"),
+        (8.0, "Debug neighbours"), (1.0 / 255.0, "8 bpc unit"), (1.0 / 65535.0, "16 bpc unit"),
     ];
     let f64s: [(f64, &str); 11] = [
         (0.0, "zero"), (0.5, "half"), (1.0, "one"), (2.0, "two"), (127.0, "8 bpc code"), (32767.0, "16 bpc code"), (254.0, "8 bpc den"),
@@ -267,6 +269,19 @@ fn every_float_literal_is_a_cpu_constant_exactly() {
     // the weights at both precisions are spelled once each
     let all: String = ks::PARTS.concat();
     for (lit, want) in [("0x1.333334p-2f", 0.3f32 as f64), ("0x1.2e147ap-1f", 0.59f32 as f64), ("0x1.c28f5cp-4f", 0.11f32 as f64), ("0x1.99999ap-5f", 0.05f32 as f64)] {
+        assert!(all.contains(lit), "{lit}");
+        assert_eq!(hex_value(lit), want, "{lit}");
+    }
+    // the constants of the Debug views (`debug.rs`, create-vectors fix 05)
+    for (lit, want) in [
+        ("0x1.733334p-1f", 0.725f32 as f64),
+        ("0x1.79999ap+0f", 1.475f32 as f64),
+        ("0x1.28f5c2p-2f", 0.29f32 as f64),
+        ("0x1.eb851ep-4f", 0.12f32 as f64),
+        ("0x1.666666p-1f", 0.7f32 as f64),
+        ("0x1.010102p-8f", (1.0f32 / 255.0f32) as f64),
+        ("0x1.0001p-16f", (1.0f32 / 65535.0f32) as f64),
+    ] {
         assert!(all.contains(lit), "{lit}");
         assert_eq!(hex_value(lit), want, "{lit}");
     }
@@ -403,6 +418,42 @@ fn merge_transcriptions_equal_the_merged_encoder_and_merge_flows_in_every_order(
         }
     }
     assert!(cases >= 200);
+}
+
+#[test]
+fn blue_transcriptions_after_the_merge_equal_encode_vectors_merged_blue_in_every_order() {
+    // create-vectors fix 03: a single layer output carries its weight in the blue channel; the
+    // merge transcription equals encode_vectors_merged (above), the blue store runs on its result
+    let mut rng = Rng::new(0x6E0C_000B);
+    let mut cases = 0;
+    for &(dw, dh) in &[(2usize, 2usize), (5, 4), (7, 7), (17, 16), (33, 9)] {
+        for nl in 1..=2usize {
+            let flows: Vec<FlowField> = (0..nl).map(|k| flow(&mut rng, [dw, 9][k], [dh, 6][k], 30.0, true)).collect();
+            let weights: Vec<Matte> = (0..nl).map(|_| matte(&mut rng, dw, dh, true)).collect();
+            let layers: Vec<(&FlowField, &Matte)> = flows.iter().zip(&weights).collect();
+            for blue in [weights[0].clone(), clamp_matte(&mut rng, dw, dh)] {
+                for fmt in FMTS {
+                    let mut want = Image::new(dw, dh, fmt);
+                    crate::vectors::encode_vectors_merged_blue(&mut want, &layers, 8.0, &blue).unwrap();
+                    let mut merged = Image::new(dw, dh, fmt);
+                    crate::vectors::encode_vectors_merged(&mut merged, &layers, 8.0).unwrap();
+                    assert_eq!(sim_merge(dw, dh, Some(fmt), &layers, Some(8.0)), image_bits(&merged));
+                    let n = dw * dh;
+                    let got = sim_image(
+                        dw,
+                        dh,
+                        fmt,
+                        |g, s| sim::launch_1d(n, s, |i| items::vc_blue_u8_item(i, u8s(&merged), g, &blue.data, n as u32)),
+                        |g, s| sim::launch_1d(n, s, |i| items::vc_blue_u16_item(i, u16s(&merged), g, &blue.data, n as u32)),
+                        |g, s| sim::launch_1d(n, s, |i| items::vc_blue_f32_item(i, f32s(&merged), g, &blue.data, n as u32)),
+                    );
+                    assert_eq!(got, image_bits(&want), "{fmt:?} {dw}x{dh} {nl} layers");
+                    cases += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(cases, 60);
 }
 
 #[test]
@@ -552,6 +603,13 @@ fn effective_and_over_weights_transcriptions_equal_matte_rs_in_every_order() {
                     });
                     let want: Vec<Vec<u64>> = want.iter().map(|m| float_bits(&m.data)).collect();
                     assert_eq!(got, want, "over_weights {w}x{h} {first}..={last} of {nfg} clamp corpus {clamp}");
+                    // create-vectors fix 03: the weights inside the whole stack
+                    let want = crate::matte::stack_weights(&mattes, first, last, w, h).unwrap();
+                    let got = sim_planes(last - first + 1, n, |g, s| {
+                        sim::launch_1d(n, s, |i| items::mt_stack_weights_item(i, ms, g, first as u32, last as u32, nfg as u32, n as u32))
+                    });
+                    let want: Vec<Vec<u64>> = want.iter().map(|m| float_bits(&m.data)).collect();
+                    assert_eq!(got, want, "stack_weights {w}x{h} {first}..={last} of {nfg} clamp corpus {clamp}");
                 }
             }
         }
@@ -577,15 +635,26 @@ fn the_matte_clamp_equals_matte_rs_and_sits_where_the_cpu_reads_the_matte() {
     let got = sim_image(1, 1, Fmt::U8, |g, s| sim::launch_1d(4, s, |i| items::mt_premultiply_u8_item(i, u8s(&img), &m.data, g, 4)), |_, _| {}, |_, _| {});
     assert_eq!(got, image_bits(&want));
     assert_eq!(got, vec![200, 100, 255, 7]);
-    // the source reads the matte through the clamp in premultiply, effective and over_weights
+    // the source reads the matte through the clamp in premultiply, effective, over_weights and
+    // stack_weights
     assert!(ks::MATTE.contains("float mt_clamp_matte(float x)"));
     assert!(ks::MATTE.contains("if (x >= 0x0p+0f) {"));
     assert_eq!(ks::MATTE.matches("float mv = mt_clamp_matte(m[i / 4]);").count(), 3, "the three premultiply kernels");
-    assert_eq!(ks::MATTE.matches("float mk = mt_clamp_matte(m[i]);").count(), 2, "effective and over_weights");
+    assert_eq!(ks::MATTE.matches("float mk = mt_clamp_matte(m[i]);").count(), 3, "effective, over_weights and stack_weights");
     assert!(!ks::MATTE.contains("float mk = m[i];"));
 }
 
 // ---- overlays ---------------------------------------------------------------------------------
+
+/// Alpha 0 on every third pixel (`0.0` and `-0.0` in turn in float): the transparent pixels of
+/// `W` that `W'` takes from `Y`.
+pub(super) fn punch(img: &mut Image) {
+    match &mut img.samples {
+        Samples::U8(v) => v.chunks_exact_mut(4).step_by(3).for_each(|p| p[0] = 0),
+        Samples::U16(v) => v.chunks_exact_mut(4).step_by(3).for_each(|p| p[0] = 0),
+        Samples::F32(v) => v.chunks_exact_mut(4).step_by(3).enumerate().for_each(|(k, p)| p[0] = if k % 2 == 0 { 0.0 } else { -0.0 }),
+    }
+}
 
 #[test]
 fn debug_composition_transcriptions_equal_debug_rs_in_every_order() {
@@ -631,22 +700,172 @@ fn debug_composition_transcriptions_equal_debug_rs_in_every_order() {
                 |g, s| sim::launch_1d(n, s, |i| items::ov_overlay_f32_item(i, &r, &gg, g, n as u32)),
             );
             assert_eq!(got, image_bits(&want), "overlay {fmt:?} {w}x{h}");
+            // W': the corpus alpha plus every third pixel transparent
+            let mut wa = a.clone();
+            punch(&mut wa);
+            let mut want = wa.clone();
+            crate::debug::fill_transparent(&mut want, &b);
+            let got = sim_image(
+                w,
+                h,
+                fmt,
+                |g, s| sim::launch_1d(n, s, |i| items::ov_fill_u8_item(i, u8s(&wa), g, u8s(&b), n as u32)),
+                |g, s| sim::launch_1d(n, s, |i| items::ov_fill_u16_item(i, u16s(&wa), g, u16s(&b), n as u32)),
+                |g, s| sim::launch_1d(n, s, |i| items::ov_fill_f32_item(i, f32s(&wa), g, f32s(&b), n as u32)),
+            );
+            assert_eq!(got, image_bits(&want), "fill {fmt:?} {w}x{h}");
+            let want = crate::debug::debug_luma(&a);
+            let got = sim_floats(n, |g, s| {
+                sim::launch_1d(n, s, |i| match fmt {
+                    Fmt::U8 => items::ov_luma_u8_item(i, u8s(&a), g, n as u32),
+                    Fmt::U16 => items::ov_luma_u16_item(i, u16s(&a), g, n as u32),
+                    Fmt::F32 => items::ov_luma_f32_item(i, f32s(&a), g, n as u32),
+                })
+            });
+            assert_eq!(got, float_bits(&want.data), "debug luma {fmt:?} {w}x{h}");
         }
-        // detail and edge: the CPU blurs, the transcription takes the blurred plane
-        for nan in [false, true] {
-            let l = plane(&mut rng, w, h, 300.0, nan);
-            let mut b = l.clone();
-            crate::prep::blur5(&mut b);
+        // detail and edge on luma planes: the 0..1 range of the Debug views, then wider values,
+        // with the specials of the corpus
+        for (range, nan) in [(1.0f32, false), (1.0, true), (300.0, true)] {
+            let l = plane(&mut rng, w, h, range, nan);
             let want = crate::debug::detail(&l);
-            let got = sim_floats(n, |g, s| sim::launch_1d(n, s, |i| items::ov_detail_item(i, &l.data, &b.data, g, n as u32)));
-            assert_eq!(got, float_bits(&want), "detail {w}x{h}");
-            let mut bl = l.data.clone();
-            crate::flow::conv::blur_gaussian(&mut bl, w, h, 1, 2.0);
+            let got = sim_floats(n, |g, s| sim::launch_2d(w, h, s, |x, y| items::ov_detail_item(x, y, &l.data, g, w as u32, h as u32)));
+            assert_eq!(got, float_bits(&want), "detail {w}x{h} range {range}");
             let want = crate::debug::edge(&l);
-            let got = sim_floats(n, |g, s| sim::launch_2d(w, h, s, |x, y| items::ov_edge_item(x, y, &bl, g, w as u32, h as u32)));
-            assert_eq!(got, float_bits(&want), "edge {w}x{h}");
+            let got = sim_floats(n, |g, s| sim::launch_2d(w, h, s, |x, y| items::ov_edge_item(x, y, &l.data, g, w as u32, h as u32)));
+            assert_eq!(got, float_bits(&want), "edge {w}x{h} range {range}");
         }
     }
+}
+
+/// One launch of an image writing transcription (`run8`, `run16` or `run32` by `fmt`), the image
+/// back.
+fn sim_image_once(w: usize, h: usize, fmt: Fmt, run8: impl FnOnce(&mut Global<u8>), run16: impl FnOnce(&mut Global<u16>), run32: impl FnOnce(&mut Global<f32>)) -> Image {
+    let n = w * h * 4;
+    let samples = match fmt {
+        Fmt::U8 => {
+            let mut g = Global::new(n, 0u8);
+            run8(&mut g);
+            assert_eq!(g.written(), n);
+            Samples::U8(g.into_vec())
+        }
+        Fmt::U16 => {
+            let mut g = Global::new(n, 0u16);
+            run16(&mut g);
+            assert_eq!(g.written(), n);
+            Samples::U16(g.into_vec())
+        }
+        Fmt::F32 => {
+            let mut g = Global::new(n, 0.0f32);
+            run32(&mut g);
+            assert_eq!(g.written(), n);
+            Samples::F32(g.into_vec())
+        }
+    };
+    Image { width: w, height: h, samples }
+}
+
+/// One launch of a plane writing transcription, the plane back.
+fn sim_plane_once(n: usize, run: impl FnOnce(&mut Global<f32>)) -> Vec<f32> {
+    let mut g = Global::new(n, 0.0f32);
+    run(&mut g);
+    assert_eq!(g.written(), n);
+    g.into_vec()
+}
+
+/// The Debug view `code` of `debug::debug_view_on` after its forward warp, composed from the
+/// transcriptions in the order of `debug.rs` (`W'` from `warped` and `y`, then the view; Detail and
+/// Edge through the luma of `W'` and of `Y`, the measure of each and the overlay), every launch in
+/// the order of `seed`.
+fn sim_view(warped: &Image, y: &Image, code: i32, seed: u64) -> Image {
+    let (w, h, fmt) = (y.width, y.height, y.fmt());
+    let n = w * h;
+    let nu = n as u32;
+    let wf = sim_image_once(
+        w,
+        h,
+        fmt,
+        |g| sim::launch_1d(n, seed, |i| items::ov_fill_u8_item(i, u8s(warped), g, u8s(y), nu)),
+        |g| sim::launch_1d(n, seed, |i| items::ov_fill_u16_item(i, u16s(warped), g, u16s(y), nu)),
+        |g| sim::launch_1d(n, seed, |i| items::ov_fill_f32_item(i, f32s(warped), g, f32s(y), nu)),
+    );
+    let ns = n * 4;
+    match code {
+        crate::debug::VIEW_BLEND => sim_image_once(
+            w,
+            h,
+            fmt,
+            |g| sim::launch_1d(ns, seed, |i| items::ov_blend_u8_item(i, u8s(&wf), u8s(y), g, ns as u32)),
+            |g| sim::launch_1d(ns, seed, |i| items::ov_blend_u16_item(i, u16s(&wf), u16s(y), g, ns as u32)),
+            |g| sim::launch_1d(ns, seed, |i| items::ov_blend_f32_item(i, f32s(&wf), f32s(y), g, ns as u32)),
+        ),
+        crate::debug::VIEW_DIFF => sim_image_once(
+            w,
+            h,
+            fmt,
+            |g| sim::launch_1d(n, seed, |i| items::ov_diff_u8_item(i, u8s(&wf), u8s(y), g, nu)),
+            |g| sim::launch_1d(n, seed, |i| items::ov_diff_u16_item(i, u16s(&wf), u16s(y), g, nu)),
+            |g| sim::launch_1d(n, seed, |i| items::ov_diff_f32_item(i, f32s(&wf), f32s(y), g, nu)),
+        ),
+        _ => {
+            let luma = |img: &Image| {
+                sim_plane_once(n, |g| {
+                    sim::launch_1d(n, seed, |i| match &img.samples {
+                        Samples::U8(s) => items::ov_luma_u8_item(i, s, g, nu),
+                        Samples::U16(s) => items::ov_luma_u16_item(i, s, g, nu),
+                        Samples::F32(s) => items::ov_luma_f32_item(i, s, g, nu),
+                    })
+                })
+            };
+            let measure = |l: &[f32]| {
+                sim_plane_once(n, |g| {
+                    sim::launch_2d(w, h, seed, |x, yy| {
+                        if code == crate::debug::VIEW_DETAIL {
+                            items::ov_detail_item(x, yy, l, g, w as u32, h as u32)
+                        } else {
+                            items::ov_edge_item(x, yy, l, g, w as u32, h as u32)
+                        }
+                    })
+                })
+            };
+            let (r, gg) = (measure(&luma(&wf)), measure(&luma(y)));
+            sim_image_once(
+                w,
+                h,
+                fmt,
+                |g| sim::launch_1d(n, seed, |i| items::ov_overlay_u8_item(i, &r, &gg, g, nu)),
+                |g| sim::launch_1d(n, seed, |i| items::ov_overlay_u16_item(i, &r, &gg, g, nu)),
+                |g| sim::launch_1d(n, seed, |i| items::ov_overlay_f32_item(i, &r, &gg, g, nu)),
+            )
+        }
+    }
+}
+
+#[test]
+fn the_debug_views_composed_from_the_transcriptions_equal_debug_view() {
+    // the order of debug::debug_view_on after its forward warp, every view code at every depth;
+    // the warp leaves transparent pixels (the last row and column, the transparent pixels of X)
+    // and the corpus frames hold transparent pixels, so W' differs from W
+    let mut rng = Rng::new(0x6E0C_000A);
+    let mut compared = 0usize;
+    for &(w, h) in &[(2usize, 2usize), (5, 4), (7, 7), (17, 16), (33, 9)] {
+        for fmt in FMTS {
+            let x = image(&mut rng, w, h, fmt, true);
+            let y = image(&mut rng, w, h, fmt, true);
+            let flow = FlowField { width: w, height: h, data: (0..w * h * 2).map(|_| (rng.below(9) as f32 - 4.0) * 0.375).collect() };
+            let mut warped = Image::new(w, h, fmt);
+            if crate::forward::forward_warp(&mut warped, &x, &flow, 1.0).is_err() {
+                continue;
+            }
+            for code in [crate::debug::VIEW_BLEND, crate::debug::VIEW_DIFF, crate::debug::VIEW_DETAIL, crate::debug::VIEW_EDGE] {
+                let want = crate::debug::debug_view(&x, &y, &flow, code).unwrap();
+                let seed = sim::SEEDS[compared % sim::SEEDS.len()];
+                assert_eq!(image_bits(&sim_view(&warped, &y, code, seed)), image_bits(&want), "view {code} {fmt:?} {w}x{h}");
+                compared += 1;
+            }
+        }
+    }
+    assert!(compared >= 40, "{compared} views compared");
 }
 
 // ---- geometry and points ----------------------------------------------------------------------

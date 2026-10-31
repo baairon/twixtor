@@ -1,0 +1,21 @@
+id	exit	size	sha256	note
+create-vectors.ooc-alt-size.shift-16x12.d8	4	0	-	vfx: error: layer alt_source_a grid/inputs/shiftB-8x6.d8.f3.rgba ends with a partial frame (576 of 768 bytes) after 0 whole frames
+create-vectors.ooc-dbg-6.shift-16x12.d8	3	0	-	vfx: error: bad value for `debug_view_method`: 6 outside 1..=5
+create-vectors.ooc-display-0.shift-16x12.d8	3	0	-	vfx: error: bad value for `display`: 0 outside 1..=3
+create-vectors.ooc-display-4.shift-16x12.d8	3	0	-	vfx: error: bad value for `display`: 4 outside 1..=3
+create-vectors.ooc-geom-7.shift-16x12.d8	3	0	-	vfx: error: bad value for `draw_geom`: 7 outside 1..=6
+create-vectors.ooc-lo-6.shift-16x12.d8	3	0	-	vfx: error: bad value for `layers_output`: 6 outside 1..=5
+create-vectors.ooc-matte-size.shift-16x12.d8	4	0	-	vfx: error: layer fg1_matte grid/inputs/matte_disc-8x6.d8.f3.rgba ends with a partial frame (576 of 768 bytes) after 0 whole frames
+create-vectors.ooc-md-high.shift-16x12.d8	3	0	-	vfx: error: bad value for `max_displace`: 8192.5 outside 1..=8192
+create-vectors.ooc-md-low.shift-16x12.d8	3	0	-	vfx: error: bad value for `max_displace`: 0.99 outside 1..=8192
+create-vectors.ooc-md-neg.shift-16x12.d8	3	0	-	vfx: error: bad value for `max_displace`: -1 outside 1..=8192
+create-vectors.ooc-md-zero.shift-16x12.d8	3	0	-	vfx: error: bad value for `max_displace`: 0 outside 1..=8192
+create-vectors.ooc-prep-4.shift-16x12.d8	3	0	-	vfx: error: bad value for `prep`: 4 outside 1..=3
+create-vectors.ooc-pt-color-256.shift-16x12.d8	3	0	-	vfx: error: bad value for `pt1_color`: cannot parse `256,0,0`
+create-vectors.ooc-pt-use-6.shift-16x12.d8	3	0	-	vfx: error: bad value for `pt1_use`: 6 outside 1..=5
+create-vectors.ooc-sens-high.shift-16x12.d8	3	0	-	vfx: error: bad value for `main_bg_sensitivity`: 100.01 outside 0..=100
+create-vectors.ooc-sens-neg.shift-16x12.d8	3	0	-	vfx: error: bad value for `main_bg_sensitivity`: -0.01 outside 0..=100
+create-vectors.ooc-shrink-high.shift-16x12.d8	3	0	-	vfx: error: bad value for `fg1_inv_matte_shrink`: 10.5 outside 0..=10
+create-vectors.ooc-shrink-neg.shift-16x12.d8	3	0	-	vfx: error: bad value for `fg1_inv_matte_shrink`: -1 outside 0..=10
+create-vectors.ooc-tf-3.shift-16x12.d8	3	0	-	vfx: error: bad value for `track_frame`: 3 outside 1..=2
+create-vectors.ooc-unknown-param.shift-16x12.d8	3	0	-	vfx: error: unknown param `no_such_param`

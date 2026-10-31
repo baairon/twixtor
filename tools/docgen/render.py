@@ -5,12 +5,12 @@ import os
 import re
 from collections import OrderedDict
 
-from .data import DATA, LOCK_SETS, ROOT, Data, fmt_int, read_text, split_list
+from .data import (DATA, HARNESS_SUMMARY, LOCK_SETS, ROOT, Data, clean, fmt_int, is_match, is_verified, read_text,
+                   rerun_state, verdict)
 
 F_RE = re.compile(r"<!--f:([A-Za-z0-9_.-]+)-->(.*?)<!--/f-->")
 G_RE = re.compile(r"(<!--gen:([A-Za-z0-9_.-]+)-->\r?\n)(.*?)(<!--/gen:\2-->)", re.S)
 FACTS = DATA + "/facts.json"
-RANGE_RE = re.compile(r"^([a-z]+)(\d+)(_[a-z0-9_]+)$")
 
 
 def code(s):
@@ -26,27 +26,6 @@ def table(header, rows):
     for r in rows:
         out.append("| " + " | ".join(str(c) for c in r) + " |")
     return out
-
-
-def id_list(ids):
-    """Ids in code font; three or more consecutive numbered ids (pt1_use, pt2_use, ...) as a range."""
-    out, i = [], 0
-    while i < len(ids):
-        m = RANGE_RE.match(ids[i])
-        j = i
-        if m:
-            while j + 1 < len(ids):
-                n = RANGE_RE.match(ids[j + 1])
-                if not (n and n.group(1) == m.group(1) and n.group(3) == m.group(3)
-                        and int(n.group(2)) == int(m.group(2)) + (j + 1 - i)):
-                    break
-                j += 1
-        if j - i >= 2:
-            out.append("{} to {}".format(code(ids[i]), code(ids[j])))
-        else:
-            out.extend(code(x) for x in ids[i:j + 1])
-        i = j + 1
-    return ", ".join(out) if out else "-"
 
 
 def md_files(root):
@@ -68,8 +47,9 @@ class Generator:
         self.d = data
         self.blocks = OrderedDict()
         self.sources = OrderedDict()
-        self._gaps()
-        self._families()
+        self._modules()
+        self._notes()
+        self._harness()
         self._fixtures()
         self._lock()
         self._tests()
@@ -78,35 +58,94 @@ class Generator:
         self.blocks[name] = lines
         self.sources[name] = source
 
-    def _gaps(self):
-        refs = {}
-        for r in self.d.references:
-            # a family that settles several gaps lists them all, and each case counts for each
-            for gid in split_list(r["gap"]):
-                refs.setdefault(gid, []).append(r["result"])
+    def _modules(self):
+        """One row per module in module order, a totals row computed from the result files. A module with
+        no summary.json is Not started and every figure is a dash."""
+        mods = self.d.modules
+        dash = "-"
         rows = []
-        for g in self.d.gaps:
-            got = refs.get(g["id"], [])
-            graded = "{} of {}".format(fmt_int(got.count("pass")), fmt_int(len(got))) if got else "none yet"
-            rows.append([g["id"], g["title"], id_list(split_list(g["effects"])), id_list(split_list(g["controls"])),
-                         graded])
-        if not rows:
-            rows.append(["none", "-", "-", "-", "-"])
-        self.add("gaps", DATA + "/gaps.tsv, graded cases from " + DATA + "/references.tsv",
-                 table(["Gap", "Open point", "Effects", "Controls", "Graded reference cases"], rows))
+        for m in mods:
+            src = code(m["source"]) if m["source"] else dash
+            plugin = code(m["plugin"])
+            if not m["reported"]:
+                rows.append([code(m["id"]), plugin, "Not started"] + [dash] * 8 + [src])
+                continue
+            cases = fmt_int(m["compared"])
+            if m["compared"] != m["in_contract"]:
+                cases += " of " + fmt_int(m["in_contract"])
+            rows.append([code(m["id"]), plugin, verdict(m), cases, fmt_int(m["out_of_contract"]),
+                         "{} / {}".format(fmt_int(m["bytes_compared"]), fmt_int(m["floats_compared"])),
+                         "{} / {}".format(fmt_int(m["differing"]), fmt_int(m["differing_values"])),
+                         fmt_int(m["max_ulp"]) if m["max_ulp"] is not None else dash,
+                         "{} of {}".format(fmt_int(m["call_matching"]), fmt_int(m["call_compared"])),
+                         "{} of {}".format(fmt_int(m["mutants_killed"]), fmt_int(m["mutants_total"])),
+                         self._rerun(m), src])
+        rep = [m for m in mods if m["reported"]]
 
-    def _families(self):
-        fams = OrderedDict()
-        for r in self.d.references:
-            fams.setdefault((r["family"], r["gap"]), []).append(r["result"])
+        def total(key):
+            return sum(m[key] for m in rep)
+
+        ulps = [m["max_ulp"] for m in rep if m["max_ulp"] is not None]
+        cases = fmt_int(total("compared"))
+        if total("compared") != total("in_contract"):
+            cases += " of " + fmt_int(total("in_contract"))
+        rows.append(["Total", dash, "{} of {} match, {} of {} verified".format(
+                         sum(1 for m in mods if is_match(m)), len(mods), sum(1 for m in mods if is_verified(m)), len(mods)),
+                     cases, fmt_int(total("out_of_contract")),
+                     "{} / {}".format(fmt_int(total("bytes_compared")), fmt_int(total("floats_compared"))),
+                     "{} / {}".format(fmt_int(total("differing")), fmt_int(total("differing_values"))),
+                     fmt_int(max(ulps)) if ulps else dash,
+                     "{} of {}".format(fmt_int(total("call_matching")), fmt_int(total("call_compared"))),
+                     "{} of {}".format(fmt_int(total("mutants_killed")), fmt_int(total("mutants_total"))),
+                     "{} of {}".format(sum(1 for m in mods if rerun_state(m) == "yes"), len(mods)), dash])
+        self.add("modules", "parity/<id>/results/summary.json and verify.json, in the module order of tools/docgen/data.py",
+                 table(["Module", "Plugin", "Status", "Cases compared (in contract)", "Out of contract (candidates)",
+                        "Values compared (bytes / floats)", "Differing", "Max ULP", "Call records matching",
+                        "Mutants killed", "Re-run verified", "Source"], rows))
+
+    @staticmethod
+    def _rerun(m):
+        state, v = rerun_state(m), m["verify"]
+        if state == "none":
+            return "-"
+        if state == "no":
+            return "No, {} differences".format(fmt_int(v["differences"]))
+        return ("Yes, " if state == "yes" else "Stale, ") + (v["reran_at"] or "undated")
+
+    def _notes(self):
+        """Blockers, stand-ins, logic parity counts and surviving mutants, as the modules state them."""
         rows = []
-        for (fam, gap), res in sorted(fams.items()):
-            rows.append([code(fam), gap, fmt_int(len(res)), fmt_int(res.count("pass")), fmt_int(res.count("fail")),
-                         fmt_int(res.count("missing"))])
+        for m in self.d.modules:
+            for b in m["blockers"]:
+                rows.append([code(m["id"]), "blocker", b])
+            for s in m["stand_ins"]:
+                rows.append([code(m["id"]), "stand-in", s])
+            if m["logic_parity"]:
+                rows.append([code(m["id"]), "logic parity",
+                             "{} compared cases use a stand-in on both sides".format(fmt_int(m["logic_parity"]))])
+            for s in m["survivors"]:
+                rows.append([code(m["id"]), "surviving mutant", s])
         if not rows:
-            rows.append(["none yet", "-", "0", "0", "0", "0"])
-        self.add("families", DATA + "/references.tsv by family",
-                 table(["Family", "Gap", "Cases", "Pass", "Fail", "Missing"], rows))
+            rows.append(["-", "-", "None reported yet."])
+        self.add("notes", "parity/<id>/results/summary.json: blockers, stand_ins, cases.logic_parity, mutants.survivors",
+                 table(["Module", "Kind", "Text"], rows))
+
+    def _harness(self):
+        """The optional harness summary, shown as it states: its top level entries, nothing inferred."""
+        doc = self.d.harness
+        rows = []
+        for k, v in (doc or {}).items():
+            if isinstance(v, (dict, list)):
+                text = json.dumps(v, separators=(",", ":"))
+                text = text if len(text) <= 100 else "{} entries, see the file".format(len(v))
+            elif isinstance(v, bool):
+                text = "true" if v else "false"
+            else:
+                text = "null" if v is None else str(v)
+            rows.append([code(clean(k).replace("\\|", "|")), clean(text)])
+        if not rows:
+            rows.append(["-", "No harness summary yet." if doc is None else "The file states nothing."])
+        self.add("harness", HARNESS_SUMMARY + ", top level entries as stated", table(["Entry", "Stated"], rows))
 
     def _fixtures(self):
         rows = []

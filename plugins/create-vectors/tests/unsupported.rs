@@ -1,16 +1,19 @@
 //! What the plugin once refused now renders, through the `Effect` trait exactly as a host runs it:
 //! FG matte layers (one flow per layer, the matte weighted merge), `Layers Output`, tracking
-//! points (user displacement), `Main_BG: Track` and `FGk: Track` unchecked (the second tracker),
+//! points (user displacement), `Main_BG: Image Track` and `FGk: Image Track` unchecked (the second tracker),
 //! Display Debug (five views) and the Draw Geom overlay on the Source and Debug displays. Each
-//! render equals the engine call it stands for. An error fill (size mismatch, missing layer) still
+//! render equals the engine call it stands for, made on the frames upside down with the result turned back (the
+//! plugin works bottom row first, `create_vectors::glue`). An error fill (size mismatch, missing layer) still
 //! wins over everything, as the flags are tested first.
 
 mod common;
 
 use common::*;
+use create_vectors::glue::{flip_image, flip_pos};
 use fx_core::{Depth, Frame, Pixels};
 use retime_engine::create_vectors::{create_vectors, create_vectors_job, frame_time, job_flow, CreateVectorsJob, LayerParams};
-use retime_engine::debug::debug_view;
+use retime_engine::debug::debug_view_on;
+use retime_engine::stages::{GouraudForward, StageSet};
 use retime_engine::image::{Fmt, Image};
 use retime_engine::matte::extract;
 use retime_engine::points::UserPoint;
@@ -47,8 +50,22 @@ fn rig(params: &[(&str, &str)]) -> Rig {
     Rig::new(clip(), params).with_frames(6)
 }
 
+/// The engine image of a frame, upside down (the row order of the plugin).
 fn engine(f: &Frame) -> Image {
-    Image::from_frame(f)
+    let mut img = Image::from_frame(f);
+    flip_image(&mut img);
+    img
+}
+
+/// The stages of the Debug views: the CPU with the Gouraud forward warp (`create_vectors::glue`, Debug warp).
+fn gouraud() -> StageSet {
+    GouraudForward::wrap(StageSet::cpu())
+}
+
+/// An engine result turned back to the rows of the frame, as the wire frame the effect writes.
+fn back(mut img: Image) -> Frame {
+    flip_image(&mut img);
+    img.to_frame()
 }
 
 /// The settings of the default parameters with `max_displace` 16 (the rigs below set it).
@@ -92,12 +109,12 @@ fn fg_matte_layers_render_the_merged_vectors() {
             first,
             last,
         };
-        assert_eq!(got, create_vectors_job(&x, &y, &job).unwrap().to_frame(), "layers output {lo}");
+        assert_eq!(got, back(create_vectors_job(&x, &y, &job).unwrap()), "layers output {lo}");
     }
     // FG2 alone is not active (the scan stops at the first empty matte): the single layer output
     let plain = rig(&[("max_displace", "16")]).render(2).unwrap();
     assert_eq!(rig(&[("max_displace", "16")]).with_layer(FG2, m2).render(2).unwrap(), plain);
-    assert_eq!(plain, create_vectors(&x, &y, &base()).unwrap().to_frame());
+    assert_eq!(plain, back(create_vectors(&x, &y, &base()).unwrap()));
     // a black FG1 matte with Layers Output All: Main_BG takes the whole frame, the single layer output
     let black: Vec<Frame> = (0..6).map(|_| Frame::new(W, H, Depth::U8)).collect();
     assert_eq!(rig(&[("max_displace", "16")]).with_layer(FG1, black).render(2).unwrap(), plain);
@@ -129,7 +146,7 @@ fn the_fg_controls_reach_their_layers() {
         first: 0,
         last: 1,
     };
-    assert_eq!(got, create_vectors_job(&x, &y, &job).unwrap().to_frame());
+    assert_eq!(got, back(create_vectors_job(&x, &y, &job).unwrap()));
 }
 
 /// `CreateVectorsSettings` with another Main_BG sensitivity.
@@ -160,13 +177,13 @@ fn every_debug_view_renders_the_engine_view() {
         let c = clip();
         let (dx, dy) = (engine(&c[3]), engine(&c[2]));
         let job = CreateVectorsJob::single(base());
-        let want = debug_view(&dx, &dy, &job_flow(&dx, &dy, &job).unwrap(), code).unwrap().to_frame();
+        let want = back(debug_view_on(gouraud().get(), &dx, &dy, &job_flow(&dx, &dy, &job).unwrap(), code).unwrap());
         let got = rig(&[("display", "3"), ("debug_view_method", view), ("max_displace", "16"), ("draw_geom", "1")]).render(2).unwrap();
         assert_eq!(got, want, "view {view}");
     }
     // the view popup does nothing when Display is not Debug
-    assert_eq!(rig(&[("debug_view_method", "1"), ("max_displace", "16")]).render(2).unwrap(), create_vectors(&x, &y, &base()).unwrap().to_frame());
-    // with an FG matte the Debug view uses the merged flow
+    assert_eq!(rig(&[("debug_view_method", "1"), ("max_displace", "16")]).render(2).unwrap(), back(create_vectors(&x, &y, &base()).unwrap()));
+    // with an FG matte the Debug display composes the layers, as the original's code does
     let m1 = disc_clip(18.0, 16.0, 11.0);
     let c = clip();
     let (dx, dy) = (engine(&c[3]), engine(&c[2]));
@@ -179,7 +196,7 @@ fn every_debug_view_renders_the_engine_view() {
         first: 0,
         last: 1,
     };
-    let want = debug_view(&dx, &dy, &job_flow(&dx, &dy, &job).unwrap(), 4).unwrap().to_frame();
+    let want = back(retime_engine::create_vectors::debug_job_view_on(StageSet::cpu().get(), gouraud().get(), &dx, &dy, &job, 4).unwrap());
     let got = rig(&[("display", "3"), ("debug_view_method", "1"), ("max_displace", "16")]).with_layer(FG1, m1).render(2).unwrap();
     assert_eq!(got, want);
 }
@@ -206,15 +223,15 @@ fn main_bg_track_unchecked_is_the_second_tracker() {
 #[test]
 fn tracking_points_in_use_at_both_frames_reach_the_solver() {
     let (x, y) = pair();
-    let plain = create_vectors(&x, &y, &base()).unwrap().to_frame();
+    let plain = back(create_vectors(&x, &y, &base()).unwrap());
     let at = |t: i32| frame_time(t, 100);
     // Pt 1 on FG1: with one layer it belongs to the only layer; at frame 2 (Previous: ticks 200 and 100)
     let params = [("max_displace", "16"), ("pt1_use", "2"), ("pt1_pos", "20,15@1;24,17@2")];
     let got = rig(&params).render(2).unwrap();
     let mut job = CreateVectorsJob::single(base());
-    job.points = vec![vec![UserPoint { at_a: [24.0, 17.0], at_b: [20.0, 15.0] }]];
+    job.points = vec![vec![UserPoint { at_a: flip_pos([24.0, 17.0], H), at_b: flip_pos([20.0, 15.0], H) }]];
     assert_eq!((at(2), at(1)), (200, 100));
-    assert_eq!(got, create_vectors_job(&x, &y, &job).unwrap().to_frame());
+    assert_eq!(got, back(create_vectors_job(&x, &y, &job).unwrap()));
     assert_ne!(got, plain);
     // Don't Use (the default) and a value that differs at the two frame times change nothing
     assert_eq!(rig(&[("max_displace", "16"), ("pt1_use", "1")]).render(2).unwrap(), plain);
@@ -229,15 +246,18 @@ fn draw_geom_draws_over_the_source_and_the_debug_display() {
     // default Draw Geom is All: with no point in use the overlay draws nothing and the Source display is a plain copy
     let source = rig(&[("display", "1")]).render(2).unwrap();
     assert_eq!(source, clip()[2]);
-    // a point in use at the frame time: an opaque disc in its colour (Pt 3 is white)
+    // a point in use at the frame time: the plugin's cross in its colour (Pt 3 is white), arms of
+    // full coverage 3 pixels each way, a quarter one pixel further, nothing beyond
     let got = rig(&[("display", "1"), ("pt3_use", "2"), ("pt3_pos", "10,12")]).render(2).unwrap();
     let Pixels::U8(p) = &got.pixels else { panic!() };
+    let Pixels::U8(s) = &source.pixels else { panic!() };
     assert_eq!(p[12 * W + 10], [255, 255, 255, 255]);
     assert_eq!(p[12 * W + 11], [255, 255, 255, 255]);
-    assert_eq!(p[12 * W + 13], {
-        let Pixels::U8(s) = &source.pixels else { panic!() };
-        s[12 * W + 13]
-    });
+    assert_eq!(p[12 * W + 13], [255, 255, 255, 255]);
+    assert_eq!(p[9 * W + 10], [255, 255, 255, 255]);
+    assert_ne!(p[12 * W + 14], s[12 * W + 14]);
+    assert_ne!(p[12 * W + 14], [255, 255, 255, 255]);
+    assert_eq!(p[12 * W + 15], s[12 * W + 15]);
     // Draw Geom None switches the overlay off; one layer: FG1 to Main_BG all name the only layer
     assert_eq!(rig(&[("display", "1"), ("pt3_use", "2"), ("pt3_pos", "10,12"), ("draw_geom", "1")]).render(2).unwrap(), source);
     for g in ["3", "4", "5", "6"] {
@@ -293,7 +313,7 @@ fn an_error_fill_wins_over_everything() {
     let out = r.render(2).unwrap();
     let Pixels::U8(p) = &out.pixels else { panic!() };
     assert!(p.iter().all(|px| *px == [255, 0, 0, 128]), "50 percent red at every pixel");
-    // and the Source display with a mismatching Alt Src too
+    // and the Source display with a mismatching Alt Motion Src too
     let alt = random_clip(Depth::U8, 8, 8, 6, 9);
     let out = rig(&[("display", "1")]).with_layer("alt_source_a", alt).render(2).unwrap();
     let Pixels::U8(p) = &out.pixels else { panic!() };
