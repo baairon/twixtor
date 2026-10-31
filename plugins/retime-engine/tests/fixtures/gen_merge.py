@@ -1,4 +1,4 @@
-"""Independent numpy float32 model of the matte weighted merge of create-vectors (rule G1d): the
+"""Independent numpy float32 model of the matte weighted merge of create-vectors (a rule of this project that no effect runs): the
 merged vector image `vectors::encode_vectors_merged` and the merged flow `vectors::merge_flows`
 of the Debug views. It produces `merge_cases.hex` for the Rust test
 `vectors::merge_tests::model_fixtures_are_reproduced_bit_for_bit`.

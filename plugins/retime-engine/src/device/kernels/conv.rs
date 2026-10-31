@@ -12,6 +12,9 @@
 //!   and then the left tap, `den = den + w`, `num = num + xv * w`, result `num / den`) with the
 //!   zero padding of 1 channel lines (`xv = 0`, `w = 0` outside) and the `-1.0` sentinel of 2 and
 //!   3 channel lines (`w = mask * k[j]`, the mask 0 for a sample equal to `-1.0`, outside or not).
+//! * `cv_vpass_above`: the vertical pass of `conv::convolve_above_first`, the same as `cv_vpass`
+//!   except that the border rule takes the tap above (`y - j`) before the tap below
+//!   (`cv_border_ordered` with `left_first`; `holefill::VerticalTaps::AboveFirst`).
 //! * `cv_hpass_wrapx`: the circular horizontal pass of `conv::convolve_wrapx`, the interior chain
 //!   at every sample with the tap columns from [`CV_WRAPX_TAP`]'s helper `cv_wrapx_tap`, the one
 //!   place the horizontal wrap rule of the convolution lives.
@@ -52,10 +55,11 @@ float cv_interior(__global const float* src, int base, int stride, int i, __glob
     return s;
 }
 
-/* Border rule of conv.rs (border_value): the renormalised chain, right tap then left tap. With
-   multi == 0 a tap outside the line adds (0, 0); with multi != 0 the line is padded with -1.0
-   and a sample equal to -1.0 gets the weight 0. */
-float cv_border(__global const float* src, int base, int stride, int len, int i, __global const float* k, int n, int multi) {
+/* Border rule of conv.rs (border_value_ordered): the renormalised chain, right tap then left tap,
+   or with left_first != 0 the left tap then the right tap. With multi == 0 a tap outside the line
+   adds (0, 0); with multi != 0 the line is padded with -1.0 and a sample equal to -1.0 gets the
+   weight 0. */
+float cv_border_ordered(__global const float* src, int base, int stride, int len, int i, __global const float* k, int n, int multi, int left_first) {
     float centre = src[base + i * stride];
     float num = k[0] * centre;
     float den = k[0];
@@ -66,7 +70,8 @@ float cv_border(__global const float* src, int base, int stride, int len, int i,
         }
         float kj = k[j];
         for (int side = 0; side < 2; side++) {
-            int t = side == 0 ? i + j : i - j;
+            int right = (side == 0) != (left_first != 0);
+            int t = right ? i + j : i - j;
             int inside = t >= 0 && t < len;
             float xv;
             float w;
@@ -89,6 +94,11 @@ float cv_border(__global const float* src, int base, int stride, int len, int i,
         }
     }
     return num / den;
+}
+
+/* Border rule of conv.rs (border_value): the right tap first. */
+float cv_border(__global const float* src, int base, int stride, int len, int i, __global const float* k, int n, int multi) {
+    return cv_border_ordered(src, base, stride, len, i, k, n, multi, 0);
 }
 
 /* Horizontal pass of conv.rs (hrow): item (g, y), g = x * c + channel. */
@@ -127,6 +137,26 @@ __kernel void cv_vpass(__global const float* src, __global float* dst, int w, in
         v = cv_interior(src, t, row, y, k, n);
     } else {
         v = cv_border(src, t, row, h, y, k, n, c != 1);
+    }
+    dst[y * row + t] = v;
+}
+
+/* Vertical pass of conv.rs whose border rows take the tap above first (vrow_ordered with
+   ABOVE_FIRST, the vertical pass of convolve_above_first): item (t, y) as cv_vpass. */
+__kernel void cv_vpass_above(__global const float* src, __global float* dst, int w, int h, int c, __global const float* k, int n) {
+    int t = (int)get_global_id(0);
+    int y = (int)get_global_id(1);
+    int row = w * c;
+    if (t >= row || y >= h) {
+        return;
+    }
+    int head = n < h ? n : h;
+    int interior = h > 2 * n ? h - 2 * n : 0;
+    float v;
+    if (y >= head && y < head + interior) {
+        v = cv_interior(src, t, row, y, k, n);
+    } else {
+        v = cv_border_ordered(src, t, row, h, y, k, n, c != 1, 1);
     }
     dst[y * row + t] = v;
 }
@@ -225,7 +255,7 @@ pub fn cv_interior(src: &[f32], base: i32, stride: i32, i: i32, k: &[f32], n: i3
 }
 
 #[allow(clippy::too_many_arguments)]
-pub fn cv_border(src: &[f32], base: i32, stride: i32, len: i32, i: i32, k: &[f32], n: i32, multi: bool) -> f32 {
+pub fn cv_border_ordered(src: &[f32], base: i32, stride: i32, len: i32, i: i32, k: &[f32], n: i32, multi: bool, left_first: bool) -> f32 {
     let centre = src[(base + i * stride) as usize];
     let mut num = k[0] * centre;
     let mut den = k[0];
@@ -236,7 +266,8 @@ pub fn cv_border(src: &[f32], base: i32, stride: i32, len: i32, i: i32, k: &[f32
         }
         let kj = k[j as usize];
         for side in 0..2 {
-            let t = if side == 0 { i + j } else { i - j };
+            let right = (side == 0) != left_first;
+            let t = if right { i + j } else { i - j };
             let inside = t >= 0 && t < len;
             let xv;
             let w;
@@ -259,6 +290,11 @@ pub fn cv_border(src: &[f32], base: i32, stride: i32, len: i32, i: i32, k: &[f32
         }
     }
     num / den
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn cv_border(src: &[f32], base: i32, stride: i32, len: i32, i: i32, k: &[f32], n: i32, multi: bool) -> f32 {
+    cv_border_ordered(src, base, stride, len, i, k, n, multi, false)
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -293,6 +329,23 @@ pub fn cv_vpass_item(t: usize, y: usize, src: &[f32], dst: &mut Global<f32>, w: 
         cv_interior(src, t, row, y, k, n)
     } else {
         cv_border(src, t, row, h, y, k, n, c != 1)
+    };
+    dst.set((y * row + t) as usize, v);
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn cv_vpass_above_item(t: usize, y: usize, src: &[f32], dst: &mut Global<f32>, w: i32, h: i32, c: i32, k: &[f32], n: i32) {
+    let (t, y) = (t as i32, y as i32);
+    let row = w * c;
+    if t >= row || y >= h {
+        return;
+    }
+    let head = if n < h { n } else { h };
+    let interior = if h > 2 * n { h - 2 * n } else { 0 };
+    let v = if y >= head && y < head + interior {
+        cv_interior(src, t, row, y, k, n)
+    } else {
+        cv_border_ordered(src, t, row, h, y, k, n, c != 1, true)
     };
     dst.set((y * row + t) as usize, v);
 }

@@ -1,12 +1,15 @@
 //! The FG matte layers of the layered paths. A [`Matte`] is one f32 channel at the output size in
 //! 0..1. [`extract`] takes it from a fetched matte frame, [`choke`] shrinks or
-//! grows it (rule G1), [`effective`] gives every layer's tracking matte (rule G1c),
-//! [`over_weights`] the OVER weights of a group of layers (the weights of rule G1d),
+//! grows it, [`effective`] gives every layer's tracking matte,
+//! [`over_weights`] the OVER weights of a group of layers,
 //! [`premultiply`] and [`over`] make and compose the layer images, and [`alpha_holes`] gives
 //! the holes of a composite.
 //!
-//! Claim tags: V established, I inferred, U not established (a rule of this project, pinned in
-//! the parity gaps register until a reference render grades it).
+//! Claim tags: V established, I inferred, U not established (a rule of this project). The effects
+//! read the raw matte plane and the plugin's own kernels ([`extract_raw`], [`cut_view`],
+//! [`layer_solve_mattes`], [`premultiply_pl`], [`over_pl`]), which follow the original; the
+//! rules of this project ([`choke`], [`effective`], [`over_weights`]) run only on paths no effect
+//! takes.
 //!
 //! Precision contract: f32 evaluated in the order written, no fused multiply add, no
 //! reassociation; rows run in parallel through rayon row chunks only and no float is summed
@@ -186,7 +189,7 @@ pub fn extract_raw(img: &Image, chan: i32) -> Matte {
 /// kernel of the blur finite.
 pub const CHOKE_MAX: f32 = 65536.0;
 
-/// `fgk_inv_matte_shrink` on one matte (structure V, threshold and rescale U, rule G1):
+/// `fgk_inv_matte_shrink` on one matte (structure V, threshold and rescale U):
 /// `amount` pixels of shrink, a negative amount grows the matte. The steps (V):
 /// - a negative amount inverts the matte (`m = 1.0 - m`) before and after the operation and
 ///   shrinks by `-amount`;
@@ -196,11 +199,11 @@ pub const CHOKE_MAX: f32 = 65536.0;
 /// - the result is clamped to 0..1 ([`clamp01`]).
 ///
 /// The shrink step by `n` is the identity for `n = 0` and, for `n >= 1`, the blur and the
-/// threshold of rule G1 (U), which erode a straight edge by exactly `n` pixels. So a choke of 0
+/// threshold (U), which erode a straight edge by exactly `n` pixels. So a choke of 0
 /// is the identity (bit for bit, no clamp either), and so is a NaN or infinite amount (U, ours:
 /// no control gives one). The amount is in pixels at the render's resolution
 /// (`downsample_ratio_y * value` in the original, ratio 1 here); magnitudes above
-/// [`CHOKE_MAX`] act as it. Records gap G1 when it runs.
+/// [`CHOKE_MAX`] act as it.
 ///
 /// Errors: `FxError::Mismatch` for a matte that does not hold `width * height` values, whatever
 /// the amount (the matte is left as it is).
@@ -231,7 +234,6 @@ pub fn choke_with(m: &mut Matte, amount: f32, exact: bool) -> Result<()> {
     if amount == 0.0 || !amount.is_finite() {
         return Ok(());
     }
-    fx_core::gaps::record(&crate::gaps::G1);
     let (w, h) = (m.width, m.height);
     let grow = amount < 0.0;
     let mut a = if grow { -amount } else { amount };
@@ -281,9 +283,6 @@ fn choke_pl(m: &mut Matte, amount: f32) -> Result<()> {
     let mut a = if grow { -amount } else { amount };
     if a > CHOKE_MAX {
         a = CHOKE_MAX;
-    }
-    if a != 0.0 {
-        fx_core::gaps::record(&crate::gaps::G1);
     }
     if grow {
         invert_pl(&mut m.data, w);
@@ -386,8 +385,7 @@ fn blur_pl(data: &mut [f32], w: usize, h: usize, r: f32) {
     crate::flow::conv::convolve_above_first(data, w, h, 1, &k);
 }
 
-/// One shrink step of [`choke`] on a `w x h` plane by the whole number of pixels `n` (rule G1,
-/// U): nothing for `n < 1` (a choke of 0 is the identity); else `r = ceil(n + 1.0)`,
+/// One shrink step of [`choke`] on a `w x h` plane by the whole number of pixels `n` (U): nothing for `n < 1` (a choke of 0 is the identity); else `r = ceil(n + 1.0)`,
 /// `fr = r - (n + 1.0)` (0.01 added when below 0.01, so 0.01 for every whole `n`), the radius
 /// `R = (1.0 - fr) + r` (`n + 1.99`, V: the radius), the one channel `conv::blur_gaussian`
 /// of radius `R` (the kernel `2^(-(i*i) / (R/3)^2)` normalised, half width `r = n + 1`),
@@ -560,13 +558,13 @@ fn check_same_size(mattes: &[Matte], w: usize, h: usize, what: &str) -> Result<(
     Ok(())
 }
 
-/// The tracking matte of every layer (rule G1c): `nfg + 1`
+/// The tracking matte of every layer: `nfg + 1`
 /// entries for the `nfg` FG mattes `mattes` (raw, from [`extract`]), FG1 on top. With `vis` all
 /// 1.0 at first, for `k` in `0..nfg`: entry `k` is `m_k * vis`; then `inv_k = 1.0 - m_k` is
 /// choked by `shrinks[k]` ([`choke`]: the shrink acts on the inverse matte only, in the
 /// visibility of the layers below, never on FG k's own tracking or compositing matte) and
 /// `vis = clamp01(inv_k * vis)`. Entry `nfg` (Main_BG, matte 1) is the final `vis`, the product
-/// of all inverses. Records gap G1c with two or more FG mattes.
+/// of all inverses.
 ///
 /// Every matte is `width x height`, the size of the layers, and so is every entry: with no FG
 /// matte (`nfg = 0`, the single layer path, which never calls this) the one entry is
@@ -590,9 +588,6 @@ pub fn effective_with(mattes: &[Matte], shrinks: &[f32], width: usize, height: u
     let Some(n) = w.checked_mul(h) else {
         return Err(FxError::Mismatch(format!("effective: a {w}x{h} matte is too large")));
     };
-    if nfg >= 2 {
-        fx_core::gaps::record(&crate::gaps::G1C);
-    }
     let mut out = Vec::with_capacity(nfg + 1);
     let mut vis = vec![1.0f32; n];
     for (m, &s) in mattes.iter().zip(shrinks) {
@@ -607,8 +602,7 @@ pub fn effective_with(mattes: &[Matte], shrinks: &[f32], width: usize, height: u
     Ok(out)
 }
 
-/// The OVER weights of the layers `first..=last` of create-vectors (flow V, merge U; the
-/// weights of rule G1d), from the raw mattes `mattes` (the `nfg` FG mattes, no shrink) with the
+/// The OVER weights of the layers `first..=last` of create-vectors (flow V, merge U), from the raw mattes `mattes` (the `nfg` FG mattes, no shrink) with the
 /// constant matte 1 for Main_BG (index `nfg`), each `w x h`. They are the shares of the layers in
 /// the OVER composite of the group alone, FG1 on top (U, ours: the layers outside the group do
 /// not occlude it): with `vis` all 1.0 at first, for `k` in `first..=last` the weight is

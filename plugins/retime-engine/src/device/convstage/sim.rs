@@ -101,6 +101,14 @@ impl Backend for SimBackend {
                 sim::launch_2d(w * c, h, seed, |t, y| kc::cv_vpass_item(t, y, &s, &mut out, wi, hi, ci, &k, ni));
                 finish(dst, out, "vpass");
             }
+            Launch::VPassAbove { src, dst, w, h, c, taps } => {
+                let s = snapshot(src);
+                let k = snapshot(&taps.buf);
+                let mut out = global_f32(dst.borrow().len());
+                let (wi, hi, ci, ni) = (w as i32, h as i32, c as i32, taps.n as i32);
+                sim::launch_2d(w * c, h, seed, |t, y| kc::cv_vpass_above_item(t, y, &s, &mut out, wi, hi, ci, &k, ni));
+                finish(dst, out, "vpass above");
+            }
             Launch::Resample { src, sw, sh, dst, dw, dh, sx, sy, wrap } => {
                 let s = snapshot(src);
                 let mut out = global_f32(dst.borrow().len());

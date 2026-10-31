@@ -1,5 +1,5 @@
-//! The matte weighted merge of create-vectors (rule G1d): `encode_vectors_merged` and
-//! `merge_flows` against the numpy model of `tests/fixtures/gen_merge.py`, the single layer
+//! The matte weighted merge of create-vectors (a rule of this project that no effect runs):
+//! `encode_vectors_merged` and `merge_flows` against the numpy model of `tests/fixtures/gen_merge.py`, the single layer
 //! identity with `encode_vectors`, the errors and the thread count.
 
 use super::*;

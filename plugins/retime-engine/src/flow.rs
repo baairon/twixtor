@@ -626,7 +626,8 @@ pub(crate) fn block_match(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: u
 //
 // Each variant is the plain kernel above with its extra input applied, and the plain kernels
 // stay as they are: the plain driver calls only them. Claim tags: V established, I inferred,
-// U not established, the rule of this project (gaps G1b and G6 of the register).
+// U not established, the rule of this project (the gate runs on no effect's path; the wrap is gap
+// G6 of the register).
 
 /// A level mask value counts as inside the layer when it is at least this: the matte is
 /// binarized with it, and the solver's "mask is 0" tests compare against it. The mask levels
@@ -1214,19 +1215,16 @@ fn sweeps<S: Fn(usize, usize, [f32; 2], [f32; 2]) -> Option<[f32; 2]> + Sync>(fl
 
 /// The block matching of a layered or wrap solve: the four sweeps of [`block_match`] (same order,
 /// interior pixels, in place neighbours) with
-/// - `gate`, the level mask of `X` (rule G1b, U): the step of a pixel whose mask is 0 (below
+/// - `gate`, the level mask of `X` (U, on no effect's path: the effects build ungated masks): the step of a pixel whose mask is 0 (below
 ///   [`MASK_ON`]) is skipped and the pixel keeps its vector; the block cost itself stays
 ///   unmasked (it compares the patch of `X` with `Y` wherever the target lies);
 /// - `wrap`: the ring sweeps of [`sweeps_ring`] with [`Block::step_with`] with wrap (G6).
 ///
 /// With neither it equals [`block_match`] bit for bit, and the driver calls [`block_match`]
-/// itself then. Records gap G1b where the gated sweeps run.
+/// itself then.
 pub(crate) fn block_match_with(a: &[f32], b: &[f32], flow: &mut [f32], w: usize, h: usize, gate: Option<&[f32]>, wrap: bool) {
     if w < 3 || h < 3 {
         return;
-    }
-    if gate.is_some() {
-        fx_core::gaps::record(&crate::gaps::G1B);
     }
     let bm = Block { a, b, w, h };
     let step = |x: usize, y: usize, cur: [f32; 2], n: [f32; 2]| {

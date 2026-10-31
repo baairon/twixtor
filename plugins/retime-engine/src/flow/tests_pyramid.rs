@@ -725,7 +725,7 @@ fn seam_scene(w: usize, h: usize, fmt: Fmt) -> (Image, Image, Matte, Matte) {
     (x, y, disc_on_cylinder(w, h, c, r), disc_on_cylinder(w, h, (c.0 + 2.5, c.1 + 1.0), r))
 }
 
-/// A user displacement of a few points per level (rule G2's form: `d` and `w` per pixel), two of
+/// A user displacement of a few points per level (the form of `points::user_displacement`: `d` and `w` per pixel), two of
 /// them on the seam columns of every level.
 fn seam_points(geo: &FlowGeometry) -> UserDisplacement {
     let levels = geo

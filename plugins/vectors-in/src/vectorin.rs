@@ -16,7 +16,7 @@
 //!    ([`retime_engine::compose::flow_from_vector_image_with`]).
 //! 4. With exactly one layer present the other flow is its inversion; with none the render writes
 //!    the error fill before any engine call (`glue.rs`).
-//! 5. With FG matte layers (rule G1e) the loaders run once per layer of the displayed group
+//! 5. With FG matte layers the loaders run once per layer of the displayed group
 //!    ([`load_layer_flows`]), as the original's per layer vector loader does: each load first
 //!    caps the alpha of the vector image by the layer's composition matte at the load's frame
 //!    ([`matte_step`], `min(alpha, c)`), then decodes, fills and scales as above, so the layer's
@@ -115,8 +115,7 @@ fn load_image(layer: &dyn Layer, name: &str, time: i32, settings: &EngineSetting
     })
 }
 
-/// The per layer matte of a vector load (rule G1e;
-/// READ, TwixtorProVectorsIn_64: the per layer
+/// The per layer matte of a vector load (READ, TwixtorProVectorsIn_64: the per layer
 /// vector loader, its two loads and its row kernels at 8 bit, 16 bit and float): per pixel the
 /// alpha of the vector image becomes `c` where `c < alpha`, with `c` the layer's matte `m` in the
 /// units of the depth (`trunc(m * 255 + 0.5)`, `trunc(m * 65535 + 0.5)`, the float itself); a NaN
@@ -124,7 +123,7 @@ fn load_image(layer: &dyn Layer, name: &str, time: i32, settings: &EngineSetting
 /// (`retime_engine::layers::LayerMattes`), whose units come back exactly. The decode then takes
 /// `white - alpha` as the hole mask of the flow fill: whole holes where the layer is absent,
 /// partial ones where its matte is soft. `m` has the size of `img` (otherwise
-/// `FxError::Mismatch`). Records gap G1e.
+/// `FxError::Mismatch`).
 pub fn matte_step(img: &mut Image, m: &Matte) -> Result<()> {
     if (m.width, m.height) != (img.width, img.height) || m.data.len() != img.width * img.height {
         return Err(FxError::Mismatch(format!(
@@ -132,7 +131,6 @@ pub fn matte_step(img: &mut Image, m: &Matte) -> Result<()> {
             m.width, m.height, img.width, img.height
         )));
     }
-    fx_core::gaps::record(&retime_engine::gaps::G1E);
     match &mut img.samples {
         Samples::U8(s) => s.chunks_exact_mut(CHANNELS).zip(&m.data).for_each(|(px, &v)| {
             let c = ((v * 255.0f32 + 0.5f32) as i64).clamp(0, 255) as u8;

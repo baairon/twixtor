@@ -3,7 +3,7 @@
 //! compared bit for bit (NaN payloads included, the simulator runs on the CPU's arithmetic) with
 //! the CPU functions on random and adversarial inputs.
 
-use super::conv::{blur_gaussian_host, choke_host, convolve_host, convolve_on};
+use super::conv::{blur_gaussian_host, choke_host, convolve_above_on, convolve_host, convolve_on};
 use super::corpus;
 use super::holefill::{fill_flow_holes_host, fill_holes_host, fill_holes_masked_host, fill_plane_host};
 use super::pyramid::{build_pyramid_host, luma_host, mask_pyramid_host, reduce_host, upsample_flow_host};
@@ -181,6 +181,65 @@ fn convolution_transcriptions_equal_the_cpu_on_every_small_size() {
                 }
             }
         }
+    }
+}
+
+/// The convolution whose vertical border rows take the tap above first, through the backend's
+/// buffers, NaNs kept.
+fn sim_convolve_above(seed: u64, data: &[f32], w: usize, h: usize, c: usize, k: &[f32]) -> Vec<f32> {
+    let b = SimBackend::new(seed);
+    let taps = Taps::upload(&b, k).unwrap();
+    let buf = b.upload(data).unwrap();
+    let tmp = b.alloc::<f32>(data.len()).unwrap();
+    convolve_above_on(&b, &buf, &tmp, &buf, w, h, c, &taps).unwrap();
+    b.download(&buf).unwrap()
+}
+
+#[test]
+fn above_first_convolution_transcriptions_equal_the_cpu_on_every_size_and_tap_count() {
+    let mut rng = Rng::new(0xAB0F);
+    let mut case = 0usize;
+    for h in 1..=16 {
+        for w in 1..=17 {
+            for c in 1..=3 {
+                let data = corpus::plane(&mut rng, w * h * c, 0.15);
+                for k in [conv::BINOMIAL5.to_vec(), conv::gaussian_kernel(5.0), corpus::taps(&mut rng, 1 + (case % 9), false)] {
+                    let mut cpu = data.clone();
+                    conv::convolve_above_first(&mut cpu, w, h, c, &k);
+                    same(&format!("{w}x{h}x{c} n={}", k.len()), &cpu, &sim_convolve_above(seed_for(case), &data, w, h, c, &k));
+                    case += 1;
+                }
+            }
+        }
+    }
+    for n in 1..=kconv::CV_MAX_TAPS {
+        for &(w, h) in &[(1usize, 1usize), (2, 3), (7, 5), (3, n * 2 + 2), (5, n * 2 - 1)] {
+            let c = 1 + case % 3;
+            let data = corpus::plane(&mut rng, w * h * c, 0.1);
+            let k = corpus::taps(&mut rng, n, case % 2 == 0);
+            let mut cpu = data.clone();
+            conv::convolve_above_first(&mut cpu, w, h, c, &k);
+            same(&format!("{w}x{h}x{c} n={n}"), &cpu, &sim_convolve_above(seed_for(case), &data, w, h, c, &k));
+            case += 1;
+        }
+    }
+    // the order of the work items does not change a bit, and a real -1.0 next to the border is
+    // dropped in 2 and 3 channel images as on the CPU
+    let data = corpus::plane(&mut rng, 23 * 19 * 3, 0.2);
+    let k = conv::gaussian_kernel(7.0);
+    let got = sim::same_for_every_order(|seed| bits(&sim_convolve_above(seed, &data, 23, 19, 3, &k)));
+    let mut cpu = data.clone();
+    conv::convolve_above_first(&mut cpu, 23, 19, 3, &k);
+    same("order", &cpu, &got.into_iter().map(f32::from_bits).collect::<Vec<f32>>());
+    for c in 1..=3 {
+        let mut data = vec![3.0f32; 6 * c];
+        for ch in 0..c {
+            data[c + ch] = -1.0;
+        }
+        // a column of six rows: the sentinel row sits in the vertical border
+        let mut cpu = data.clone();
+        conv::convolve_above_first(&mut cpu, 1, 6, c, &conv::gaussian_kernel(2.0));
+        same(&format!("sentinel c={c}"), &cpu, &sim_convolve_above(1, &data, 1, 6, c, &conv::gaussian_kernel(2.0)));
     }
 }
 
@@ -414,7 +473,6 @@ fn luma_transcriptions_equal_the_cpu_at_every_depth() {
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn reduction_transcriptions_equal_the_cpu() {
     let mut rng = Rng::new(0x4ED);
     for &(w, h) in &[(17usize, 16usize), (33, 20), (64, 48), (100, 7), (9, 37)] {
@@ -424,8 +482,14 @@ fn reduction_transcriptions_equal_the_cpu() {
             }
             for wrap in [false, true] {
                 let t = Plane { width: w, height: h, data: corpus::finite(&mut rng, w * h, 0.0, 255.0) };
+                let got = reduce_host(&SimBackend::new(seed_for(w + r as usize)), &t, r, wrap);
+                if wrap {
+                    // the 360 filters have no kernels yet: refused, the CPU reduces
+                    assert!(matches!(got, Err(StageError::Unsupported(_))), "reduce {w}x{h} r={r} wrap");
+                    continue;
+                }
                 let cpu = prep::reduce_with(t.clone(), r, wrap);
-                let got = reduce_host(&SimBackend::new(seed_for(w + r as usize)), &t, r, wrap).unwrap();
+                let got = got.unwrap();
                 assert_eq!((got.width, got.height), (cpu.width, cpu.height));
                 same(&format!("reduce {w}x{h} r={r} wrap={wrap}"), &cpu.data, &got.data);
             }
@@ -442,7 +506,6 @@ fn settings(quality: u8, hiq: bool, wrap: bool, delin: bool, edge: bool) -> Flow
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn pyramid_levels_equal_build_pyramid() {
     let mut rng = Rng::new(0xBA4D);
     let mut case = 0usize;
@@ -451,21 +514,26 @@ fn pyramid_levels_equal_build_pyramid() {
             for (q, hiq, wrap, delin, edge) in [(5, true, false, false, false), (4, true, true, false, false), (3, true, false, true, true), (5, true, true, true, true), (4, false, false, false, true)] {
                 let img = corpus::image(&mut rng, w, h, depth, 0.0);
                 let s = settings(q, hiq, wrap, delin, edge);
+                let got = build_pyramid_host(&SimBackend::new(seed_for(case)), &img, &s);
+                case += 1;
+                if wrap {
+                    // the 360 filters have no kernels yet: refused, the CPU builds the pyramid
+                    assert!(matches!(got, Err(StageError::Unsupported(_))), "{w}x{h} depth {depth} q{q} wrap");
+                    continue;
+                }
                 let cpu = flow::build_pyramid(&img, &s).unwrap();
-                let got = build_pyramid_host(&SimBackend::new(seed_for(case)), &img, &s).unwrap();
+                let got = got.unwrap();
                 assert_eq!(got.len(), cpu.geometry().levels);
                 for (l, p) in got.iter().enumerate() {
                     assert_eq!((p.width, p.height), (cpu.level(l).width, cpu.level(l).height));
                     same(&format!("{w}x{h} depth {depth} q{q} wrap={wrap} level {l}"), &cpu.level(l).data, &p.data);
                 }
-                case += 1;
             }
         }
     }
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn mask_pyramid_levels_equal_mask_pyramid_build() {
     let mut rng = Rng::new(0x3A5C);
     let mut case = 0usize;
@@ -475,8 +543,15 @@ fn mask_pyramid_levels_equal_mask_pyramid_build() {
                 let data = if kind == 0 { corpus::matte(&mut rng, w * h) } else { corpus::disc(w, h, w as f32 * 0.3, h as f32 * 0.6, h as f32 * 0.3) };
                 let m = Matte { width: w, height: h, data };
                 let s = settings(q, true, wrap, false, false);
+                let got = mask_pyramid_host(&SimBackend::new(seed_for(case)), &m, &s);
+                if wrap {
+                    // the 360 filters have no kernels yet: refused, the CPU builds the masks
+                    assert!(matches!(got, Err(StageError::Unsupported(_))), "mask {w}x{h} q{q} wrap");
+                    case += 1;
+                    continue;
+                }
                 let cpu = flow::extras::MaskPyramid::build(&m, &s).unwrap();
-                let got = mask_pyramid_host(&SimBackend::new(seed_for(case)), &m, &s).unwrap();
+                let got = got.unwrap();
                 assert_eq!(got.len(), cpu.geometry().levels);
                 for (l, p) in got.iter().enumerate() {
                     same(&format!("mask {w}x{h} q{q} wrap={wrap} level {l}"), cpu.level(l), p);

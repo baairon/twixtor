@@ -204,23 +204,14 @@ Every parameter and layer of the four effects pairs with one the plugins registe
 
 ## Stated rules
 
-A render that reaches one of these points prints a `vfx: note:` line ending `(README: limits)`. The notes come from the gap register in `plugins/retime-engine/src/gaps.rs`, which `vfx list --json` lists under `gaps` and `docs/data/gaps.tsv` mirrors. The register was written when the original's behavior at these points was not known. Since then, every point except one follows the original or matches it on every compared grid case that reaches it. Retiring the notes from the code is still to do.
+A render that reaches one of these points prints a `vfx: note:` line ending `(README: limits)`. The notes come from the gap register in `plugins/retime-engine/src/gaps.rs`, which `vfx list --json` lists under `gaps` and `docs/data/gaps.tsv` mirrors. A point stays in the register while some path through it runs a rule of this project that no compared case grades, and its note prints where that rule can run. The former points G1 and G1b to G1h (the layered paths, the matte choke, the vector merge and the vector matte step) and G2 (the point displacement) are retired: the code follows the original there, matches it on every compared grid case and prints no note.
 
 | Gap | Open point | What the code does now | On the grid |
 |---|---|---|---|
-| G1 | matte shrink tail | The original's own choke kernel. A fraction mixes the two nearest whole shrinks, and a negative shrink grows the matte. A shrink makes exact frames take the motion path. | matches (54 grid cases with a shrink) |
-| G1b | mask-aware block matching cost | No gate: block matching never reads the masks, which reach the solve through each layer's own images. | matches (every FG matte case) |
-| G1c | layer visibility direction | FG1 is on top. Each layer is interpolated on its own and composed from the bottom up. A layer's matte is cut by the layers above with the exact choke. | matches |
-| G1d | create-vectors merge | The vectors of a group are composited from the bottom up with the raw mattes. A one-layer output is that layer's own flow, with its visible matte in blue. | matches (85 FG cases, 48 with Layers Output) |
-| G1e | vectors-in per-layer matte step | Each layer's vector alpha is capped by its matte, and the matte channel is read as stored. | matches (22 FG cases) |
-| G1f | blur tail flow of a layered render | The original's per-layer path: every layer's blur compensation uses that layer's own motion. This project's earlier rule is left only on a path no effect takes. | matches (22 grid cases) |
-| G1g | hole fill of a single group display | The original's per-layer path: a single group display rebuilds and fills its layer from its own plates. This project's earlier rule is left only on a path no effect takes. | matches (94 group display cases) |
-| G1h | fast path group display | The group is composed without warp or fill, and rebuilt where the layers above cover it. | matches (the same cases) |
-| G2 | tracking point displacement | The original's rule: the points move the motion at the finest level only, and the coarser levels take it from the image pyramid. | matches (114 point cases) |
-| G3 | Draw Geom drawing | `create-vectors` draws the original's antialiased cross. `retime-fgbg` still draws an opaque disc of radius 1.5 on the Source display. | `create-vectors` matches; `retime-fgbg` differs on a supplementary set (the original draws the cross), and a fix is written but not merged |
-| G4 | four Debug view compositions | The original's arithmetic for all five views. | matches (60 Debug display cases) |
+| G3 | Draw Geom drawing | `retime-fgbg` draws an opaque disc of radius 1.5 on the Source display, where the original draws an antialiased cross. `create-vectors` draws the original's cross and prints no note. | `retime-fgbg` differs on a supplementary set (the original draws the cross), and a fix is written but not merged |
+| G4 | one-layer Debug Blend view | The Blend view of a one-layer group of an FG stack (Layers Output FG1 to MAIN_BG with a matte layer) is a plain 50 percent blend of the group's composite and the layer's own image; the original runs a step there that was not read. Every other view and group follows the original's arithmetic and prints no note. | no grid case reaches it; the other Debug views match (60 Debug display cases) |
 | G5 | second tracker arithmetic | This project's rule: a layer with Track off takes the motion of its tracking points, spread by the pull-push hole fill. | matches (13 cases with Track off); the rule was not read in the original |
-| G6 | solver, hole fill and blur wrap variants | Track RGB+A switches the filters of the layered motion search to their 360 variants and adds no alpha; 360 Video wraps the whole motion search around the sphere. | matches (59 Track RGB+A cases, 16 360 Video cases) |
+| G6 | solver, hole fill and blur wrap variants | 360 Video runs the original's wrap variants of the filters, samplers, gradient and block matching. The wrap of the layer masks in a layered render and the nearest taps of a draft quality blur are this project's reading. Track RGB+A switches the filters of the layered motion search to their 360 variants and adds no alpha; it prints no note. | matches (16 360 Video cases, none with a matte layer, and 59 Track RGB+A cases); no grid case reaches the layered or draft quality wrap |
 
 ## Rules without a note
 
@@ -233,7 +224,7 @@ Some points have a stated rule but print no note. The original's behavior there 
 | an eased key's influence | exactly 1/3 | the same |
 | overshoot | a float is held inside its valid range; an angle is not | the same |
 | the curve solve | 64 bisection steps in f64, in the operation order of [timing: key shapes](timing.md#key-shapes) | the same |
-| a point's path | the straight line between its keys at S pixels a second; a segment of length 0 stays put | the same, together with G2 and G3 |
+| a point's path | the straight line between its keys at S pixels a second; a segment of length 0 stays put | the same, together with G3 |
 | retimed audio | varispeed along the effect's time map ([timing: audio](timing.md#audio)) | outside the original's contract; `tools/test_apply.py` holds the sync |
 | a checkout between two composition frames | the footage frame at that exact time (`vfx --clip-fps`) | host behavior; the call record shows which frame the original asks for |
 | a new size | the footage is scaled before the effect, which renders at the new size | host behavior; the call record shows what the original is given |
@@ -316,13 +307,13 @@ A scan of the source files: a `#[test]` line is one test of `cargo test`, a `def
 |---|---|---|
 | `fx-cli` | `#[test]` | 134 |
 | `fx-core` | `#[test]` | 52 |
-| `fx-parity` | `#[test]` | 175 (1 ignored) |
+| `fx-parity` | `#[test]` | 175 |
 | `create-vectors` | `#[test]` | 91 |
 | `retime` | `#[test]` | 70 (2 ignored) |
-| `retime-engine` | `#[test]` | 844 (76 ignored) |
+| `retime-engine` | `#[test]` | 847 (65 ignored) |
 | `retime-fgbg` | `#[test]` | 104 (1 ignored) |
 | `vectors-in` | `#[test]` | 104 |
-| `tools/test_apply.py` | `def test_` | 110 |
+| `tools/test_apply.py` | `def test_` | 114 |
 | `tools/test_apply_geometry.py` | `def test_` | 22 |
 | `tools/test_apply_hdr.py` | `def test_` | 38 |
 | `tools/test_audio_map.py` | `def test_` | 26 |

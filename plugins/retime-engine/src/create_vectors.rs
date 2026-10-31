@@ -8,7 +8,7 @@
 //! * [`CreateVectorsJob`], [`layer_flows`], [`job_flow`] and [`create_vectors_job`]: the layered
 //!   case: one flow per layer of the Layers Output group, with the masks of
 //!   the tracking mattes, the user displacement of the tracking points or the second tracker,
-//!   merged by the matte weighted encoder (rule G1d). The single layer case of a job calls
+//!   composited from the bottom layer up with the raw mattes (READ). The single layer case of a job calls
 //!   [`create_vectors`], so it keeps its bytes.
 //!
 //! Claim tags: V established, I inferred, U not established (a rule of this project, pinned in
@@ -296,23 +296,20 @@ fn check_pair(x: &Image, y: &Image) -> Result<()> {
 /// `X(p) ~ Y(p + flow(p))` with `x` the frame `a` and `y` the frame `b` of the pair, each at the
 /// working resolution (one flow per layer, V).
 ///
-/// - The luma pyramids of `x` and `y` are built once and shared by the layers; only the
-///   sensitivity, the masks and the user displacement differ per layer.
-/// - With FG layers (`nfg >= 1`, the "multi layer" flag) every solve gets the mask pyramids
-///   (`flow::extras::MaskPyramid`) of the layer's tracking matte (`matte::effective` of the raw
-///   mattes with the shrinks, rule G1c and G1) at `X` and at `Y`. With `nfg = 0` there is no mask
-///   (the single layer solve), and a group whose layers all have Track off computes no tracking
-///   matte.
-/// - A layer with points in use gets their user displacement (`points::user_displacement`,
-///   rule G2) at every level.
+/// - With `nfg = 0` the luma pyramids of `x` and `y` are built once and shared; there is no mask
+///   (the single layer solve).
+/// - With FG layers (`nfg >= 1`, the "multi layer" flag) a layer with Track on solves on its own
+///   layer images, the frames times its visible matte at `X` and at `Y`, with the ungated mask
+///   pyramids of `white - (own - visible)` (`matte::layer_solve_mattes`, READ).
+/// - A layer with points in use gets their user displacement (`points::user_displacement`) at
+///   every level.
 /// - A layer whose Track is off does not solve: its flow is the second tracker of its
 ///   points (`points::second_tracker`, rule G5), the exact zero field without a point.
 ///
 /// With `nfg = 0`, no point and Track on this is `solve_flow` bit for bit (the plain driver of
 /// `flow::extras::solve_pyramids_with`). Tiny frames (U, ours; the rule of
 /// [`create_vectors_job`]): a frame that is not [`crate::prep::searchable`] has no search, and
-/// every entry is the zero field of the frame size. Records gap G1 with FG layers (a layered
-/// frame is built); the primitives record G1b, G1c, G2 and G5 where their rules run.
+/// every entry is the zero field of the frame size. The second tracker records G5.
 ///
 /// Errors: `Mismatch` for frames of different shapes or a job that does not fit them; the
 /// solver's.
@@ -330,9 +327,6 @@ pub fn layer_flows_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVec
         return Ok((first..=last).map(|_| FlowField::new(w, h)).collect());
     }
     let nfg = job.nfg();
-    if nfg >= 1 {
-        fx_core::gaps::record(&crate::gaps::G1);
-    }
     let tracks = (first..=last).any(|k| job.layers[k].track);
     let shrinks: Vec<f32> = job.layers[..nfg].iter().map(|l| l.shrink).collect();
     let base = job.flow_settings(first);
@@ -375,12 +369,13 @@ pub fn layer_flows_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVec
     Ok(out)
 }
 
-/// The flow the Debug views of a job use (rule G4: with `nfg >= 1` the merged flow):
+/// The flow of a job as one field (with `nfg >= 1` the merged flow):
 /// with `nfg = 0` the flow of the only layer as [`layer_flows`] gives it (at the working
 /// resolution); with FG layers the merged flow of `vectors::merge_flows` at the output size,
 /// over the layers `first..=last` with the OVER weights of the raw mattes at `X`
 /// (`matte::over_weights`, U, ours: the Layers Output group applies to the Debug display as it
-/// does to Vectors). Records gap G1d with FG layers. A frame that is not searchable gives the
+/// does to Vectors; no effect takes this branch: the Debug display of an FG stack composes its
+/// layers in [`debug_job_view_on`]). A frame that is not searchable gives the
 /// zero field. Errors as [`layer_flows`].
 pub fn job_flow(x: &Image, y: &Image, job: &CreateVectorsJob) -> Result<FlowField> {
     job_flow_on(&Cpu, x, y, job)
@@ -393,7 +388,6 @@ pub fn job_flow_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVector
     if job.nfg() == 0 || !crate::prep::searchable(w, h) {
         return Ok(flows.swap_remove(0));
     }
-    fx_core::gaps::record(&crate::gaps::G1D);
     let weights = matte::over_weights(&job.mattes_x, job.first, job.last, w, h)?;
     let layers: Vec<(&FlowField, &Matte)> = flows.iter().zip(weights.iter()).collect();
     vectors::merge_flows(w, h, &layers)
@@ -410,7 +404,7 @@ pub fn job_flow_on(stages: &dyn Stages, x: &Image, y: &Image, job: &CreateVector
 /// layer group is `W_k` alone. The other views compare the result (as `W'`) with `y` for a group of
 /// several layers, with `Y_k` for a one layer group (whose Diff, Detail and Edge first run
 /// [`crate::debug::match_alpha`] on the two; its Blend view runs a step that was not read, U: the plain
-/// `lerp` here). Errors as [`layer_flows`] and the forward warp's.
+/// `lerp` here, which records G4). Errors as [`layer_flows`] and the forward warp's.
 pub fn debug_job_view_on(stages: &dyn Stages, warp: &dyn Stages, x: &Image, y: &Image, job: &CreateVectorsJob, code: i32) -> Result<Image> {
     use crate::debug::{self, VIEW_WARP};
     check_pair(x, y)?;
@@ -443,10 +437,11 @@ pub fn debug_job_view_on(stages: &dyn Stages, warp: &dyn Stages, x: &Image, y: &
     if code == VIEW_WARP {
         return Ok(out);
     }
-    fx_core::gaps::record(&crate::gaps::G4);
     match (single, y_layer) {
         (true, Some(mut yk)) => {
-            if code != debug::VIEW_BLEND {
+            if code == debug::VIEW_BLEND {
+                fx_core::gaps::record(&crate::gaps::G4);
+            } else {
                 debug::match_alpha(&mut yk, &mut out);
             }
             Ok(debug::views_of(&out, &yk, code))
@@ -462,10 +457,11 @@ pub fn debug_job_view_on(stages: &dyn Stages, warp: &dyn Stages, x: &Image, y: &
 ///   [`create_vectors`] with Main_BG's sensitivity, so it keeps its bytes.
 /// - `nfg = 0` with points or Track off: the encoding ([`vectors::encode_vectors_image`]) of
 ///   the only layer's flow from [`layer_flows`].
-/// - With FG layers: the flows of the layers `first..=last` ([`layer_flows`]) merged by
-///   [`vectors::encode_vectors_merged`] (rule G1d) with the OVER weights of the raw mattes at
-///   `X`, the frame whose grid the flows live on (`matte::over_weights`, U, ours), Main_BG's
-///   weight the visibility left by the FG layers of the group.
+/// - With FG layers (READ): the flows of the layers `first..=last` ([`layer_flows`]); a group of
+///   one layer is that layer's own flow, unweighted, with its visible matte at `X` in the blue
+///   channel ([`vectors::encode_vectors_blue`]); a larger group is composited from its bottom
+///   layer up, every layer above laid over with its raw matte at `X`
+///   ([`vectors::composite_vectors`]).
 ///
 /// Tiny frames (U, ours, G7 family): a frame that is not [`crate::prep::searchable`] (a side of
 /// 1) is the zero vector image ([`vectors::zero_vectors_image`]: 127, 32767 or 0.5 in R and G,

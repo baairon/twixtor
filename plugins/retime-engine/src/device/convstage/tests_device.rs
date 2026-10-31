@@ -7,7 +7,7 @@
 //! time, and every launch is a few milliseconds. `stage_timings_at_1080p` (ignored) prints the
 //! device time (transfers included) against the CPU time per stage.
 
-use super::conv::{blur5_gpu, blur5_wrapx_gpu, blur_gaussian_gpu, blur_gaussian_wrapx_gpu, choke_gpu, convolve_gpu, convolve_wrapx_gpu};
+use super::conv::{blur5_gpu, blur5_wrapx_gpu, blur_gaussian_gpu, blur_gaussian_wrapx_gpu, choke_gpu, convolve_above_gpu, convolve_gpu, convolve_wrapx_gpu};
 use super::corpus;
 use super::holefill::{fill_flow_holes_gpu, fill_holes_gpu, fill_holes_masked_gpu, fill_plane_gpu};
 use super::pyramid::{build_pyramid_gpu, luma_gpu, mask_pyramid_gpu, reduce_gpu, upsample_flow_gpu};
@@ -272,7 +272,6 @@ fn device_flow_upsample_equals_the_cpu() {
 // ---- pyramids -----------------------------------------------------------------------------------
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn device_luma_and_reduction_equal_the_cpu() {
     on_devices("luma and reduce", |dev, s| {
         let mut rng = Rng::new(0xD5);
@@ -288,6 +287,11 @@ fn device_luma_and_reduction_equal_the_cpu() {
         for &(w, h, r) in &[(1920usize, 1080usize, 1u32), (1920, 1080, 3), (1001, 777, 2), (64, 48, 2)] {
             for wrap in [false, true] {
                 let t = Plane { width: w, height: h, data: finite(&mut rng, w * h, 0.0, 255.0) };
+                if wrap {
+                    // the 360 filters have no kernels yet: refused, the CPU reduces
+                    assert!(matches!(reduce_gpu(s, t, r, wrap), Err(StageError::Unsupported(_))), "{dev}: reduce {w}x{h} wrap");
+                    continue;
+                }
                 let cpu = prep::reduce_with(t.clone(), r, wrap);
                 n += check(dev, &format!("reduce {w}x{h} r={r} wrap={wrap}"), &cpu.data, reduce_gpu(s, t, r, wrap).map(|p| p.data));
             }
@@ -297,18 +301,64 @@ fn device_luma_and_reduction_equal_the_cpu() {
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
+fn device_above_first_convolution_equals_the_cpu() {
+    on_devices("convolve above first", |dev, s| {
+        let mut rng = Rng::new(0xDA);
+        let mut n = 0;
+        for h in 1..=16 {
+            for w in 1..=17 {
+                for c in 1..=3 {
+                    let data = corpus::plane(&mut rng, w * h * c, 0.08);
+                    let k = if (w + h + c) % 2 == 0 { conv::gaussian_kernel(5.0) } else { corpus::taps(&mut rng, 1 + (w * h) % 12, false) };
+                    let mut cpu = data.clone();
+                    conv::convolve_above_first(&mut cpu, w, h, c, &k);
+                    let mut dv = data.clone();
+                    let got = convolve_above_gpu(s, &mut dv, w, h, c, &k);
+                    n += check(dev, &format!("{w}x{h}x{c} n={}", k.len()), &cpu, got.map(|_| dv));
+                }
+            }
+        }
+        for (i, &taps) in [1usize, 2, 3, 6, 13, 64].iter().enumerate() {
+            let (w, h, c) = [(640usize, 360usize, 1usize), (331, 257, 2), (200, 199, 3)][i % 3];
+            let data = finite(&mut rng, w * h * c, -10.0, 300.0);
+            let k = corpus::taps(&mut rng, taps, i % 2 == 0);
+            let mut cpu = data.clone();
+            conv::convolve_above_first(&mut cpu, w, h, c, &k);
+            let mut dv = data.clone();
+            let got = convolve_above_gpu(s, &mut dv, w, h, c, &k);
+            n += check(dev, &format!("{w}x{h}x{c} n={taps}"), &cpu, got.map(|_| dv));
+        }
+        // the solver's three Gaussians: radius 7 on 3 and 2 channels, radius 5 on 2
+        for (c, r) in [(3usize, 7.0f32), (2, 7.0), (2, 5.0)] {
+            let (w, h) = (480usize, 270usize);
+            let data = finite(&mut rng, w * h * c, -40.0, 40.0);
+            let mut cpu = data.clone();
+            conv::blur_gaussian_above_first(&mut cpu, w, h, c, r);
+            let mut dv = data.clone();
+            let got = convolve_above_gpu(s, &mut dv, w, h, c, &conv::gaussian_kernel(r));
+            n += check(dev, &format!("gauss {w}x{h}x{c} r={r}"), &cpu, got.map(|_| dv));
+        }
+        n
+    });
+}
+
+#[test]
 fn device_pyramids_equal_build_pyramid_and_mask_pyramid() {
     on_devices("pyramids", |dev, s| {
         let mut rng = Rng::new(0xD6);
         let mut n = 0;
         for &(w, h) in &[(64usize, 48usize), (37, 29), (1280, 720), (640, 480)] {
-            for (q, wrap, delin, edge, depth) in [(5u8, false, false, false, 8), (4, true, false, false, 16), (5, false, true, true, 32), (5, true, false, true, 8)] {
+            for (q, wrap, delin, edge, depth) in [(5u8, false, false, false, 8), (4, true, false, false, 16), (5, false, true, true, 32), (5, true, false, true, 8), (4, false, false, true, 16), (3, false, true, false, 32)] {
                 let img = image(&mut rng, w, h, depth);
                 let mut st = FlowSettings::new(q, true, 0.7);
                 st.wrap = wrap;
                 st.prep_delinearize = delin;
                 st.prep_contrast_edge = edge;
+                if wrap {
+                    // the 360 filters have no kernels yet: refused, the CPU builds the pyramids
+                    assert!(matches!(build_pyramid_gpu(s, &img, &st), Err(StageError::Unsupported(_))), "{dev}: pyramid {w}x{h} wrap");
+                    continue;
+                }
                 let cpu = flow::build_pyramid(&img, &st).unwrap();
                 let got = build_pyramid_gpu(s, &img, &st).unwrap_or_else(|e| panic!("{dev}: pyramid {w}x{h}: {e}"));
                 assert_eq!(got.len(), cpu.geometry().levels);

@@ -1,8 +1,8 @@
-//! The Debug display of create-vectors (rule G4).
+//! The Debug display of create-vectors.
 //! `debug_view_method` 1 Warp, 2 Blend, 3 Diff, 4 Detail Compare and 5 Edge Compare are the
 //! engine view codes 4, 0, 1, 2 and 3. Every view starts from `W`, the forward warp of the first
 //! frame `X` of the solve by its flow (the Warp view); the other four compose `W` with the
-//! second frame `Y` (rule G4; the claim tags of each part below):
+//! second frame `Y` (the claim tags of each part below):
 //!
 //! * Warp (4): `W` itself, the forward warp at amount 1.0 with no coverage and no hole fill;
 //! * the other four start from `W'`: a transparent image with `Y` laid OVER it, then `W` laid
@@ -93,9 +93,8 @@ pub fn overlay_gain() -> f32 {
 /// The debug view of engine view `code` (0 Blend, 1 Diff, 2 Detail Compare, 3 Edge Compare,
 /// 4 Warp; any other code is Edge Compare, the last entry, as the popup map of the glue reads it)
 /// for the frames `x` and `y` of the solve and its flow `X(p) ~ Y(p + flow(p))` (any size of at
-/// least 2x2; with FG layers, the merged flow): an image of the size and format of `x` (see the
-/// module documentation for each view). The four compositions record gap G4; Warp, which has
-/// no open point, records nothing.
+/// least 2x2): an image of the size and format of `x` (see the module documentation for each
+/// view). Every view follows the original and records no gap.
 ///
 /// Tiny frames (U, ours, G7 family): a frame that is not [`crate::prep::searchable`] has no
 /// search, and its Debug display shows what the Vectors display shows, the zero vector image
@@ -129,7 +128,6 @@ pub fn debug_view_on(stages: &dyn crate::stages::Stages, x: &Image, y: &Image, f
     if code == VIEW_WARP {
         return Ok(warped);
     }
-    fx_core::gaps::record(&crate::gaps::G4);
     let wp = compose_over(&warped, y)?;
     Ok(views_of(&wp, y, code))
 }

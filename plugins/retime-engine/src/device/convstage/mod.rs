@@ -73,6 +73,8 @@ pub enum Launch<'a, B: Backend + ?Sized> {
     HPass { src: &'a B::Buf<f32>, dst: &'a B::Buf<f32>, w: usize, h: usize, c: usize, taps: &'a Taps<B>, wrap: bool },
     /// `cv_vpass`.
     VPass { src: &'a B::Buf<f32>, dst: &'a B::Buf<f32>, w: usize, h: usize, c: usize, taps: &'a Taps<B> },
+    /// `cv_vpass_above`: the vertical pass whose border rows take the tap above first.
+    VPassAbove { src: &'a B::Buf<f32>, dst: &'a B::Buf<f32>, w: usize, h: usize, c: usize, taps: &'a Taps<B> },
     /// `rs_resample1` or `rs_resample1_wrapx`, `dw` by `dh` items.
     Resample { src: &'a B::Buf<f32>, sw: usize, sh: usize, dst: &'a B::Buf<f32>, dw: usize, dh: usize, sx: f32, sy: f32, wrap: bool },
     /// `rs_gather1` (`lanes` 1), `rs_gather2` (2) or `rs_gather1_wrapx` (1, `wrap`).
@@ -217,6 +219,9 @@ impl Backend for Session {
             ),
             Launch::VPass { src, dst, w, h, c, taps } => {
                 ("cv_vpass", Range::D2(w * c, h), vec![src.arg(), dst.arg(), i(w), i(h), i(c), taps.buf.arg(), i(taps.n)])
+            }
+            Launch::VPassAbove { src, dst, w, h, c, taps } => {
+                ("cv_vpass_above", Range::D2(w * c, h), vec![src.arg(), dst.arg(), i(w), i(h), i(c), taps.buf.arg(), i(taps.n)])
             }
             Launch::Resample { src, sw, sh, dst, dw, dh, sx, sy, wrap } => (
                 if wrap { "rs_resample1_wrapx" } else { "rs_resample1" },

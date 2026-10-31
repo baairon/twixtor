@@ -1,6 +1,6 @@
 """Independent numpy float32 models of the layer primitives of the FG matte paths: the matte
-channel, the choke (rule G1), the tracking mattes (rule G1c), the OVER weights, the layer
-premultiply and OVER, the tracking point splat (rule G2), the second tracker (rule G5) and the Draw
+channel, the choke, the tracking mattes, the OVER weights, the layer
+premultiply and OVER, the tracking point splat, the second tracker (rule G5) and the Draw
 Geom discs (rule G3). They produce `matte_cases.hex` for the Rust test
 `matte::tests::model_fixtures_are_reproduced_bit_for_bit`.
 

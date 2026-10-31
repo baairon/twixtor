@@ -195,11 +195,12 @@ fn list_json_carries_gaps_only_where_an_effect_has_them() {
         e.get("gaps").map(|g| g.as_array().unwrap().iter().map(|x| x["id"].as_str().unwrap().to_string()).collect())
     };
     assert_eq!(gap_ids("retime"), None);
+    assert_eq!(gap_ids("vectors-in"), None);
     for id in [FRAME, SHIFT, INTEGRATE] {
         assert_eq!(gap_ids(id), None, "{id}");
     }
     assert_eq!(gap_ids(GAP).unwrap(), ["T1"]);
-    for (id, first) in [("create-vectors", "G1"), ("retime-fgbg", "G1"), ("vectors-in", "G1")] {
+    for (id, first) in [("create-vectors", "G4"), ("retime-fgbg", "G3")] {
         assert_eq!(gap_ids(id).unwrap()[0], first, "{id}");
     }
     // the hidden effect and its test gap stay out of the plain list

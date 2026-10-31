@@ -120,7 +120,6 @@ fn merge_enqueue(session: &Session, name: &str, dw: usize, dh: usize, dst: Arg<'
 pub fn encode_vectors_merged_enqueue(session: &Session, dst: &DeviceImage, layers: &[(&DeviceFlow, &DevicePlane)], scale: f32) -> Result<(), StageError> {
     let name = format!("vc_merge_{}", suffix(dst.fmt()));
     merge_enqueue(session, &name, dst.width, dst.height, samples_arg(&dst.samples), layers, Some(scale), "vector merge")?;
-    fx_core::gaps::record(&crate::gaps::G1D);
     Ok(())
 }
 

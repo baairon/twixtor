@@ -2,7 +2,7 @@
 //! `flow::extras::solve_pyramids_with` (masks, user displacement, wrap) with the CPU's bytes.
 //!
 //! Kernel prefix `sv_` (`kernels/solver.rs`); the convolutions, the pyramid builders, the samplers
-//! and the plain flow upsample are the convolution stages' (`convstage`: `blur_gaussian_on`,
+//! and the plain flow upsample are the convolution stages' (`convstage`: `blur_gaussian_above_on`,
 //! `luma_upload` / `luma_enqueue`, `reduce_on`, `bands_on`, `upsample_flow_on`, the `rs_`
 //! samplers). [`program_parts`] lists every source these stages need, the convolution stages'
 //! first.
@@ -29,8 +29,9 @@
 //!
 //! Refused with `StageError::Unsupported` (the executor reruns the solve on the CPU): what the CPU
 //! refuses (`FxError` from the geometry or a mismatch, mapped to its text), a level wider or taller
-//! than `SV_LINE_MAX` or holding more than `convstage::MAX_SAMPLES` tensor samples, and buffers
-//! of another size than the geometry says.
+//! than `SV_LINE_MAX` or holding more than `convstage::MAX_SAMPLES` tensor samples, buffers
+//! of another size than the geometry says, and the 360 solve (`FlowSettings::wrap`), whose rules
+//! have no kernels yet.
 //!
 //! Entry points (the executor codes against these): [`solve_pyramids_with_enqueue`] on device
 //! resident pyramids ([`DevicePyramid`], from [`build_pyramid_enqueue`] or
@@ -52,7 +53,7 @@ mod tests;
 mod tests_device;
 
 use super::cl::{Arg, Buffer, Range};
-use super::convstage::conv::blur_gaussian_on;
+use super::convstage::conv::blur_gaussian_above_on;
 use super::convstage::pyramid::{bands_on, luma_enqueue, luma_upload, reduce_on, upsample_flow_on, DevicePlane};
 use super::convstage::{self, check_len, check_samples, Backend, Taps};
 use super::image::{reject_nan, DeviceImage};
@@ -391,9 +392,6 @@ fn refine_on<B: SolverBackend>(b: &B, a: &B::Buf<f32>, bb: &B::Buf<f32>, flow: &
     if w < 3 || h < 3 {
         return Ok(());
     }
-    if gate.is_some() {
-        fx_core::gaps::record(&crate::gaps::G1B);
-    }
     let chunk = ksv::SV_SWEEP_CHUNK;
     if wrap {
         // sweeps 1 and 2 of sweeps_ring: every pixel against the row as it stood before
@@ -452,6 +450,11 @@ fn level_on<B: SolverBackend>(
     taps: &SolverTaps<B>,
 ) -> Result<(), StageError> {
     let wrap = s.wrap;
+    if wrap {
+        // the 360 rules of the solver (the column walk of its filters, the 360 gradient, the B
+        // step and the block matching over the poles) have no kernels yet: the CPU solves
+        return Err(StageError::Unsupported("the 360 solve is not ported to the device yet".into()));
+    }
     let n = w * h;
     if let Some(u) = user {
         b.sv_launch(SvLaunch::ApplyUser { flow, d: &u.d, wt: &u.w, n })?;
@@ -460,14 +463,16 @@ fn level_on<B: SolverBackend>(
     let tensor = b.alloc::<f32>(n * 3)?;
     b.sv_launch(SvLaunch::Grad { img: img_a, mask: mask_x, wrap, grad: &grad, tensor: &tensor, w, h })?;
     let tmp3 = b.alloc::<f32>(n * 3)?;
-    blur_gaussian_on(b, &tensor, &tmp3, &tensor, w, h, 3, taps.g7.as_ref(), wrap)?;
+    // the three Gaussians of a level take the tap above first in their vertical border rows
+    // (`conv::blur_gaussian_above_first`)
+    blur_gaussian_above_on(b, &tensor, &tmp3, &tensor, w, h, 3, taps.g7.as_ref())?;
     let bvec = b.alloc::<f32>(n * 2)?;
     let tmp2 = b.alloc::<f32>(n * 2)?;
     for it in 0..3 {
         b.sv_launch(SvLaunch::CalcB { i1: img_a, i0: img_b, grad: &grad, flow, mask: mask_y, wrap, b: &bvec, w, h })?;
-        blur_gaussian_on(b, &bvec, &tmp2, &bvec, w, h, 2, taps.g7.as_ref(), wrap)?;
+        blur_gaussian_above_on(b, &bvec, &tmp2, &bvec, w, h, 2, taps.g7.as_ref())?;
         b.sv_launch(SvLaunch::NewDisp { flow, a: &tensor, b: &bvec, n })?;
-        blur_gaussian_on(b, flow, &tmp2, flow, w, h, 2, taps.g5.as_ref(), wrap)?;
+        blur_gaussian_above_on(b, flow, &tmp2, flow, w, h, 2, taps.g5.as_ref())?;
         if it == 1 && finest && !s.skip_refine {
             refine_on(b, img_a, img_b, flow, w, h, mask_x, wrap)?;
         }

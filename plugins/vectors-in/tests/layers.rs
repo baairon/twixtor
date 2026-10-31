@@ -1,4 +1,4 @@
-//! The n-layer path of plugin 04 with exact vector images: the per layer matte step (rule G1e) gives
+//! The n-layer path of plugin 04 with exact vector images: the per layer matte step gives
 //! each layer the motion of its own region everywhere, and the layered render of a two layer scene
 //! is the exact in-between frame on the FG core and on the BG far from the disc.
 

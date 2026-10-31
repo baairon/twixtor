@@ -1494,7 +1494,8 @@ def build_layer_commands(args, info, plan, size=None, geo=None):
 
 
 def decode_layers(commands, plan, args, info, scratch, size=None, geo=None):
-    """run the layer decodes one after the other; each leaves a raw file of whole frames or fails with ffmpeg's last lines."""
+    """run the layer decodes one after the other; each leaves a raw file of whole frames or fails with ffmpeg's last lines.
+    a layer without an alpha channel is made opaque (opaque_source)."""
     geo = geo or work_geometry(args, info)
     w, h = size or (geo["width"], geo["height"])
     frame_bytes = w * h * {8: 4, 16: 8, 32: 16}[args.depth]
@@ -1515,10 +1516,98 @@ def decode_layers(commands, plan, args, info, scratch, size=None, geo=None):
         if size == 0 or size % frame_bytes:
             fail(f"layer {layer['id']}: {layer['video']} decoded to {size} bytes, "
                  f"which is not a whole number of {w}x{h} frames", kind="bad_input", stage="layer-decode")
+        if opaque_source(layer["info"]):
+            fill_file(layer["temp"], OpaqueFill(args.depth, w, h))
 
 
 def rate_text(rate):
     return f"{rate.numerator}/{rate.denominator}"
+
+
+# ----------------------------------------------------------------------------
+# footage without an alpha channel reaches vfx opaque
+# ----------------------------------------------------------------------------
+
+# the float 1.0 of a gbrapf32le alpha sample
+ONE_F32 = struct.pack("<f", 1.0)
+# {pixel format name: carries alpha} from ffprobe, read once a run
+_PIX_ALPHA = {}
+
+
+def pixel_formats_alpha():
+    """{pixel format name: carries alpha}, from ffprobe's list of pixel formats (its alpha flag; a palette format is
+    flagged, since its entries may be transparent). empty when ffprobe cannot list them."""
+    if "table" not in _PIX_ALPHA:
+        proc = run([ffprobe_path(), "-v", "error", "-show_pixel_formats", "-print_format", "json"],
+                   stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=PROBE_TIMEOUT)
+        table = {}
+        try:
+            for entry in json.loads(proc.stdout or "{}").get("pixel_formats", []):
+                table[entry["name"]] = bool((entry.get("flags") or {}).get("alpha"))
+        except (ValueError, KeyError, TypeError, AttributeError):
+            table = {}
+        _PIX_ALPHA["table"] = table
+    return _PIX_ALPHA["table"]
+
+
+def opaque_source(info):
+    """true when a probed video stream has no alpha channel: ffprobe lists its pixel format without the alpha flag.
+    its decoded frames get the alpha of every pixel set to white (OpaqueFill), because ffmpeg's conversion can leave
+    it short of white (an 8 bit bgr0 source decodes to 65532 at 16 bpc and 0.99995 at 32 bpc), and vfx reads a
+    pixel below white as partly transparent. a real alpha channel, and a format ffprobe does not list, pass on as
+    ffmpeg decodes them."""
+    fmt = info.get("pix_fmt") if info else None
+    return bool(fmt) and pixel_formats_alpha().get(fmt) is False
+
+
+class OpaqueFill:
+    """sets the alpha of whole raw frames of a --depth format to white, in place: 255 (rgba), 65535 (rgba64le) or
+    1.0 (gbrapf32le, whose last plane is the alpha). the colour samples stay as they are."""
+
+    def __init__(self, depth, width, height):
+        self.depth, self.pixels = depth, width * height
+        self.frame_bytes = self.pixels * BYTES_PER_PIXEL[depth]
+
+    def __call__(self, block):
+        """`block` is a bytearray of whole frames; returns it."""
+        if self.depth == 8:
+            block[3::4] = b"\xff" * (len(block) // 4)
+        elif self.depth == 16:
+            white = b"\xff" * (len(block) // 8)
+            block[6::8] = white
+            block[7::8] = white
+        else:
+            plane = self.pixels * 4
+            one = ONE_F32 * self.pixels
+            for start in range(0, len(block), self.frame_bytes):
+                block[start + 3 * plane:start + self.frame_bytes] = one
+        return block
+
+
+def fill_file(path, fill):
+    """OpaqueFill over a raw file of whole frames, in place, a few frames at a time."""
+    step = fill.frame_bytes * max(1, (16 << 20) // fill.frame_bytes)
+    with open(path, "r+b") as handle:
+        at = 0
+        while True:
+            handle.seek(at)
+            block = bytearray(handle.read(step))
+            whole = len(block) - len(block) % fill.frame_bytes
+            if not whole:
+                return
+            del block[whole:]
+            handle.seek(at)
+            handle.write(fill(block))
+            at += whole
+
+
+def decode_fill(args, info, geo=None):
+    """the OpaqueFill of the decode's frames (the work size, the --depth format) when the input has no alpha
+    channel, else None."""
+    if not opaque_source(info):
+        return None
+    w, h = (geo["width"], geo["height"]) if geo else display_size(info)
+    return OpaqueFill(args.depth, w, h)
 
 
 # the pixel formats of the libx265 encode of an HDR input: 4:2:0, and 4:4:4 for a size with an odd side
@@ -1729,26 +1818,34 @@ def relay_notes(result, logs):
         result["notes"] = notes
 
 
-def run_pipeline(decode, effect, encode, scratch):
+def run_pipeline(decode, effect, encode, scratch, fill=None):
     """decode | vfx | encode with every stderr in a log file, so no pipe can fill up
-    and stall a stage. returns each stage's exit code and log path."""
+    and stall a stage. with `fill` (an OpaqueFill) the decoded frames go to vfx through a relay
+    that sets their alpha to white. returns each stage's exit code and log path."""
     stages = [("decode", decode), ("vfx", effect), ("encode", encode)]
     logs = {name: os.path.join(scratch, name + ".log") for name, _ in stages}
     handles = {name: open(path, "w", encoding="utf-8") for name, path in logs.items()}
     procs = []
+    buffering = 0 if fill else -1
     try:
-        p1 = subprocess.Popen(decode, shell=False, stdin=subprocess.DEVNULL,
+        p1 = subprocess.Popen(decode, shell=False, stdin=subprocess.DEVNULL, bufsize=buffering,
                               stdout=subprocess.PIPE, stderr=handles["decode"])
         procs.append(p1)
-        p2 = subprocess.Popen(effect, shell=False, stdin=p1.stdout,
+        p2 = subprocess.Popen(effect, shell=False, stdin=subprocess.PIPE if fill else p1.stdout, bufsize=buffering,
                               stdout=subprocess.PIPE, stderr=handles["vfx"])
         procs.append(p2)
-        p1.stdout.close()
+        hop = Hop(p1.stdout, p2.stdin, fill) if fill else None
+        if hop:
+            hop.thread.start()
+        else:
+            p1.stdout.close()
         p3 = subprocess.Popen(encode, shell=False, stdin=p2.stdout,
                               stdout=subprocess.DEVNULL, stderr=handles["encode"])
         procs.append(p3)
         p2.stdout.close()
         codes = {"encode": p3.wait(), "vfx": p2.wait(), "decode": p1.wait()}
+        if hop:
+            hop.thread.join(GRACE)
     except BaseException:
         for p in procs:
             try:
@@ -1945,10 +2042,11 @@ class Hop:
     """what flows from one process of the pipe to the next, and the thread that carries it. between
     two processes of a run with stages vfx's data goes through here instead of a direct pipe, which
     lets the run see what an exit code cannot: bytes that stop moving, a consumer that stops reading
-    and a producer that stops in the middle of a frame."""
+    and a producer that stops in the middle of a frame. with `fill` (an OpaqueFill) it passes on whole
+    frames with their alpha set to white, and a partial last frame as it came."""
 
-    def __init__(self, source, sink):
-        self.source, self.sink = source, sink
+    def __init__(self, source, sink, fill=None):
+        self.source, self.sink, self.fill = source, sink, fill
         self.moved = time.monotonic()  # when a byte last went in or came out
         self.state = "reading"         # reading: waits for the producer, writing: waits for the consumer, done
         self.read = self.written = 0   # bytes taken from the producer, bytes the consumer accepted
@@ -1956,7 +2054,23 @@ class Hop:
         self.broken = False            # the consumer closed its input while the producer still had data
         self.thread = threading.Thread(target=self.carry, daemon=True)
 
+    def give(self, data):
+        """write `data` to the consumer; False when it closed its input."""
+        self.state = "writing"
+        view = memoryview(data)
+        try:
+            while view:
+                sent = self.sink.write(view)
+                view = view[sent:]
+                self.written += sent
+                self.moved = time.monotonic()
+        except (OSError, ValueError):
+            self.broken = True
+            return False
+        return True
+
     def carry(self):
+        pending = bytearray()
         try:
             while True:
                 self.state = "reading"
@@ -1964,21 +2078,21 @@ class Hop:
                     chunk = self.source.read(RELAY_CHUNK)
                 except (OSError, ValueError):
                     chunk = b""
+                if chunk:
+                    self.read += len(chunk)
+                    self.moved = time.monotonic()
+                data = chunk
+                if self.fill is not None:
+                    pending += chunk
+                    whole = len(pending) - len(pending) % self.fill.frame_bytes
+                    data = self.fill(pending[:whole])
+                    del pending[:whole]
+                    if not chunk:
+                        data += pending
+                if data and not self.give(data):
+                    return
                 if not chunk:
                     self.eof = True
-                    return
-                self.read += len(chunk)
-                self.moved = time.monotonic()
-                self.state = "writing"
-                view = memoryview(chunk)
-                try:
-                    while view:
-                        sent = self.sink.write(view)
-                        view = view[sent:]
-                        self.written += sent
-                        self.moved = time.monotonic()
-                except (OSError, ValueError):
-                    self.broken = True
                     return
         finally:
             # closing the sink is the producer's end of file for the consumer; closing the source
@@ -2039,12 +2153,13 @@ def kill_tree(proc):
             pass
 
 
-def run_staged_pipeline(chain, scratch, timeout):
+def run_staged_pipeline(chain, scratch, timeout, fill=None):
     """chain[0] | chain[1] | ... with a Hop between every two neighbours and every stderr in a log
     file in scratch, so no pipe can fill up and stall a process. a pre or post stage that stalls for
     `timeout` seconds (0: never) is killed; once a process has failed the others get GRACE seconds to
     end before they are killed too, so the run always ends. returns the exit code and log path of every
-    process by name, the hops (hops[i] carries chain[i] to chain[i + 1]) and the names killed for stalling."""
+    process by name, the hops (hops[i] carries chain[i] to chain[i + 1]) and the names killed for stalling. with
+    `fill` (an OpaqueFill) the hop after the decode sets the alpha of its frames to white."""
     names = [entry["name"] for entry in chain]
     logs = {name: os.path.join(scratch, name + ".log") for name in names}
     handles = {name: open(path, "w", encoding="utf-8") for name, path in logs.items()}
@@ -2060,7 +2175,8 @@ def run_staged_pipeline(chain, scratch, timeout):
                                               start_new_session=os.name != "nt"))
             except OSError as exc:
                 fail(f"cannot start {entry['label']}: {exc}", kind="tool_missing", stage=entry["name"])
-        hops = [Hop(procs[i].stdout, procs[i + 1].stdin) for i in range(last)]
+        hops = [Hop(procs[i].stdout, procs[i + 1].stdin, fill if i == 0 and chain[0]["role"] == "decode" else None)
+                for i in range(last)]
         for hop in hops:
             hop.thread.start()
         failed_at = None
@@ -2155,7 +2271,7 @@ def run_staged(chain, scratch, args, info, geo=None):
     """run the pipe with stages and fail, in the style of a vfx failure, when it did not go through:
     the failing process, its exit code and the last lines of its own stderr. returns the codes and logs.
     `geo` is the work geometry, the size of the frames on every relay a declared stage did not change."""
-    codes, logs, hops, timed_out = run_staged_pipeline(chain, scratch, args.stage_timeout)
+    codes, logs, hops, timed_out = run_staged_pipeline(chain, scratch, args.stage_timeout, decode_fill(args, info, geo))
     sizes = frame_size(args, info, geo)
     if any("frame_bytes" in entry for entry in chain):
         sizes = [entry.get("frame_bytes", sizes) for entry in chain[:-1]]
@@ -2622,7 +2738,7 @@ def main():
             codes, logs = run_staged(chain, scratch, args, info, geo)
             result["stages"] = [stage_report(s, codes[s["name"]], logs[s["name"]]) for s in stages]
         else:
-            codes, logs = run_pipeline(decode, effect, encode, scratch)
+            codes, logs = run_pipeline(decode, effect, encode, scratch, decode_fill(args, info, geo))
             if any(codes.values()):
                 lines = []
                 for name in ("vfx", "decode", "encode"):

@@ -13,8 +13,8 @@
 //! [`solve_pyramids_with`] IS [`super::solve_pyramids`] (it calls it), so the plain solve keeps
 //! its bytes.
 //!
-//! Claim tags: V established, I inferred, U not established (the rule of this project; gaps G1b
-//! and G6 record where such a rule runs).
+//! Claim tags: V established, I inferred, U not established (the rule of this project; gap G6
+//! records where the wrap runs; the gated block matching runs on no effect's path).
 
 use rayon::prelude::*;
 
@@ -153,7 +153,7 @@ impl MaskPyramid {
 /// values `(dx, dy)` per pixel interleaved like [`FlowField::data`], and `w` the weight, one
 /// value per pixel. At the start of every level and again at its end, before the range check, the
 /// solver sets `flow = d / w` at every pixel where `w != 0`. `d` is in the solver's internal sign
-/// (`X(p) ~ Y(p - d)`, rule G2: `d += (from - to) * k_l`), so the returned flow of a pixel set at
+/// (`X(p) ~ Y(p - d)`: `d += (from - to) * k_l`), so the returned flow of a pixel set at
 /// level 0 is `-(d / w)`.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct UserLevel {
@@ -205,7 +205,7 @@ pub(crate) fn apply_user(flow: &mut [f32], u: &UserLevel, w: usize) {
 /// 3. the B vector step: with masks the warped mask of `Y` must be at least 0.999;
 ///    with wrap the target column wraps and only the row is range checked (G6);
 /// 4. the block matching: with masks the sweep step of a pixel where `X`'s mask is 0 is skipped
-///    and the cost stays unmasked (G1b, U); with wrap the cost wraps its column and window and
+///    and the cost stays unmasked (U, on no effect's path); with wrap the cost wraps its column and window and
 ///    the step tests the target row only (G6, U);
 ///    on the finest level `flow = d / w` is set again right after the block matching step of the
 ///    second iteration, whether or not that step runs (READ in the solver); a pyramid made by
@@ -239,7 +239,7 @@ pub(crate) fn apply_user(flow: &mut [f32], u: &UserLevel, w: usize) {
 /// is the plain solver's rule on the masked gradient, not a reset by the range check (a zero
 /// flow is in range everywhere).
 ///
-/// Records gap G6 when the wrap solve runs, G1b when gated sweeps run. Errors: pyramids, mask
+/// Records gap G6 when the wrap solve runs. Errors: pyramids, mask
 /// pyramids or a user displacement of another geometry are `FxError::Mismatch`.
 pub fn solve_pyramids_with(x: &Pyramid, y: &Pyramid, s: &FlowSettings, e: SolveExtras<'_>) -> Result<FlowField> {
     if x.geometry != y.geometry {

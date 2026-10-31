@@ -244,8 +244,8 @@ impl Effect for RetimeFgBg {
         ]
     }
 
-    /// The open parity gaps of the layered retime path, the points, the overlay and the wrap
-    /// (`retime_engine::gaps`).
+    /// The open parity gaps of this effect (`retime_engine::gaps`): the Draw Geom disc and the 360
+    /// wrap.
     fn gaps(&self) -> &'static [&'static fx_core::OpenGap] {
         retime_engine::gaps::RETIME_FGBG
     }

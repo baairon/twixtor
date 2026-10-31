@@ -306,8 +306,8 @@ impl Effect for CreateVectors {
         ]
     }
 
-    /// The open parity gaps of the layer flows, their merge, the points, the overlay, the Debug
-    /// views and the second tracker (`retime_engine::gaps`).
+    /// The open parity gaps of this effect (`retime_engine::gaps`): the Debug Blend view of a one
+    /// layer group and the second tracker.
     fn gaps(&self) -> &'static [&'static fx_core::OpenGap] {
         retime_engine::gaps::CREATE_VECTORS
     }

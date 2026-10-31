@@ -81,8 +81,8 @@ pub fn read_pos(c: &ParamCurves, id: &str, time: i32) -> [f32; 2] {
 
 /// Whether the position `p` (output pixels, pixel centres at whole numbers) lies in the output
 /// frame of `out = (W, H)`: its nearest pixel exists, `0.0 <= p + 0.5 < W` on x (f32) and the same
-/// with `H` on y. A NaN or infinite position is outside. U (ours, rule G2: "points outside the
-/// frame are skipped").
+/// with `H` on y. A NaN or infinite position is outside. U (ours: points outside the frame are
+/// skipped).
 pub fn in_frame(p: [f32; 2], out: (usize, usize)) -> bool {
     let fx = p[0] + 0.5f32;
     let fy = p[1] + 0.5f32;
@@ -168,8 +168,8 @@ fn coarser_level(prev: &UserLevel, (pw, ph): (usize, usize), (nw, nh): (usize, u
     UserLevel { d, w }
 }
 
-/// The splat of the pairs into one level of `wl x hl` of the second tracker (see [`second_tracker`]; rule G2's
-/// producer of this project, kept for rule G5, U).
+/// The splat of the pairs into one level of `wl x hl` of the second tracker (see [`second_tracker`]; this project's
+/// producer, kept for rule G5, U).
 fn splat(pairs: &[([f32; 2], [f32; 2])], wl: usize, hl: usize, out: (usize, usize)) -> UserLevel {
     let mut lvl = UserLevel { d: vec![0.0f32; wl * hl * 2], w: vec![0.0f32; wl * hl] };
     if out.0 < 2 || out.1 < 2 || wl == 0 || hl == 0 {
@@ -218,11 +218,7 @@ pub fn user_displacement(pairs: &[([f32; 2], [f32; 2])], geo: &FlowGeometry, out
 ///
 /// The solver's consumer sets `flow = d / w` where `w != 0` (`flow::extras::apply_user`), so a coarse level carries
 /// the blurred spread of the level 0 pairs. An output with a side below 2 (never searched) gives empty levels.
-/// Records gap G2 when there is at least one pair.
 pub fn user_displacement_with(pairs: &[([f32; 2], [f32; 2])], geo: &FlowGeometry, out: (usize, usize), wrap: bool) -> UserDisplacement {
-    if !pairs.is_empty() {
-        fx_core::gaps::record(&crate::gaps::G2);
-    }
     let mut levels: Vec<UserLevel> = Vec::with_capacity(geo.sizes.len());
     for (l, &(wl, hl)) in geo.sizes.iter().enumerate() {
         let lvl = if l == 0 { finest_level(pairs, wl, hl, out) } else { coarser_level(&levels[l - 1], geo.sizes[l - 1], (wl, hl), wrap) };
@@ -234,7 +230,7 @@ pub fn user_displacement_with(pairs: &[([f32; 2], [f32; 2])], geo: &FlowGeometry
 /// The flow of a layer whose Track is off (role V, arithmetic U; rule G5): the displacement
 /// interpolated from its point pairs `(from X, to Y)` in output pixels (`out` the output size)
 /// instead of an optical flow estimate, at the working resolution `geo.width x geo.height`. The
-/// level 0 splat of this project's rule G2 (module documentation: the pixel `cvtt(from * k + 0.5)` of a pair whose
+/// level 0 splat of this project's rule (module documentation: the pixel `cvtt(from * k + 0.5)` of a pair whose
 /// `from` lies in the frame and whose `to` is finite, `d += (from - to) * k`) gives `d / w` at every pixel with a point; the other
 /// pixels are holes of a u8 mask (255), filled by the pull-push fill `holefill::fill_flow_holes`
 /// (no 360 wrap), with no further blur; the field is then multiplied by `-1.0` into the solver's

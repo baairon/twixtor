@@ -388,6 +388,9 @@ class ApplyTests(Workspace):
                 self.assertTrue(pix_fmt.startswith(("bgra", "gbrap")), probe)
                 raw_in, raw_expect, raw_back = (self.path(n) for n in ("in.raw", "expect.raw", "back.raw"))
                 ff("-i", rgb, "-an", "-pix_fmt", wire, "-f", "rawvideo", raw_in)
+                # the input as apply.py hands it to vfx: a source without alpha (ffv1 stores this one as bgr0) opaque
+                if tool.opaque_source(tool.probe(rgb)):
+                    tool.fill_file(raw_in, tool.OpaqueFill(depth, 101, 61))
                 run = subprocess.run([VFX, "apply", "selftest-invert", "--width", "101", "--height", "61",
                                       "--depth", str(depth), "--in", raw_in, "--out", raw_expect],
                                      shell=False, capture_output=True, text=True)
@@ -2350,6 +2353,123 @@ class AudioRunTests(Workspace):
                 self.assertLess(worst, 1 / 24 + 0.001)
                 self.assertGreater(compared, 30)
         self.assertClean()
+
+
+def split_alpha(raw, depth, width, height):
+    """the colour bytes and the alpha samples of raw frames of a --depth format (the alpha as numbers)."""
+    from array import array
+    import struct
+    if depth == 8:
+        return bytes(b for i, b in enumerate(raw) if i % 4 != 3), list(raw[3::4])
+    if depth == 16:
+        words = array("H")
+        words.frombytes(raw)
+        return b"".join(raw[i:i + 6] for i in range(0, len(raw), 8)), list(words[3::4])
+    plane, frame = width * height * 4, width * height * 16
+    colour = b"".join(raw[s:s + 3 * plane] for s in range(0, len(raw), frame))
+    alpha = [v for s in range(0, len(raw), frame) for v in struct.unpack("<%df" % (width * height), raw[s + 3 * plane:s + frame])]
+    return colour, alpha
+
+
+class OpaqueTests(Workspace):
+    """footage without an alpha channel reaches vfx opaque at every depth, its layers too; a real alpha channel
+    passes on as ffmpeg decodes it."""
+
+    W, H, FRAMES = 48, 32, 6
+    WHITE = {8: 255, 16: 65535, 32: 1.0}
+
+    def setUp(self):
+        super().setUp()
+        if not TEMPORAL:
+            self.skipTest("this vfx has no temporal self-test effects (build it from the current workspace)")
+        size, seconds = f"{self.W}x{self.H}", self.FRAMES / FPS
+        # an 8 bit source without alpha that ffmpeg converts to an alpha short of white (65532 at 16 bpc)
+        self.bgr0 = self.path("bgr0.mkv")
+        ff("-f", "lavfi", "-i", f"testsrc=size={size}:rate={FPS}:duration={seconds}", "-c:v", "ffv1", "-pix_fmt", "bgr0",
+           self.bgr0)
+        # a source with a real alpha channel, every level of it
+        self.bgra = self.path("bgra.mkv")
+        ff("-f", "lavfi", "-i", f"testsrc=size={size}:rate={FPS}:duration={seconds}", "-vf",
+           "format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='mod(X*7+Y*3+N*40,256)'", "-c:v", "ffv1",
+           "-pix_fmt", "bgra", self.bgra)
+        # a post-stage that keeps a copy of the frames it passes on
+        self.keep = self.path("keep.py")
+        with open(self.keep, "w", encoding="utf-8") as handle:
+            handle.write("import sys\ndata = sys.stdin.buffer.read()\nopen(sys.argv[1], 'wb').write(data)\n"
+                         "sys.stdout.buffer.write(data)\n")
+
+    def given_to_vfx(self, src, depth):
+        """the raw frames vfx was given for `src`: selftest-shift with offset 0 writes the frames it reads, and a
+        post-stage keeps them."""
+        raw = self.path(f"given_{depth}.raw")
+        proc = apply(src, TEMPORAL, "--param", "offset=0", "--depth", str(depth), "--post-stage",
+                     stage_line(sys.executable, self.keep, raw), "-o", self.path(f"given_{depth}.mp4"), tmp=self.dir)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        return slurp(raw)
+
+    def plain_decode(self, src, depth):
+        """the frames ffmpeg decodes from `src` with the decode's filters of apply.py, alpha untouched."""
+        info = tool.probe(src)
+        graph = ",".join(tool.decode_filters(None, info, {"width": self.W, "height": self.H}))
+        out = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-nostdin", "-i", src, "-map", "0:v:0", "-vf", graph,
+                              "-pix_fmt", tool.PIX_FMT[depth], "-f", "rawvideo", "-"], capture_output=True, check=True)
+        return out.stdout
+
+    def test_an_8_bit_source_without_alpha_reaches_vfx_opaque_at_every_depth(self):
+        info = tool.probe(self.bgr0)
+        self.assertEqual(info["pix_fmt"], "bgr0")
+        self.assertTrue(tool.opaque_source(info))
+        for depth in (8, 16, 32):
+            with self.subTest(depth=depth):
+                given = self.given_to_vfx(self.bgr0, depth)
+                self.assertEqual(len(given), self.FRAMES * self.W * self.H * tool.BYTES_PER_PIXEL[depth])
+                colour, alpha = split_alpha(given, depth, self.W, self.H)
+                self.assertEqual(set(alpha), {self.WHITE[depth]})
+                # only the alpha changes: the colour is ffmpeg's
+                self.assertEqual(colour, split_alpha(self.plain_decode(self.bgr0, depth), depth, self.W, self.H)[0])
+
+    def test_the_plain_pipe_and_a_layer_without_alpha_reach_vfx_opaque(self):
+        """no stage: the decode goes to vfx through the relay; the overlay layer (mixed in at 50 percent by
+        selftest-shift, alpha included) is made opaque in its raw file. any alpha short of white in either one
+        would leave the mix below 65535."""
+        out = self.path("mixed.mkv")
+        proc = apply(self.bgr0, TEMPORAL, "--param", "offset=0", "--layer", f"overlay={self.bgr0}", "--depth", "16",
+                     "--lossless", "-o", out, tmp=self.dir)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        raw = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-i", out, "-f", "rawvideo", "-pix_fmt", "rgba64le", "-"],
+                             capture_output=True, check=True).stdout
+        self.assertEqual(len(raw), self.FRAMES * self.W * self.H * 8)
+        self.assertEqual(set(split_alpha(raw, 16, self.W, self.H)[1]), {65535})
+
+    def test_a_real_alpha_channel_passes_on_as_ffmpeg_decodes_it(self):
+        info = tool.probe(self.bgra)
+        self.assertEqual(info["pix_fmt"], "bgra")
+        self.assertFalse(tool.opaque_source(info))
+        for depth in (8, 16, 32):
+            with self.subTest(depth=depth):
+                given = self.given_to_vfx(self.bgra, depth)
+                self.assertEqual(given, self.plain_decode(self.bgra, depth))
+                self.assertGreater(len(set(split_alpha(given, depth, self.W, self.H)[1])), 200)
+
+    def test_a_layered_nearest_render_at_16_bpc_has_no_black_frame(self):
+        """retime-fgbg with an FG matte, Frame Interp Nearest, 16 bpc, half speed: the per layer refill of the
+        original fills every pixel below full alpha, so footage short of opaque made every in-between frame black."""
+        matte = self.path("matte.mkv")
+        ff("-f", "lavfi", "-i", f"color=black:s={self.W}x{self.H}:r={FPS}:d={self.FRAMES / FPS},format=gray,"
+           "drawbox=x=10:y=8:w=16:h=12:color=white:t=fill", "-c:v", "ffv1", "-pix_fmt", "gray", matte)
+        out = self.path("nearest16.mkv")
+        proc = apply(self.bgr0, "retime-fgbg", "--depth", "16", "--lossless", "--frames", str(self.FRAMES),
+                     "--param", "speed_percent=50", "--param", "frame_interp=1", "--param", "fg1_matte_chan=1",
+                     "--layer", f"fg1_matte={matte}", "-o", out, tmp=self.dir)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        raw = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-i", out, "-f", "rawvideo", "-pix_fmt", "rgba64le", "-"],
+                             capture_output=True, check=True).stdout
+        frame = self.W * self.H * 8
+        self.assertEqual(len(raw), self.FRAMES * frame)
+        for n in range(self.FRAMES):
+            colour, alpha = split_alpha(raw[n * frame:(n + 1) * frame], 16, self.W, self.H)
+            self.assertGreater(max(colour), 0, f"frame {n} is black")
+            self.assertEqual(set(alpha), {65535}, f"frame {n}")
 
 
 if __name__ == "__main__":

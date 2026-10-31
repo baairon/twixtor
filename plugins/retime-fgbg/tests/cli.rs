@@ -392,15 +392,14 @@ fn a_fg_matte_layer_file_renders_end_to_end_as_the_engine_does_and_notes_its_rul
     let matte = write_raw(dir.path("matte.raw"), &matte_frames);
     let out = dir.path("out.raw");
     for (params, notes) in [
-        (vec!["speed_percent=50"], vec!["G1"]),
-        // frame 0 is exact: the fast path of the FG1 group notes G1h first; Track RGB+A does not wrap (fix 05), so no
-        // G6; the notes of a frame come in id order. The layer plates (fgbg-layers fix 30, read from the code) fill and blur
-        // every layer on its own: no G1g (the fill of a single group) and no G1f (one blur tail) any more; FG1 alone
-        // solves its own layer images without a mask and the masks of the other layers do not gate the block matching
-        // (fixes 34, 35): no G1b
-        (vec!["speed_percent=50", "track_rgb_a=1", "warping=2", "display=3"], vec!["G1", "G1h"]),
-        (vec!["speed_percent=50", "pt1_use=2", "pt1_pos=24,24@0;30,24@6", "blur_compensation=1"], vec!["G1", "G2"]),
-        (vec!["vectors=1", "display=6"], vec!["G1", "G1h"]),
+        // the layered paths, the points and the group displays follow the original: no note; Track RGB+A does not wrap
+        // (fix 05), so no G6
+        (vec!["speed_percent=50"], vec![]),
+        (vec!["speed_percent=50", "track_rgb_a=1", "warping=2", "display=3"], vec![]),
+        (vec!["speed_percent=50", "pt1_use=2", "pt1_pos=24,24@0;30,24@6", "blur_compensation=1"], vec![]),
+        (vec!["vectors=1", "display=6"], vec![]),
+        // 360 Video wraps the solver, its masks, the fill and the blur: G6
+        (vec!["speed_percent=50", "video_360=1"], vec!["G6"]),
     ] {
         let frames = 6;
         let mut cmd = Command::new(bin);
@@ -447,24 +446,24 @@ fn note_line(g: &fx_core::OpenGap) -> String {
 }
 
 #[test]
-fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_display() {
-    // gaps.rs: G1 is noted on every frame rendered with an FG matte layer present, on any display but Source. vfx
-    // prints a gap once per run, so each run here renders ONE frame (Frame Number mode): an in-between frame (the
-    // layered vector path; its masked solves do not gate the block matching, so G1b is not noted), an exact frame and
-    // a No Vectors frame (the layered fast path), and
-    // the Source display, which composes no layer and notes nothing
+fn a_layered_frame_notes_only_the_360_wrap() {
+    // gaps.rs: the layered paths follow the original and note nothing; 360 Video notes G6. vfx prints a gap once per
+    // run, so each run here renders ONE frame (Frame Number mode): an in-between frame (the layered vector path), an
+    // exact frame and a No Vectors frame (the layered fast path), the Source display, and an in-between frame with
+    // 360 Video
     let bin = vfx().expect("fx-cli builds");
-    let dir = Scratch::new("g1-note");
+    let dir = Scratch::new("g6-note");
     let clip = write_raw(dir.path("clip.raw"), &common::moving::DEFAULT.clip(Depth::U8, W, H, SOURCE_FRAMES));
     let matte = write_raw(dir.path("matte.raw"), &disc_matte(Depth::U8, SOURCE_FRAMES));
     let out = dir.path("out.raw");
-    let (g1, g1b) = (note_line(&retime_engine::gaps::G1), note_line(&retime_engine::gaps::G1B));
-    for (params, want_g1, want_g1b) in [
-        (vec!["time_remap_mode=2", "frame_num=2.5"], true, false),
+    let g6 = note_line(&retime_engine::gaps::G6);
+    for (params, want_g6) in [
+        (vec!["time_remap_mode=2", "frame_num=2.5"], false),
         // an exact frame and No Vectors take the fast path of the full group, which is the single layer one (fix 04)
-        (vec!["time_remap_mode=2", "frame_num=3"], false, false),
-        (vec!["time_remap_mode=2", "frame_num=2.5", "vectors=1"], false, false),
-        (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false, false),
+        (vec!["time_remap_mode=2", "frame_num=3"], false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "vectors=1"], false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false),
+        (vec!["time_remap_mode=2", "frame_num=2.5", "video_360=1"], true),
     ] {
         let mut cmd = Command::new(bin);
         cmd.args(["apply", "retime-fgbg", "--width", &W.to_string(), "--height", &H.to_string(), "--depth", "8", "--fps", "24", "--in"])
@@ -480,10 +479,9 @@ fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_
         let stderr = String::from_utf8_lossy(&r.stderr).to_string();
         assert!(r.status.success(), "{params:?}: {stderr}");
         let count = |line: &str| stderr.lines().filter(|l| l.trim_end() == line).count();
-        assert_eq!(count(&g1), usize::from(want_g1), "{params:?}: {stderr}");
-        assert_eq!(count(&g1b), usize::from(want_g1b), "{params:?}: {stderr}");
-        if !want_g1 {
-            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display and the full group fast path note nothing: {stderr}");
+        assert_eq!(count(&g6), usize::from(want_g6), "{params:?}: {stderr}");
+        if !want_g6 {
+            assert!(!stderr.contains("vfx: note:"), "{params:?}: a layered frame without 360 Video notes nothing: {stderr}");
         }
     }
 }

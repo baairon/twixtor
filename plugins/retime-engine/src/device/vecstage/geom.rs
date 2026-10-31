@@ -123,9 +123,6 @@ pub fn user_displacement_gpu(session: &Session, pairs: &[([f32; 2], [f32; 2])], 
     if pairs.len() > MAX_POINTS {
         return Err(StageError::Unsupported(format!("point splat: {} pairs (at most {MAX_POINTS})", pairs.len())));
     }
-    if !pairs.is_empty() {
-        fx_core::gaps::record(&crate::gaps::G2);
-    }
     let pb = pair_buffer(session, pairs)?;
     let mut levels = Vec::with_capacity(geo.sizes.len());
     for &(wl, hl) in &geo.sizes {

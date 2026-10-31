@@ -217,15 +217,14 @@ mod tests {
         let v: serde_json::Value = serde_json::from_str(&text).unwrap();
         let list = v.as_array().unwrap();
         let find = |id: &str| list.iter().find(|e| e["id"] == id).unwrap_or_else(|| panic!("{id} missing"));
-        for id in ["retime", "selftest-invert", "selftest-shift", "selftest-integrate", "selftest-threads"] {
+        for id in ["retime", "vectors-in", "selftest-invert", "selftest-shift", "selftest-integrate", "selftest-threads"] {
             assert!(find(id).get("gaps").is_none(), "{id}");
         }
         let gap = &find("selftest-gap")["gaps"];
         assert_eq!(gap, &serde_json::json!([{"id": "T1", "title": "notes plumbing test", "controls": ["gap"]}]));
         let ids = |id: &str| find(id)["gaps"].as_array().unwrap().iter().map(|g| g["id"].as_str().unwrap().to_string()).collect::<Vec<_>>();
-        assert_eq!(ids("create-vectors"), ["G1", "G1b", "G1c", "G1d", "G2", "G3", "G4", "G5"]);
-        assert_eq!(ids("retime-fgbg"), ["G1", "G1b", "G1c", "G1f", "G1g", "G1h", "G2", "G3", "G6"]);
-        assert_eq!(ids("vectors-in"), ["G1", "G1c", "G1e", "G1f", "G1g", "G1h"]);
+        assert_eq!(ids("create-vectors"), ["G4", "G5"]);
+        assert_eq!(ids("retime-fgbg"), ["G3", "G6"]);
         // the top level keys of every entry in text order: `gaps` comes last, after `layers`
         let mut keys: Vec<Vec<&str>> = Vec::new();
         for line in text.lines() {

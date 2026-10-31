@@ -97,8 +97,8 @@ impl Backend for Fake {
 const SOLVES: [Stage; 3] = [Stage::Solve, Stage::SolvePair, Stage::SolvePyramidsWith];
 
 /// The executor of the dispatch tests: the fake with every stage on the device (the default
-/// placement keeps the solver on the CPU, see
-/// `the_default_placement_serves_the_solver_on_the_cpu_and_the_textured_forward_warp_on_the_device`).
+/// placement keeps the layered solves on the CPU, see
+/// `the_default_placement_serves_plain_solves_on_the_device_and_360_and_layered_solves_on_the_cpu`).
 fn exec(mode: Mode) -> Arc<Exec<Fake>> {
     Arc::new(Exec::new(Fake::new(mode), "gpu=9 (fake)", Placement::all_on_device()))
 }
@@ -210,17 +210,19 @@ fn the_cpu_placement_and_a_refused_device_never_call_the_device() {
 }
 
 #[test]
-fn the_default_placement_serves_the_solver_on_the_cpu_and_the_textured_forward_warp_on_the_device() {
-    // the solver kernels follow the rules before the parity work (docs/engine.md, Device): the
-    // default serves the three solver stages with the CPU functions, counted as CPU calls, not as
-    // fallbacks, and never calls the device for them, not even one that answers wrongly
+fn the_default_placement_serves_plain_solves_on_the_device_and_360_and_layered_solves_on_the_cpu() {
+    // the 360 rules of the solver and the layered solves (`solve_pyramids_with`) have no ported
+    // kernels yet (docs/engine.md, Device): the default serves them with the CPU functions,
+    // counted as CPU calls, not as fallbacks, and never calls the device for them, not even one
+    // that answers wrongly
     let p = Placement::default();
-    assert_eq!(SOLVES.map(|s| p.device(s)), [false; 3]);
+    assert_eq!(SOLVES.map(|s| p.device(s)), [true, true, false]);
     assert!(p.device(Stage::ForwardWarp) && p.device(Stage::Compose));
     let e = Exec::new(Fake::new(Mode::Wrong), "gpu=9 (fake)", p);
     let (a, b) = (frame(33, 17, Fmt::U16, 0.0), frame(33, 17, Fmt::U16, 1.5));
-    assert_eq!(e.solve(&a, &b, &fs()).unwrap(), Cpu.solve(&a, &b, &fs()).unwrap());
-    assert_eq!(e.solve_pair(&a, &b, &fs()).unwrap(), Cpu.solve_pair(&a, &b, &fs()).unwrap());
+    let wrap = FlowSettings { wrap: true, ..fs() };
+    assert_eq!(e.solve(&a, &b, &wrap).unwrap(), Cpu.solve(&a, &b, &wrap).unwrap());
+    assert_eq!(e.solve_pair(&a, &b, &wrap).unwrap(), Cpu.solve_pair(&a, &b, &wrap).unwrap());
     let (pa, pb) = (flow::build_pyramid(&a, &fs()).unwrap(), flow::build_pyramid(&b, &fs()).unwrap());
     assert_eq!(
         e.solve_pyramids_with(&pa, &pb, &fs(), SolveExtras::default()).unwrap(),
@@ -235,6 +237,12 @@ fn the_default_placement_serves_the_solver_on_the_cpu_and_the_textured_forward_w
     // the device report names them as CPU calls
     let summary = e.summary();
     assert!(summary.contains("solve device 0 (0 ms) fallback 0 [cl 0 nan 0 unsupported 0] (0 ms) cpu 1 ("), "{summary}");
+    // a solve and a solve pair without the flag go to the device
+    let e = Exec::new(Fake::new(Mode::Exact), "gpu=9 (fake)", Placement::default());
+    assert_eq!(e.solve(&a, &b, &fs()).unwrap(), Cpu.solve(&a, &b, &fs()).unwrap());
+    assert_eq!(e.solve_pair(&a, &b, &fs()).unwrap(), Cpu.solve_pair(&a, &b, &fs()).unwrap());
+    let (rs, rp) = (e.report(Stage::Solve), e.report(Stage::SolvePair));
+    assert_eq!((rs.device, rs.cpu, rp.device, rp.cpu), (1, 0, 1, 0));
     // the textured forward warp still goes to the device
     let src = frame(24, 16, Fmt::U8, 0.0);
     let mut flow = FlowField::new(24, 16);

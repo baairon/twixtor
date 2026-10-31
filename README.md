@@ -123,23 +123,14 @@ A stand-in is labelled data that the harness feeds to both sides where After Eff
 
 ## Limits
 
-Every point below follows the original and matches it on the grid, with two exceptions. In `retime-fgbg`, G3 draws a disc where the original draws a cross. G5 is this project's own rule: it matches on the grid, but the original's code for it was not read. A render that uses one of these points still prints a `vfx: note:` line on stderr ending `(README: limits)`. A note never changes the frames or the exit code. G3 in `retime-fgbg`. The notes still print until they are retired from the code. Each rule in full is in [parity: stated rules](docs/parity.md#stated-rules).
+Four points still run a rule of this project somewhere. A render that uses one prints a `vfx: note:` line on stderr ending `(README: limits)`; a note never changes the frames or the exit code. Everything else follows the original and matches it on the grid, and prints no note. Each rule in full is in [parity: stated rules](docs/parity.md#stated-rules).
 
 | Gap | Open point | Where it stands |
 |---|---|---|
-| G1 | matte shrink tail | Follows the original's choke kernel; matches on the grid. |
-| G1b | mask-aware block matching cost | Follows the original: block matching ignores the masks. Matches on the grid. |
-| G1c | layer visibility direction | Follows the original: each layer is interpolated on its own and composed from the bottom up. Matches on the grid. |
-| G1d | create-vectors merge | Follows the original's bottom-up composite; matches on the grid. |
-| G1e | vectors-in per-layer matte step | Follows the original: each layer's vector alpha is capped by its matte. Matches on the grid. |
-| G1f | blur tail flow of a layered render | Follows the original: each layer uses its own motion. Matches on the grid. |
-| G1g | hole fill of a single group display | Follows the original's per-layer rebuild; matches on the grid. |
-| G1h | fast path group display | Follows the original's rebuild of covered layers; matches on the grid. |
-| G2 | tracking point displacement | Follows the original's pyramid rule; matches on the grid. |
-| G3 | Draw Geom drawing | Follows the original in `create-vectors`. `retime-fgbg` still draws a disc where the original draws a cross. |
-| G4 | four Debug view compositions | Follows the original's arithmetic; matches on the grid. |
+| G3 | Draw Geom drawing | `retime-fgbg` draws a disc on its Source display where the original draws a cross. `create-vectors` follows the original. |
+| G4 | one-layer Debug Blend view | In `create-vectors`, the Blend view of a one-layer group with matte layers is a plain blend where the original runs a step that was not read; no grid case reaches it. The other Debug views follow the original. |
 | G5 | second tracker arithmetic | This project's rule, not read in the original; matches on the grid. |
-| G6 | solver, hole fill and blur wrap variants | Track RGB+A and 360 Video follow the original; matches on the grid. |
+| G6 | solver, hole fill and blur wrap variants | 360 Video follows the original's wrap variants and matches on the grid, but the grid has no layered or draft quality 360 case: the wrap of the layer masks and of the draft blur taps is this project's reading. |
 
 ### Not offered
 

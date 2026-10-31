@@ -279,13 +279,7 @@ fn make_disc_matte(dir: &Scratch, name: &str, cx: f64, cy: f64, r: f64) -> PathB
 /// The note line `vfx` prints for gap `id` with its register title.
 fn note(id: &str) -> String {
     let title = match id {
-        "G1" => "matte shrink tail",
-        "G1b" => "mask-aware block matching cost",
-        "G1c" => "layer visibility direction",
-        "G1d" => "create-vectors merge",
-        "G2" => "tracking point displacement",
-        "G3" => "Draw Geom drawing",
-        "G4" => "four Debug view compositions",
+        "G4" => "one-layer Debug Blend view",
         "G5" => "second tracker arithmetic",
         other => panic!("no gap {other}"),
     };
@@ -308,20 +302,24 @@ fn the_layered_paths_render_through_the_binary_and_note_each_gap_once() {
         (&["display=1", "pt1_use=2", "pt1_pos=20,15", "draw_geom=1"], &[], &[]),
         (&["display=3", "debug_view_method=1"], &[], &[]),
         (&["fg1_track=0", "fg2_sensitivity=10"], &[], &[]),
-        // the layered solve, its masks and visibility order, the output composite and the Debug composition are
-        // read from the original's code: only the layered frame itself (G1) is noted
-        (&[], one, &["G1"]),
-        (&["fg1_inv_matte_shrink=2"], one, &["G1"]),
-        (&["layers_output=3"], two, &["G1"]),
+        // the layered solve, its masks and visibility order, the output composite, the points, the cross of Draw Geom
+        // and the Debug composition are read from the original's code: no note
+        (&[], one, &[]),
+        (&["fg1_inv_matte_shrink=2"], one, &[]),
+        (&["layers_output=3"], two, &[]),
+        (&["display=3"], &[], &[]),
+        (&["display=3", "debug_view_method=3"], one, &[]),
+        (&["display=3", "debug_view_method=3", "layers_output=2"], one, &[]),
+        (&["pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &[]),
+        (&["display=1", "pt1_use=2", "pt1_pos=20,15"], &[], &[]),
+        (&["display=3", "debug_view_method=1", "pt1_use=2", "pt1_pos=20,15"], &[], &[]),
+        // the Blend view of a one layer group runs a step that was not read: G4
+        (&["display=3", "layers_output=2"], one, &["G4"]),
+        (&["display=3", "debug_view_method=2", "layers_output=5"], one, &["G4"]),
         // no layer of the group tracks: no solve, the second tracker runs
-        (&["fg1_track=0", "fg2_track=0", "main_bg_track=0"], two, &["G1", "G5"]),
-        (&["display=3"], &[], &["G4"]),
-        (&["display=3", "debug_view_method=3"], one, &["G1", "G4"]),
+        (&["fg1_track=0", "fg2_track=0", "main_bg_track=0"], two, &["G5"]),
         (&["main_bg_track=0"], &[], &["G5"]),
         (&["main_bg_track=0", "pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &["G5"]),
-        (&["pt1_use=5", "pt1_pos=20,15@0;26,18@7"], &[], &["G2"]),
-        (&["display=1", "pt1_use=2", "pt1_pos=20,15"], &[], &["G3"]),
-        (&["display=3", "debug_view_method=1", "pt1_use=2", "pt1_pos=20,15"], &[], &["G2", "G3"]),
     ];
     for (params, layers, gaps) in cases {
         let mut p = vec!["max_displace=16"];

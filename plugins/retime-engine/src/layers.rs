@@ -4,20 +4,21 @@
 //! of `compose::retime_layers` (the solver path of retime-fgbg) and
 //! `compose::retime_layers_with_flows` (the Vectors In path).
 //!
-//! Claim tags: V established, I inferred, U not established (a rule of this project, pinned in
-//! the parity gaps register `crate::gaps` until a reference render grades it).
+//! Claim tags: V established, I inferred, U not established (a rule of this project). The effects
+//! set `LayerJob::plates`, whose paths follow the original; the rules of this project below run
+//! only on paths without it, which no effect takes.
 //!
 //! A layered frame (`nfg >= 1`) on the vector path, in this order:
 //! 1. the fetches: the tracking frames (when there is a tracking layer), the main frames `A` and
 //!    `B`, then the FG mattes at `A` and at `B` (at the layer times of the main frames),
 //!    then the error fill check;
 //! 2. the raw mattes (`matte::extract`) and the tracking mattes of every layer
-//!    (`matte::effective`: FG1 on top, Main_BG the product of the inverses, rule G1c; the
-//!    inverse matte shrink, rule G1);
+//!    (`matte::effective`: FG1 on top, Main_BG the product of the inverses; the
+//!    inverse matte shrink);
 //! 3. the luma pyramids of the two tracking frames, built ONCE for all layers;
 //! 4. per layer `k` of the group, FG1 first: the solve with that layer's sensitivity, the mask
 //!    pyramids of its tracking matte at `A` and at `B` (swapped for the reverse flow) and its
-//!    tracking points as a user displacement (rule G2); the solves a frame needs are those of
+//!    tracking points as a user displacement; the solves a frame needs are those of
 //!    the single layer path (Nearest one, Blend and Weighted Blend two);
 //! 5. from layer `last` down to `first` (bottom up, so FG1 ends on top): `A` and `B` are
 //!    premultiplied by the composition matte (the raw matte, Main_BG the constant 1),
@@ -25,11 +26,11 @@
 //!    [`compose_layers`]) and composed OVER into the running results `RA` and `RB`;
 //! 6. codes 1 and 2 fill the holes of each running result once, the holes being `white - alpha`
 //!    then the final stage of the warping code; then ONE blur compensation tail with
-//!    the flow of layer `last` (rule G1f, U).
+//!    the flow of layer `last` (U).
 //!
 //! The fast path of a layered frame (an exact position, No Vectors, a segment row, a frame that is
 //! not `prep::searchable`) composes the displayed group of the two unwarped frames the same way,
-//! with no warp and no fill (rule G1h, U), then interpolates as the single layer fast path.
+//! with no warp and no fill (U), then interpolates as the single layer fast path.
 //!
 //! `nfg = 0` never comes here unless a tracking point is in use: `compose::retime_layers` calls
 //! the single layer functions of today for it, and with points only the solve changes
@@ -53,7 +54,6 @@ use crate::compose::{
 use crate::filters::sharpen_step;
 use crate::flow::extras::{MaskPyramid, SolveExtras};
 use crate::flow::{build_pyramid, FlowField, FlowSettings, Pyramid};
-use crate::gaps;
 use crate::holefill::{fill_holes_masked, fill_holes_masked_with, HoleMaskRef, VerticalTaps};
 use crate::host::{EngineHost, EngineSettings};
 use crate::image::{Image, Samples, A, CHANNELS};
@@ -406,11 +406,11 @@ fn compose_group(frame: &Image, mattes: &[Matte], job: &LayerJob) -> Result<Imag
     Ok(r)
 }
 
-/// The fast path of a layered frame (rule G1h, U): the main frames `A` and `B`, the FG mattes
+/// The fast path of a layered frame: the main frames `A` and `B`, the FG mattes
 /// at both, the error fill check, the composite of the displayed group of each frame
 /// ([`compose_group`], no warp, no fill) and `compose::interpolate` of the two composites (the
-/// single layer fast path on them). Records G1 (a layered frame), G1h for a single group display
-/// (`first == last`) and G1c with two or more FG layers (the composition order).
+/// single layer fast path on them). A job with `plates` rebuilds a single group display as the
+/// original does ([`rebuilt_plate`]).
 pub(crate) fn fast_path(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, sel: &Selection) -> Result<Rendered> {
     if job.full_group_fast_path() {
         return crate::compose::fast_path(settings, host, sel);
@@ -420,13 +420,6 @@ pub(crate) fn fast_path(settings: &EngineSettings, host: &dyn EngineHost, job: &
     let (ma, mb) = fetch_mattes(host, job, sel, &a)?;
     if let Some(fill) = issue_fill(settings, host) {
         return Ok(fill);
-    }
-    fx_core::gaps::record(&gaps::G1);
-    if job.first == job.last {
-        fx_core::gaps::record(&gaps::G1H);
-    }
-    if job.nfg >= 2 {
-        fx_core::gaps::record(&gaps::G1C);
     }
     let (ra, rb) = if job.plates && job.rebuild_group && job.first == job.last {
         let fill = FillFrame { is360: settings.wrap_360, taps: settings.stages.get().vertical_taps(), reversed: settings.motion_rows_reversed };
@@ -552,7 +545,6 @@ where
     if let Some(fill) = issue_fill(settings, host) {
         return Ok(fill);
     }
-    fx_core::gaps::record(&gaps::G1);
     let (xa, xb) = match &tracking {
         Some((ta, tb)) => (ta, tb),
         None => (&a, &b),
@@ -645,7 +637,7 @@ fn complete_layer_flows(settings: &EngineSettings, sel: &Selection, flows: &mut 
 /// `plates::comp_mattes`, the planes the original's per layer vector loader caps the vector alpha
 /// with, READ in TwixtorProVectorsIn_64), then per layer
 /// `k` of the group, FG1 first, `flows(sel, k, mattes)` with the layer's mattes at `A` and `B` (the
-/// front-end's per layer load, rule G1e) and the inversion of a missing flow of that layer
+/// front-end's per layer load) and the inversion of a missing flow of that layer
 /// ([`complete_layer_flows`]), then the composition of [`compose_layers`] with Vectors In's settings
 /// (no wrap).
 pub(crate) fn vector_path_with_flows<F>(settings: &EngineSettings, host: &dyn EngineHost, job: &LayerJob, sel: &Selection, mut flows: F) -> Result<Rendered>
@@ -659,7 +651,6 @@ where
     if let Some(fill) = issue_fill(settings, host) {
         return Ok(fill);
     }
-    fx_core::gaps::record(&gaps::G1);
     let shrinks = job.shrinks();
     let (ea, eb) = if job.plates {
         (plates::comp_mattes(&mattes.0, &shrinks, &a)?, plates::comp_mattes(&mattes.1, &shrinks, &a)?)
@@ -769,9 +760,8 @@ fn fill_alpha_holes(r: &mut Image, is360: bool) -> Result<()> {
 /// Nearest has one running result, the side the single layer composition takes
 /// ([`nearest_takes_a`]). The fill runs with `is360 = wrap_360` except under Weighted Blend (the
 /// weighted compositions of the single layer path keep the wrap off). Then ONE blur compensation
-/// tail with `wrap_360` and the blur flow of layer `last` (`F_AB`, or the one flow of Nearest; rule
-/// G1f, U). Records G1g when a fill runs on a single group (`first == last`, the literal reading
-/// of the composition: the fill floods an FG only view) and G1f when the tail changes pixels.
+/// tail with `wrap_360` and the blur flow of layer `last` (`F_AB`, or the one flow of Nearest;
+/// U). Without `plates` (no effect) a fill on a single group floods an FG only view.
 pub(crate) fn compose_layers(
     settings: &EngineSettings,
     sel: &Selection,
@@ -828,9 +818,6 @@ pub(crate) fn compose_layers(
         }
     }
     if fills {
-        if job.first == job.last {
-            fx_core::gaps::record(&gaps::G1G);
-        }
         let is360 = settings.wrap_360 && !weighted;
         for r in [ra.as_mut(), rb.as_mut()].into_iter().flatten() {
             fill_alpha_holes(r, is360)?;
@@ -856,11 +843,6 @@ pub(crate) fn compose_layers(
         (None, None) => unreachable!("Nearest takes one side, the blends both"),
     };
     if let Some(flow) = flows[job.last - job.first].blur_flow() {
-        if let Some(amount) = blur_amount(sel.s0, sel.s1, settings.blur) {
-            if !((amount.abs() as f64) < 1e-6) {
-                fx_core::gaps::record(&gaps::G1F);
-            }
-        }
         blur_compensation_wrap(&mut out, flow, sel.s0, sel.s1, settings.blur, settings.quality_high, settings.wrap_360)?;
     }
     Ok(out)

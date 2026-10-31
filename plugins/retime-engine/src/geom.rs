@@ -1,4 +1,4 @@
-//! The Draw Geom overlay (rule G3): the tracking points drawn over the
+//! The Draw Geom overlay: the tracking points drawn over the
 //! Source display and the create-vectors Debug display, after the source copy. [`draw_points`]
 //! draws opaque discs in the point colours; [`draw_crosses`] is the glyph of
 //! `CreateMotionVectors_64`, read from its code: two
@@ -64,7 +64,7 @@ pub const CROSS_HALF_LENGTH: f32 = 3.0;
 /// Line width of the arms at the ratio 1.
 pub const CROSS_WIDTH: f32 = 1.5;
 
-/// The Draw Geom glyph of `CreateMotionVectors_64` (rule G3, V: read from the code of the
+/// The Draw Geom glyph of `CreateMotionVectors_64` (V: read from the code of the
 /// original and reproduced call for call: for every segment it draws, the list of pixels it plots
 /// with their alpha is the list computed here, 264 segments of nine probe cases at all three
 /// depths). Every point of `pts` (position in output pixels of the image as the plugin sees it,
@@ -90,14 +90,13 @@ pub const CROSS_WIDTH: f32 = 1.5;
 /// `c / 255.0`, `t = a / 255.0`; `t == 1.0` stores colour and alpha 1.0, else the same formula
 /// (alpha channel with 1.0), no rounding.
 ///
-/// A point with an end outside the 32 bit range or not a number draws nothing. Records gap G3 when
-/// there is a point to draw. [`draw_points`] (the disc) is not this plugin's glyph and stays as it
-/// was.
+/// A point with an end outside the 32 bit range or not a number draws nothing. It follows the
+/// original and records no gap. [`draw_points`] (the disc, rule G3) is not this plugin's glyph and
+/// stays as it was.
 pub fn draw_crosses(img: &mut Image, pts: &[([f32; 2], [u8; 3])], ratio: f32) {
     if pts.is_empty() {
         return;
     }
-    fx_core::gaps::record(&crate::gaps::G3);
     let half = ratio * CROSS_HALF_LENGTH;
     let width = ratio * CROSS_WIDTH;
     for &(p, col) in pts {

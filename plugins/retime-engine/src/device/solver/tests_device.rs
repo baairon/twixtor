@@ -136,13 +136,17 @@ fn device_solves_match_the_cpu_over_the_corpus() {
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn device_solve_and_solve_pair_match_the_cpu() {
     on_devices(
         "device_solve_and_solve_pair_match_the_cpu",
         |name, s| {
             let mut n = 0;
-            for c in cases::corpus(0x9A1, 40, 160) {
+            for c in cases::corpus(0x9A1, 48, 160) {
+                if c.s.wrap {
+                    // the 360 solve has no kernels yet: refused, the CPU solves
+                    assert!(matches!(solve_pair_gpu(s, &c.a, &c.b, &c.s), Err(StageError::Unsupported(_))), "{name}: {}", c.name);
+                    continue;
+                }
                 let cpu = flow::solve_pair(&c.a, &c.b, &c.s);
                 let dev = solve_pair_gpu(s, &c.a, &c.b, &c.s);
                 match (cpu, dev) {
@@ -173,13 +177,16 @@ fn device_solve_and_solve_pair_match_the_cpu() {
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn device_resident_pyramids_from_device_images_match_the_cpu() {
     on_devices(
         "device_resident_pyramids_from_device_images_match_the_cpu",
         |name, s| {
             let mut n = 0;
-            for c in cases::corpus(0x7E5, 20, 96) {
+            for c in cases::corpus(0x7E5, 24, 96) {
+                // the 360 solve has no kernels yet (the executor keeps it on the CPU)
+                if c.s.wrap {
+                    continue;
+                }
                 let Ok(cpu) = flow::solve(&c.a, &c.b, &c.s) else { continue };
                 let taps5 = Taps::binomial5(s).unwrap();
                 let (da, db) = (DeviceImage::upload(s, &c.a).unwrap(), DeviceImage::upload(s, &c.b).unwrap());

@@ -924,8 +924,8 @@ mod tests {
     /// The hand made set with two of its clips turned into family cases.
     fn family_set() -> TestSet {
         let mut s = set();
-        s.cases[3].family = Some("gap-shrink".into());
-        s.cases[3].label = "gap-shrink-cv-lo5-shrink-2".into();
+        s.cases[3].family = Some("gap-tracker2".into());
+        s.cases[3].label = "gap-tracker2-cv-track-off-1pt-vr1".into();
         s.cases[4].family = Some("gap-keys".into());
         s.cases[4].label = "gap-keys-frame-num-easy-ease".into();
         s.cases[4].source = "fgdisc".into();
@@ -947,7 +947,7 @@ mod tests {
             "every `record` call of it",
             "its Stated rules row in `docs/parity.md` goes",
             "## Parity gaps these cases settle",
-            "| `gap-shrink` | G1 matte shrink tail | how FG Inv Matte Shrink chokes",
+            "| `gap-tracker2` | G5 second tracker arithmetic | the flow of a layer whose Track is off",
             "| `gap-keys` | K1a a Linear end next to a Bezier end; K1b Easy Ease influence;",
             "(observe only, no note)",
             "The family clips:",
@@ -956,7 +956,7 @@ mod tests {
             assert!(head.contains(want), "{want}: {head}");
         }
         assert!(head.contains("| 1 |\n| `gap-keys`") && !head.contains("gap-tiny"), "one row per family present: {head}");
-        assert!(md.contains("- case: `retime-01.speed-ramp.testsrc2-4x3.d8.00000004`\n- settles: G1 (matte shrink tail) in family `gap-shrink`\n"), "{md}");
+        assert!(md.contains("- case: `retime-01.speed-ramp.testsrc2-4x3.d8.00000004`\n- settles: G5 (second tracker arithmetic) in family `gap-tracker2`\n"), "{md}");
         assert!(md.contains("- settles: K1b (Easy Ease influence) in family `gap-keys`, observe only\n"), "{md}");
         assert_eq!(md.matches("- settles:").count(), 2, "only the family cases");
         assert!(md.is_ascii());

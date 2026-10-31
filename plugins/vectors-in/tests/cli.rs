@@ -272,13 +272,13 @@ fn the_defaults_and_a_fg_matte_layer_render_between_frames() {
     let r = apply(bin, Depth::U8, &clip, &out, SOURCE_FRAMES, &[], &layers);
     assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
     assert_eq!(read_frames(&out, Depth::U8), read_frames(&clip, Depth::U8));
-    // a FG Matte layer: the n-layer path renders, and it notes its open rules once each
+    // a FG Matte layer: the n-layer path renders; it follows the original and notes nothing
     let with_matte = [("vectors_prev", prev.as_path()), ("vectors_next", next.as_path()), ("fg1_matte", clip.as_path())];
     let r = apply(bin, Depth::U8, &clip, &out, 4, &["warping=1", "speed_percent=50"], &with_matte);
     assert!(r.status.success(), "{}", String::from_utf8_lossy(&r.stderr));
     assert_eq!(read_frames(&out, Depth::U8).len(), 4);
     let stderr = String::from_utf8_lossy(&r.stderr);
-    assert_eq!(stderr.matches("vfx: note: vectors-in: G1e ").count(), 1, "{stderr}");
+    assert!(!stderr.contains("vfx: note:"), "{stderr}");
 }
 
 /// A real `testsrc2` clip (needs ffmpeg) with vector layers of zero motion: exact frames pass the engine, the odd
@@ -327,36 +327,25 @@ fn testsrc2_clip_with_zero_vectors_at_8_bpc() {
 }
 
 #[test]
-fn the_g1_note_prints_for_a_run_of_any_one_layered_frame_and_not_for_the_source_display() {
-    // gaps.rs: G1 is noted on every frame rendered by the layered path. vfx prints a gap once per run, so each run here
-    // renders ONE frame (Frame Number mode): an in-between frame (the layered Vectors In path, which also notes G1e), an
-    // exact frame of a single group display (the layered fast path, which also loads the layer's flows through the matte
-    // cap, G1e, and drops them, as the original does), and an exact frame of the full group, which reads no FG matte and
-    // is the single layer fast path (`LayerJob::full_group_reads_no_matte`, plugin 03's flags),
-    // so it notes nothing; the Source display composes no layer and notes nothing
+fn a_layered_frame_notes_nothing() {
+    // gaps.rs: vectors-in has no open gap, its layered path follows the original. Each run renders ONE frame (Frame
+    // Number mode): an in-between frame (the layered Vectors In path), an exact frame of a single group display (the
+    // layered fast path, which also loads the layer's flows through the matte cap and drops them, as the original
+    // does), an exact frame of the full group (the single layer fast path) and the Source display
     let bin = vfx().expect("fx-cli builds");
-    let dir = Scratch::new("g1-note");
+    let dir = Scratch::new("layered-note");
     let (clip, prev, next) = moving_files(&dir, Depth::U8);
     let layers = [("vectors_prev", prev.as_path()), ("vectors_next", next.as_path()), ("fg1_matte", clip.as_path())];
     let out = dir.path("out.raw");
-    let line = |g: &fx_core::OpenGap| {
-        format!("vfx: note: vectors-in: {} {}: a stated rule that no Twixtor reference render has graded yet (README: limits)", g.id, g.title)
-    };
-    let (g1, g1e) = (line(&retime_engine::gaps::G1), line(&retime_engine::gaps::G1E));
-    for (params, want_g1, want_g1e) in [
-        (vec!["time_remap_mode=2", "frame_num=2.5"], true, true),
-        (vec!["time_remap_mode=2", "frame_num=3", "display=3"], true, true),
-        (vec!["time_remap_mode=2", "frame_num=3"], false, false),
-        (vec!["time_remap_mode=2", "frame_num=2.5", "display=2"], false, false),
+    for params in [
+        vec!["time_remap_mode=2", "frame_num=2.5"],
+        vec!["time_remap_mode=2", "frame_num=3", "display=3"],
+        vec!["time_remap_mode=2", "frame_num=3"],
+        vec!["time_remap_mode=2", "frame_num=2.5", "display=2"],
     ] {
         let r = apply(bin, Depth::U8, &clip, &out, 1, &params, &layers);
         let stderr = String::from_utf8_lossy(&r.stderr).to_string();
         assert!(r.status.success(), "{params:?}: {stderr}");
-        let count = |l: &str| stderr.lines().filter(|x| x.trim_end() == l).count();
-        assert_eq!(count(&g1), usize::from(want_g1), "{params:?}: {stderr}");
-        assert_eq!(count(&g1e), usize::from(want_g1e), "{params:?}: {stderr}");
-        if !want_g1 {
-            assert!(!stderr.contains("vfx: note:"), "{params:?}: the Source display and the full group's exact frame note nothing: {stderr}");
-        }
+        assert!(!stderr.contains("vfx: note:"), "{params:?}: {stderr}");
     }
 }

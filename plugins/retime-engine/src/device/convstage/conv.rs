@@ -47,6 +47,49 @@ pub fn convolve_on<B: Backend>(
     b.launch(Launch::VPass { src: tmp, dst, w, h, c, taps })
 }
 
+/// `conv::convolve_above_first` over any backend: the plain horizontal pass `src -> tmp`, then the
+/// vertical pass whose border rows take the tap above first `tmp -> dst` (the convolutions of the
+/// solver and of the images it is given: the pyramid filter, the reduction, the mask pyramid and
+/// the three Gaussians of a level).
+#[allow(clippy::too_many_arguments)]
+pub fn convolve_above_on<B: Backend>(
+    b: &B,
+    src: &B::Buf<f32>,
+    tmp: &B::Buf<f32>,
+    dst: &B::Buf<f32>,
+    w: usize,
+    h: usize,
+    c: usize,
+    taps: &Taps<B>,
+) -> Result<(), StageError> {
+    if std::ptr::eq(tmp, src) || std::ptr::eq(tmp, dst) {
+        return Err(StageError::Unsupported("convolve: the intermediate buffer must differ from the source and the destination".into()));
+    }
+    check_plane(b, &[src, tmp, dst], w, h, c, "convolve")?;
+    b.launch(Launch::HPass { src, dst: tmp, w, h, c, taps, wrap: false })?;
+    b.launch(Launch::VPassAbove { src: tmp, dst, w, h, c, taps })
+}
+
+/// `conv::blur_gaussian_above_first` on device buffers; `taps` from `Taps::gaussian(r)`, `None`
+/// (a radius below `BLUR_RADIUS_EPS`) copies `src` to `dst` (nothing when they are one buffer).
+#[allow(clippy::too_many_arguments)]
+pub fn blur_gaussian_above_on<B: Backend>(
+    b: &B,
+    src: &B::Buf<f32>,
+    tmp: &B::Buf<f32>,
+    dst: &B::Buf<f32>,
+    w: usize,
+    h: usize,
+    c: usize,
+    taps: Option<&Taps<B>>,
+) -> Result<(), StageError> {
+    match taps {
+        Some(t) => convolve_above_on(b, src, tmp, dst, w, h, c, t),
+        None if std::ptr::eq(src, dst) => Ok(()),
+        None => b.copy(src, dst),
+    }
+}
+
 /// `conv::convolve` on device buffers of `w * h * c` samples: the horizontal pass `src -> tmp`,
 /// the vertical pass `tmp -> dst` (`dst` may be `src`; `tmp` is a third buffer).
 #[allow(clippy::too_many_arguments)]
@@ -163,6 +206,33 @@ pub fn convolve_host<B: Backend>(b: &B, data: &mut [f32], w: usize, h: usize, c:
     Ok(())
 }
 
+/// `conv::convolve_above_first` of host data on the backend: `data` changes only on success.
+pub fn convolve_above_host<B: Backend>(b: &B, data: &mut [f32], w: usize, h: usize, c: usize, k: &[f32]) -> Result<(), StageError> {
+    if !(1..=3).contains(&c) {
+        return Err(StageError::Unsupported(format!("convolve: {c} channels are not used by the solver")));
+    }
+    if Some(data.len()) != w.checked_mul(h).and_then(|v| v.checked_mul(c)) {
+        return Err(StageError::Unsupported(format!("convolve: {} samples for {w}x{h}x{c}", data.len())));
+    }
+    if data.is_empty() || k.is_empty() {
+        return Ok(());
+    }
+    check_samples(data.len(), "convolve")?;
+    let taps = Taps::upload(b, k)?;
+    let buf = b.upload(data)?;
+    let tmp = b.alloc::<f32>(data.len())?;
+    convolve_above_on(b, &buf, &tmp, &buf, w, h, c, &taps)?;
+    let out = b.download(&buf)?;
+    reject_nan(&out)?;
+    data.copy_from_slice(&out);
+    Ok(())
+}
+
+/// `conv::convolve_above_first` on the device.
+pub fn convolve_above_gpu(s: &Session, data: &mut [f32], w: usize, h: usize, c: usize, k: &[f32]) -> Result<(), StageError> {
+    convolve_above_host(s, data, w, h, c, k)
+}
+
 /// `conv::convolve` on the device.
 pub fn convolve_gpu(s: &Session, data: &mut [f32], w: usize, h: usize, c: usize, k: &[f32]) -> Result<(), StageError> {
     convolve_host(s, data, w, h, c, k, false)
@@ -231,7 +301,7 @@ fn shrink_on<B: Backend>(b: &B, data: &B::Buf<f32>, tmp: &B::Buf<f32>, w: usize,
 }
 
 /// `matte::choke` on a device plane of `w * h` samples, in place. A NaN, infinite or zero amount
-/// queues nothing (the CPU's identity). Records gap G1 as the CPU does when the choke runs.
+/// queues nothing (the CPU's identity).
 pub fn choke_on<B: Backend>(b: &B, data: &B::Buf<f32>, w: usize, h: usize, amount: f32) -> Result<(), StageError> {
     if amount == 0.0 || !amount.is_finite() {
         return Ok(());
@@ -251,7 +321,6 @@ pub fn choke_on<B: Backend>(b: &B, data: &B::Buf<f32>, w: usize, h: usize, amoun
     if need > crate::device::kernels::conv::CV_MAX_TAPS {
         return Err(StageError::Unsupported(format!("choke of {a} pixels: a half kernel of {need} taps")));
     }
-    fx_core::gaps::record(&crate::gaps::G1);
     let tmp = b.alloc::<f32>(n)?;
     if grow {
         b.launch(Launch::Invert { data, n })?;
@@ -298,7 +367,6 @@ pub fn choke_host<B: Backend>(b: &B, m: &mut Matte, amount: f32) -> Result<(), S
         return Ok(());
     }
     if m.data.is_empty() {
-        fx_core::gaps::record(&crate::gaps::G1);
         return Ok(());
     }
     let buf = b.upload(&m.data)?;

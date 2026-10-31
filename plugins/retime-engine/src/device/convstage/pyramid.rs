@@ -3,12 +3,14 @@
 //! `flow::upsample_flow`.
 //!
 //! Precision contract: that of the `pm_`, `cv_` and `rs_` kernels, in the CPU's order: a
-//! reduction stage is `blur5` (two passes) then the resample to `(w / 2, h / 2)`; a band level is
+//! reduction stage is `blur5` (two passes, the vertical border rows with the tap above first,
+//! `cv_vpass_above`) then the resample to `(w / 2, h / 2)`; a band level is
 //! `tmp = blur5(orig)`, the next level `resample(tmp)` and `band = orig - tmp`; a mask step is
 //! `blur5`, resample, binarize. Delinearize (an f64 `powf` per pixel) and Contrast / Edge Enhance
 //! (the solver's gradient) run on the host in [`build_pyramid_gpu`], between the device steps.
+//! The 360 variants (`wrap`) are not ported yet: they are `StageError::Unsupported`.
 
-use super::conv::convolve_on;
+use super::conv::convolve_above_on;
 use super::sample::resample1_on;
 use super::{check_len, check_samples, Backend, Launch, Session, StageError, Taps};
 use crate::device::cl::Buffer;
@@ -42,12 +44,18 @@ impl<B: Backend> DevicePlane<B> {
     }
 }
 
-/// `blur5` (or `blur5_wrapx`) of `p` into a new plane.
+/// `prep::blur5` of `p` into a new plane: the pyramid filter with the vertical border rows taking
+/// the tap above first (`conv::blur5_above_first`). The 360 filter (`prep::blur5_with` with the
+/// flag: the circular rows and the column walk over the poles) has no kernel yet, so `wrap` is
+/// `StageError::Unsupported` and the CPU builds that pyramid.
 fn blur5_new<B: Backend>(b: &B, p: &DevicePlane<B>, taps5: &Taps<B>, wrap: bool) -> Result<DevicePlane<B>, StageError> {
+    if wrap {
+        return Err(StageError::Unsupported("the 360 pyramid filters are not ported to the device yet".into()));
+    }
     let n = p.width * p.height;
     let tmp = b.alloc::<f32>(n)?;
     let out = b.alloc::<f32>(n)?;
-    convolve_on(b, &p.buf, &tmp, &out, p.width, p.height, 1, taps5, wrap)?;
+    convolve_above_on(b, &p.buf, &tmp, &out, p.width, p.height, 1, taps5)?;
     Ok(DevicePlane { buf: out, width: p.width, height: p.height })
 }
 

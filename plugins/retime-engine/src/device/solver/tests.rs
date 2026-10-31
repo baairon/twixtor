@@ -339,18 +339,36 @@ fn check_case(c: &Case, seed: u64) -> bool {
     true
 }
 
+/// A case of the plain solve (`solve`, `solve_pair`): no 360 flag, no masks, no user points.
+fn plain(c: &Case) -> bool {
+    !c.s.wrap && c.mattes.is_none() && c.points.is_empty()
+}
+
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn whole_solves_on_the_simulator_match_the_cpu() {
-    let cs = cases::corpus(0xD5, 60, 33);
+    let cs = cases::corpus(0xD5, 96, 33);
     let mut compared = 0;
-    for (k, c) in cs.iter().enumerate() {
+    for (k, c) in cs.iter().enumerate().filter(|(_, c)| plain(c)) {
         let seed = SEEDS[k % SEEDS.len()];
         if check_case(c, seed) {
             compared += 1;
         }
     }
-    assert!(compared >= 50, "{compared} solves compared");
+    assert!(compared >= 30, "{compared} solves compared");
+}
+
+#[test]
+#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
+fn layered_and_360_solves_on_the_simulator_match_the_cpu() {
+    let cs = cases::corpus(0xD5, 96, 33);
+    let mut compared = 0;
+    for (k, c) in cs.iter().enumerate().filter(|(_, c)| !plain(c)) {
+        let seed = SEEDS[k % SEEDS.len()];
+        if check_case(c, seed) {
+            compared += 1;
+        }
+    }
+    assert!(compared >= 20, "{compared} solves compared");
 }
 
 #[test]
@@ -379,12 +397,17 @@ fn every_corpus_class_is_exercised_and_changes_the_flow() {
 }
 
 #[test]
-#[ignore = "the kernel follows the rule before the parity work; port pending (docs/engine.md, Device)"]
 fn solve_and_solve_pair_on_the_simulator_match_the_cpu() {
     let mut n = 0;
     for (k, c) in cases::corpus(0xF00, 24, 24).iter().enumerate() {
         let seed = SEEDS[k % SEEDS.len()];
         let b = backend(seed);
+        if c.s.wrap {
+            // the 360 solve has no kernels yet: refused, the CPU solves
+            assert!(matches!(solve_pair_host(&b, &c.a, &c.b, &c.s), Err(StageError::Unsupported(_))), "{}", c.name);
+            assert!(matches!(solve_host(&b, &c.a, &c.b, &c.s), Err(StageError::Unsupported(_))), "{}", c.name);
+            continue;
+        }
         let cpu = flow::solve_pair(&c.a, &c.b, &c.s);
         let dev = solve_pair_host(&b, &c.a, &c.b, &c.s);
         match (cpu, dev) {
@@ -406,13 +429,15 @@ fn solve_and_solve_pair_on_the_simulator_match_the_cpu() {
             (cpu, dev) => panic!("{}: cpu {:?} device {:?}", c.name, cpu.is_ok(), dev.err()),
         }
     }
-    assert!(n >= 15, "{n} pairs compared");
+    assert!(n >= 12, "{n} pairs compared");
 }
 
 #[test]
 fn refusals() {
     let b = backend(0);
-    let c = &cases::corpus(1, 12, 16)[10];
+    // a case without the 360 flag (a 360 solve is refused: its rules have no kernels yet)
+    let cs = cases::corpus(1, 12, 16);
+    let c = cs.iter().skip(10).chain(cs.iter()).find(|c| !c.s.wrap && cases::reference(c).is_some()).unwrap();
     let r = cases::reference(c).unwrap();
     let other = flow::build_pyramid(&cases::texture(8, 8, 8, 3, 0.0, 0.0, 0.0, false), &c.s).unwrap();
     assert!(matches!(solve_pyramids_with_host(&b, &r.px, &other, &c.s, SolveExtras::default()), Err(StageError::Unsupported(_))));

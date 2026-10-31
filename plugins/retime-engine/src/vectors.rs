@@ -9,7 +9,8 @@
 //! * [`decode_vectors`]: encoded image -> `FlowField`; [`vector_hole_mask`] is the mask built
 //!   from the alpha channel for the hole fill; [`apply_vec_scale`] applies Vec Scale X / Y.
 //! * [`encode_vectors_merged`] and [`merge_flows`]: the matte weighted merge of the layered Create
-//!   Vectors pass (rule G1d): the per layer vectors of [`encode_vectors`] summed with their
+//!   Vectors pass (U, a rule of this project that no effect runs: the layered pass composites
+//!   its layers from the bottom up instead): the per layer vectors of [`encode_vectors`] summed with their
 //!   weights in layer order from `0.0`, then today's clamp and store (or, for the Debug views, the
 //!   sum in output pixels).
 //!
@@ -225,7 +226,7 @@ fn merged_at(per: &[MergeLayer<'_>], x: usize, y: usize, width: usize) -> (f32, 
 }
 
 /// The vector image of a layered Create Vectors render (one flow per layer V, the matte
-/// weighted merge U; rule G1d): `layers` holds, for the layers `first..=last` of Layers Output in
+/// weighted merge U; no effect runs it): `layers` holds, for the layers `first..=last` of Layers Output in
 /// that order, each layer's flow (`X(p) ~ Y(p + flow(p))`, any size of at least 2x2, usually the
 /// working resolution) and its weight at the output size, the OVER weight of
 /// `matte::over_weights` (raw mattes, Main_BG 1).
@@ -239,13 +240,12 @@ fn merged_at(per: &[MergeLayer<'_>], x: usize, y: usize, width: usize) -> (f32, 
 /// the merge gives the opaque alpha and the zero blue, I).
 ///
 /// One layer of weight 1.0 everywhere is [`encode_vectors`] bit for bit (`0.0 + 1.0 * v` is `v`
-/// up to the sign of a zero, which the store does not see). Records gap G1d.
+/// up to the sign of a zero, which the store does not see).
 ///
 /// Errors: `Mismatch` for an empty list, an output or a flow below 2x2, a flow whose data does not
 /// match its size and a weight of another size than `dst`.
 pub fn encode_vectors_merged(dst: &mut Image, layers: &[(&FlowField, &Matte)], scale: f32) -> Result<()> {
     let per = merge_layers(dst.width, dst.height, layers, Some(scale), "vector merge")?;
-    fx_core::gaps::record(&crate::gaps::G1D);
     let width = dst.width;
     let per = &per;
     let sample = move |x: usize, y: usize| -> (f32, f32) { merged_at(per, x, y, width) };

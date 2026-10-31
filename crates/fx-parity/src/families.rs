@@ -32,7 +32,7 @@ pub const FPS: &str = "24";
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct FamilyInfo {
     pub id: &'static str,
-    /// Register ids (`G1`, `G1b`, ...), or `G7` and `K1a` to `K1e` for the observing families.
+    /// Register ids (`G3`, `G4`, ...), or `G7` and `K1a` to `K1e` for the observing families.
     pub gaps: &'static [&'static str],
     /// What the references decide, in one line.
     pub settles: &'static str,
@@ -45,7 +45,7 @@ pub struct FamilyInfo {
 /// One case of a family, before it is crossed with nothing: every field is fixed.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Family {
-    /// The family id, for example `gap-shrink`.
+    /// The family id, for example `gap-drawgeom`.
     pub gap: &'static str,
     /// What sets this case apart inside its family, for example `cv-lo5-shrink-0.5`.
     pub label: String,
@@ -67,73 +67,17 @@ pub struct Family {
 /// Every family, in the order of the register.
 pub const FAMILIES: &[FamilyInfo] = &[
     FamilyInfo {
-        id: "gap-shrink",
-        gaps: &["G1"],
-        settles: "how FG Inv Matte Shrink chokes a hard matte edge, read out through the Main_BG flow next to the edge",
-        rule: "a choke of 0 is the identity; shrink(m, n >= 1) blurs with radius (1 - fr) + r, then clamp((b - T) / (1 - T)) with T = 1 - (k[n] + k[n+1]); only the inverse matte is choked",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-maskbm",
-        gaps: &["G1b"],
-        settles: "how the matte enters block matching, seen in each layer's flow at full resolution and Sensitivity 100",
-        rule: "the block matching sweep is gated by the mask of frame X; the cost itself is unmasked",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-order",
-        gaps: &["G1c"],
-        settles: "which layer is on top when two FG mattes overlap, and how the upper matte cuts the lower layer's tracking",
-        rule: "FG1 on top; the tracking matte of layer k is m_k * prod(1 - m_j, j < k), Main_BG's the product of all inverses",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-merge",
-        gaps: &["G1d"],
-        settles: "how create-vectors merges the layer flows into one vector image under a soft matte, for each Layers Output",
-        rule: "the sum of w_k * v_k with the over weights (raw mattes, Main_BG 1) over the layers of Layers Output; alpha white, blue 0",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-vecmatte",
-        gaps: &["G1e"],
-        settles: "how vectors-in restricts the loaded vectors of a layer to its matte",
-        rule: "each per layer load sets alpha to 0 where the layer's effective matte is below 0.95, then decodes as the single layer path does",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-blurflow",
-        gaps: &["G1f"],
-        settles: "whose flow drives Blur Compensation in a layered render: a fast FG over a still BG",
-        rule: "the blur tail uses the flow of the last layer of the displayed group",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-groups",
-        gaps: &["G1g", "G1h"],
-        settles: "what a single group display shows: the hole fill of each warping mode at 50% speed, and the fast path at 100%",
-        rule: "the hole fill runs whatever the displayed group (an FG only view gets flooded); the fast path composes the displayed group with no warp and no fill",
-        observe_only: false,
-    },
-    FamilyInfo {
-        id: "gap-points",
-        gaps: &["G2"],
-        settles: "how a tracking point turns into displacement: a keyed point on a still texture, a sub pixel variant and two points on one pixel",
-        rule: "a nearest pixel splat per pyramid level, d += (from - to) * k_l and w += 1 in point order; points outside the frame are skipped",
-        observe_only: false,
-    },
-    FamilyInfo {
         id: "gap-drawgeom",
         gaps: &["G3"],
-        settles: "what Draw Geom draws for three points at sub pixel positions, at every depth",
+        settles: "what retime-fgbg's Draw Geom draws for three points at sub pixel positions on its Source display with Alt Color Source set, at every depth",
         rule: "an opaque disc of radius 1.5 times the downsample ratio in the point colour, in point order, later points on top",
         observe_only: false,
     },
     FamilyInfo {
         id: "gap-debug",
         gaps: &["G4"],
-        settles: "the pixels of the Debug views Blend, Diff, Detail Compare and Edge Compare (Warp has no open point), for both Track Frames",
-        rule: "Blend = blend(W, Y, 0.5); Diff = abs(W - Y), opaque; Detail = R/G overlay of clamp((L - blur5(L)) / 255 + 0.5); Edge = R/G overlay of min(abs(grad(blur2(L))) * 0.05, 1)",
+        settles: "the Blend view of the Debug display for a one layer group of an FG stack (FG1 alone, MAIN_BG alone), for both Track Frames",
+        rule: "the plain lerp(W', Y_k, 0.5) of the group's composite and its own layer image, with no alpha match",
         observe_only: false,
     },
     FamilyInfo {
@@ -146,8 +90,8 @@ pub const FAMILIES: &[FamilyInfo] = &[
     FamilyInfo {
         id: "gap-wrap",
         gaps: &["G6"],
-        settles: "how Track RGB+A wraps the solver, the hole fill and the blur across the left and right edges, whether alpha enters the luma, and a pole crossing",
-        rule: "the solver, hole fill and motion blur wrap horizontally as the inverse warp does; the forward warp itself does not wrap; Track RGB+A does not add alpha to the luma",
+        settles: "how 360 Video wraps the solver, the masks of a layered render, the hole fill and the blur across the left and right edges, and a pole crossing",
+        rule: "the solver, the layer masks, the hole fill and the motion blur wrap horizontally (indices modulo the width, y range checked only); the forward warp itself does not wrap",
         observe_only: false,
     },
     FamilyInfo {
@@ -166,20 +110,11 @@ pub const FAMILIES: &[FamilyInfo] = &[
     },
 ];
 
-/// The one line titles of the gaps the families settle: the register's own titles for G1 to G6
+/// The one line titles of the gaps the families settle: the register's own titles for G3 to G6
 /// (as `vfx list --json` prints them), and the observed points G7 and K1a to K1e.
 pub const TITLES: &[(&str, &str)] = &[
-    ("G1", "matte shrink tail"),
-    ("G1b", "mask-aware block matching cost"),
-    ("G1c", "layer visibility direction"),
-    ("G1d", "create-vectors merge"),
-    ("G1e", "vectors-in per-layer matte step"),
-    ("G1f", "blur tail flow of a layered render"),
-    ("G1g", "hole fill of a single group display"),
-    ("G1h", "fast path group display"),
-    ("G2", "tracking point displacement"),
     ("G3", "Draw Geom drawing"),
-    ("G4", "four Debug view compositions"),
+    ("G4", "one-layer Debug Blend view"),
     ("G5", "second tracker arithmetic"),
     ("G6", "solver, hole fill and blur wrap variants"),
     ("G7", "tiny frames"),
@@ -266,116 +201,6 @@ const RETIME: &str = "retime";
 /// Half speed, so that every other output frame is an in-between frame on the vector path.
 const HALF: &str = "speed_percent=50";
 
-fn shrink() -> Vec<Family> {
-    let mut out = Vec::new();
-    for s in ["0", "0.5", "1", "2", "3.5"] {
-        let chokes = s != "0";
-        let cv = case("gap-shrink", format!("cv-lo5-shrink-{s}"), CV, "fgdisc", vec!["layers_output=5".into(), format!("fg1_inv_matte_shrink={s}")]);
-        out.push(cv.layer("fg1_matte", "fgdisc_matte").notes(if chokes { &["G1", "G1d"][..] } else { &["G1d"][..] }));
-        let bg = case("gap-shrink", format!("fgbg-bg-shrink-{s}"), FGBG, "fgdisc", vec!["display=6".into(), HALF.into(), format!("fg1_inv_matte_shrink={s}")]);
-        out.push(bg.layer("fg1_matte", "fgdisc_matte").notes(if chokes { &["G1", "G1b"][..] } else { &["G1b"][..] }));
-    }
-    out
-}
-
-fn maskbm() -> Vec<Family> {
-    [2, 5]
-        .iter()
-        .map(|lo| {
-            let params = vec![format!("layers_output={lo}"), "vector_resolution=2".into(), "fg1_sensitivity=100".into(), "main_bg_sensitivity=100".into()];
-            case("gap-maskbm", format!("cv-lo{lo}-full-sens100"), CV, "fgdisc", params).layer("fg1_matte", "fgdisc_matte").notes(&["G1b", "G1d"])
-        })
-        .collect()
-}
-
-/// Two FG layers on the mattes of `fg2disc_matte`: disc A (red) and disc B (green) as FG1 and FG2,
-/// in the order of the image (`ab`, disc A in front is FG1) or against it (`ba`).
-fn order() -> Vec<Family> {
-    let mut out = Vec::new();
-    for (tag, chans) in [("ab", ["fg1_matte_chan=1", "fg2_matte_chan=2"]), ("ba", ["fg1_matte_chan=2", "fg2_matte_chan=1"])] {
-        let mattes = |f: Family| f.layer("fg1_matte", "fg2disc_matte").layer("fg2_matte", "fg2disc_matte");
-        for lo in [2, 3, 5] {
-            let mut params = vec![format!("layers_output={lo}")];
-            params.extend(p(&chans));
-            out.push(mattes(case("gap-order", format!("cv-{tag}-lo{lo}"), CV, "fg2disc", params)).notes(&["G1c", "G1d"]));
-        }
-        for display in [1, 4] {
-            let mut params = vec![format!("display={display}"), HALF.into()];
-            params.extend(p(&chans));
-            out.push(mattes(case("gap-order", format!("fgbg-{tag}-display{display}"), FGBG, "fg2disc", params)).notes(&["G1c"]));
-        }
-    }
-    out
-}
-
-fn merge() -> Vec<Family> {
-    (1..=5)
-        .map(|lo| case("gap-merge", format!("cv-soft-lo{lo}"), CV, "fgdisc", vec![format!("layers_output={lo}")]).layer("fg1_matte", "fgdisc_soft").notes(&["G1d"]))
-        .collect()
-}
-
-/// vectors-in on the exact vector images of the fgdisc disc, at 32 bpc where the images hold
-/// their vectors without rounding.
-fn vecmatte() -> Vec<Family> {
-    [1, 3, 6]
-        .iter()
-        .map(|d| {
-            let params = vec![format!("display={d}"), HALF.into(), format!("vectors_max_displace={}", sources::FAMILY_VECTOR_SCALE)];
-            case("gap-vecmatte", format!("vin-display{d}"), VIN, "fgdisc", params)
-                .layer("vectors_prev", "fgvec_prev")
-                .layer("vectors_next", "fgvec_next")
-                .layer("fg1_matte", "fgdisc_matte")
-                .depth(32)
-                .notes(&["G1e"])
-        })
-        .collect()
-}
-
-fn blurflow() -> Vec<Family> {
-    [1, 3]
-        .iter()
-        .map(|d| {
-            let params = vec![format!("display={d}"), "speed_percent=200".into(), "blur_compensation=1".into()];
-            case("gap-blurflow", format!("fgbg-display{d}-blur1-speed200"), FGBG, "fgdisc", params).layer("fg1_matte", "fgdisc_matte").notes(&["G1f"])
-        })
-        .collect()
-}
-
-fn groups() -> Vec<Family> {
-    let mut out = Vec::new();
-    for d in [3, 6] {
-        for w in 1..=4 {
-            // Inverse w/ Smart Blend and Forward fill holes; Inverse and Forward, no Smart Blend do not
-            let fills = w == 2 || w == 3;
-            let params = vec![format!("display={d}"), format!("warping={w}"), HALF.into()];
-            let c = case("gap-groups", format!("fgbg-display{d}-warping{w}"), FGBG, "fgdisc", params).layer("fg1_matte", "fgdisc_matte");
-            out.push(c.notes(if fills { &["G1g"] } else { &["G1b"] }).settles(&["G1g"]));
-        }
-        let c = case("gap-groups", format!("fgbg-display{d}-speed100"), FGBG, "fgdisc", vec![format!("display={d}")]).layer("fg1_matte", "fgdisc_matte");
-        out.push(c.notes(&["G1h"]).settles(&["G1h"]));
-    }
-    out
-}
-
-/// The point settings of `gap-points`: a keyed point, its sub pixel twin, and two points that
-/// start on one pixel and move apart.
-const POINT_SETS: [(&str, &[&str]); 3] = [
-    ("keyed", &["pt1_use=5", "pt1_pos=40,30@0;46,32@11"]),
-    ("subpixel", &["pt1_use=5", "pt1_pos=40.4,30.3@0;46.7,32.6@11"]),
-    ("two-on-one-pixel", &["pt1_use=5", "pt1_pos=40,30@0;46,32@11", "pt2_use=5", "pt2_pos=40.2,29.8@0;43,35@11"]),
-];
-
-fn points() -> Vec<Family> {
-    let mut out = Vec::new();
-    for (tag, set) in POINT_SETS {
-        out.push(case("gap-points", format!("cv-{tag}"), CV, "stilltex", p(set)).notes(&["G2"]));
-        let mut fgbg = vec![HALF.to_string()];
-        fgbg.extend(p(set));
-        out.push(case("gap-points", format!("fgbg-{tag}"), FGBG, "stilltex", fgbg).notes(&["G2"]));
-    }
-    out
-}
-
 /// Three points at sub pixel positions on three layers' choices (all the only group without mattes).
 const DRAWN: [&str; 6] = ["pt1_use=2", "pt1_pos=10.3,12.6", "pt2_use=3", "pt2_pos=30.5,20.5", "pt3_use=5", "pt3_pos=50.75,35.25"];
 
@@ -383,24 +208,24 @@ fn drawgeom() -> Vec<Family> {
     let mut out = Vec::new();
     for depth in [8, 16, 32] {
         for g in [2, 3, 6] {
-            for (effect, tag, source_display) in [(FGBG, "fgbg", "display=2"), (CV, "cv", "display=1")] {
-                let mut params = vec![source_display.to_string(), format!("draw_geom={g}")];
-                params.extend(p(&DRAWN));
-                out.push(case("gap-drawgeom", format!("{tag}-source-geom{g}-d{depth}"), effect, "flatgrey", params).depth(depth).notes(&["G3"]));
-            }
+            // the Source display shows Alt Color Source A with the points drawn over it (without it, the missing layer fill)
+            let mut params = vec!["display=2".to_string(), format!("draw_geom={g}")];
+            params.extend(p(&DRAWN));
+            let c = case("gap-drawgeom", format!("fgbg-source-geom{g}-d{depth}"), FGBG, "flatgrey", params).layer("alt_source_a", "flatgrey");
+            out.push(c.depth(depth).notes(&["G3"]));
         }
     }
     out
 }
 
+/// The Blend view (2) of a one layer group of an FG stack: FG1 alone (Layers Output 2) and MAIN_BG alone (5).
 fn debug() -> Vec<Family> {
     let mut out = Vec::new();
     for track in [1, 2] {
-        for view in 1..=5 {
-            let params = vec!["display=3".into(), format!("debug_view_method={view}"), format!("track_frame={track}")];
-            // Warp has no open point and notes nothing
-            let c = case("gap-debug", format!("cv-view{view}-track{track}"), CV, "fgdisc", params);
-            out.push(if view == 1 { c } else { c.notes(&["G4"]) });
+        for lo in [2, 5] {
+            let params = vec!["display=3".into(), "debug_view_method=2".into(), format!("layers_output={lo}"), format!("track_frame={track}")];
+            let c = case("gap-debug", format!("cv-blend-lo{lo}-track{track}"), CV, "fgdisc", params).layer("fg1_matte", "fgdisc_matte");
+            out.push(c.notes(&["G4"]));
         }
     }
     out
@@ -427,12 +252,17 @@ fn wrap() -> Vec<Family> {
     let mut out = Vec::new();
     for w in 1..=3 {
         for blur in [0, 1] {
-            let params = vec!["track_rgb_a=1".into(), HALF.into(), format!("warping={w}"), format!("blur_compensation={blur}")];
+            let params = vec!["video_360=1".into(), HALF.into(), format!("warping={w}"), format!("blur_compensation={blur}")];
             out.push(case("gap-wrap", format!("fgbg-warping{w}-blur{blur}"), FGBG, "wraptex", params).notes(&["G6"]));
         }
     }
-    out.push(case("gap-wrap", "fgbg-alpha-only", FGBG, "alphaonly", p(&["track_rgb_a=1", HALF])).notes(&["G6"]));
-    out.push(case("gap-wrap", "fgbg-pole-d32", FGBG, "wrappole", p(&["track_rgb_a=1", HALF])).depth(32).notes(&["G6"]));
+    // a layered render: the masks of the layers below FG1 wrap too
+    for w in [1, 2] {
+        let params = vec!["video_360=1".into(), HALF.into(), format!("warping={w}")];
+        let c = case("gap-wrap", format!("fgbg-layered-warping{w}"), FGBG, "wraptex", params).layer("fg1_matte", "fgdisc_matte");
+        out.push(c.notes(&["G6"]));
+    }
+    out.push(case("gap-wrap", "fgbg-pole-blur1-d32", FGBG, "wrappole", p(&["video_360=1", HALF, "blur_compensation=1"])).depth(32).notes(&["G6"]));
     out
 }
 
@@ -467,7 +297,8 @@ fn keys() -> Vec<Family> {
     }
     for (tag, keys) in [("point-path", "10,10@0o20/50;50,40@11"), ("point-still-segment", "30,20@0o10/50;30,20@11")] {
         let params = vec!["display=2".to_string(), "pt1_use=5".into(), format!("pt1_pos={keys}")];
-        out.push(case("gap-keys", tag, FGBG, "flatgrey", params).depth(16).notes(&["G3"]).settles(&["K1e"]));
+        let c = case("gap-keys", tag, FGBG, "flatgrey", params).layer("alt_source_a", "flatgrey");
+        out.push(c.depth(16).notes(&["G3"]).settles(&["K1e"]));
     }
     out
 }
@@ -475,14 +306,6 @@ fn keys() -> Vec<Family> {
 /// The cases of one family, in a fixed order. Empty for an unknown id.
 pub fn cases_of(id: &str) -> Vec<Family> {
     match id {
-        "gap-shrink" => shrink(),
-        "gap-maskbm" => maskbm(),
-        "gap-order" => order(),
-        "gap-merge" => merge(),
-        "gap-vecmatte" => vecmatte(),
-        "gap-blurflow" => blurflow(),
-        "gap-groups" => groups(),
-        "gap-points" => points(),
         "gap-drawgeom" => drawgeom(),
         "gap-debug" => debug(),
         "gap-tracker2" => tracker2(),
@@ -672,7 +495,7 @@ mod tests {
             for c in &cases {
                 assert_eq!(c.gap, info.id);
                 assert!(labels.insert(c.label.clone()), "{}: {} twice", info.id, c.label);
-                assert!(c.notes.iter().all(|g| info.gaps.contains(g) || *g == "G1b" || *g == "G1d" || *g == "G3"), "{}: {:?}", c.label, c.notes);
+                assert!(c.notes.iter().all(|g| info.gaps.contains(g) || *g == "G3"), "{}: {:?}", c.label, c.notes);
                 assert!(c.label.is_ascii() && !c.label.contains(' '), "{}", c.label);
             }
             assert!(!info.gaps.is_empty() && info.gaps.iter().all(|g| TITLES.iter().any(|(id, _)| id == g)), "{}", info.id);
@@ -684,10 +507,7 @@ mod tests {
         let order: Vec<&str> = FAMILIES.iter().map(|f| f.id).collect();
         assert_eq!(
             order,
-            [
-                "gap-shrink", "gap-maskbm", "gap-order", "gap-merge", "gap-vecmatte", "gap-blurflow", "gap-groups", "gap-points", "gap-drawgeom",
-                "gap-debug", "gap-tracker2", "gap-wrap", "gap-tiny", "gap-keys"
-            ]
+["gap-drawgeom", "gap-debug", "gap-tracker2", "gap-wrap", "gap-tiny", "gap-keys"]
         );
     }
 
@@ -697,13 +517,14 @@ mod tests {
         for (id, _) in TITLES {
             assert!(covered.contains(id), "{id} has no family");
         }
-        assert_eq!(title("G1"), "matte shrink tail");
+        assert_eq!(title("G3"), "Draw Geom drawing");
+        assert_eq!(title("G4"), "one-layer Debug Blend view");
         assert_eq!(title("G6"), "solver, hole fill and blur wrap variants");
         assert_eq!(title("Z9"), "Z9");
         // only the observing families print nothing on purpose; every other case expects a note
         for info in FAMILIES {
             for c in cases_of(info.id) {
-                if !info.observe_only && !(info.id == "gap-debug" && c.label.starts_with("cv-view1-")) {
+                if !info.observe_only {
                     assert!(!c.notes.is_empty(), "{} {} expects no note", info.id, c.label);
                 }
             }
@@ -719,50 +540,27 @@ mod tests {
             assert!(c.params.iter().any(|p| p == param), "{id} {label}: {:?} lacks {param}", c.params);
             c
         };
-        // G1: Layers Output MAIN_BG and the Background display, shrink 0, 0.5, 1, 2, 3.5 on the hard matte
-        for s in ["0", "0.5", "1", "2", "3.5"] {
-            let cv = has("gap-shrink", &format!("cv-lo5-shrink-{s}"), &format!("fg1_inv_matte_shrink={s}"));
-            assert!(cv.params.contains(&"layers_output=5".to_string()) && cv.layers == [("fg1_matte", "fgdisc_matte")]);
-            let bg = has("gap-shrink", &format!("fgbg-bg-shrink-{s}"), "display=6");
-            assert_eq!((bg.main, bg.effect), ("fgdisc", "retime-fgbg"));
-        }
-        assert_eq!(labels("gap-shrink").len(), 10);
-        // G1b: Layers Output 2 and 5 at full resolution, Sensitivity 100
-        for lo in [2, 5] {
-            has("gap-maskbm", &format!("cv-lo{lo}-full-sens100"), "vector_resolution=2");
-        }
-        // G1c: two overlapping mattes from one file, by channel, in both orders
-        let ab = has("gap-order", "cv-ab-lo3", "fg2_matte_chan=2");
-        assert_eq!(ab.layers, [("fg1_matte", "fg2disc_matte"), ("fg2_matte", "fg2disc_matte")]);
-        has("gap-order", "cv-ba-lo3", "fg1_matte_chan=2");
-        // G1d: the soft matte at every Layers Output
-        assert_eq!(labels("gap-merge"), ["cv-soft-lo1", "cv-soft-lo2", "cv-soft-lo3", "cv-soft-lo4", "cv-soft-lo5"]);
-        assert!(cases_of("gap-merge").iter().all(|c| c.layers == [("fg1_matte", "fgdisc_soft")]));
-        // G1e: displays 1, 3 and 6, vector images coded at the scale the cases read them with
-        for d in [1, 3, 6] {
-            let c = has("gap-vecmatte", &format!("vin-display{d}"), &format!("vectors_max_displace={}", sources::FAMILY_VECTOR_SCALE));
-            assert_eq!(c.depth, 32);
-        }
-        // G1f: blur 1 at 200%; G1g and G1h: displays 3 and 6, warping 1 to 4 at 50%, and 100%
-        has("gap-blurflow", "fgbg-display3-blur1-speed200", "speed_percent=200");
-        assert_eq!(labels("gap-groups").len(), 10);
-        has("gap-groups", "fgbg-display6-warping4", "speed_percent=50");
-        assert!(!has("gap-groups", "fgbg-display3-speed100", "display=3").params.iter().any(|p| p.starts_with("speed_percent")));
-        // G2: the keyed point (40,30) to (46,32), a sub pixel variant, two points on one pixel
-        has("gap-points", "cv-keyed", "pt1_pos=40,30@0;46,32@11");
-        has("gap-points", "fgbg-two-on-one-pixel", "pt2_use=5");
-        // G3: flat grey, Draw Geom 2, 3 and 6, three sub pixel points, every depth
+        // G3: retime-fgbg's Source display with Alt Color Source on flat grey, Draw Geom 2, 3 and 6, three sub pixel points,
+        // every depth
         let depths: HashSet<u32> = cases_of("gap-drawgeom").iter().map(|c| c.depth).collect();
         assert_eq!(depths, HashSet::from([8, 16, 32]));
-        assert!(cases_of("gap-drawgeom").iter().all(|c| c.main == "flatgrey" && c.params.iter().filter(|p| p.contains("_pos=")).count() == 3));
-        // G4: views 1 to 5 with both Track Frames; G5: 0, 1 and 2 points at both resolutions
-        assert_eq!(labels("gap-debug").len(), 10);
-        has("gap-debug", "cv-view5-track2", "debug_view_method=5");
+        assert_eq!(labels("gap-drawgeom").len(), 9);
+        for c in cases_of("gap-drawgeom") {
+            assert_eq!((c.effect, c.main), ("retime-fgbg", "flatgrey"));
+            assert!(c.params.contains(&"display=2".to_string()) && c.params.iter().filter(|p| p.contains("_pos=")).count() == 3);
+            assert_eq!(c.layers, [("alt_source_a", "flatgrey")]);
+        }
+        // G4: the Blend view of FG1 alone and MAIN_BG alone, both Track Frames, with the hard matte
+        assert_eq!(labels("gap-debug"), ["cv-blend-lo2-track1", "cv-blend-lo5-track1", "cv-blend-lo2-track2", "cv-blend-lo5-track2"]);
+        let blend = has("gap-debug", "cv-blend-lo5-track2", "debug_view_method=2");
+        assert!(blend.params.contains(&"layers_output=5".to_string()) && blend.layers == [("fg1_matte", "fgdisc_matte")]);
+        // G5: 0, 1 and 2 points at both resolutions
         assert_eq!(labels("gap-tracker2").len(), 6);
         has("gap-tracker2", "cv-track-off-2pt-vr2", "main_bg_track=0");
-        // G6: warping 1 to 3, blur 0 and 1 on wraptex, alpha only, a 32 bpc pole crossing
-        assert_eq!(labels("gap-wrap").len(), 8);
-        assert!(cases_of("gap-wrap").iter().all(|c| c.params.contains(&"track_rgb_a=1".to_string())));
+        // G6: 360 Video, warping 1 to 3, blur 0 and 1 on wraptex, a layered render, a 32 bpc pole crossing with blur
+        assert_eq!(labels("gap-wrap").len(), 9);
+        assert!(cases_of("gap-wrap").iter().all(|c| c.params.contains(&"video_360=1".to_string())));
+        assert_eq!(has("gap-wrap", "fgbg-layered-warping2", "warping=2").layers, [("fg1_matte", "fgdisc_matte")]);
         assert_eq!(cases_of("gap-wrap").iter().find(|c| c.main == "wrappole").map(|c| c.depth), Some(32));
         // G7: 1x1 to 5x5 in all four effects; K1: handles on frame_num and speed_percent
         let sizes: HashSet<(usize, usize)> = cases_of("gap-tiny").iter().map(|c| c.size).collect();
@@ -789,7 +587,7 @@ mod tests {
     #[test]
     fn ids_parse_with_all_and_unknown_ids_are_errors() {
         assert_eq!(parse_ids("all").unwrap().len(), FAMILIES.len());
-        assert_eq!(parse_ids(" gap-wrap , gap-shrink,gap-wrap").unwrap(), ["gap-wrap", "gap-shrink"]);
+        assert_eq!(parse_ids(" gap-wrap , gap-tiny,gap-wrap").unwrap(), ["gap-wrap", "gap-tiny"]);
         assert!(parse_ids("gap-wat").unwrap_err().contains("unknown family `gap-wat`"));
         assert!(parse_ids(",").is_err());
     }
@@ -798,8 +596,10 @@ mod tests {
     fn mini_list() -> Vec<EffectInfo> {
         parse_list(
             r#"[{"id":"create-vectors","kind":"temporal","params":[
+              {"id":"display","name":"Display","kind":"popup","choices":["Vectors","Source","Debug"],"default":1},
+              {"id":"debug_view_method","name":"Debug View Method","kind":"popup","choices":["Warp","Blend","Diff","Detail Compare","Edge Compare"],"default":2},
               {"id":"layers_output","name":"Layers Output","kind":"popup","choices":["All","FG1","FG2","FG3","MAIN_BG"],"default":1},
-              {"id":"fg1_inv_matte_shrink","name":"FG1: Inv Matte Shrink","kind":"float","valid_min":0.0,"valid_max":10.0,"slider_min":0.0,"slider_max":10.0,"default":0.0}
+              {"id":"track_frame","name":"Track Frame","kind":"popup","choices":["Previous","Next"],"default":1}
              ],"layers":[{"id":"fg1_matte","name":"FG1: Matte","optional":true}]}]"#,
         )
         .unwrap()
@@ -807,25 +607,27 @@ mod tests {
 
     #[test]
     fn build_keeps_the_listed_effects_and_refuses_a_setting_the_effect_lacks() {
-        let built = build(&mini_list(), &["gap-shrink".to_string()]).unwrap();
-        assert_eq!(built.counts, [("gap-shrink", 5)], "only the create-vectors half: retime-fgbg is not listed");
-        assert!(built.cases.iter().all(|c| c.family.as_deref() == Some("gap-shrink") && c.effect == "create-vectors"));
+        let built = build(&mini_list(), &["gap-debug".to_string(), "gap-tiny".to_string()]).unwrap();
+        assert_eq!(built.counts, [("gap-debug", 4), ("gap-tiny", 5)], "only the create-vectors cases: the other effects are not listed");
+        assert!(built.cases.iter().all(|c| c.effect == "create-vectors"));
         let files: Vec<&str> = built.inputs.iter().map(|f| f.file.as_str()).collect();
-        assert_eq!(files, ["inputs/fgdisc-64x48.d8.f12.rgba", "inputs/fgdisc_matte-64x48.d8.f12.rgba"]);
+        assert_eq!(files.len(), 7, "{files:?}");
+        assert_eq!(files[..2], ["inputs/fgdisc-64x48.d8.f12.rgba", "inputs/fgdisc_matte-64x48.d8.f12.rgba"]);
         let c = &built.cases[1];
-        assert_eq!(c.label, "gap-shrink-cv-lo5-shrink-0.5");
-        assert!(c.id.starts_with("create-vectors.gap-shrink-cv-lo5-shrink-0_5.fgdisc-64x48.d8."), "{}", c.id);
+        assert_eq!(c.family.as_deref(), Some("gap-debug"));
+        assert_eq!(c.label, "gap-debug-cv-blend-lo5-track1");
+        assert!(c.id.starts_with("create-vectors.gap-debug-cv-blend-lo5-track1.fgdisc-64x48.d8."), "{}", c.id);
         assert_eq!(c.reference, format!("{}.rgba", c.id));
         assert_eq!(c.layers["fg1_matte"], "inputs/fgdisc_matte-64x48.d8.f12.rgba");
         assert_eq!((c.frames, c.fps.as_deref(), c.kind), (12, Some("24"), CaseKind::Temporal));
         // a param the effect does not have is an error, so is a popup value out of range
-        let err = build(&mini_list(), &["gap-maskbm".to_string()]).unwrap_err();
-        assert!(err.contains("has no param `vector_resolution`"), "{err}");
-        let f = case("gap-merge", "bad", CV, "fgdisc", vec!["layers_output=6".into()]);
+        let err = build(&mini_list(), &["gap-tracker2".to_string()]).unwrap_err();
+        assert!(err.contains("has no param `main_bg_track`"), "{err}");
+        let f = case("gap-debug", "bad", CV, "fgdisc", vec!["layers_output=6".into()]);
         assert!(check(&f, &mini_list()[0]).unwrap_err().contains("is not a value"));
-        let f = case("gap-merge", "bad", CV, "fgdisc", Vec::new()).layer("fg9_matte", "fgdisc_matte");
+        let f = case("gap-debug", "bad", CV, "fgdisc", Vec::new()).layer("fg9_matte", "fgdisc_matte");
         assert!(check(&f, &mini_list()[0]).unwrap_err().contains("no layer `fg9_matte`"));
-        let f = case("gap-merge", "bad", CV, "nosuch", Vec::new());
+        let f = case("gap-debug", "bad", CV, "nosuch", Vec::new());
         assert!(check(&f, &mini_list()[0]).unwrap_err().contains("no clip source `nosuch`"));
         // ids are unique over every family, and stable
         let every: Vec<Case> = all().iter().map(to_case).collect();
@@ -857,12 +659,10 @@ mod tests {
         }
         let keys: Vec<Vec<&str>> = cases_of("gap-keys").iter().map(|f| settles(&to_case(f))).collect();
         assert_eq!(keys, [vec!["K1a"], vec!["K1b"], vec!["K1b"], vec!["K1d"], vec!["K1c"], vec!["K1e"], vec!["K1e"]]);
-        let speed100 = cases_of("gap-groups").into_iter().find(|f| f.label == "fgbg-display6-speed100").unwrap();
-        assert_eq!(settles(&to_case(&speed100)), ["G1h"]);
         // a family this build lacks, a renamed case and a matrix case
         let mut c = to_case(&every[0]);
-        c.label = "gap-shrink-renamed".into();
-        assert_eq!((family_case(&c), settles(&c)), (None, vec!["G1"]));
+        c.label = "gap-drawgeom-renamed".into();
+        assert_eq!((family_case(&c), settles(&c)), (None, vec!["G3"]));
         c.family = Some("gap-future".into());
         assert!(settles(&c).is_empty());
         c.family = None;

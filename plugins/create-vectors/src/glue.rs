@@ -7,17 +7,17 @@
 //! * the FG matte layers with pixels (`nfg`, FG1 first, stopping at the first empty one) are
 //!   fetched at the layer times of the pair and their `fgk_matte_chan` channel is taken
 //!   (`matte::extract`); every layer (FG1 to FGn, then Main_BG) gets its own flow with its
-//!   sensitivity, Track and tracking matte, and the layers of `layers_output` are merged into the
-//!   vector image (`create_vectors::create_vectors_job`, rule G1d);
+//!   sensitivity, Track and visible matte, and the layers of `layers_output` are composited into
+//!   the vector image (`create_vectors::create_vectors_job`);
 //! * a `Pt k: Use` point in use at the layer times of both frames (not Don't Use and the same
 //!   value at both; with `nfg == 0` every value 2 to 5 belongs to the only layer) becomes user
-//!   displacement of its layer (rule G2), or drives the second tracker of a layer whose Track is
+//!   displacement of its layer, or drives the second tracker of a layer whose Track is
 //!   off (rule G5); masks (`First Mask`, `Last Mask`) feed the same slot but are parameter
 //!   kinds `fx-core` cannot express, so they do not exist for this crate;
-//! * `Display == Debug` shows the debug view of `Debug View Method` (rule G4) of the pair's
-//!   flow (with FG layers the merged flow);
+//! * `Display == Debug` shows the debug view of `Debug View Method` of the pair's flow (with FG
+//!   layers composed per layer; the Blend view of a one layer group is rule G4);
 //! * the Source display and the Debug display draw the points in use at the frame time of the
-//!   layers `Draw Geom` names over the image (rule G3).
+//!   layers `Draw Geom` names over the image (the original's cross).
 //!
 //! Tiny frames (U, ours, G7 family): a frame with a side of 1 has no motion search, so the
 //! Vectors and the Debug displays are the zero vector image whatever the FG layers, points,
@@ -289,7 +289,7 @@ pub fn layer_points(curves: &ParamCurves, time_a: i32, time_b: i32, nfg: usize) 
     out
 }
 
-/// The Draw Geom overlay (rule G3) over the upside down `img` (row order), the Source display after
+/// The Draw Geom overlay over the upside down `img` (row order), the Source display after
 /// the source copy or the Debug display after its view: the points in use at the frame time
 /// (`frame_time` of the current frame number, the rounded frame time) whose layer is in the
 /// group `Draw Geom` names ([`overlay_layers`]), at their position at that time and in their

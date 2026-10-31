@@ -23,8 +23,8 @@
 //!
 //! | stage | runs on | why |
 //! |---|---|---|
-//! | `flow::solve`, `flow::solve_pair` (pyramids built on the device, kept resident in the frame cache) | CPU until the solver kernels are ported | the kernels follow the rules before the parity work (the 360 wrap, the vertical tap order of the pyramid filters); on the device the solve is the largest part of a vector frame (the measured per call times are in docs/engine.md, Device) |
-//! | `flow::extras::solve_pyramids_with` (masks, user displacement, wrap; host pyramids uploaded) | CPU until the solver kernels are ported | the same kernels; on the device the solve dominates its upload |
+//! | `flow::solve`, `flow::solve_pair` (pyramids built on the device, kept resident in the frame cache) | device; a call with the wrap-around (360) flag on the CPU | the largest part of a vector frame (the measured per call times are in docs/engine.md, Device); the 360 rules of the solver have no kernels yet |
+//! | `flow::extras::solve_pyramids_with` (masks, user displacement, wrap; host pyramids uploaded) | CPU until its kernels are ported | the layered solves (the ungated block matching, the user displacement) follow the rules before the parity work |
 //! | `forward::forward_warp_with` (codes 2 and 3, the flow inversion, the Warp debug view; the mesh and its mip levels on the host) | device, except the Gouraud variant (`pyramid = false`), which every effect that warps forward uses | 4 to 7 times faster than the single threaded CPU rasteriser; the Gouraud variant has no kernel |
 //! | `compose::compose_vectors` (the warps, Blend, Weighted Blend, Smart Blend, the hole fill and the blur compensation of one vector frame) as one resident chain ([`chain`]) | device, except with the wrap-around (360) flag; no effect calls it (`stages::AboveFirstTaps` and `stages::GouraudForward` compose on the CPU) | the frames and flows go up once and only the finished frame comes back |
 //! | the layered compositions of `retime-fgbg` with mattes, vector coding, mattes, overlays | CPU | proven exact on the device, but alone each costs more in transfers than it saves |
@@ -106,12 +106,12 @@ pub struct Placement {
 
 /// The stages whose kernels follow the rules before the parity work (docs/engine.md, Device): the
 /// default placement keeps them on the CPU, and a port takes its stage out of this list.
-const NOT_PORTED: &[Stage] = &[Stage::Solve, Stage::SolvePair, Stage::SolvePyramidsWith];
+const NOT_PORTED: &[Stage] = &[Stage::SolvePyramidsWith];
 
 impl Default for Placement {
-    /// The table of the module documentation: the solver stages (`Solve`, `SolvePair`,
-    /// `SolvePyramidsWith`) on the CPU until their kernels are ported, the forward warp and the
-    /// compose chain on the device.
+    /// The table of the module documentation: `Solve` and `SolvePair` on the device (a call with
+    /// the 360 flag runs on the CPU), `SolvePyramidsWith` (the layered solves) on the CPU until its
+    /// kernels are ported, the forward warp and the compose chain on the device.
     fn default() -> Placement {
         let mut p = Placement::all_on_device();
         for &s in NOT_PORTED {
@@ -326,14 +326,9 @@ impl<B: Backend> Exec<B> {
         self.counters[stage.slot()].first_refusal.lock().unwrap_or_else(|e| e.into_inner()).clone()
     }
 
-    /// Runs `stage`: on the device when it is placed there and the device is active, the CPU
-    /// function `cpu` otherwise or when the device attempt fails.
-    fn run<T>(&self, stage: Stage, dev: impl FnOnce(&B) -> Result<T, StageError>, cpu: impl FnOnce() -> fx_core::Result<T>) -> fx_core::Result<T> {
-        self.run_if(stage, true, dev, cpu)
-    }
-
-    /// [`Exec::run`], with `eligible` false for a call whose settings the placement keeps on the
-    /// CPU (counted as a CPU call, not as a fallback).
+    /// Runs `stage`: on the device when it is placed there, the device is active and the call is
+    /// `eligible`, the CPU function `cpu` otherwise or when the device attempt fails. A call whose
+    /// settings keep it on the CPU (`eligible` false) counts as a CPU call, not as a fallback.
     fn run_if<T>(&self, stage: Stage, eligible: bool, dev: impl FnOnce(&B) -> Result<T, StageError>, cpu: impl FnOnce() -> fx_core::Result<T>) -> fx_core::Result<T> {
         let c = &self.counters[stage.slot()];
         let add = |a: &AtomicU64, t: Instant| {
@@ -375,16 +370,18 @@ impl<B: Backend> Exec<B> {
 }
 
 impl<B: Backend> Stages for Exec<B> {
+    // a solve with the wrap-around (360) flag runs on the CPU: the 360 rules of the solver have no
+    // kernels yet (counted as a CPU call, not as a fallback)
     fn solve(&self, x: &Image, y: &Image, s: &FlowSettings) -> fx_core::Result<FlowField> {
-        self.run(Stage::Solve, |b| b.solve(x, y, s), || flow::solve(x, y, s))
+        self.run_if(Stage::Solve, !s.wrap, |b| b.solve(x, y, s), || flow::solve(x, y, s))
     }
 
     fn solve_pair(&self, a: &Image, b: &Image, s: &FlowSettings) -> fx_core::Result<FlowPair> {
-        self.run(Stage::SolvePair, |d| d.solve_pair(a, b, s), || flow::solve_pair(a, b, s))
+        self.run_if(Stage::SolvePair, !s.wrap, |d| d.solve_pair(a, b, s), || flow::solve_pair(a, b, s))
     }
 
     fn solve_pyramids_with(&self, x: &Pyramid, y: &Pyramid, s: &FlowSettings, e: SolveExtras<'_>) -> fx_core::Result<FlowField> {
-        self.run(Stage::SolvePyramidsWith, |b| b.solve_pyramids_with(x, y, s, e), || solve_pyramids_with(x, y, s, e))
+        self.run_if(Stage::SolvePyramidsWith, !s.wrap, |b| b.solve_pyramids_with(x, y, s, e), || solve_pyramids_with(x, y, s, e))
     }
 
     fn forward_warp_with(&self, out: &mut Image, src: &Image, flow: &FlowField, amount: f32, opts: ForwardOpts, want_coverage: bool) -> fx_core::Result<Option<Coverage>> {

@@ -262,7 +262,7 @@ fn max_displace_is_the_16_16_value_at_the_given_time() {
 
 #[test]
 fn each_layered_load_is_stepped_by_the_matte_of_its_own_frame() {
-    // rule G1e: F_AB is loaded from Vectors: Next at T(A) and stepped by the layer's matte AT A, F_BA from
+    // the per layer matte step: F_AB is loaded from Vectors: Next at T(A) and stepped by the layer's matte AT A, F_BA from
     // Vectors: Prev at T(B) by its matte AT B. The vector layers hold one flow on the left half and another on the
     // right half; the layer's matte covers the left half at A and the right half at B. F_AB keeps the left half's
     // vectors exactly and its holes (the right half) take them from the fill; F_BA the other way round

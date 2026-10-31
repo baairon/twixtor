@@ -112,9 +112,6 @@ pub fn effective_enqueue(session: &Session, mattes: &[&DevicePlane], w: usize, h
     let o = |k: usize| out.get(k).unwrap_or(&out[0]).data.arg();
     let args = [m(0), m(1), m(2), o(0), o(1), o(2), o(3), Arg::U32(nfg as u32), count(n)];
     launch(session, "mt_effective", Range::D1(n), &args)?;
-    if nfg >= 2 {
-        fx_core::gaps::record(&crate::gaps::G1C);
-    }
     Ok(())
 }
 

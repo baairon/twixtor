@@ -1113,14 +1113,14 @@ mod tests {
         // a family without a single compared case is not settled
         assert!(!family_grades(&[family_result("gap-c", "gap-c-x", Status::NoReference, None, &[])])[0].settled());
         // nor is a known family of which only some cases ran, however exact they are
-        let part = family_grades(&[family_result("gap-blurflow", "gap-blurflow-fgbg-display1-blur1-speed200", Status::Pass, Some(0.0), &[])]);
-        assert_eq!((part[0].cases, part[0].exact, part[0].full), (1, 1, 2));
+        let part = family_grades(&[family_result("gap-debug", "gap-debug-cv-blend-lo2-track1", Status::Pass, Some(0.0), &[])]);
+        assert_eq!((part[0].cases, part[0].exact, part[0].full), (1, 1, 4));
         assert!(!part[0].settled());
-        let both = [
-            family_result("gap-blurflow", "gap-blurflow-fgbg-display1-blur1-speed200", Status::Pass, Some(0.0), &[]),
-            family_result("gap-blurflow", "gap-blurflow-fgbg-display3-blur1-speed200", Status::Pass, Some(0.0), &[]),
-        ];
-        assert!(family_grades(&both)[0].settled());
+        let every: Vec<CaseResult> = ["lo2-track1", "lo5-track1", "lo2-track2", "lo5-track2"]
+            .iter()
+            .map(|t| family_result("gap-debug", &format!("gap-debug-cv-blend-{t}"), Status::Pass, Some(0.0), &[]))
+            .collect();
+        assert!(family_grades(&every)[0].settled());
         let v = to_json(&rs, false);
         assert_eq!(v["families"]["gap-a"], json!({"cases": 2, "compared": 2, "exact": 2, "failed": 0, "missing": 0, "settled": true}));
         assert_eq!(v["families"]["gap-b"]["settled"], false);
@@ -1146,28 +1146,27 @@ mod tests {
 
     #[test]
     fn a_family_case_that_prints_no_note_is_a_warning() {
-        // gap-shrink's cv-lo5-shrink-2 must note G1 and G1d
-        let label = "gap-shrink-cv-lo5-shrink-2";
-        let both = family_result("gap-shrink", label, Status::Pass, Some(0.0), &["G1", "G1b", "G1d"]);
+        // gap-debug's cv-blend-lo2-track1 must note G4
+        let label = "gap-debug-cv-blend-lo2-track1";
+        let both = family_result("gap-debug", label, Status::Pass, Some(0.0), &["G4", "G5"]);
         assert!(missing_notes(&[both]).is_empty());
-        let none = family_result("gap-shrink", label, Status::Pass, Some(0.0), &[]);
+        let none = family_result("gap-debug", label, Status::Pass, Some(0.0), &[]);
         let w = missing_notes(&[none]);
         assert_eq!(w.len(), 1);
-        assert!(w[0].contains("fx.gap-shrink-cv-lo5-shrink-2 (gap-shrink) printed no note for G1 (matte shrink tail), G1d (create-vectors merge)"), "{}", w[0]);
-        let one = family_result("gap-shrink", label, Status::Fail, Some(0.1), &["G1d"]);
-        assert!(missing_notes(&[one])[0].contains("printed no note for G1 (matte shrink tail):"), "a failing comparison still ran vfx");
+        assert!(w[0].contains("fx.gap-debug-cv-blend-lo2-track1 (gap-debug) printed no note for G4 (one-layer Debug Blend view)"), "{}", w[0]);
+        let one = family_result("gap-debug", label, Status::Fail, Some(0.1), &["G5"]);
+        assert!(missing_notes(&[one])[0].contains("printed no note for G4 (one-layer Debug Blend view):"), "a failing comparison still ran vfx");
         // no run, no judgement: no reference, or an error
-        assert!(missing_notes(&[family_result("gap-shrink", label, Status::NoReference, None, &[])]).is_empty());
-        let mut broken = family_result("gap-shrink", label, Status::Fail, None, &[]);
+        assert!(missing_notes(&[family_result("gap-debug", label, Status::NoReference, None, &[])]).is_empty());
+        let mut broken = family_result("gap-debug", label, Status::Fail, None, &[]);
         broken.error = Some("vfx exited with code 3: vfx: error: unsupported: x".into());
         assert!(missing_notes(&[broken]).is_empty());
-        // the observing families and the Warp view expect nothing
+        // the observing families expect nothing
         assert!(missing_notes(&[family_result("gap-tiny", "gap-tiny-cv-1x1", Status::Pass, Some(0.0), &[])]).is_empty());
-        assert!(missing_notes(&[family_result("gap-debug", "gap-debug-cv-view1-track1", Status::Pass, Some(0.0), &[])]).is_empty());
         // a case this build does not know: any note will do, unless its family only observes
-        let unknown = family_result("gap-shrink", "gap-shrink-future", Status::Pass, Some(0.0), &[]);
+        let unknown = family_result("gap-debug", "gap-debug-future", Status::Pass, Some(0.0), &[]);
         assert!(missing_notes(&[unknown])[0].contains("printed no note: its settings may no longer reach an open rule"));
-        assert!(missing_notes(&[family_result("gap-shrink", "gap-shrink-future", Status::Pass, Some(0.0), &["G2"])]).is_empty());
+        assert!(missing_notes(&[family_result("gap-debug", "gap-debug-future", Status::Pass, Some(0.0), &["G5"])]).is_empty());
         assert!(missing_notes(&[family_result("gap-keys", "gap-keys-future", Status::Pass, Some(0.0), &[])]).is_empty());
         assert!(missing_notes(&[family_result("gap-later", "gap-later-x", Status::Pass, Some(0.0), &[])])[0].contains("printed no note"));
     }

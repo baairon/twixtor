@@ -43,11 +43,9 @@ params as `vfx apply --param` takes them (keyframes included).
 
 gen --families writes a family test set instead of that matrix: the reference
 case families of the open parity gaps, the cases that settle each stated rule
-once they are rendered in the original plugin (gap-shrink, gap-maskbm,
-gap-order, gap-merge, gap-vecmatte, gap-blurflow, gap-groups, gap-points,
-gap-drawgeom, gap-debug, gap-tracker2, gap-wrap), plus gap-tiny (frames of 1x1
-to 5x5) and gap-keys (Bezier ease handles), which only observe. A family case
-has its own clips (a moving disc and its mattes, a texture that wraps across
+once they are rendered in the original plugin (gap-drawgeom, gap-debug,
+gap-tracker2, gap-wrap), plus gap-tiny (frames of 1x1 to 5x5) and gap-keys
+(Bezier ease handles), which only observe. A family case has its own clips (a moving disc and its mattes, a texture that wraps across
 the width, and others), size, depth, 12 frames at 24 fps and settings, so the
 matrix flags do not apply; --effects keeps the families of those effects. Each
 case records its `family` in cases.json, and gen prints the cases per family.
@@ -488,10 +486,10 @@ mod tests {
 
     #[test]
     fn gen_families_takes_ids_or_all_and_refuses_the_matrix_flags() {
-        let Command::Gen(a) = p(&["gen", "--out", "set", "--families", "gap-wrap,gap-shrink", "--effects", "retime-fgbg", "--jobs", "2", "--vfx", "v"]).unwrap() else {
+        let Command::Gen(a) = p(&["gen", "--out", "set", "--families", "gap-wrap,gap-tiny", "--effects", "retime-fgbg", "--jobs", "2", "--vfx", "v"]).unwrap() else {
             panic!("not gen")
         };
-        assert_eq!(a.families, Some(vec!["gap-wrap".to_string(), "gap-shrink".to_string()]));
+        assert_eq!(a.families, Some(vec!["gap-wrap".to_string(), "gap-tiny".to_string()]));
         assert_eq!((a.effects.as_deref(), a.jobs), (Some(&["retime-fgbg".to_string()][..]), Some(2)));
         let Command::Gen(all) = p(&["gen", "--out", "set", "--families=all"]).unwrap() else { panic!("not gen") };
         assert_eq!(all.families.unwrap().len(), crate::families::FAMILIES.len());

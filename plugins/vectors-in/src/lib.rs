@@ -157,7 +157,7 @@ impl Effect for VectorsIn {
         ]
     }
 
-    /// The open parity gaps of the layered retime path over loaded vectors (`retime_engine::gaps`).
+    /// The open parity gaps of this effect (`retime_engine::gaps`): none, its layered path follows the original.
     fn gaps(&self) -> &'static [&'static fx_core::OpenGap] {
         retime_engine::gaps::VECTORS_IN
     }
