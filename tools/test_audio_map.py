@@ -75,7 +75,7 @@ class MapTests(unittest.TestCase):
                     self.assertEqual([t for t, _ in knots], [k / 2 for k in range(97)])
 
     def test_the_half_frame_knot_is_the_engines_half_step(self):
-        # 100@0;0@1: the half step at k = 1 reads tick trunc(50 + 0.1) = 50, speed 50%
+        # 100@0;0@1: the half step at k = 1 reads tick trunc(50 + 0.05) = 50, speed 50%
         knots = am.build_knots("retime", ["speed_percent=100@0;0@1"], 24, 1)
         self.assertEqual(knots, [(0.0, 0.0), (0.5, 0.25), (1.0, 0.25)])
 

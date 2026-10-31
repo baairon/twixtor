@@ -40,8 +40,9 @@ from collections import namedtuple
 from fractions import Fraction
 from itertools import islice
 
-# the effect reads the curve 0.1 tick after each half frame, then drops the fraction of a tick
-SAMPLE_BIAS = 0.1
+# the effect reads the curve 0.05 tick after each half frame, then drops the fraction of a tick (the engine's K in
+# timeline.rs); with whole ticks a frame the half frame times are whole or half ticks, so the bias never moves a read
+SAMPLE_BIAS = 0.05
 # a position this close to a whole frame shows that frame as it is, with no interpolation
 EXACT = 0.005
 # the tail search accepts a position this close to a whole frame, inside the tolerance above

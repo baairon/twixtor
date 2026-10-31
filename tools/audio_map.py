@@ -10,7 +10,7 @@ raw pcm_f32le and the encode. it can also print where each output frame lands in
 
 the map: output position t (output frames, continuous) shows clip position p(t) (clip frames).
 - retime, retime-fgbg and vectors-in in Speed mode (time_remap_mode=1): p is linear between the knots of
-  the effect's own half frame sum (32 bit floats, the speed read at tick trunc(L*k/2 + 0.1), L the ticks a
+  the effect's own half frame sum (32 bit floats, the speed read at tick trunc(L*k/2 + 0.05), L the ticks a
   frame of vfx's time base: 100 at a whole rate, D at N/D), plus trunc(src_time_offset) * out_fps / in_fps
   in retime only. the rate settings (in_fps_is_out_fps, input_frame_rate, input_fields) act only through
   that offset: the rate ratio and the duration of a source frame cancel everywhere else.

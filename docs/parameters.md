@@ -101,7 +101,7 @@ Labels source frames. For each in-between frame the labels of its two source fra
 | `4` | any | the nearer frame copied, no motion search |
 | `5` | any | a cross-fade of the two, no motion search, whatever `frame_interp` says |
 
-Its keys count source frames (clip frames), not output frames: the label is sampled at each source frame's own time. Labels step; they never interpolate. Because the `5` row wins, the pair that leaves a `5` span is cross-faded even across a label change. Example: a cut between source frames 23 and 24 is `1@0;2@24`; at 50% output frame 47 (position 23.5) is then a copy of frame 23.
+The label is sampled at each source frame's own time, so at the output rate (the default `in_fps_is_out_fps=1`) its keys count source frames (clip frames), not output frames. With another input rate (`in_fps_is_out_fps=0` and an `input_frame_rate`, as `tools/apply.py --fps` sets them) the keys still count output frames, and source frame f is read at output frame f x out_fps / input_frame_rate ([timing](timing.md)). Labels step; they never interpolate. Because the `5` row wins, the pair that leaves a `5` span is cross-faded even across a label change. Example: a cut between source frames 23 and 24 is `1@0;2@24`; at 50% output frame 47 (position 23.5) is then a copy of frame 23.
 
 ### display
 
