@@ -387,10 +387,15 @@ class ApplyTests(Workspace):
                 self.assertEqual((codec, width, height), ("ffv1", "101", "61"), probe)
                 self.assertTrue(pix_fmt.startswith(("bgra", "gbrap")), probe)
                 raw_in, raw_expect, raw_back = (self.path(n) for n in ("in.raw", "expect.raw", "back.raw"))
-                ff("-i", rgb, "-an", "-pix_fmt", wire, "-f", "rawvideo", raw_in)
-                # the input as apply.py hands it to vfx: a source without alpha (ffv1 stores this one as bgr0) opaque
-                if tool.opaque_source(tool.probe(rgb)):
-                    tool.fill_file(raw_in, tool.OpaqueFill(depth, 101, 61))
+                # the input as apply.py gives it to vfx: ffv1 stores this source as bgr0, 8 bits a sample and no
+                # alpha, so it is decoded as rgba, made opaque and, at 16 bpc, expanded to v * 257
+                ff("-i", rgb, "-an", "-pix_fmt", "rgba", "-f", "rawvideo", raw_in)
+                self.assertTrue(tool.opaque_source(tool.probe(rgb)))
+                with open(raw_in, "rb") as handle:
+                    decoded = bytearray(handle.read())
+                decoded[3::4] = b"\xff" * (len(decoded) // 4)
+                with open(raw_in, "wb") as handle:
+                    handle.write(expand8(decoded, depth, 101, 61) if depth != 8 else decoded)
                 run = subprocess.run([VFX, "apply", "selftest-invert", "--width", "101", "--height", "61",
                                       "--depth", str(depth), "--in", raw_in, "--out", raw_expect],
                                      shell=False, capture_output=True, text=True)
@@ -667,7 +672,10 @@ class TemporalTests(Workspace):
         self.assertEqual(data["input_frames"], 30)
         self.assertEqual([layer["id"] for layer in data["layers"]], ["overlay"])
         self.assertTrue(data["layers"][0]["temp"].endswith("layer_overlay.rgba64le"))
-        self.assertEqual(len(data["temp_files"]), 2)
+        # the layer is 8 bit: decoded to an rgba file first, which apply.py expands into the rgba64le one vfx reads
+        self.assertEqual([os.path.basename(t["path"]) for t in data["temp_files"][:2]],
+                         ["layer_overlay.rgba", "layer_overlay.rgba64le"])
+        self.assertEqual(len(data["temp_files"]), 3)
         self.assertEqual(len(data["commands"]), 4)
         # 45 frames outlast the 1 s of audio, which just ends early
         self.assertEqual(data["audio"], {"plan": "ends-early", "shortest": False})
@@ -2371,9 +2379,36 @@ def split_alpha(raw, depth, width, height):
     return colour, alpha
 
 
-class OpaqueTests(Workspace):
-    """footage without an alpha channel reaches vfx opaque at every depth, its layers too; a real alpha channel
-    passes on as ffmpeg decodes it."""
+def expand8(raw8, depth, width, height, opaque=False):
+    """what apply.py gives vfx for 8 bit rgba frames `raw8` at `depth` 16 or 32, by the test's own arithmetic: every
+    sample v as v * 257, or as the f32 of v / 255 in the planes G, B, R, A; the alpha white when `opaque`."""
+    import struct
+    raw8 = bytearray(raw8)
+    if opaque:
+        raw8[3::4] = b"\xff" * (len(raw8) // 4)
+    if depth == 16:
+        return struct.pack("<%dH" % len(raw8), *(v * 257 for v in raw8))
+    n, out = width * height, []
+    for start in range(0, len(raw8), 4 * n):
+        frame = raw8[start:start + 4 * n]
+        for channel in (1, 2, 0, 3):
+            out.append(struct.pack("<%df" % n, *(v / 255 for v in frame[channel::4])))
+    return b"".join(out)
+
+
+def nearest_f32(value, exact):
+    """whether the f32 `value` is the f32 nearest to the fraction `exact`: no f32 next to it is closer."""
+    import struct
+    bits = struct.unpack("<I", struct.pack("<f", value))[0]
+    near = [struct.unpack("<f", struct.pack("<I", b))[0] for b in (bits - 1, bits + 1) if 0 <= b < 0x7F800000]
+    gap = abs(Fraction(value) - exact)
+    return all(gap <= abs(Fraction(n) - exact) for n in near)
+
+
+class PreparedFrameTests(Workspace):
+    """what apply.py gives vfx: a source of 8 bits a sample decoded at 16 or 32 bpc is expanded exactly (v * 257,
+    v / 255), footage without an alpha channel arrives opaque at every depth, its layers too, a real 8 bit alpha
+    expands like the colour, and a deeper source keeps ffmpeg's conversion."""
 
     W, H, FRAMES = 48, 32, 6
     WHITE = {8: 255, 16: 65535, 32: 1.0}
@@ -2382,14 +2417,14 @@ class OpaqueTests(Workspace):
         super().setUp()
         if not TEMPORAL:
             self.skipTest("this vfx has no temporal self-test effects (build it from the current workspace)")
-        size, seconds = f"{self.W}x{self.H}", self.FRAMES / FPS
-        # an 8 bit source without alpha that ffmpeg converts to an alpha short of white (65532 at 16 bpc)
+        self.size, self.seconds = f"{self.W}x{self.H}", self.FRAMES / FPS
+        # an 8 bit source without alpha: ffmpeg's own conversion gives its alpha 65532 at 16 bpc
         self.bgr0 = self.path("bgr0.mkv")
-        ff("-f", "lavfi", "-i", f"testsrc=size={size}:rate={FPS}:duration={seconds}", "-c:v", "ffv1", "-pix_fmt", "bgr0",
-           self.bgr0)
-        # a source with a real alpha channel, every level of it
+        ff("-f", "lavfi", "-i", f"testsrc=size={self.size}:rate={FPS}:duration={self.seconds}", "-c:v", "ffv1",
+           "-pix_fmt", "bgr0", self.bgr0)
+        # an 8 bit source with a real alpha channel, every level of it
         self.bgra = self.path("bgra.mkv")
-        ff("-f", "lavfi", "-i", f"testsrc=size={size}:rate={FPS}:duration={seconds}", "-vf",
+        ff("-f", "lavfi", "-i", f"testsrc=size={self.size}:rate={FPS}:duration={self.seconds}", "-vf",
            "format=rgba,geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='mod(X*7+Y*3+N*40,256)'", "-c:v", "ffv1",
            "-pix_fmt", "bgra", self.bgra)
         # a post-stage that keeps a copy of the frames it passes on
@@ -2407,70 +2442,157 @@ class OpaqueTests(Workspace):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         return slurp(raw)
 
-    def plain_decode(self, src, depth):
-        """the frames ffmpeg decodes from `src` with the decode's filters of apply.py, alpha untouched."""
+    def plain_decode(self, src, depth, size=None):
+        """the frames ffmpeg decodes from `src` with the decode's filters of apply.py to the raw format of `depth`."""
         info = tool.probe(src)
-        graph = ",".join(tool.decode_filters(None, info, {"width": self.W, "height": self.H}))
+        w, h = size or (self.W, self.H)
+        graph = ",".join(tool.decode_filters(None, info, {"width": w, "height": h}))
         out = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-nostdin", "-i", src, "-map", "0:v:0", "-vf", graph,
                               "-pix_fmt", tool.PIX_FMT[depth], "-f", "rawvideo", "-"], capture_output=True, check=True)
         return out.stdout
 
-    def test_an_8_bit_source_without_alpha_reaches_vfx_opaque_at_every_depth(self):
+    def as_given(self, src, depth, opaque):
+        """what apply.py should give vfx for the 8 bit source `src`: its rgba decode, the alpha white when `opaque`,
+        expanded at 16 and 32 bpc."""
+        raw8 = bytearray(self.plain_decode(src, 8))
+        if depth == 8:
+            if opaque:
+                raw8[3::4] = b"\xff" * (len(raw8) // 4)
+            return bytes(raw8)
+        return expand8(raw8, depth, self.W, self.H, opaque)
+
+    def test_an_8_bit_source_without_alpha_reaches_vfx_opaque_and_exact_at_every_depth(self):
         info = tool.probe(self.bgr0)
         self.assertEqual(info["pix_fmt"], "bgr0")
         self.assertTrue(tool.opaque_source(info))
         for depth in (8, 16, 32):
             with self.subTest(depth=depth):
+                self.assertEqual(tool.expands(argparse.Namespace(depth=depth), info), depth != 8)
                 given = self.given_to_vfx(self.bgr0, depth)
                 self.assertEqual(len(given), self.FRAMES * self.W * self.H * tool.BYTES_PER_PIXEL[depth])
-                colour, alpha = split_alpha(given, depth, self.W, self.H)
-                self.assertEqual(set(alpha), {self.WHITE[depth]})
-                # only the alpha changes: the colour is ffmpeg's
-                self.assertEqual(colour, split_alpha(self.plain_decode(self.bgr0, depth), depth, self.W, self.H)[0])
+                self.assertEqual(set(split_alpha(given, depth, self.W, self.H)[1]), {self.WHITE[depth]})
+                self.assertEqual(given, self.as_given(self.bgr0, depth, opaque=True))
 
-    def test_the_plain_pipe_and_a_layer_without_alpha_reach_vfx_opaque(self):
-        """no stage: the decode goes to vfx through the relay; the overlay layer (mixed in at 50 percent by
-        selftest-shift, alpha included) is made opaque in its raw file. any alpha short of white in either one
-        would leave the mix below 65535."""
-        out = self.path("mixed.mkv")
-        proc = apply(self.bgr0, TEMPORAL, "--param", "offset=0", "--layer", f"overlay={self.bgr0}", "--depth", "16",
-                     "--lossless", "-o", out, tmp=self.dir)
-        self.assertEqual(proc.returncode, 0, proc.stderr)
-        raw = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-i", out, "-f", "rawvideo", "-pix_fmt", "rgba64le", "-"],
-                             capture_output=True, check=True).stdout
-        self.assertEqual(len(raw), self.FRAMES * self.W * self.H * 8)
-        self.assertEqual(set(split_alpha(raw, 16, self.W, self.H)[1]), {65535})
+    def test_8_bit_white_and_a_gray_ramp_reach_vfx_as_v_times_257_and_v_over_255(self):
+        """ffmpeg's own conversion gives 8 bit white 65280 at 16 bpc and 0.9961 at 32 bpc; apply.py gives 65535 and
+        1.0, and every level v of a gray ramp as v * 257 and as the f32 nearest to v / 255."""
+        import struct
+        ramp = self.path("ramp.mkv")
+        ff("-f", "lavfi", "-i", f"color=black:s=256x4:r={FPS}:d={3 / FPS},format=gray,geq=lum=X", "-c:v", "ffv1",
+           "-pix_fmt", "gray", ramp)
+        self.assertTrue(tool.expands(argparse.Namespace(depth=16), tool.probe(ramp)))
+        words = struct.unpack("<%dH" % (3 * 256 * 4 * 4), self.given_to_vfx(ramp, 16))
+        for i, got in enumerate(words):
+            x, channel = (i // 4) % 256, i % 4
+            self.assertEqual(got, 65535 if channel == 3 else x * 257, f"16 bpc sample {i}")
+        floats = struct.unpack("<%df" % (3 * 256 * 4 * 4), self.given_to_vfx(ramp, 32))
+        plane = 256 * 4
+        for i, got in enumerate(floats):
+            x, which = (i % plane) % 256, (i // plane) % 4
+            if which == 3:
+                self.assertEqual(got, 1.0, f"32 bpc alpha {i}")
+            else:
+                self.assertTrue(nearest_f32(got, Fraction(x, 255)), f"32 bpc sample {i}: {got!r} for {x} / 255")
+        self.assertEqual((words[255 * 4], floats[255]), (65535, 1.0), "8 bit white is white")
 
-    def test_a_real_alpha_channel_passes_on_as_ffmpeg_decodes_it(self):
+    def test_a_real_8_bit_alpha_expands_exactly(self):
         info = tool.probe(self.bgra)
         self.assertEqual(info["pix_fmt"], "bgra")
         self.assertFalse(tool.opaque_source(info))
         for depth in (8, 16, 32):
             with self.subTest(depth=depth):
                 given = self.given_to_vfx(self.bgra, depth)
-                self.assertEqual(given, self.plain_decode(self.bgra, depth))
-                self.assertGreater(len(set(split_alpha(given, depth, self.W, self.H)[1])), 200)
+                self.assertEqual(given, self.as_given(self.bgra, depth, opaque=False))
+                alpha = split_alpha(given, depth, self.W, self.H)[1]
+                self.assertGreater(len(set(alpha)), 200)
+                if depth == 16:
+                    self.assertTrue(all(a % 257 == 0 for a in alpha))
 
-    def test_a_layered_nearest_render_at_16_bpc_has_no_black_frame(self):
-        """retime-fgbg with an FG matte, Frame Interp Nearest, 16 bpc, half speed: the per layer refill of the
-        original fills every pixel below full alpha, so footage short of opaque made every in-between frame black."""
-        matte = self.path("matte.mkv")
-        ff("-f", "lavfi", "-i", f"color=black:s={self.W}x{self.H}:r={FPS}:d={self.FRAMES / FPS},format=gray,"
-           "drawbox=x=10:y=8:w=16:h=12:color=white:t=fill", "-c:v", "ffv1", "-pix_fmt", "gray", matte)
-        out = self.path("nearest16.mkv")
-        proc = apply(self.bgr0, "retime-fgbg", "--depth", "16", "--lossless", "--frames", str(self.FRAMES),
-                     "--param", "speed_percent=50", "--param", "frame_interp=1", "--param", "fg1_matte_chan=1",
-                     "--layer", f"fg1_matte={matte}", "-o", out, tmp=self.dir)
+    def test_a_10_bit_source_keeps_ffmpegs_conversion(self):
+        deep = self.path("deep.mkv")
+        ff("-f", "lavfi", "-i", f"testsrc=size={self.size}:rate={FPS}:duration={self.seconds}", "-c:v", "ffv1",
+           "-pix_fmt", "yuv420p10le", deep)
+        info = tool.probe(deep)
+        self.assertEqual(info["pix_fmt"], "yuv420p10le")
+        for depth in (16, 32):
+            with self.subTest(depth=depth):
+                self.assertFalse(tool.expands(argparse.Namespace(depth=depth), info))
+                given = self.given_to_vfx(deep, depth)
+                colour, alpha = split_alpha(given, depth, self.W, self.H)
+                self.assertEqual(colour, split_alpha(self.plain_decode(deep, depth), depth, self.W, self.H)[0])
+                self.assertEqual(set(alpha), {self.WHITE[depth]})
+
+    def test_the_plain_pipe_and_a_layer_are_expanded_alike(self):
+        """no stage: the decode goes to vfx through the relay, the overlay layer is expanded in its raw file, and
+        selftest-shift mixes the two at 50 percent ((a + b + 1) / 2 of equal samples is the sample), so the output
+        is the input's exact expansion, opaque."""
+        out = self.path("mixed.mkv")
+        proc = apply(self.bgr0, TEMPORAL, "--param", "offset=0", "--layer", f"overlay={self.bgr0}", "--depth", "16",
+                     "--lossless", "-o", out, tmp=self.dir)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         raw = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-i", out, "-f", "rawvideo", "-pix_fmt", "rgba64le", "-"],
                              capture_output=True, check=True).stdout
-        frame = self.W * self.H * 8
-        self.assertEqual(len(raw), self.FRAMES * frame)
-        for n in range(self.FRAMES):
-            colour, alpha = split_alpha(raw[n * frame:(n + 1) * frame], 16, self.W, self.H)
-            self.assertGreater(max(colour), 0, f"frame {n} is black")
-            self.assertEqual(set(alpha), {65535}, f"frame {n}")
+        self.assertEqual(raw, self.as_given(self.bgr0, 16, opaque=True))
 
+    def test_the_dry_run_shows_the_rgba_decode_and_the_expansion(self):
+        for depth, rule in ((16, "v * 257"), (32, "v / 255 as f32")):
+            with self.subTest(depth=depth):
+                proc = apply(self.bgr0, TEMPORAL, "--depth", str(depth), "--layer", f"overlay={self.bgra}", "--dry-run",
+                             "--json", tmp=self.dir)
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+                data = json.loads(proc.stdout)
+                decode = [c for c in data["commands"] if self.bgr0 in c and c.endswith(" -")]
+                self.assertEqual(len(decode), 1, data["commands"])
+                self.assertIn("-pix_fmt rgba -f rawvideo", decode[0])
+                layer = [c for c in data["commands"] if self.bgra in c]
+                self.assertTrue(layer and "-pix_fmt rgba -f rawvideo" in layer[0], layer)
+                # the file is read from the parsed command: fmt_cmd quotes a Windows path, so the text ends in a quote
+                self.assertEqual(os.path.basename(shlex.split(layer[0])[-1]), "layer_overlay.rgba", layer)
+                given = tool.PIX_FMT[depth]
+                self.assertEqual(data["prepare"], [
+                    {"stream": "input", "decoded": "rgba", "given": given, "samples": rule,
+                     "alpha": "white (the source has none)"},
+                    {"stream": "layer overlay", "decoded": "rgba", "given": given, "samples": rule, "alpha": rule}])
+                self.assertIn(os.path.basename(data["layers"][0]["temp"]), (f"layer_overlay.{given}",))
+                text = apply(self.bgr0, TEMPORAL, "--depth", str(depth), "--dry-run", tmp=self.dir).stdout
+                self.assertIn(f"[step] input: decoded as rgba, given to vfx as {given}, the samples {rule}, the alpha "
+                              "white (the source has none)", text)
+        # 8 bpc decodes as before; a source without alpha is still made opaque
+        data = json.loads(apply(self.bgr0, TEMPORAL, "--depth", "8", "--dry-run", "--json", tmp=self.dir).stdout)
+        self.assertEqual(data["prepare"], [{"stream": "input", "decoded": "rgba", "given": "rgba", "samples": "as decoded",
+                                            "alpha": "white (the source has none)"}])
+
+    def test_a_layered_nearest_render_at_16_bpc_matches_the_8_bpc_one_in_the_matte(self):
+        """retime-fgbg with a white box as FG matte, Frame Interp Nearest, half speed: the per layer refill of the
+        original fills every pixel below full alpha, so a matte or footage short of white made the matte area (or
+        the whole in-between frame) black at 16 bpc. now the 16 bpc render is the 8 bpc one up to the depth."""
+        matte = self.path("matte.mkv")
+        ff("-f", "lavfi", "-i", f"color=black:s={self.size}:r={FPS}:d={self.seconds},format=gray,"
+           "drawbox=x=10:y=8:w=16:h=12:color=white:t=fill", "-c:v", "ffv1", "-pix_fmt", "gray", matte)
+        renders = {}
+        for depth, fmt in ((16, "rgba64le"), (8, "rgba")):
+            out = self.path(f"nearest{depth}.mkv")
+            proc = apply(self.bgr0, "retime-fgbg", "--depth", str(depth), "--lossless", "--frames", str(self.FRAMES),
+                         "--param", "speed_percent=50", "--param", "frame_interp=1", "--param", "fg1_matte_chan=1",
+                         "--layer", f"fg1_matte={matte}", "-o", out, tmp=self.dir)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            renders[depth] = subprocess.run([tool.ffmpeg_path(), "-v", "error", "-i", out, "-f", "rawvideo", "-pix_fmt", fmt,
+                                             "-"], capture_output=True, check=True).stdout
+        from array import array
+        wide = array("H")
+        wide.frombytes(renders[16])
+        narrow = renders[8]
+        self.assertEqual(len(wide), len(narrow))
+        worst = 0
+        for n in range(self.FRAMES):
+            for y in range(8, 20):
+                for x in range(10, 26):
+                    for c in range(4):
+                        i = ((n * self.H + y) * self.W + x) * 4 + c
+                        worst = max(worst, abs((wide[i] + 128) // 257 - narrow[i]))
+            colour = [wide[i] for i in range(n * self.W * self.H * 4, (n + 1) * self.W * self.H * 4) if i % 4 != 3]
+            self.assertGreater(max(colour), 0, f"frame {n} is black")
+        self.assertLessEqual(worst, 2, "the matte area of the 16 bpc render against the 8 bpc one")
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

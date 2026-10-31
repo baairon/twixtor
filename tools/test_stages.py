@@ -201,10 +201,13 @@ def raw_output(path, depth):
 
 
 def raw_input(src, depth, tmp):
-    """the frames apply.py feeds the pipe: its own decode command, taken from a dry run."""
-    dry = apply(src, "selftest-invert", "--depth", str(depth), "--lossless", "--dry-run", "--json", tmp=tmp)
-    decode = shlex.split(json.loads(dry.stdout)["commands"][0])
-    return subprocess.run(decode, shell=False, check=True, capture_output=True).stdout
+    """the frames apply.py feeds the pipe: its own decode command, taken from a dry run, then the preparation its
+    [step] line names (an 8 bit source expanded at 16 and 32 bpc, footage without alpha made opaque)."""
+    dry = json.loads(apply(src, "selftest-invert", "--depth", str(depth), "--lossless", "--dry-run", "--json", tmp=tmp).stdout)
+    raw = subprocess.run(shlex.split(dry["commands"][0]), shell=False, check=True, capture_output=True).stdout
+    width, height = map(int, dry["size"].split("x"))
+    wire = tool.stream_wire(argparse.Namespace(depth=depth), tool.probe(src), width, height)
+    return bytes(wire(bytearray(raw))) if wire else raw
 
 
 def facts(**over):

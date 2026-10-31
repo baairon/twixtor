@@ -704,6 +704,9 @@ def emit(result, as_json):
         print(f"[temp] {temp['path']} ({temp['what']})")
     for cmd in result.get("commands") or []:
         print(f"[cmd] {cmd}")
+    for step in result.get("prepare") or []:
+        print(f"[step] {step['stream']}: decoded as {step['decoded']}, given to vfx as {step['given']}, the samples "
+              f"{step['samples']}, the alpha {step['alpha']}")
     if result.get("dry_run"):
         print("[dry-run] nothing was written")
         return
@@ -1467,8 +1470,16 @@ def make_plan(args, info, einfo, layers, scratch, geo=None, chain=None):
     fmt = PIX_FMT[args.depth]
     for layer in layers:
         temp = os.path.join(scratch, f"layer_{layer['id']}.{fmt}")
-        plan["layers"].append({"id": layer["id"], "video": layer["video"], "temp": temp, "info": layer["info"]})
-        plan["temp_files"].append({"path": temp, "what": f"layer {layer['id']}, decoded to raw {fmt}"})
+        entry = {"id": layer["id"], "video": layer["video"], "temp": temp, "info": layer["info"]}
+        what = f"layer {layer['id']}, decoded to raw {fmt}"
+        if expands(args, layer["info"]):
+            # an 8 bit layer at 16 or 32 bpc: decoded to rgba, then expanded exactly into the raw file vfx reads
+            entry["decoded"] = os.path.join(scratch, f"layer_{layer['id']}.rgba")
+            plan["temp_files"].append({"path": entry["decoded"], "what": f"layer {layer['id']}, decoded to raw rgba, "
+                                                                          f"expanded into raw {fmt}, then removed"})
+            what = f"layer {layer['id']}, raw {fmt} expanded exactly from its rgba decode"
+        plan["layers"].append(entry)
+        plan["temp_files"].append({"path": temp, "what": what})
     plan["temp_files"].append({"path": scratch, "what": "scratch directory: the layer clips, the logs and the "
                                                         "spool file vfx makes of the piped input"})
     # without --frames vfx renders the frames it was fed, so the output is as long as the decode
@@ -1479,27 +1490,30 @@ def make_plan(args, info, einfo, layers, scratch, geo=None, chain=None):
 
 def build_layer_commands(args, info, plan, size=None, geo=None):
     """one ffmpeg per layer: decode it to a raw file of the effect's pixel format, size and frame rate
-    (layer_filters). `size` is the frame size vfx gets when a declared pre-stage changed it (frames/2), `geo`
-    the work geometry."""
+    (layer_filters); an 8 bit layer at 16 or 32 bpc to an rgba file that decode_layers expands. `size` is the
+    frame size vfx gets when a declared pre-stage changed it (frames/2), `geo` the work geometry."""
     geo = geo or work_geometry(args, info)
-    fmt = PIX_FMT[args.depth]
     commands = []
     for layer in plan["layers"]:
         li = layer["info"]
+        fmt = "rgba" if layer.get("decoded") else PIX_FMT[args.depth]
         commands.append([ffmpeg_path(), "-v", "error", "-nostdin", "-y", "-i", layer["video"],
                          "-map", f"0:{li['video_index']}", "-an", "-sn", "-dn",
                          "-vf", ",".join(layer_filters(args, li, geo, size)), "-pix_fmt", fmt, "-f", "rawvideo",
-                         layer["temp"]])
+                         layer.get("decoded") or layer["temp"]])
     return commands
 
 
 def decode_layers(commands, plan, args, info, scratch, size=None, geo=None):
     """run the layer decodes one after the other; each leaves a raw file of whole frames or fails with ffmpeg's last lines.
-    a layer without an alpha channel is made opaque (opaque_source)."""
+    the frames are then prepared as the input's are (stream_wire): an 8 bit layer at 16 or 32 bpc is expanded from its
+    rgba file into the raw file vfx reads, and a layer without an alpha channel is made opaque."""
     geo = geo or work_geometry(args, info)
     w, h = size or (geo["width"], geo["height"])
-    frame_bytes = w * h * {8: 4, 16: 8, 32: 16}[args.depth]
     for layer, cmd in zip(plan["layers"], commands):
+        wire = stream_wire(args, layer["info"], w, h)
+        decoded = layer.get("decoded") or layer["temp"]
+        frame_bytes = wire.in_bytes if wire else w * h * BYTES_PER_PIXEL[args.depth]
         log = os.path.join(scratch, f"layer_{layer['id']}.log")
         with open(log, "w", encoding="utf-8") as handle:
             proc = run(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=handle)
@@ -1510,14 +1524,14 @@ def decode_layers(commands, plan, args, info, scratch, size=None, geo=None):
                  exit_code=proc.returncode, tail=tail(log, STAGE_TAIL),
                  summary=f"layer {layer['id']}: decoding {layer['video']} failed (ffmpeg exited with code {proc.returncode})")
         try:
-            size = os.path.getsize(layer["temp"])
+            size = os.path.getsize(decoded)
         except OSError:
             size = 0
         if size == 0 or size % frame_bytes:
             fail(f"layer {layer['id']}: {layer['video']} decoded to {size} bytes, "
                  f"which is not a whole number of {w}x{h} frames", kind="bad_input", stage="layer-decode")
-        if opaque_source(layer["info"]):
-            fill_file(layer["temp"], OpaqueFill(args.depth, w, h))
+        if wire:
+            wire_file(decoded, wire, layer["temp"] if layer.get("decoded") else None)
 
 
 def rate_text(rate):
@@ -1525,89 +1539,172 @@ def rate_text(rate):
 
 
 # ----------------------------------------------------------------------------
-# footage without an alpha channel reaches vfx opaque
+# the frames vfx is given: 8 bit sources expanded exactly, opaque footage white
 # ----------------------------------------------------------------------------
 
 # the float 1.0 of a gbrapf32le alpha sample
 ONE_F32 = struct.pack("<f", 1.0)
-# {pixel format name: carries alpha} from ffprobe, read once a run
-_PIX_ALPHA = {}
+# byte k (little endian) of the f32 of v / 255 for every 8 bit value v: the translate tables of the 32 bpc expansion.
+# in binary v / 255 repeats the 8 bits of v without end, so it never lies on a tie of f32 rounding, and rounding the
+# double quotient to f32 gives the f32 quotient itself
+F32_OF_BYTE = tuple(bytes(struct.pack("<f", v / 255)[k] for v in range(256)) for k in range(4))
+# {pixel format name: (carries alpha, bits of its deepest sample or None)} from ffprobe, read once a run
+_PIX_FORMATS = {}
 
 
-def pixel_formats_alpha():
-    """{pixel format name: carries alpha}, from ffprobe's list of pixel formats (its alpha flag; a palette format is
-    flagged, since its entries may be transparent). empty when ffprobe cannot list them."""
-    if "table" not in _PIX_ALPHA:
+def pixel_formats():
+    """{pixel format name: (carries alpha, bits of its deepest sample)}, from ffprobe's list of pixel formats: its
+    alpha flag (a palette format is flagged, since its entries may be transparent) and the bit depths of its
+    components (None when it lists none). empty when ffprobe cannot list them."""
+    if "table" not in _PIX_FORMATS:
         proc = run([ffprobe_path(), "-v", "error", "-show_pixel_formats", "-print_format", "json"],
                    stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=PROBE_TIMEOUT)
         table = {}
         try:
             for entry in json.loads(proc.stdout or "{}").get("pixel_formats", []):
-                table[entry["name"]] = bool((entry.get("flags") or {}).get("alpha"))
+                depths = [c.get("bit_depth") for c in entry.get("components") or []]
+                depths = [d for d in depths if isinstance(d, int)]
+                table[entry["name"]] = (bool((entry.get("flags") or {}).get("alpha")), max(depths) if depths else None)
         except (ValueError, KeyError, TypeError, AttributeError):
             table = {}
-        _PIX_ALPHA["table"] = table
-    return _PIX_ALPHA["table"]
+        _PIX_FORMATS["table"] = table
+    return _PIX_FORMATS["table"]
 
 
 def opaque_source(info):
     """true when a probed video stream has no alpha channel: ffprobe lists its pixel format without the alpha flag.
-    its decoded frames get the alpha of every pixel set to white (OpaqueFill), because ffmpeg's conversion can leave
-    it short of white (an 8 bit bgr0 source decodes to 65532 at 16 bpc and 0.99995 at 32 bpc), and vfx reads a
-    pixel below white as partly transparent. a real alpha channel, and a format ffprobe does not list, pass on as
-    ffmpeg decodes them."""
+    vfx reads a pixel below white as partly transparent, so its frames are given with the alpha of every pixel at
+    white (Wire), whatever ffmpeg's conversion left there (an 8 bit bgr0 source decodes to 65532 at 16 bpc). a real
+    alpha channel, and a format ffprobe does not list, keep their own."""
     fmt = info.get("pix_fmt") if info else None
-    return bool(fmt) and pixel_formats_alpha().get(fmt) is False
+    return bool(fmt) and pixel_formats().get(fmt, (None, None))[0] is False
 
 
-class OpaqueFill:
-    """sets the alpha of whole raw frames of a --depth format to white, in place: 255 (rgba), 65535 (rgba64le) or
-    1.0 (gbrapf32le, whose last plane is the alpha). the colour samples stay as they are."""
+def expands(args, info):
+    """true when a decode at --depth 16 or 32 reads a probed video stream as 8 bit rgba and expands it exactly (Wire):
+    its pixel format has at most 8 bits a sample. ffmpeg's own conversion is not exact: an 8 bit white arrives as
+    65280 or 65283 at 16 bpc and as 0.9961 at 32 bpc, so a white matte would read as partly transparent. a deeper
+    source, and a format ffprobe does not list, are decoded to the raw format of --depth."""
+    fmt = info.get("pix_fmt") if info else None
+    bits = pixel_formats().get(fmt, (None, None))[1] if fmt else None
+    return args.depth in (16, 32) and bits is not None and bits <= 8
 
-    def __init__(self, depth, width, height):
-        self.depth, self.pixels = depth, width * height
+
+def decode_format(args, info):
+    """the -pix_fmt of the decode of a probed video stream (the input or a layer): rgba when it expands, else the
+    raw format of --depth."""
+    return "rgba" if expands(args, info) else PIX_FMT[args.depth]
+
+
+class Wire:
+    """turns whole decoded frames into the frames vfx is given, at the size and in the order they came. with `expand`
+    each 8 bit rgba frame becomes a frame of the --depth format with every sample exact: 16 bpc v * 257 (each byte
+    twice, low and high, so 255 is 65535), 32 bpc v / 255 as f32 in the planes G, B, R, A of gbrapf32le, built with a
+    translate table per float byte and extended slices. with `opaque` the alpha of every pixel is white (255, 65535
+    or 1.0), else a real alpha expands like the colour. `in_bytes` is a decoded frame, `frame_bytes` a given one."""
+
+    def __init__(self, depth, width, height, expand=False, opaque=False):
+        self.depth, self.pixels, self.expand, self.opaque = depth, width * height, expand, opaque
         self.frame_bytes = self.pixels * BYTES_PER_PIXEL[depth]
+        self.in_bytes = self.pixels * 4 if expand else self.frame_bytes
+        self._out = bytearray()
+
+    def output(self, size):
+        """the buffer an expansion writes into, kept from one call to the next of the same size: what a call
+        returned is only valid until the next one."""
+        if len(self._out) != size:
+            self._out = bytearray(size)
+        return self._out
 
     def __call__(self, block):
-        """`block` is a bytearray of whole frames; returns it."""
-        if self.depth == 8:
+        """`block` is a bytearray of whole decoded frames; returns the frames as given: the Wire's output buffer when
+        they expand (valid until the next call), else `block` itself."""
+        if self.opaque and (self.expand or self.depth == 8):
             block[3::4] = b"\xff" * (len(block) // 4)
-        elif self.depth == 16:
-            white = b"\xff" * (len(block) // 8)
-            block[6::8] = white
-            block[7::8] = white
-        else:
-            plane = self.pixels * 4
-            one = ONE_F32 * self.pixels
-            for start in range(0, len(block), self.frame_bytes):
-                block[start + 3 * plane:start + self.frame_bytes] = one
-        return block
+        if not self.expand:
+            if self.opaque and self.depth == 16:
+                white = b"\xff" * (len(block) // 8)
+                block[6::8] = white
+                block[7::8] = white
+            elif self.opaque and self.depth == 32:
+                plane = self.pixels * 4
+                one = ONE_F32 * self.pixels
+                for start in range(0, len(block), self.frame_bytes):
+                    block[start + 3 * plane:start + self.frame_bytes] = one
+            return block
+        if self.depth == 16:
+            out = self.output(2 * len(block))
+            out[0::2] = block
+            out[1::2] = block
+            return out
+        n = self.pixels
+        out = self.output(4 * len(block))
+        for start in range(0, len(block), self.in_bytes):
+            frame = block[start:start + self.in_bytes]
+            at = 4 * start
+            for channel in (1, 2, 0, 3):
+                plane = frame[channel::4]
+                for k in range(4):
+                    out[at + k:at + 4 * n:4] = plane.translate(F32_OF_BYTE[k])
+                at += 4 * n
+        return out
 
 
-def fill_file(path, fill):
-    """OpaqueFill over a raw file of whole frames, in place, a few frames at a time."""
-    step = fill.frame_bytes * max(1, (16 << 20) // fill.frame_bytes)
-    with open(path, "r+b") as handle:
-        at = 0
+def wire_file(path, wire, out=None):
+    """Wire over a raw file of whole decoded frames, a few frames at a time: in place, or into the file `out` when the
+    frames expand (the decoded file is removed afterwards)."""
+    step = wire.in_bytes * max(1, (16 << 20) // wire.in_bytes)
+    if out is None:
+        with open(path, "r+b") as handle:
+            at = 0
+            while True:
+                handle.seek(at)
+                block = bytearray(handle.read(step))
+                whole = len(block) - len(block) % wire.in_bytes
+                if not whole:
+                    return
+                del block[whole:]
+                handle.seek(at)
+                handle.write(wire(block))
+                at += whole
+    with open(path, "rb") as source, open(out, "wb") as sink:
         while True:
-            handle.seek(at)
-            block = bytearray(handle.read(step))
-            whole = len(block) - len(block) % fill.frame_bytes
+            block = bytearray(source.read(step))
+            whole = len(block) - len(block) % wire.in_bytes
             if not whole:
-                return
+                break
             del block[whole:]
-            handle.seek(at)
-            handle.write(fill(block))
-            at += whole
+            sink.write(wire(block))
+    os.remove(path)
 
 
-def decode_fill(args, info, geo=None):
-    """the OpaqueFill of the decode's frames (the work size, the --depth format) when the input has no alpha
-    channel, else None."""
-    if not opaque_source(info):
-        return None
+def stream_wire(args, info, width, height):
+    """the Wire of the frames decoded from a probed video stream at width x height, or None when vfx is given them
+    as decoded."""
+    expand, opaque = expands(args, info), opaque_source(info)
+    return Wire(args.depth, width, height, expand, opaque) if expand or opaque else None
+
+
+def decode_wire(args, info, geo=None):
+    """the Wire of the decode's frames (at the work size), or None."""
     w, h = (geo["width"], geo["height"]) if geo else display_size(info)
-    return OpaqueFill(args.depth, w, h)
+    return stream_wire(args, info, w, h)
+
+
+def prepare_report(args, info, plan):
+    """what apply.py does to the decoded frames before vfx reads them, one entry for each stream it changes (the
+    input, then the layers): the format decoded, the format given, the samples and the alpha."""
+    steps = []
+    streams = [("input", info)] + [("layer " + layer["id"], layer["info"]) for layer in plan.get("layers") or []]
+    for name, facts in streams:
+        expand, opaque = expands(args, facts), opaque_source(facts)
+        if not (expand or opaque):
+            continue
+        rule = "v * 257" if args.depth == 16 else "v / 255 as f32"
+        steps.append({"stream": name, "decoded": decode_format(args, facts), "given": PIX_FMT[args.depth],
+                      "samples": rule if expand else "as decoded",
+                      "alpha": "white (the source has none)" if opaque else rule})
+    return steps
 
 
 # the pixel formats of the libx265 encode of an HDR input: 4:2:0, and 4:4:4 for a size with an odd side
@@ -1733,7 +1830,8 @@ def build_commands(args, info, vfx, destination, plan=None, sizes=None, geo=None
     base = [ffmpeg_path(), "-v", "error", "-nostdin"]
 
     decode = base + ["-i", args.input, "-map", f"0:{info['video_index']}", "-an", "-sn", "-dn",
-                     "-vf", ",".join(decode_filters(args, info, geo)), "-pix_fmt", fmt, "-f", "rawvideo", "-"]
+                     "-vf", ",".join(decode_filters(args, info, geo)), "-pix_fmt", decode_format(args, info),
+                     "-f", "rawvideo", "-"]
 
     effect = [vfx, "apply", args.effect, "--width", str(ew), "--height", str(eh),
               "--depth", str(args.depth), "--fps", rate_text(rate)]
@@ -1818,23 +1916,23 @@ def relay_notes(result, logs):
         result["notes"] = notes
 
 
-def run_pipeline(decode, effect, encode, scratch, fill=None):
+def run_pipeline(decode, effect, encode, scratch, wire=None):
     """decode | vfx | encode with every stderr in a log file, so no pipe can fill up
-    and stall a stage. with `fill` (an OpaqueFill) the decoded frames go to vfx through a relay
-    that sets their alpha to white. returns each stage's exit code and log path."""
+    and stall a stage. with `wire` (a Wire) the decoded frames go to vfx through a relay
+    that prepares them. returns each stage's exit code and log path."""
     stages = [("decode", decode), ("vfx", effect), ("encode", encode)]
     logs = {name: os.path.join(scratch, name + ".log") for name, _ in stages}
     handles = {name: open(path, "w", encoding="utf-8") for name, path in logs.items()}
     procs = []
-    buffering = 0 if fill else -1
+    buffering = 0 if wire else -1
     try:
         p1 = subprocess.Popen(decode, shell=False, stdin=subprocess.DEVNULL, bufsize=buffering,
                               stdout=subprocess.PIPE, stderr=handles["decode"])
         procs.append(p1)
-        p2 = subprocess.Popen(effect, shell=False, stdin=subprocess.PIPE if fill else p1.stdout, bufsize=buffering,
+        p2 = subprocess.Popen(effect, shell=False, stdin=subprocess.PIPE if wire else p1.stdout, bufsize=buffering,
                               stdout=subprocess.PIPE, stderr=handles["vfx"])
         procs.append(p2)
-        hop = Hop(p1.stdout, p2.stdin, fill) if fill else None
+        hop = Hop(p1.stdout, p2.stdin, wire) if wire else None
         if hop:
             hop.thread.start()
         else:
@@ -2042,17 +2140,44 @@ class Hop:
     """what flows from one process of the pipe to the next, and the thread that carries it. between
     two processes of a run with stages vfx's data goes through here instead of a direct pipe, which
     lets the run see what an exit code cannot: bytes that stop moving, a consumer that stops reading
-    and a producer that stops in the middle of a frame. with `fill` (an OpaqueFill) it passes on whole
-    frames with their alpha set to white, and a partial last frame as it came."""
+    and a producer that stops in the middle of a frame. with `wire` (a Wire) it passes on whole frames
+    prepared and a partial last frame as it came, and counts what it read in prepared bytes."""
 
-    def __init__(self, source, sink, fill=None):
-        self.source, self.sink, self.fill = source, sink, fill
+    def __init__(self, source, sink, wire=None):
+        self.source, self.sink, self.wire = source, sink, wire
+        self.scale = wire.frame_bytes // wire.in_bytes if wire else 1
         self.moved = time.monotonic()  # when a byte last went in or came out
         self.state = "reading"         # reading: waits for the producer, writing: waits for the consumer, done
         self.read = self.written = 0   # bytes taken from the producer, bytes the consumer accepted
         self.eof = False               # the producer closed its output
         self.broken = False            # the consumer closed its input while the producer still had data
         self.thread = threading.Thread(target=self.carry, daemon=True)
+
+    def carry_frames(self):
+        """the relay with a Wire: each decoded frame read whole into one buffer, prepared and passed on; a partial last
+        frame goes on as it came."""
+        frame = bytearray(self.wire.in_bytes)
+        view = memoryview(frame)
+        while True:
+            self.state = "reading"
+            got = 0
+            while got < len(frame):
+                try:
+                    n = self.source.readinto(view[got:])
+                except (OSError, ValueError):
+                    n = 0
+                if not n:
+                    break
+                got += n
+                self.read += n * self.scale
+                self.moved = time.monotonic()
+            if got < len(frame):
+                if got:
+                    self.give(view[:got])
+                self.eof = True
+                return
+            if not self.give(self.wire(frame)):
+                return
 
     def give(self, data):
         """write `data` to the consumer; False when it closed its input."""
@@ -2070,29 +2195,22 @@ class Hop:
         return True
 
     def carry(self):
-        pending = bytearray()
         try:
+            if self.wire is not None:
+                self.carry_frames()
+                return
             while True:
                 self.state = "reading"
                 try:
                     chunk = self.source.read(RELAY_CHUNK)
                 except (OSError, ValueError):
                     chunk = b""
-                if chunk:
-                    self.read += len(chunk)
-                    self.moved = time.monotonic()
-                data = chunk
-                if self.fill is not None:
-                    pending += chunk
-                    whole = len(pending) - len(pending) % self.fill.frame_bytes
-                    data = self.fill(pending[:whole])
-                    del pending[:whole]
-                    if not chunk:
-                        data += pending
-                if data and not self.give(data):
-                    return
                 if not chunk:
                     self.eof = True
+                    return
+                self.read += len(chunk)
+                self.moved = time.monotonic()
+                if not self.give(chunk):
                     return
         finally:
             # closing the sink is the producer's end of file for the consumer; closing the source
@@ -2153,13 +2271,13 @@ def kill_tree(proc):
             pass
 
 
-def run_staged_pipeline(chain, scratch, timeout, fill=None):
+def run_staged_pipeline(chain, scratch, timeout, wire=None):
     """chain[0] | chain[1] | ... with a Hop between every two neighbours and every stderr in a log
     file in scratch, so no pipe can fill up and stall a process. a pre or post stage that stalls for
     `timeout` seconds (0: never) is killed; once a process has failed the others get GRACE seconds to
     end before they are killed too, so the run always ends. returns the exit code and log path of every
     process by name, the hops (hops[i] carries chain[i] to chain[i + 1]) and the names killed for stalling. with
-    `fill` (an OpaqueFill) the hop after the decode sets the alpha of its frames to white."""
+    `wire` (a Wire) the hop after the decode prepares its frames."""
     names = [entry["name"] for entry in chain]
     logs = {name: os.path.join(scratch, name + ".log") for name in names}
     handles = {name: open(path, "w", encoding="utf-8") for name, path in logs.items()}
@@ -2175,7 +2293,7 @@ def run_staged_pipeline(chain, scratch, timeout, fill=None):
                                               start_new_session=os.name != "nt"))
             except OSError as exc:
                 fail(f"cannot start {entry['label']}: {exc}", kind="tool_missing", stage=entry["name"])
-        hops = [Hop(procs[i].stdout, procs[i + 1].stdin, fill if i == 0 and chain[0]["role"] == "decode" else None)
+        hops = [Hop(procs[i].stdout, procs[i + 1].stdin, wire if i == 0 and chain[0]["role"] == "decode" else None)
                 for i in range(last)]
         for hop in hops:
             hop.thread.start()
@@ -2271,7 +2389,7 @@ def run_staged(chain, scratch, args, info, geo=None):
     """run the pipe with stages and fail, in the style of a vfx failure, when it did not go through:
     the failing process, its exit code and the last lines of its own stderr. returns the codes and logs.
     `geo` is the work geometry, the size of the frames on every relay a declared stage did not change."""
-    codes, logs, hops, timed_out = run_staged_pipeline(chain, scratch, args.stage_timeout, decode_fill(args, info, geo))
+    codes, logs, hops, timed_out = run_staged_pipeline(chain, scratch, args.stage_timeout, decode_wire(args, info, geo))
     sizes = frame_size(args, info, geo)
     if any("frame_bytes" in entry for entry in chain):
         sizes = [entry.get("frame_bytes", sizes) for entry in chain[:-1]]
@@ -2518,6 +2636,7 @@ def make_result(args, info, einfo, vfx, dst, plan, commands, stages=(), geo=None
     parts += geometry_phrases + encode_phrases + audio_phrases
     pipe = [e["label"] for e in pipe_chain(None, None, None, stages)]
     parts.append(f"{' | '.join(pipe)} -> {dst}")
+    prepared = prepare_report(args, info, plan)
     return {
         "operation": "apply",
         **({"contract": CONTRACT} if stages else {}),
@@ -2541,6 +2660,7 @@ def make_result(args, info, einfo, vfx, dst, plan, commands, stages=(), geo=None
         "summary": ", ".join(parts),
         "dry_run": args.dry_run,
         "commands": [fmt_cmd(c) for c in commands],
+        **({"prepare": prepared} if prepared else {}),
         **({"stages": [stage_report(s) for s in stages]} if stages else {}),
         "outputs": [],
     }
@@ -2738,7 +2858,7 @@ def main():
             codes, logs = run_staged(chain, scratch, args, info, geo)
             result["stages"] = [stage_report(s, codes[s["name"]], logs[s["name"]]) for s in stages]
         else:
-            codes, logs = run_pipeline(decode, effect, encode, scratch, decode_fill(args, info, geo))
+            codes, logs = run_pipeline(decode, effect, encode, scratch, decode_wire(args, info, geo))
             if any(codes.values()):
                 lines = []
                 for name in ("vfx", "decode", "encode"):

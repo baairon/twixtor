@@ -208,13 +208,13 @@
    "source": "scan of `#[test]` lines in the .rs files of vectors-in"
   },
   "tests_python": {
-   "value": 604,
-   "text": "604",
+   "value": 607,
+   "text": "607",
    "source": "scan of `def test_` lines in tools/test_*.py"
   },
   "tests_py_apply": {
-   "value": 114,
-   "text": "114",
+   "value": 117,
+   "text": "117",
    "source": "scan of `def test_` lines in tools/test_apply.py"
   },
   "tests_py_apply_geometry": {

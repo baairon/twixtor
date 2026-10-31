@@ -313,7 +313,7 @@ A scan of the source files: a `#[test]` line is one test of `cargo test`, a `def
 | `retime-engine` | `#[test]` | 847 (65 ignored) |
 | `retime-fgbg` | `#[test]` | 104 (1 ignored) |
 | `vectors-in` | `#[test]` | 104 |
-| `tools/test_apply.py` | `def test_` | 114 |
+| `tools/test_apply.py` | `def test_` | 117 |
 | `tools/test_apply_geometry.py` | `def test_` | 22 |
 | `tools/test_apply_hdr.py` | `def test_` | 38 |
 | `tools/test_audio_map.py` | `def test_` | 26 |
