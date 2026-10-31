@@ -63,7 +63,15 @@ pub fn pick(first: f32, second: f32) -> f32 {
     }
 }
 
-/// The result `r` of `first op second` with the NaN rule applied: numbers and invalid operations unchanged.
+/// The default NaN of an invalid operation (`inf - inf`, `0 * inf`, `0 / 0`) on x86, the processor the original runs
+/// on and the references were rendered for. ARM processors make the positive one (`0x7fc00000`), so the result of an
+/// invalid operation is set to this value explicitly: the bytes are then the same on every processor.
+const DEFAULT_NAN: u32 = 0xffc0_0000;
+/// [`DEFAULT_NAN`] in double precision.
+const DEFAULT_NAN64: u64 = 0xfff8_0000_0000_0000;
+
+/// The result `r` of `first op second` with the NaN rule applied: numbers unchanged, an invalid operation the x86
+/// default NaN.
 #[inline(always)]
 fn fix(r: f32, first: f32, second: f32) -> f32 {
     if r.is_nan() {
@@ -76,7 +84,7 @@ fn fix(r: f32, first: f32, second: f32) -> f32 {
         } else if second.is_nan() {
             quiet(second)
         } else {
-            r
+            f32::from_bits(DEFAULT_NAN)
         }
     } else {
         r
@@ -134,7 +142,8 @@ pub fn pick64(first: f64, second: f64) -> f64 {
     }
 }
 
-/// `first + second` in double precision with the NaN rule (numbers and invalid operations unchanged).
+/// `first + second` in double precision with the NaN rule (numbers unchanged, an invalid operation the x86 default
+/// NaN).
 #[inline(always)]
 pub fn add64(first: f64, second: f64) -> f64 {
     let r = first + second;
@@ -147,14 +156,15 @@ pub fn add64(first: f64, second: f64) -> f64 {
     } else if second.is_nan() {
         f64::from_bits(second.to_bits() | QUIET64)
     } else {
-        r
+        f64::from_bits(DEFAULT_NAN64)
     }
 }
 
 /// A set of arithmetic operations for kernels written once and run in two ways: [`Plain`] is the processor's own (fast, and
 /// vectorisable), [`Rule`] applies the NaN rule of this module. A kernel runs as `Plain` and is repeated as `Rule` only when
-/// a result holds a NaN ([`any_nan`]): without a NaN operand both give the same bits, and a NaN needs a NaN operand or an
-/// invalid operation, whose default NaN is the same in both.
+/// a result holds a NaN ([`any_nan`]): without a NaN in the result both give the same bits, and a result that holds a NaN
+/// takes the rule's bits from the repeat, also for an invalid operation, whose default NaN the processor's own operations
+/// make positive on ARM.
 pub trait Arith {
     fn add(first: f32, second: f32) -> f32;
     fn sub(first: f32, second: f32) -> f32;
@@ -250,14 +260,16 @@ mod tests {
 
     #[test]
     fn numbers_are_the_plain_ieee_result() {
+        // an invalid operation among the pairs (-0 / 0) gives the x86 default NaN on every processor
+        let ieee = |r: f32| if r.is_nan() { NEG } else { bits(r) };
         for (a, b) in [(1.0f32, 3.0f32), (-0.0, 0.0), (2.5, -7.0), (f32::MAX, f32::INFINITY), (1.0e-40, 3.0e-40)] {
-            assert_eq!(bits(add(a, b)), bits(a + b));
-            assert_eq!(bits(sub(a, b)), bits(a - b));
-            assert_eq!(bits(mul(a, b)), bits(a * b));
-            assert_eq!(bits(div(a, b)), bits(a / b));
+            assert_eq!(bits(add(a, b)), ieee(a + b));
+            assert_eq!(bits(sub(a, b)), ieee(a - b));
+            assert_eq!(bits(mul(a, b)), ieee(a * b));
+            assert_eq!(bits(div(a, b)), ieee(a / b));
         }
         for (a, b, f) in [(1.0f32, 3.0f32, 0.25f32), (-0.0, 0.0, 0.5), (2.5, -7.0, 0.75), (f32::MAX, f32::INFINITY, 0.5)] {
-            assert_eq!(bits(lerp(a, b, f)), bits((b - a) * f + a));
+            assert_eq!(bits(lerp(a, b, f)), ieee((b - a) * f + a));
         }
     }
 
